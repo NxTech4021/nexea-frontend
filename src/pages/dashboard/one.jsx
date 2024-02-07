@@ -10,7 +10,6 @@ export default function Page() {
       <Helmet>
         <title> Dashboard: One</title>
       </Helmet>
-
       <OneView />
     </>
   );
