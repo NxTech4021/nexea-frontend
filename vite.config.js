@@ -28,6 +28,9 @@ export default defineConfig({
   },
   server: {
     port: 3031,
+    strictPort: true,
+    host: true,
+    origin: 'http://0.0.0.0:3031',
   },
   preview: {
     port: 3031,
