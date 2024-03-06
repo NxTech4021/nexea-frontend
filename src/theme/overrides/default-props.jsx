@@ -106,7 +106,7 @@ export function defaultProps(theme) {
     },
     MuiCardHeader: {
       defaultProps: {
-        titleTypographyProps: { variant: 'h6' },
+        titleTypographyProps: { variant: 'h5' },
         subheaderTypographyProps: {
           variant: 'body2',
           marginTop: theme.spacing(0.5),

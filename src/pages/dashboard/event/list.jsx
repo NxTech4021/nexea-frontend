@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import OneView from 'src/sections/dashboard/view';
+import Events from 'src/sections/events/view';
 
 // ----------------------------------------------------------------------
 
@@ -8,9 +8,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title>Dashboard</title>
+        <title> Dashboard: Events</title>
       </Helmet>
-      <OneView />
+
+      <Events />
     </>
   );
 }

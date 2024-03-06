@@ -20,6 +20,7 @@ function jwtDecode(token) {
 
 // ----------------------------------------------------------------------
 
+// Access Token is a jwt encoded type
 export const isValidToken = (accessToken) => {
   if (!accessToken) {
     return false;
