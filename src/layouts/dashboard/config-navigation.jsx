@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Icon } from '@iconify/react';
 
 import { paths } from 'src/routes/paths';
 
@@ -49,14 +50,18 @@ export function useNavData() {
       // OVERVIEW
       // ----------------------------------------------------------------------
       {
-        subheader: 'overview v5.6.0',
         items: [
           { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
-          { title: 'two', path: paths.dashboard.two, icon: ICONS.ecommerce },
           {
-            title: 'three',
-            path: paths.dashboard.three,
-            icon: ICONS.analytics,
+            title: 'Events',
+            path: paths.dashboard.events.root,
+            icon: <Icon icon="material-symbols:event" width={25} />,
+            children: [{ title: 'Create', path: paths.dashboard.events.create }],
+          },
+          {
+            title: 'Attendees',
+            path: paths.dashboard.attendees,
+            icon: <Icon icon="heroicons:users-16-solid" width={25} />,
           },
         ],
       },
@@ -64,17 +69,13 @@ export function useNavData() {
       // MANAGEMENT
       // ----------------------------------------------------------------------
       {
-        subheader: 'management',
+        subheader: 'nexea management',
         items: [
           {
-            title: 'user',
-            path: paths.dashboard.group.root,
+            title: 'employee',
+            path: paths.dashboard.employee,
             icon: ICONS.user,
-            children: [
-              { title: 'four', path: paths.dashboard.group.root },
-              { title: 'five', path: paths.dashboard.group.five },
-              { title: 'six', path: paths.dashboard.group.six },
-            ],
+            // children: [{ title: 'employee', path: paths.dashboard.group.root }],
           },
         ],
       },

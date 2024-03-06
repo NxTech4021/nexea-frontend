@@ -23,7 +23,7 @@ const NavItem = forwardRef(
       disabled,
       caption,
       roles,
-      //
+
       open,
       depth,
       active,

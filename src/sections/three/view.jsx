@@ -7,12 +7,12 @@ import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function ThreeView() {
+export default function Attendees() {
   const settings = useSettingsContext();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Typography variant="h4"> Page Three </Typography>
+      <Typography variant="h4"> Attendees </Typography>
 
       <Box
         sx={{

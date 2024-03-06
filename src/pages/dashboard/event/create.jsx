@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import TwoView from 'src/sections/two/view';
+import CreateEvent from 'src/sections/events/event-create';
 
 // ----------------------------------------------------------------------
 
@@ -8,10 +8,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Two</title>
+        <title> Dashboard: Create a new event</title>
       </Helmet>
 
-      <TwoView />
+      <CreateEvent />
     </>
   );
 }

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
+import { Typography } from '@mui/material';
 
 import { usePathname } from 'src/routes/hooks';
 
@@ -47,7 +48,12 @@ export default function NavVertical({ openNav, onCloseNav }) {
         },
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
+      <Stack direction="row" alignItems="center" gap={1.21} sx={{ ml: 3, mt: 3, mb: 4 }}>
+        <Logo />
+        <Typography level="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
+          Nexea Event App
+        </Typography>
+      </Stack>
 
       <NavSectionVertical
         data={navData}

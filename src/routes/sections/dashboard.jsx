@@ -9,11 +9,11 @@ import { LoadingScreen } from 'src/components/loading-screen';
 // ----------------------------------------------------------------------
 
 const IndexPage = lazy(() => import('src/pages/dashboard/one'));
-const PageTwo = lazy(() => import('src/pages/dashboard/two'));
+const Event = lazy(() => import('src/pages/dashboard/event/list'));
+const CreateEvent = lazy(() => import('src/pages/dashboard/event/create'));
 const PageThree = lazy(() => import('src/pages/dashboard/three'));
 const PageFour = lazy(() => import('src/pages/dashboard/four'));
-const PageFive = lazy(() => import('src/pages/dashboard/five'));
-const PageSix = lazy(() => import('src/pages/dashboard/six'));
+const TestView = lazy(() => import('src/pages/dashboard/test'));
 
 // ----------------------------------------------------------------------
 
@@ -31,16 +31,16 @@ export const dashboardRoutes = [
     ),
     children: [
       { element: <IndexPage />, index: true },
-      { path: 'two', element: <PageTwo /> },
-      { path: 'three', element: <PageThree /> },
       {
-        path: 'group',
+        path: 'events',
         children: [
-          { element: <PageFour />, index: true },
-          { path: 'five', element: <PageFive /> },
-          { path: 'six', element: <PageSix /> },
+          { element: <Event />, index: true },
+          { path: 'create', element: <CreateEvent /> },
         ],
       },
+      { path: 'attendees', element: <PageThree /> },
+      { path: 'test', element: <TestView /> },
+      { path: 'employee', element: <PageFour /> },
     ],
   },
 ];
