@@ -19,6 +19,10 @@ export const paths = {
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
+    user: {
+      root: `${ROOTS.DASHBOARD}/user`,
+      profile: `${ROOTS.DASHBOARD}/user/profile`,
+    },
     events: {
       root: `${ROOTS.DASHBOARD}/events`,
       create: `${ROOTS.DASHBOARD}/events/create`,

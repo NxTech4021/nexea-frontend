@@ -56,7 +56,10 @@ export function useNavData() {
             title: 'Events',
             path: paths.dashboard.events.root,
             icon: <Icon icon="material-symbols:event" width={25} />,
-            children: [{ title: 'Create', path: paths.dashboard.events.create }],
+            children: [
+              { title: 'List', path: paths.dashboard.events.root },
+              { title: 'Create', path: paths.dashboard.events.create },
+            ],
           },
           {
             title: 'Attendees',
