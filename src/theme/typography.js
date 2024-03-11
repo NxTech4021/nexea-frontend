@@ -24,12 +24,14 @@ export function responsiveFontSizes({ sm, md, lg }) {
 
 export const primaryFont = 'Public Sans, sans-serif';
 export const secondaryFont = 'Barlow, sans-serif';
+export const tertiaryFont = 'Madimi One, sans-serif';
 
 // ----------------------------------------------------------------------
 
 export const typography = {
   fontFamily: primaryFont,
   fontSecondaryFamily: secondaryFont,
+  fontTertiaryFamily: tertiaryFont,
   fontWeightRegular: 400,
   fontWeightMedium: 500,
   fontWeightSemiBold: 600,

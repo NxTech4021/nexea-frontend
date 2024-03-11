@@ -8,6 +8,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { bgGradient } from 'src/theme/css';
+import { typography } from 'src/theme/typography';
 
 import Logo from 'src/components/logo';
 
@@ -59,11 +60,28 @@ export default function AuthClassicLayout({ children, image, title }) {
         }),
       }}
     >
-      <Typography variant="h3" sx={{ maxWidth: 480, textAlign: 'center' }}>
+      <Typography
+        variant="h3"
+        sx={{
+          maxWidth: 480,
+          textAlign: 'center',
+          fontFamily: typography.fontTertiaryFamily,
+        }}
+      >
         {title || 'Welcome to Nexea Event App'}
       </Typography>
 
       <Box
+        component="img"
+        alt="nexea"
+        src="/src/assets/nexea.jpeg"
+        sx={{
+          borderRadius: 10,
+          objectFit: 'cover',
+        }}
+      />
+
+      {/* <Box
         component="img"
         alt="auth"
         src={image || '/assets/illustrations/illustration_dashboard.png'}
@@ -74,7 +92,7 @@ export default function AuthClassicLayout({ children, image, title }) {
             xl: 720,
           },
         }}
-      />
+      /> */}
     </Stack>
   );
 

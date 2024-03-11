@@ -6,6 +6,8 @@ import DashboardLayout from 'src/layouts/dashboard';
 
 import { LoadingScreen } from 'src/components/loading-screen';
 
+import Profile from 'src/sections/profile/view';
+
 // ----------------------------------------------------------------------
 
 const IndexPage = lazy(() => import('src/pages/dashboard/one'));
@@ -31,6 +33,13 @@ export const dashboardRoutes = [
     ),
     children: [
       { element: <IndexPage />, index: true },
+      {
+        path: 'user',
+        children: [
+          { element: <Profile />, index: true },
+          { path: 'profile', element: <Profile /> },
+        ],
+      },
       {
         path: 'events',
         children: [
