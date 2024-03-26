@@ -30,5 +30,6 @@ export const paths = {
     attendees: `${ROOTS.DASHBOARD}/attendees`,
     test: `${ROOTS.DASHBOARD}/test`,
     employee: `${ROOTS.DASHBOARD}/employee`,
+    Qr: `${ROOTS.DASHBOARD}/qr`,
   },
 };
