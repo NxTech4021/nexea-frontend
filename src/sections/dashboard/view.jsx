@@ -13,7 +13,6 @@ import EventListsEventListsDashboard from './list-events';
 
 export default function OneView() {
   const settings = useSettingsContext();
-  // const theme = useTheme();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>

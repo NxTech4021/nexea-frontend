@@ -14,7 +14,7 @@ const IndexPage = lazy(() => import('src/pages/dashboard/one'));
 const Event = lazy(() => import('src/pages/dashboard/event/list'));
 const CreateEvent = lazy(() => import('src/pages/dashboard/event/create'));
 const PageThree = lazy(() => import('src/pages/dashboard/three'));
-const PageFour = lazy(() => import('src/pages/dashboard/four'));
+const PageFour = lazy(() => import('src/pages/dashboard/employee/four'));
 const TestView = lazy(() => import('src/pages/dashboard/test'));
 
 // ----------------------------------------------------------------------

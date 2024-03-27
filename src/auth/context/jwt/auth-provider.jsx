@@ -83,7 +83,6 @@ export function AuthProvider({ children }) {
         });
       }
     } catch (error) {
-      console.error(error);
       dispatch({
         type: 'INITIAL',
         payload: {
@@ -105,7 +104,6 @@ export function AuthProvider({ children }) {
     };
 
     const response = await axios.post(endpoints.auth.login, data);
-    // console.log(response);
 
     const { accessToken, user } = response.data;
 
@@ -150,6 +148,7 @@ export function AuthProvider({ children }) {
 
   // LOGOUT
   const logout = useCallback(async () => {
+    await axios.post(endpoints.auth.logout);
     setSession(null);
     dispatch({
       type: 'LOGOUT',
@@ -169,7 +168,6 @@ export function AuthProvider({ children }) {
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
-      //
       login,
       register,
       logout,

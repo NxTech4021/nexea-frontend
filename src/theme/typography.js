@@ -25,6 +25,7 @@ export function responsiveFontSizes({ sm, md, lg }) {
 export const primaryFont = 'Public Sans, sans-serif';
 export const secondaryFont = 'Barlow, sans-serif';
 export const tertiaryFont = 'Madimi One, sans-serif';
+export const test = 'Times New Roman, serif';
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +33,7 @@ export const typography = {
   fontFamily: primaryFont,
   fontSecondaryFamily: secondaryFont,
   fontTertiaryFamily: tertiaryFont,
+  fontTest: test,
   fontWeightRegular: 400,
   fontWeightMedium: 500,
   fontWeightSemiBold: 600,
@@ -105,5 +107,8 @@ export const typography = {
     lineHeight: 24 / 14,
     fontSize: pxToRem(14),
     textTransform: 'unset',
+  },
+  italic: {
+    fontStyle: 'italic',
   },
 };

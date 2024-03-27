@@ -77,22 +77,18 @@ export default function AuthClassicLayout({ children, image, title }) {
         src="/src/assets/nexea.jpeg"
         sx={{
           borderRadius: 10,
-          objectFit: 'cover',
-        }}
-      />
-
-      {/* <Box
-        component="img"
-        alt="auth"
-        src={image || '/assets/illustrations/illustration_dashboard.png'}
-        sx={{
-          maxWidth: {
-            xs: 480,
-            lg: 560,
-            xl: 720,
+          p: 2,
+          animation: 'width-increase 1s ease-in-out',
+          '@keyframes width-increase': {
+            '0%': {
+              scale: 0,
+            },
+            '100%': {
+              scale: 1,
+            },
           },
         }}
-      /> */}
+      />
     </Stack>
   );
 

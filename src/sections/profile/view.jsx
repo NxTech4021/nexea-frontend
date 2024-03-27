@@ -17,6 +17,8 @@ import {
 
 import { paths } from 'src/routes/paths';
 
+import { useAuthContext } from 'src/auth/hooks';
+
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
@@ -27,6 +29,7 @@ import AccountSecurity from './security';
 const Profile = () => {
   const settings = useSettingsContext();
   const theme = useTheme();
+  const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
 
   const [prev, setPrev] = useState();
@@ -71,10 +74,10 @@ const Profile = () => {
         <Stack alignItems="flex-end" sx={{ mt: 3 }}>
           <Grid container spacing={2} p={3}>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth title="Name" label="Name" />
+              <TextField fullWidth label="Name" defaultValue={user?.name} />
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" />
+              <TextField fullWidth label="Email address" defaultValue={user?.email} />
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
               <TextField fullWidth label="Email address" />
