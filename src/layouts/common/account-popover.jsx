@@ -79,7 +79,7 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          // src={user?.photoURL}
+          src={user?.photoURL}
           alt={user?.name}
           sx={{
             width: 36,
@@ -87,7 +87,6 @@ export default function AccountPopover() {
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
         >
-          {/* {user?.displayName.charAt(0).toUpperCase()} */}
           {user?.name}
         </Avatar>
       </IconButton>

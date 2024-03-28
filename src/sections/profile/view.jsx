@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useTheme } from '@emotion/react';
 import React, { useState, useCallback } from 'react';
 
@@ -17,6 +18,8 @@ import {
 
 import { paths } from 'src/routes/paths';
 
+import { endpoints } from 'src/utils/axios';
+
 import { useAuthContext } from 'src/auth/hooks';
 
 import Iconify from 'src/components/iconify';
@@ -32,16 +35,31 @@ const Profile = () => {
   const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
 
-  const [prev, setPrev] = useState();
+  const [image, setImage] = useState();
+  const [url, setURL] = useState();
 
   const onDrop = useCallback((e) => {
-    const url = URL.createObjectURL(e[0]);
-    setPrev(url);
+    const preview = URL.createObjectURL(e[0]);
+    setURL(e[0]);
+    setImage(preview);
   }, []);
 
   const handleChangeTab = useCallback((event, newValue) => {
     setCurrentTab(newValue);
   }, []);
+
+  const handleUpload = async () => {
+    if (!image) {
+      alert('Upload image first');
+      return;
+    }
+
+    await axios.post(
+      endpoints.auth.upload,
+      { id: user?.id, image: url },
+      { headers: { 'content-type': 'multipart/form-data' } }
+    );
+  };
 
   const renderPicture = (
     <Grid item xs={12} md={4} lg={4}>
@@ -54,7 +72,7 @@ const Profile = () => {
                 height: 1,
                 borderRadius: '50%',
               }}
-              src={prev && prev}
+              src={user?.photoURL ? user?.photoURL : image}
             />
           </UploadPhoto>
           <Typography display="block" color={theme.palette.grey['600']} sx={{ fontSize: 12 }}>
@@ -95,7 +113,13 @@ const Profile = () => {
               <TextField fullWidth label="Email address" type="text" />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} sx={{ textAlign: 'end' }}>
-              <LoadingButton type="submit" variant="contained">
+              <LoadingButton
+                type="submit"
+                variant="contained"
+                onClick={() => {
+                  handleUpload();
+                }}
+              >
                 Save Changes
               </LoadingButton>
             </Grid>
