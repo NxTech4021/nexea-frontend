@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'
 import AddIcon from '@mui/icons-material/Add';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import {
@@ -32,10 +32,32 @@ import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
 
 // ----------------------------------------------------------------------
 
+export const DeleteSelectedAttendees = async () => {
+  const [selected, setSelected] = useState([]);
+  const [attendees, setAttendees] = useState([]);
+  try {
+     // Assuming your backend endpoint is something like /api/attendee/delete
+     const response = await axios.post('http://localhost:3001/api/attendee/delete', {
+       ids: selected, // Send the IDs of the selected attendees
+     });
+ 
+     if (response.status === 200) {
+       // Assuming the backend returns the updated list of attendees
+       setAttendees(response.data);
+       setSelected([]); // Clear the selection
+       alert('Selected attendees deleted successfully!');
+     }
+  } catch (error) {
+     console.error('Error deleting attendees:', error);
+  }
+ };
+ 
+
 export default function Attendees() {
   const settings = useSettingsContext();
   //  const [checkAll, setCheckAll] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -50,16 +72,35 @@ export default function Attendees() {
   const handleChange = (event, value) => {
     setPage(value);
   };
+
+
+ useEffect(() => {
+  const fetchAttendees = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/attendees');
+      setAttendees(response.data);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    }
+  };
+
+  fetchAttendees();
+}, []);
+
+
+
   const data = employee;
   //   const [check, setCheck] = useState(false);
 
-  const onSelectRow = (i) => {
-    const newSelected = selected.includes(i)
-      ? selected.filter((value) => value !== i)
-      : [...selected, i];
+  // Old selections 
 
-    setSelected(newSelected);
-  };
+  // const onSelectRow = (i) => {
+  //   const newSelected = selected.includes(i)
+  //     ? selected.filter((value) => value !== i)
+  //     : [...selected, i];
+
+  //   setSelected(newSelected);
+  // };
 
   const onSelectAllRow = () => {
     const index = data;
@@ -73,6 +114,17 @@ export default function Attendees() {
       setSelected(t);
     }
   };
+
+  // Selections Updated 
+  const onSelectRow = (id) => {
+    const newSelected = selected.includes(id)
+       ? selected.filter((value) => value !== id)
+       : [...selected, id];
+   
+    setSelected(newSelected);
+   };
+   
+  
 
   const head = (
     <TableHead>
@@ -92,20 +144,25 @@ export default function Attendees() {
           )}
         </TableCell>
         <TableCell>
-          <TableSortLabel> First Name</TableSortLabel>
+          <TableSortLabel>First Name</TableSortLabel>
         </TableCell>
-        <TableCell>Last Name</TableCell>
+        <TableCell>
+          <TableSortLabel>Last Name</TableSortLabel>
+          </TableCell>
         <TableCell>
           <TableSortLabel>Name</TableSortLabel>
         </TableCell>
         <TableCell>
-          <TableSortLabel>Order Number </TableSortLabel>
+          <TableSortLabel>Order Number</TableSortLabel>
         </TableCell>
         <TableCell>
-          <TableSortLabel>Ticket Total </TableSortLabel>
+          <TableSortLabel>Ticket Total</TableSortLabel>
         </TableCell>
         <TableCell>
           <TableSortLabel>Discount Code</TableSortLabel>
+        </TableCell>
+        <TableCell>
+          <TableSortLabel>Ticket Code</TableSortLabel>
         </TableCell>
         <TableCell>
           <TableSortLabel>Ticket ID</TableSortLabel>
@@ -116,28 +173,31 @@ export default function Attendees() {
         <TableCell>
           <TableSortLabel>Buyer First Name</TableSortLabel>
         </TableCell>
-        <TableCell> Buyer Email</TableCell>
+        <TableCell> 
+          <TableSortLabel>Buyer Last Name</TableSortLabel> 
+        </TableCell>
         <TableCell>
-          <TableSortLabel>Contact No.</TableSortLabel>
+          <TableSortLabel>Buyer Email.</TableSortLabel>
+        </TableCell>
+        <TableCell>
+          <TableSortLabel>Phone Number</TableSortLabel>
         </TableCell>
         <TableCell>
           <TableSortLabel>Company Name</TableSortLabel>
-        </TableCell>
-        <TableCell>
-          <TableSortLabel>Buyer Last Name</TableSortLabel>
         </TableCell>
 
         <TableCell>
           <TableSortLabel>Attendance</TableSortLabel>
         </TableCell>
+
       </TableRow>
     </TableHead>
   );
 
-  const body = data.slice(6 * page - 6, 6 * page).map((item, i) => (
+  const body = attendees.slice(6 * page - 6, 6 * page).map((item, i) => (
     <TableBody>
       <TableRow key={i}>
-        <TableCell>
+        {/* <TableCell>
           <Checkbox
             id={i}
             onClick={() => onSelectRow(item.email)}
@@ -146,14 +206,42 @@ export default function Attendees() {
         </TableCell>
         <TableCell>{item.name}</TableCell>
         <TableCell>{item.email}</TableCell>
-        <TableCell>{item.position}</TableCell>
+        <TableCell>{item.position}</TableCell> */}
+        <TableCell>
+          <Checkbox
+            id={i}
+            onClick={() => onSelectRow(item.email)}
+            checked={selected.includes(item.email)}
+          />
+        </TableCell>
+        <TableCell>{item.firstName}</TableCell>
+        <TableCell>{item.lastName}</TableCell>
+        <TableCell>{item.name}</TableCell>
+        <TableCell>{item.orderNumber}</TableCell>
+        <TableCell>{item.ticketTotal}</TableCell>
+        <TableCell>{item.discountCode}</TableCell>
+        <TableCell>{item.ticketCode}</TableCell>
+        <TableCell>{item.ticketID}</TableCell>
+        <TableCell>{item.ticketType}</TableCell>
+        <TableCell>{item.buyerFirstName}</TableCell>
+        <TableCell>{item.buyerEmail}</TableCell>
+        <TableCell>{item.phoneNumber}</TableCell>
+        <TableCell>{item.companyName}</TableCell>
+        <TableCell>{item.buyerLastName}</TableCell>
         <TableCell>
           {item.verified ? (
-            <Chip label="Verified" variant="outlined" color="primary" />
+            <Chip label="Attended" variant="outlined" color="primary" />
           ) : (
-            <Chip label="Unverified" variant="outlined" color="error" />
+            <Chip label="Not Attended" variant="outlined" color="error" />
           )}
         </TableCell>
+        <TableCell>
+        {selected.includes(item.email) && (
+          <IconButton onClick={() => DeleteSelectedAttendees(item.email)}>
+            <Iconify icon="ic:outline-delete" width={24} />
+          </IconButton>
+        )}
+      </TableCell>
       </TableRow>
     </TableBody>
   ));
@@ -162,17 +250,6 @@ export default function Attendees() {
    <>
    <Container  maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }} >
       <Typography variant="h4"> Attendees</Typography>
-
-      {/* <Box
-        sx={{
-          mt: 5,
-          width: 1,
-          height: 320,
-          borderRadius: 2,
-          bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
-          border: (theme) => `dashed 1px ${theme.palette.divider}`,
-        }}
-      /> */}
     </Container>  
 
   <Container maxWidth ={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
@@ -199,18 +276,11 @@ export default function Attendees() {
         <DialogContent sx={{ py: 4 }}>
           <CreateAttendeeForm/>
         </DialogContent>
-        {/* <DialogActions>
-           <Button onClick={handleModalClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleModalClose} color="primary">
-            Add
-          </Button> 
-        </DialogActions> */}
-      </Dialog>
+  </Dialog>
   </Container>
 
     <Stack>
+
       <TableContainer component={Paper} sx={{ position: 'relative' }}>
         {selected.length > 0 && (
           <Stack
