@@ -74,7 +74,7 @@ export default function AuthClassicLayout({ children, image, title }) {
       <Box
         component="img"
         alt="nexea"
-        src="/src/assets/nexea.jpeg"
+        src="/assets/images/nexea.jpeg"
         sx={{
           borderRadius: 10,
           p: 2,
