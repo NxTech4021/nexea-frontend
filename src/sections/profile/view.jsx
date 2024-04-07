@@ -1,7 +1,6 @@
 // import axios from 'axios';
-import axios from 'src/utils/axios';
 import { useTheme } from '@emotion/react';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -19,7 +18,7 @@ import {
 
 import { paths } from 'src/routes/paths';
 
-import { endpoints } from 'src/utils/axios';
+import axios, { endpoints } from 'src/utils/axios';
 
 import { useAuthContext } from 'src/auth/hooks';
 

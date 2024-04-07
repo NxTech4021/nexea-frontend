@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { Icon } from '@iconify/react';
+
 import QrCodeIcon from '@mui/icons-material/QrCode';
+
 import { paths } from 'src/routes/paths';
+
 import SvgColor from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------

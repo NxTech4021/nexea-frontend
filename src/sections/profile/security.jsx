@@ -1,55 +1,52 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import axios, { endpoints } from 'src/utils/axios';
-import { LoadingButton } from '@mui/lab';
-import { Card, Grid, Stack, TextField, IconButton, InputAdornment } from '@mui/material';
-import bcrypt from 'bcryptjs'
-import { useBoolean } from 'src/hooks/use-boolean';
+import bcrypt from 'bcryptjs';
+import React, { useState } from 'react';
 
-import Iconify from 'src/components/iconify';
+import { LoadingButton } from '@mui/lab';
+import { Card, Grid, TextField } from '@mui/material';
+
+import axios, { endpoints } from 'src/utils/axios';
+
 import { useAuthContext } from 'src/auth/hooks';
 
 const AccountSecurity = () => {
   // const password = useBoolean();
-  const [password, setPassword] = useState(
-    {current: '', new: '', confirm: ''});
-  const { user } = useAuthContext()
+  const [password, setPassword] = useState({ current: '', new: '', confirm: '' });
+  const { user } = useAuthContext();
   const [error, setError] = useState('');
 
   const handleInputChanges = (event) => {
-    setPassword({ ...password, [event.target.name]: event.target.value});
+    setPassword({ ...password, [event.target.name]: event.target.value });
   };
 
   const handleSaveChanges = async () => {
     const { current, new: newPassword, confirm } = password;
 
     if (newPassword !== confirm) {
-      setError ('Password do not match');
+      setError('Password do not match');
       return;
     }
 
-    bcrypt.compare(current, user?.password, async function(err, result) {
+    bcrypt.compare(current, user?.password, async (err, result) => {
       if (err) {
-          console.error('Error comparing passwords:', err);
-          return;
+        console.error('Error comparing passwords:', err);
+        return;
       }
-  
+
       if (result) {
-          if (current === user?.password){
-            setError('New password must be different from the current password');
-            return;
-          } else {
-            try {
-              await axios.patch(endpoints.auth.update, { id: user?.id, password: confirm });
-              alert('Password update successfully');
-          } catch (error) {
-              setError('Invalid current password');
+        if (current === user?.password) {
+          setError('New password must be different from the current password');
+        } else {
+          try {
+            await axios.patch(endpoints.auth.update, { id: user?.id, password: confirm });
+            alert('Password update successfully');
+          } catch (e) {
+            setError('Invalid current password');
           }
-          }
+        }
       } else {
-          setError('Invalid current password');
+        setError('Invalid current password');
       }
-  });
-   
+    });
   };
 
   return (

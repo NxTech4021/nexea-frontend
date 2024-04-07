@@ -1,6 +1,7 @@
-import { useRef, useState, useEffect } from "react";
 import QrScanner from "qr-scanner";
-import { Box, Button, Container, Modal, Typography } from "@mui/material";
+import { useRef, useState, useEffect } from "react";
+
+import { Box, Modal, Button, Container, Typography } from "@mui/material";
 
 const QrReader = () => {
  const scanner = useRef(null);
