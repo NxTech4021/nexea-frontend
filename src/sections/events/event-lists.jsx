@@ -1,4 +1,6 @@
-import React from 'react';
+
+import React, {useState, useEffect} from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
@@ -19,8 +21,8 @@ const TestCard = styled(Card)(({ theme }) => ({
     height: '100%',
     top: 0,
     left: 0,
-    // backgroundImage: (props) => `url(${props.backgroundImage}`,
-    // backgroundImage: 'url(https://api.slingacademy.com/public/sample-photos/1.jpeg)',
+    //  backgroundImage: (props) => `url(${props.backgroundImage}`,
+    //  backgroundImage: 'url(https://api.slingacademy.com/public/sample-photos/1.jpeg)',
     filter: 'blur(10px)', // Adjust the blur intensity as needed
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
@@ -28,9 +30,30 @@ const TestCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const EventLists = () => (
+const EventLists = () => {
   //   const setting = useSettingsContext();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+ useEffect(() => {
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('https://localhost:3001/api/events/list'); //  change the /api if it doesnt work
+      console.log(response.data)
+      setEvents(response.data);
+
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    fetchEvents();
+ }, []);
+
+ return (
   <>
     <Box
       display="grid"
@@ -42,7 +65,41 @@ const EventLists = () => (
       }}
       marginTop={5}
     >
-      {Array(8)
+       {loading ? (
+          <div>Loading...</div>
+        ) : (
+          events.map((event) => (
+            <Card
+              sx={{
+                width: '100%',
+                height: 300,
+                backgroundImage: 'url(https://api.slingacademy.com/public/sample-photos/1.jpeg)',
+                backgroundBlendMode: 'overlay',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+              key={event.id} // Ensure each card has a unique key
+            >
+              <CardHeader title={event.name} subheader={event.description} />
+              <CardContent>
+                {/* Display event details here */}
+              </CardContent>
+              <CardActions
+                sx={{
+                 position: 'absolute',
+                 right: 0,
+                 bottom: 0,
+                }}
+              >
+                <Button>View Event</Button>
+              </CardActions>
+            </Card>
+          ))
+        )}
+      </Box>
+
+      {/* {Array(8)
         .fill(0)
         .map((i) => (
           <Card
@@ -55,10 +112,11 @@ const EventLists = () => (
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
+            key={event.id} 
           >
             <CardHeader title="DisruptInvest" subheader="Lorem ipsum dolor sit amet." />
             <CardContent>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima, corporis?
+              Call description from database 
             </CardContent>
             <CardActions
               sx={{
@@ -67,12 +125,12 @@ const EventLists = () => (
                 bottom: 0,
               }}
             >
-              <Button>See more</Button>
+              <Button>View Event</Button>
             </CardActions>
           </Card>
         ))}
 
-      <TestCard backgroundImage="https://api.slingacademy.com/public/sample-photos/1.jpeg">
+      {/* <TestCard backgroundImage="https://api.slingacademy.com/public/sample-photos/1.jpeg">
         <CardHeader title="DisruptInvest" subheader="Lorem ipsum dolor sit amet." />
         <CardContent>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima, corporis?
@@ -86,8 +144,8 @@ const EventLists = () => (
         >
           <Button>See more</Button>
         </CardActions>
-      </TestCard>
-    </Box>
+      </TestCard> 
+    </Box> */}
     <Pagination
       count={3}
       sx={{
@@ -98,7 +156,9 @@ const EventLists = () => (
       }}
     />
   </>
-);
+
+  );
+};
 export default EventLists;
 
 TestCard.propTypes = {
