@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
 import Pagination, { paginationClasses } from '@mui/material/Pagination';
-import { Box, Card, Button, CardHeader, CardActions, CardContent } from '@mui/material';
+import { Box, Card, Button, CardHeader, CardActions, CardContent, Typography } from '@mui/material';
 
 const TestCard = styled(Card)(({ theme }) => ({
   position: 'relative',
@@ -39,7 +39,7 @@ const EventLists = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://localhost:3001/api/events/list'); //  change the /api if it doesnt work
+      const response = await axios.get('http://localhost:3001/api/events/list'); //  change the /api if it doesnt work localhost:3001/api/events/list
       console.log(response.data)
       setEvents(response.data);
 
@@ -81,9 +81,15 @@ const EventLists = () => {
               }}
               key={event.id} // Ensure each card has a unique key
             >
-              <CardHeader title={event.name} subheader={event.description} />
+              <CardHeader title={event.name} subheader={event.status} />
               <CardContent>
-                {/* Display event details here */}
+              <Typography> {event.description} <br/> 
+                {event.date}
+              </Typography> 
+               
+              <Typography> Person in Charge: {event.personInCharge.name} </Typography>
+              {/* {event.personInCharge} */}
+                {/* {event.status} */}
               </CardContent>
               <CardActions
                 sx={{
@@ -99,38 +105,7 @@ const EventLists = () => {
         )}
       </Box>
 
-      {/* {Array(8)
-        .fill(0)
-        .map((i) => (
-          <Card
-            sx={{
-              width: '100%',
-              height: 300,
-              backgroundImage: 'url(https://api.slingacademy.com/public/sample-photos/1.jpeg)',
-              backgroundBlendMode: 'overlay',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-            key={event.id} 
-          >
-            <CardHeader title="DisruptInvest" subheader="Lorem ipsum dolor sit amet." />
-            <CardContent>
-              Call description from database 
-            </CardContent>
-            <CardActions
-              sx={{
-                position: 'absolute',
-                right: 0,
-                bottom: 0,
-              }}
-            >
-              <Button>View Event</Button>
-            </CardActions>
-          </Card>
-        ))}
-
-      {/* <TestCard backgroundImage="https://api.slingacademy.com/public/sample-photos/1.jpeg">
+        {/* <TestCard backgroundImage="https://api.slingacademy.com/public/sample-photos/1.jpeg">
         <CardHeader title="DisruptInvest" subheader="Lorem ipsum dolor sit amet." />
         <CardContent>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima, corporis?
