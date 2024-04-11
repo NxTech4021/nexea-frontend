@@ -1,8 +1,12 @@
 // import { useTheme } from '@emotion/react';
 
+import CountUp from 'react-countup';
+
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+
+import useGetAttendees from 'src/hooks/use-get-attendees';
 
 import { useSettingsContext } from 'src/components/settings';
 
@@ -13,6 +17,7 @@ import EventListsEventListsDashboard from './list-events';
 
 export default function OneView() {
   const settings = useSettingsContext();
+  const { totalAttendees } = useGetAttendees();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -21,7 +26,7 @@ export default function OneView() {
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget
             title="Total Attendees"
-            num="100"
+            num={<CountUp start={0} end={totalAttendees} />}
             color="success"
             icon="heroicons:users-16-solid"
           />
