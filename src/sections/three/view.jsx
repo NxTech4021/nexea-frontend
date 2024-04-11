@@ -1,13 +1,12 @@
 /* eslint-disable no-unused-vars */
-import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { DataGrid } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Dialog,
+  Button,
   Container,
   Typography,
   IconButton,
@@ -15,6 +14,9 @@ import {
   DialogContent,
 } from '@mui/material';
 
+import axiosInstance from 'src/utils/axios';
+
+import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
 
@@ -36,18 +38,33 @@ export default function Attendees() {
     setIsModalOpen(false);
   };
 
+  const fetchAttendees = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/attendees');
+      setAttendees(response.data);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    }
+  }, []);
+
+  // const fetchAttendees = async () => {
+  //   try {
+  //     const response = await axios.get('http://localhost:3001/attendees');
+  //     setAttendees(response.data);
+  //   } catch (error) {
+  //     console.error('Error fetching attendees:', error);
+  //   }
+  // };
+
   useEffect(() => {
-    const fetchAttendees = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/attendees');
-        setAttendees(response.data);
-      } catch (error) {
-        console.error('Error fetching attendees:', error);
-      }
-    };
+    const controller = new AbortController();
 
     fetchAttendees();
-  }, []);
+
+    return () => {
+      controller.abort();
+    };
+  }, [fetchAttendees]);
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
@@ -92,27 +109,16 @@ export default function Attendees() {
               alignItems: 'flex-end',
             }}
           >
-            <IconButton
-              onClick={handleModalOpen}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'green',
-                  borderRadius: '8px',
-                  transition: 'background-color 0.5s ease',
-                  color: 'white',
-                },
-              }}
-            >
-              <Typography> Add Attendee</Typography>
-              <AddIcon />
-            </IconButton>
+            <Button onClick={handleModalOpen} endIcon={<Iconify icon="material-symbols:add" />}>
+              Create
+            </Button>
           </div>
         </div>
 
         <Dialog open={isModalOpen} onClose={handleModalClose}>
           <DialogTitle> Add Attendee Information</DialogTitle>
           <DialogContent sx={{ py: 4 }}>
-            <CreateAttendeeForm />
+            <CreateAttendeeForm setIsModalOpen={setIsModalOpen} fetchAttendees={fetchAttendees} />
           </DialogContent>
         </Dialog>
       </Container>
@@ -126,7 +132,6 @@ export default function Attendees() {
           disableSelectionOnClick
           selectionModel={selected}
           onPageChange={(newPage) => setPage(newPage)}
-          //  onSelectionModelChange={}
           autoHeight
           disableColumnMenu
         />
