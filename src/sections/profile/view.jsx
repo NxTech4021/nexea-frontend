@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 import { useTheme } from '@emotion/react';
 import React, { useState, useCallback } from 'react';
 
@@ -18,7 +18,7 @@ import {
 
 import { paths } from 'src/routes/paths';
 
-import { endpoints } from 'src/utils/axios';
+import axios, { endpoints } from 'src/utils/axios';
 
 import { useAuthContext } from 'src/auth/hooks';
 
@@ -35,6 +35,13 @@ const Profile = () => {
   const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
 
+  const [data, setData] = useState({
+    name: user?.name,
+    email: user?.email,
+    department: user?.department,
+    address: user?.address,
+  });
+  
   const [image, setImage] = useState();
   const [url, setURL] = useState();
 
@@ -49,16 +56,17 @@ const Profile = () => {
   }, []);
 
   const handleUpload = async () => {
-    if (!image) {
-      alert('Upload image first');
-      return;
-    }
+    // if (!data) {
+    //   alert('Upload image first');
+    //   return;
+    // }
 
-    await axios.post(
-      endpoints.auth.upload,
-      { id: user?.id, image: url },
-      { headers: { 'content-type': 'multipart/form-data' } }
+    await axios.patch(
+      endpoints.auth.update,
+      { id: user?.id, image: url, name: data.name, email: data.email, department: data.department, address: data.address },
+      { headers: { 'content-type': 'multipart/form-data' } },
     );
+
   };
 
   const renderPicture = (
@@ -72,7 +80,7 @@ const Profile = () => {
                 height: 1,
                 borderRadius: '50%',
               }}
-              src={user?.photoURL ? user?.photoURL : image}
+              src={image || user?.photoURL}
             />
           </UploadPhoto>
           <Typography display="block" color={theme.palette.grey['600']} sx={{ fontSize: 12 }}>
@@ -92,25 +100,20 @@ const Profile = () => {
         <Stack alignItems="flex-end" sx={{ mt: 3 }}>
           <Grid container spacing={2} p={3}>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Name" defaultValue={user?.name} />
+              <TextField fullWidth label="Name" defaultValue={data.name} onChange={(e) => setData({ ...data, name: e.target.value })}
+ />
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" defaultValue={user?.email} />
+              <TextField fullWidth label="Email address" defaultValue={data.email}   onChange={(e) => setData({ ...data, email: e.target.value })}
+ />
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" />
+              <TextField fullWidth label="Department" defaultValue={data.department}onChange={(e) => setData({ ...data, department: e.target.value })}
+ />
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" />
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <TextField fullWidth label="Email address" type="text" />
+              <TextField fullWidth label="Address" defaultValue={data.address} onChange={(e) => setData({ ...data, address: e.target.value })}
+ />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} sx={{ textAlign: 'end' }}>
               <LoadingButton

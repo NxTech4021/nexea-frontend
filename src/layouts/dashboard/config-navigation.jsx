@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Icon } from '@iconify/react';
 
+import QrCodeIcon from '@mui/icons-material/QrCode';
+
 import { paths } from 'src/routes/paths';
 
 import SvgColor from 'src/components/svg-color';
@@ -40,6 +42,7 @@ const ICONS = {
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
+  qr: <QrCodeIcon />, 
 };
 
 // ----------------------------------------------------------------------
@@ -65,6 +68,11 @@ export function useNavData() {
             title: 'Attendees',
             path: paths.dashboard.attendees,
             icon: <Icon icon="heroicons:users-16-solid" width={25} />,
+          },
+          {
+            title: 'QR',
+            path: paths.dashboard.Qr,
+            icon: ICONS.qr,
           },
         ],
       },
