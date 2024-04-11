@@ -1,12 +1,16 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { DataGrid } from '@mui/x-data-grid';
+import CheckIcon from '@mui/icons-material/Check';
 import SearchIcon from '@mui/icons-material/Search';
+import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
 import {
   Box,
+  Alert,
   Dialog,
   Button,
+  Snackbar,
   Container,
   Typography,
   IconButton,
@@ -29,6 +33,8 @@ export default function Attendees() {
   const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState(null);
+  const apiRef = useGridApiRef();
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -47,14 +53,23 @@ export default function Attendees() {
     }
   }, []);
 
-  // const fetchAttendees = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:3001/attendees');
-  //     setAttendees(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching attendees:', error);
-  //   }
-  // };
+  const updateAttendees = useCallback(
+    async (newRow) => {
+      try {
+        await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow);
+        fetchAttendees();
+        setSnackbar({ children: 'User successfully saved', severity: 'success' });
+        return newRow;
+      } catch (error) {
+        console.error('Error fetching attendees:', error);
+      }
+    },
+    [fetchAttendees]
+  );
+
+  const handleProcessRowUpdateError = useCallback((error) => {
+    setSnackbar({ children: error.message, severity: 'error' });
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,8 +84,8 @@ export default function Attendees() {
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
     { field: 'id', headerName: 'ID', width: 50 },
-    { field: 'firstName', headerName: 'First Name', width: 120 },
-    { field: 'lastName', headerName: 'Last Name', width: 120 },
+    { field: 'firstName', headerName: 'First Name', width: 120, editable: true },
+    { field: 'lastName', headerName: 'Last Name', width: 120, editable: true },
     { field: 'name', headerName: 'Name', width: 120 },
     { field: 'orderNumber', headerName: 'Order Number' },
     { field: 'ticketTotal', headerName: 'Ticket Total' },
@@ -78,11 +93,11 @@ export default function Attendees() {
     { field: 'ticketCode', headerName: 'Ticket Code' },
     { field: 'ticketID', headerName: 'Ticket ID' },
     { field: 'ticketType', headerName: 'Ticket Type' },
-    { field: 'buyerFirstName', headerName: 'Buyer First Name', width: 120 },
-    { field: 'buyerLastName', headerName: 'Buyer Last Name', width: 120 },
-    { field: 'buyerEmail', headerName: 'Buyer Email', width: 120 },
-    { field: 'phoneNumber', headerName: 'Phone Number' },
-    { field: 'companyName', headerName: 'Company Name' },
+    { field: 'buyerFirstName', headerName: 'Buyer First Name', width: 120, editable: true },
+    { field: 'buyerLastName', headerName: 'Buyer Last Name', width: 120, editable: true },
+    { field: 'buyerEmail', headerName: 'Buyer Email', width: 120, editable: true },
+    { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
+    { field: 'companyName', headerName: 'Company Name', editable: true },
     { field: 'attendance', headerName: 'Attendance' },
   ];
 
@@ -124,6 +139,8 @@ export default function Attendees() {
       </Container>
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
+          editMode="row"
+          apiRef={apiRef}
           rows={attendees}
           columns={columns}
           pagination
@@ -133,8 +150,25 @@ export default function Attendees() {
           selectionModel={selected}
           onPageChange={(newPage) => setPage(newPage)}
           autoHeight
-          disableColumnMenu
+          // disableColumnMenu
+          processRowUpdate={(newRow, oldRow) => {
+            if (JSON.stringify(newRow) === JSON.stringify(oldRow)) {
+              return oldRow;
+            }
+            return updateAttendees(newRow);
+          }}
+          onProcessRowUpdateError={handleProcessRowUpdateError}
         />
+        {!!snackbar && (
+          <Snackbar
+            open
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            onClose={() => setSnackbar(null)}
+            autoHideDuration={6000}
+          >
+            <Alert icon={<CheckIcon fontSize="inherit" />} {...snackbar} />
+          </Snackbar>
+        )}
       </Box>
     </>
   );
