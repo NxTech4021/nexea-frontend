@@ -66,7 +66,6 @@ const EventStatus = {
 // }));
 
 const EventLists = () => {
-  //   const setting = useSettingsContext();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]); // State to store users data
@@ -83,8 +82,7 @@ const EventLists = () => {
     }
  };
 
-  useEffect(() => {
-    
+  useEffect(() => {   
     const fetchUsers = async () => {
       try {
         // Fetch users data from user API
@@ -104,7 +102,6 @@ const EventLists = () => {
     setOpen(true);
   
    };
-   
   const handleIcon = () => {
     setIsEditing(!isEditing);
   } 
@@ -113,7 +110,6 @@ const EventLists = () => {
     setIsEditing(false);
    };
    
-
  return (
   <>
     <Box
@@ -158,8 +154,6 @@ const EventLists = () => {
               }}
             >
                <Typography> {dayjs(event.date).format('DD-MMM-YYYY')} </Typography>
-
-
               {/* MODAL */}
               <Dialog sx={{
               '& .MuiDialog-paper': {
@@ -375,7 +369,6 @@ const EventLists = () => {
   );
 };
 export default EventLists;
-
 // TestCard.propTypes = {
 //   backgroundImage: PropTypes.string.isRequired,
 // };

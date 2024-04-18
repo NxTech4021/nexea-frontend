@@ -176,7 +176,7 @@ const CreateEvent = () => {
              };
          
              // eslint-disable-next-line no-undef
-             const response = await axios.post('http://localhost:3001/api/event/create', eventData); // remove/add /api if it doesnt work 
+             const response = await axios.post('http://localhost:3001/event/create', eventData); // remove/add /api if it doesnt work 
          
              // Handle the response
              if (response.data.success) {
