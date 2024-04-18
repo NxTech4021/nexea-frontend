@@ -14,6 +14,7 @@ import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { SettingsDrawer, SettingsProvider } from 'src/components/settings';
 
 import { AuthProvider } from 'src/auth/context/jwt';
+import {ToastContainer} from 'react-toastify';
 
 // ----------------------------------------------------------------------
 
@@ -46,6 +47,7 @@ export default function App() {
       >
         <ThemeProvider>
           <MotionLazy>
+          <ToastContainer position="bottom-right" />
             <SettingsDrawer />
             <ProgressBar />
             <Router />

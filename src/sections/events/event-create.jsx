@@ -1,14 +1,14 @@
 /* eslint-disable import/no-unresolved */
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { Grid, Button, Dialog, MenuItem, Container, TextField, DialogTitle, DialogContent} from '@mui/material';
+import { Grid, Button, Dialog, MenuItem, Container, TextField, Typography, DialogTitle, DialogContent} from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 
@@ -32,14 +32,14 @@ const CreateEvent = () => {
   
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/event/events');
+      const response = await axios.get('http://localhost:3001/event/events'); // remove/add /api if it doesnt work 
       const eventsArray = response.data.events;
       setEvents(eventsArray);
     } catch (error) {
       console.error('Error fetching events:', error);
     }
  };
- 
+
   useEffect(() => {
     
     const fetchUsers = async () => {
@@ -103,7 +103,7 @@ const CreateEvent = () => {
    
     try {
        // Send the FormData to the backend
-       const response = await axios.post('http://localhost:3001/api/attendee/upload', formData);
+       const response = await axios.post('http://localhost:3001/attendee/upload', formData);  // remove/add /api if it doesnt work 
 
        if (response.data.message) {
         toast.success('CSV uploaded successfully!');
@@ -115,17 +115,6 @@ const CreateEvent = () => {
       console.error('Error uploading CSV:', error);
       toast.error('Error uploading CSV. Please try again.');
    }
-   
-    //    if (response.data.success) {
-    //      toast.success('CSV uploaded successfully!');
-    //      handleCloseModal(); 
-    //    } else {
-    //      toast.error('Error uploading CSV.');
-    //    }
-    // } catch (error) {
-    //    console.error('Error uploading CSV:', error);
-    //    toast.error('Error uploading CSV. Please try again.');
-    // }
    };
    
 
@@ -187,7 +176,7 @@ const CreateEvent = () => {
              };
          
              // eslint-disable-next-line no-undef
-             const response = await axios.post('http://localhost:3001/api/event/create', eventData);
+             const response = await axios.post('http://localhost:3001/api/event/create', eventData); // remove/add /api if it doesnt work 
          
              // Handle the response
              if (response.data.success) {
@@ -294,17 +283,16 @@ const CreateEvent = () => {
       </Formik>
     </div>
   
-    <ToastContainer /> {/* Add this to display toast notifications */}
     <Dialog open={openModal} onClose={handleCloseModal}
-     sx={{
+    sx={{
       '& .MuiDialog-paper': {
-        width: '50%', 
+        width: { xs: '90%', sm: '50%', md: '40%' }, // Adjust width for different screen sizes
         maxWidth: '500px', 
-        height: '50%', 
-        maxHeight: '300px', 
+        minHeight: '300px',
+        height: 'auto', // Adjust height to auto to prevent squashing
         overflow: 'auto', 
       },
-   }}>
+      }}>
     <DialogTitle 
     sx={{
       display: 'flex',
@@ -312,17 +300,21 @@ const CreateEvent = () => {
       alignItems: 'center', 
       textAlign: 'center', 
     }}>
-      Upload Csv </DialogTitle>
+      Upload Csv 
+    </DialogTitle>
         <DialogContent
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '5px', 
         }}
         > 
-     <TextField
+     
+     <Typography sx={{ marginTop: 2 , marginBottom : 4  }}> 
+     Select Event to attach csv 
+     </Typography>   
+     
+     <TextField 
+      sx={{ width: '100%', marginBottom: 4 }}
       select
       label="Select Event"
       value={selectedEvent}
@@ -345,8 +337,7 @@ const CreateEvent = () => {
         margin: '0 auto', 
       }}
     />     
-      {/* <Button> Upload </Button> */}
-        </DialogContent>
+      </DialogContent>
       </Dialog>
 
     </Container>
