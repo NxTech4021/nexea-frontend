@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import CheckIcon from '@mui/icons-material/Check';
 import SearchIcon from '@mui/icons-material/Search';
-import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import {
   Box,
   Alert,
@@ -104,18 +104,11 @@ export default function Attendees() {
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
-        <Typography variant="h4"> Attendees</Typography>
+        <Typography variant="h4">Attendees</Typography>
       </Container>
 
       <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <IconButton>
-              <SearchIcon />
-            </IconButton>
-            <input type="text" placeholder="Search..." style={{ marginLeft: '8px' }} />
-          </div>
-
           <div
             style={{
               marginLeft: 'auto',
@@ -158,6 +151,12 @@ export default function Attendees() {
             return updateAttendees(newRow);
           }}
           onProcessRowUpdateError={handleProcessRowUpdateError}
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+            },
+          }}
         />
         {!!snackbar && (
           <Snackbar
