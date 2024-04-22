@@ -63,9 +63,34 @@ const CreateEvent = () => {
     setOpenModal(true);
  };
 
+ // Function to handle modal close
  const handleCloseModal = () => {
     setOpenModal(false);
  };
+
+  // const renderInfo = (
+  //   <Grid container>
+  //     {mdUp && (
+  //       <Grid md={4} >
+  //         <Typography variant="h6" sx={{ mb: 0.5 }}>
+  //           Details
+  //         </Typography>
+  //         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+  //           Title, short description, image...
+  //         </Typography>
+  //       </Grid>
+  //     )}
+
+  //     <Grid xs={12} md={8}>
+  //       <Card>
+  //         <Stack spacing={1.5} sx={{ p: 3 }}>
+  //           <Typography variant="subtitle2">Event name</Typography>
+  //           <TextField placeholder="Ex: DisruptInvest..." />
+  //         </Stack>
+  //       </Card>
+  //     </Grid>
+  //   </Grid>
+  // );
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -109,6 +134,11 @@ const CreateEvent = () => {
           mb: { xs: 3, md: 5 },
         }}
       />
+
+      {/* <Stack spacing={3}>
+        {renderInfo}
+        {renderUploadCSV}
+      </Stack> */}
     <div>
       <h2>Create Event</h2>
       <Formik
