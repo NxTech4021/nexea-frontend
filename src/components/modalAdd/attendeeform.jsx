@@ -40,6 +40,7 @@ const initialValues = {
   ticketType: '',
   buyerFirstName: '',
   buyerLastName: '',
+  attendance: '',
 };
 
 // eslint-disable-next-line react/prop-types
@@ -61,6 +62,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees }) => {
         email: values.email,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
+        attendance: values.attendance,
       });
       fetchAttendees();
       setIsModalOpen(false);
@@ -208,6 +210,20 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees }) => {
                     error={errors.companyName}
                     fullWidth
                     helperText={errors.companyName}
+                  />
+                )}
+              </Field>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Field fullWidth name="attendance">
+                {({ field, form: { errors } }) => (
+                  <TextField
+                    label="Attendance"
+                    {...field}
+                    error={errors.attendance}
+                    fullWidth
+                    helperText={errors.attendance}
                   />
                 )}
               </Field>
