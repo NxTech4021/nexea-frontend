@@ -1,31 +1,31 @@
-import QrScanner from "qr-scanner";
-import { useRef, useState, useEffect } from "react";
+import QrScanner from 'qr-scanner';
+import { useRef, useState, useEffect } from 'react';
 
-import { Box, Modal, Button, Container, Typography } from "@mui/material";
+import { Box, Modal, Button, Container, Typography } from '@mui/material';
 
 const QrReader = () => {
- const scanner = useRef(null);
- const videoRef = useRef(null);
- const qrBoxRef = useRef(null);
- const [cameraOn, setCameraOn] = useState(false);
- const [scannedResult, setScannedResult] = useState("");
- const [openModal, setOpenModal] = useState(false);
+  const scanner = useRef(null);
+  const videoRef = useRef(null);
+  const qrBoxRef = useRef(null);
+  const [cameraOn, setCameraOn] = useState(false);
+  const [scannedResult, setScannedResult] = useState('');
+  const [openModal, setOpenModal] = useState(false);
 
- const onScanSuccess = (result) => {
+  const onScanSuccess = (result) => {
     console.log(result);
     setScannedResult(result?.data);
     setOpenModal(true);
- };
+  };
 
- const onScanFail = (err) => {
+  const onScanFail = (err) => {
     console.log(err);
- };
+  };
 
- useEffect(() => {
+  useEffect(() => {
     if (videoRef?.current && !scanner.current) {
       scanner.current = new QrScanner(videoRef?.current, onScanSuccess, {
         onDecodeError: onScanFail,
-        preferredCamera: "environment",
+        preferredCamera: 'environment',
         highlightScanRegion: true,
         highlightCodeOutline: true,
         overlay: qrBoxRef?.current || undefined,
@@ -44,19 +44,21 @@ const QrReader = () => {
         scanner.current.stop();
       }
     };
- }, []);
+  }, []);
 
- useEffect(() => {
+  useEffect(() => {
     if (!cameraOn) {
-      alert("Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload.");
+      alert(
+        'Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload.'
+      );
     }
- }, [cameraOn]);
+  }, [cameraOn]);
 
- const handleCloseModal = () => {
+  const handleCloseModal = () => {
     setOpenModal(false);
- };
+  };
 
- return (
+  return (
     <Container maxWidth="lg">
       <Box
         sx={{
@@ -79,11 +81,13 @@ const QrReader = () => {
             marginBottom: '20px',
           }}
         >
-         { /* eslint-disable jsx-a11y/media-has-caption */}
-          <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }}> </video>
+          {/* eslint-disable jsx-a11y/media-has-caption */}
+          <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }}>
+            {' '}
+          </video>
         </Box>
 
-        <div ref={qrBoxRef}/>
+        <div ref={qrBoxRef} />
       </Box>
 
       <Modal
@@ -108,9 +112,9 @@ const QrReader = () => {
             alignItems: 'center',
           }}
         >
-          <Typography id="modal-title" variant="h6" component="h6" >
-              Scanned Output
-            </Typography>
+          <Typography id="modal-title" variant="h6" component="h6">
+            Scanned Output
+          </Typography>
           <Box
             sx={{
               width: '100%',
@@ -119,26 +123,20 @@ const QrReader = () => {
               borderRadius: '10px',
               margintTop: '10px',
               marginBottom: '20px',
-              textAlign: 'center'
+              textAlign: 'center',
             }}
           >
-            <Typography id="modal-description"sx={{ mt: 2 }}>
+            <Typography id="modal-description" sx={{ mt: 2 }}>
               {scannedResult}
             </Typography>
           </Box>
-          <Button
-            size="medium"
-            variant="contained"
-            color="primary"
-            fullWidth 
-            disabled
-            >
-           Verify
+          <Button size="medium" variant="contained" color="primary" fullWidth disabled>
+            Verify
           </Button>
         </Box>
       </Modal>
     </Container>
- );
+  );
 };
 
 export default QrReader;

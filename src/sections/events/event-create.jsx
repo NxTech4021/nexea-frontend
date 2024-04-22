@@ -134,11 +134,11 @@ const CreateEvent = () => {
           mb: { xs: 3, md: 5 },
         }}
       />
+
       {/* <Stack spacing={3}>
         {renderInfo}
         {renderUploadCSV}
       </Stack> */}
-
     <div>
       <h2>Create Event</h2>
       <Formik

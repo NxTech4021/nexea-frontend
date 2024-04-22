@@ -1,6 +1,7 @@
 /* eslint-disable perfectionist/sort-imports */
 /* eslint-disable import/no-unresolved */
 
+
 import axios from 'axios';
 import dayjs from 'dayjs';
 //  import PropTypes from 'prop-types';
@@ -9,7 +10,6 @@ import { toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, {useState, useEffect} from 'react';
 import { Form, Field, Formik,  ErrorMessage } from 'formik';
-
 import EditIcon from '@mui/icons-material/Edit';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -182,6 +182,7 @@ const EventLists = () => {
                       description: event.description,
                       date: event.date,
                       personInCharge: event.personInCharge.name,
+                      tickera_api: event.tickera_api,
                       status: event.status
                     }}
                     onSubmit={(values, { setSubmitting }) => {
@@ -256,7 +257,8 @@ const EventLists = () => {
                           <DatePicker 
                              selected={values.date}
                              onChange={date => setFieldValue('date', date)}
-                             className="form-control"              
+                             className="form-control"   
+                             required           
                           />
                           </LocalizationProvider>
                             <ErrorMessage name="date" component="div" />
@@ -331,6 +333,9 @@ const EventLists = () => {
                       <Typography gutterBottom>
                         Date: {dayjs(event.date).format('DD-MMM-YYYY')}
                       </Typography>
+                      {/* <Typography gutterBottom>
+                        Tickera API: {event.tickera_api}
+                      </Typography> */}
                       <Typography gutterBottom>
                         Status: {event.status}
                       </Typography>

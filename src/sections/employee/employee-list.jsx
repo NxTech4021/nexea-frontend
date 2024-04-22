@@ -23,21 +23,6 @@ import employee from 'src/_mock/startupsDatabase.users.json';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
-// const fakeData = [
-//   {
-//     name: 'Afiq',
-//     phone: '01238123',
-//     department: 'IT',
-//     role: 'Admin',
-//   },
-//   {
-//     name: 'Danial',
-//     phone: '1231243',
-//     department: 'Finance',
-//     role: 'Admin',
-//   },
-// ];
-
 const EmployeeLists = () => {
   //   const [checkAll, setCheckAll] = useState(false);
   const [selected, setSelected] = useState([]);
