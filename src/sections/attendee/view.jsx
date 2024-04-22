@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import CheckIcon from '@mui/icons-material/Check';
-import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import {
   Box,
@@ -13,7 +12,6 @@ import {
   Snackbar,
   Container,
   Typography,
-  IconButton,
   DialogTitle,
   DialogContent,
 } from '@mui/material';

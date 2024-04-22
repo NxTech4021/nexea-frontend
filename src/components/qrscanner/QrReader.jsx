@@ -1,8 +1,9 @@
 import QrScanner from 'qr-scanner';
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Box, Modal, Button, Container, Typography} from '@mui/material';
-import axiosInstance from 'src/utils/axios';
 
+import { Box, Modal, Button, Container, Typography } from '@mui/material';
+
+import axiosInstance from 'src/utils/axios';
 
 const QrReader = () => {
   const scanner = useRef(null);
@@ -15,12 +16,12 @@ const QrReader = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [attendeesData, setAttendeesData] = useState([]);
   const [verificationInProgress, setVerificationInProgress] = useState(false);
-  const [cameraScannerActive, setCameraScannerActive] = useState(false); 
+  const [cameraScannerActive, setCameraScannerActive] = useState(false);
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
       const response = await axiosInstance.get('/api/attendees');
-      const ticketIDs = response.data.map(obj => obj.ticketID);
+      const ticketIDs = response.data.map((obj) => obj.ticketID);
       setAttendeesData(response.data);
       return { ticketIDs };
     } catch (error) {
@@ -50,8 +51,10 @@ const QrReader = () => {
       if (ticketMatch) {
         setVerificationInProgress(true);
 
-        const scannedAttendee = attendeesData.filter(attendee => attendee.ticketID === scannedResult);
-        
+        const scannedAttendee = attendeesData.filter(
+          (attendee) => attendee.ticketID === scannedResult
+        );
+
         const updateEmail = async (id, newEmail) => {
           try {
             await axiosInstance.patch(
@@ -65,28 +68,31 @@ const QrReader = () => {
           }
         };
 
-        const uniqueEmails = [...new Set(scannedAttendee.map(attendee => attendee.buyerEmail))];
+        const uniqueEmails = [...new Set(scannedAttendee.map((attendee) => attendee.buyerEmail))];
 
         const listEmails = attendeesData
-        .filter(attendee => uniqueEmails.includes(attendee.buyerEmail))
-        .map(({ id, buyerEmail, ticketID }) => ({ id, buyerEmail, ticketID }));;
+          .filter((attendee) => uniqueEmails.includes(attendee.buyerEmail))
+          .map(({ id, buyerEmail, ticketID }) => ({ id, buyerEmail, ticketID }));
 
         if (scannedAttendee.length > 0) {
           if (listEmails.length === 1) {
             await updateAttendees(scannedAttendee[0].id);
           } else {
-            const confirmEmail = window.confirm(`Multiple emails associated with this ticket. Click yes to update only your ticket ID ${scannedAttendee} attendance. Click no to update the other ticket ID's emails associated.` );
+            const confirmEmail = window.confirm(
+              `Multiple emails associated with this ticket. Click yes to update only your ticket ID ${scannedAttendee} attendance. Click no to update the other ticket ID's emails associated.`
+            );
             if (!confirmEmail) {
-
-              const oppositeTicket = listEmails.find(({ticketID }) => ticketID !== scannedResult);
+              const oppositeTicket = listEmails.find(({ ticketID }) => ticketID !== scannedResult);
               if (oppositeTicket) {
-                const newEmail = prompt(`Enter new email for ticket ID ${oppositeTicket.ticketID}:`);
+                const newEmail = prompt(
+                  `Enter new email for ticket ID ${oppositeTicket.ticketID}:`
+                );
                 if (newEmail !== null) {
                   await updateEmail(oppositeTicket.id, newEmail);
                 }
               } else {
                 console.error('Opposite ticket not found.');
-              } 
+              }
             } else {
               await updateAttendees(scannedAttendee[0].id);
             }
@@ -105,7 +111,6 @@ const QrReader = () => {
       setVerificationInProgress(false);
     }
   }, [ticketMatch, updateAttendees, attendeesData, scannedResult, fetchTicketDatabase]);
-  
 
   useEffect(() => {
     const handleScanSuccess = async (result) => {
@@ -184,8 +189,7 @@ const QrReader = () => {
           height: '100vh',
           bgcolor: '#cfe8fc',
         }}
-      >  
-      
+      >
         {cameraScannerActive && (
           <Box
             sx={{
@@ -198,11 +202,12 @@ const QrReader = () => {
               marginBottom: '20px',
             }}
           >
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }} />
           </Box>
         )}
 
-        {!cameraScannerActive && ( 
+        {!cameraScannerActive && (
           <Button onClick={handleCamera} variant="contained" color="primary">
             Scan QR
           </Button>
