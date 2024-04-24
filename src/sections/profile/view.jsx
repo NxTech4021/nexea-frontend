@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import { useTheme } from '@emotion/react';
 import { Form, Field, Formik } from 'formik';
 import React, { useState, useCallback } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -86,6 +87,9 @@ const Profile = () => {
           },
         }
       );
+      toast.success('Successfully updated!', {
+        position: 'top-center',
+      });
     } catch (error) {
       alert(error);
     }
@@ -212,39 +216,42 @@ const Profile = () => {
   );
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
-        heading="Profile"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          {
-            name: 'User',
-            href: paths.dashboard.user,
-          },
-          { name: 'Profile' },
-        ]}
-        sx={{
-          mb: { xs: 3, md: 5 },
-        }}
-      />
+    <>
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <CustomBreadcrumbs
+          heading="Profile"
+          links={[
+            { name: 'Dashboard', href: paths.dashboard.root },
+            {
+              name: 'User',
+              href: paths.dashboard.user,
+            },
+            { name: 'Profile' },
+          ]}
+          sx={{
+            mb: { xs: 3, md: 5 },
+          }}
+        />
 
-      {tabs}
+        {tabs}
 
-      {currentTab === 'security' && <AccountSecurity />}
+        {currentTab === 'security' && <AccountSecurity />}
 
-      {currentTab === 'general' && (
-        <Grid container spacing={3}>
-          {renderPicture}
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={onSubmit}
-          >
-            {renderForm}
-          </Formik>
-        </Grid>
-      )}
-    </Container>
+        {currentTab === 'general' && (
+          <Grid container spacing={3}>
+            {renderPicture}
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={onSubmit}
+            >
+              {renderForm}
+            </Formik>
+          </Grid>
+        )}
+      </Container>
+      <ToastContainer />
+    </>
   );
 };
 
