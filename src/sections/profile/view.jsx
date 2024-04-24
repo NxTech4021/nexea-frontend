@@ -1,6 +1,10 @@
-// import axios from 'axios';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+import * as yup from 'yup';
 import { useTheme } from '@emotion/react';
+import { Form, Field, Formik } from 'formik';
 import React, { useState, useCallback } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -18,7 +22,7 @@ import {
 
 import { paths } from 'src/routes/paths';
 
-import axios, { endpoints } from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useAuthContext } from 'src/auth/hooks';
 
@@ -35,13 +39,23 @@ const Profile = () => {
   const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
 
-  const [data, setData] = useState({
-    name: user?.name,
-    email: user?.email,
-    department: user?.department,
-    address: user?.address,
+  const validationSchema = yup.object({
+    email: yup
+      .string('Enter your email')
+      .email('Enter a valid email')
+      .required('Email is required'),
+    name: yup.string('Enter your name').required('Name is required'),
+    department: yup.string('Enter your department').required('Department is required'),
+    address: yup.string('Enter your address').required('Address is required'),
   });
-  
+
+  const initialValues = {
+    name: user?.name || '',
+    email: user?.email || '',
+    department: user?.department || '',
+    address: user?.address || '',
+  };
+
   const [image, setImage] = useState();
   const [url, setURL] = useState();
 
@@ -55,18 +69,30 @@ const Profile = () => {
     setCurrentTab(newValue);
   }, []);
 
-  const handleUpload = async () => {
-    // if (!data) {
-    //   alert('Upload image first');
-    //   return;
-    // }
-
-    await axios.patch(
-      endpoints.auth.update,
-      { id: user?.id, image: url, name: data.name, email: data.email, department: data.department, address: data.address },
-      { headers: { 'content-type': 'multipart/form-data' } },
-    );
-
+  const onSubmit = async (values) => {
+    try {
+      await axiosInstance.patch(
+        endpoints.auth.update,
+        {
+          id: user?.id,
+          image: url,
+          name: values.name,
+          email: values.email,
+          department: values.department,
+          address: values.address,
+        },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      toast.success('Successfully updated!', {
+        position: 'top-center',
+      });
+    } catch (error) {
+      alert(error);
+    }
   };
 
   const renderPicture = (
@@ -94,41 +120,77 @@ const Profile = () => {
     </Grid>
   );
 
-  const renderForm = (
+  const renderForm = ({ dirty }) => (
     <Grid item xs={12} md={8} lg={8}>
-      <Card sx={{ p: 1 }}>
-        <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-          <Grid container spacing={2} p={3}>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Name" defaultValue={data.name} onChange={(e) => setData({ ...data, name: e.target.value })}
- />
+      <Form>
+        <Card sx={{ p: 1 }}>
+          <Stack alignItems="flex-end" sx={{ mt: 3 }}>
+            <Grid container spacing={2} p={3}>
+              <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Field name="name">
+                  {({ field, form: { errors, touched } }) => (
+                    <TextField
+                      fullWidth
+                      error={touched.name && errors.name}
+                      {...field}
+                      label="Name"
+                      defaultValue={user?.name}
+                      helperText={touched.name && errors.name}
+                    />
+                  )}
+                </Field>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Field name="email">
+                  {({ field, form: { errors, touched } }) => (
+                    <TextField
+                      fullWidth
+                      error={touched.email && errors.email}
+                      {...field}
+                      label="Email address"
+                      defaultValue={user?.email}
+                      helperText={touched.email && errors.email}
+                    />
+                  )}
+                </Field>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Field name="department">
+                  {({ field, form: { errors, touched } }) => (
+                    <TextField
+                      fullWidth
+                      error={touched.department && errors.department}
+                      {...field}
+                      label="Department"
+                      defaultValue={user?.department}
+                      helperText={touched.department && errors.department}
+                    />
+                  )}
+                </Field>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Field name="address">
+                  {({ field, form: { errors, touched } }) => (
+                    <TextField
+                      fullWidth
+                      error={touched.address && errors.address}
+                      {...field}
+                      label="Address"
+                      defaultValue={user?.address}
+                      helperText={touched.address && errors.address}
+                    />
+                  )}
+                </Field>
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={12} sx={{ textAlign: 'end' }}>
+                <LoadingButton type="submit" variant="contained" disabled={!dirty && !url}>
+                  Save Changes
+                </LoadingButton>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Email address" defaultValue={data.email}   onChange={(e) => setData({ ...data, email: e.target.value })}
- />
-            </Grid>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Department" defaultValue={data.department}onChange={(e) => setData({ ...data, department: e.target.value })}
- />
-            </Grid>
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              <TextField fullWidth label="Address" defaultValue={data.address} onChange={(e) => setData({ ...data, address: e.target.value })}
- />
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12} sx={{ textAlign: 'end' }}>
-              <LoadingButton
-                type="submit"
-                variant="contained"
-                onClick={() => {
-                  handleUpload();
-                }}
-              >
-                Save Changes
-              </LoadingButton>
-            </Grid>
-          </Grid>
-        </Stack>
-      </Card>
+          </Stack>
+        </Card>
+      </Form>
     </Grid>
   );
 
@@ -154,34 +216,42 @@ const Profile = () => {
   );
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
-        heading="Profile"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          {
-            name: 'User',
-            href: paths.dashboard.user,
-          },
-          { name: 'Profile' },
-        ]}
-        sx={{
-          mb: { xs: 3, md: 5 },
-        }}
-      />
+    <>
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <CustomBreadcrumbs
+          heading="Profile"
+          links={[
+            { name: 'Dashboard', href: paths.dashboard.root },
+            {
+              name: 'User',
+              href: paths.dashboard.user,
+            },
+            { name: 'Profile' },
+          ]}
+          sx={{
+            mb: { xs: 3, md: 5 },
+          }}
+        />
 
-      {tabs}
+        {tabs}
 
-      {currentTab === 'security' && <AccountSecurity />}
+        {currentTab === 'security' && <AccountSecurity />}
 
-      {currentTab === 'general' && (
-        <Grid container spacing={3}>
-          {renderPicture}
-
-          {renderForm}
-        </Grid>
-      )}
-    </Container>
+        {currentTab === 'general' && (
+          <Grid container spacing={3}>
+            {renderPicture}
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={onSubmit}
+            >
+              {renderForm}
+            </Formik>
+          </Grid>
+        )}
+      </Container>
+      <ToastContainer />
+    </>
   );
 };
 

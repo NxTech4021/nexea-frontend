@@ -3,8 +3,8 @@ import { useMemo, useEffect, useReducer, useCallback } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
 
+import { setSession } from './utils';
 import { AuthContext } from './auth-context';
-import { setSession, isValidToken } from './utils';
 
 // ----------------------------------------------------------------------
 
@@ -56,12 +56,14 @@ export function AuthProvider({ children }) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      // const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const response = await axios.get(endpoints.auth.me);
 
-      if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken);
+      // Using HTTPOnly cookie
+      if (response.status === 200) {
+        // setSession(accessToken);
 
-        const response = await axios.get(endpoints.auth.me);
+        // const response = await axios.get(endpoints.auth.me);
 
         const { user } = response.data;
 
@@ -70,7 +72,7 @@ export function AuthProvider({ children }) {
           payload: {
             user: {
               ...user,
-              accessToken,
+              // accessToken,
             },
           },
         });
@@ -107,7 +109,7 @@ export function AuthProvider({ children }) {
 
     const { accessToken, user } = response.data;
 
-    setSession(accessToken);
+    // setSession(accessToken);
 
     dispatch({
       type: 'LOGIN',
