@@ -9,11 +9,13 @@ import {
   Alert,
   Dialog,
   Button,
+  Select,
   Snackbar,
+  MenuItem,
   Container,
   Typography,
   DialogTitle,
-  DialogContent,
+  DialogContent
 } from '@mui/material';
 
 import axiosInstance from 'src/utils/axios';
@@ -27,13 +29,66 @@ import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
 export default function Attendees() {
   const settings = useSettingsContext();
   //  const [checkAll, setCheckAll] = useState(false);
-  const [selected, setSelected] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
+ // const [filteredAttendees, setFilteredAttendees] = useState([]);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
   const apiRef = useGridApiRef();
+  const [menuOptions, setMenuOptions] = useState([]);
+  // To select the event in the menu item 
+  const [selectedEvent, setSelectedEvent] = useState('');
+  // To filter to attendees data when an event is selected 
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [allAttendees, setAllAttendees] = useState([]);
 
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axiosInstance.get('http://localhost:3001/event/events'); // Add/remove /api if it doesnt work
+      const eventsArray = response.data.events;
+      const options = eventsArray.map(event => ({
+        value: event.id, 
+        label: event.name,
+      }));
+      setMenuOptions(options);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+ };
+
+ const fetchAttendees = async () => {
+  try {
+    const response = await axiosInstance.get('/attendees');
+    setAllAttendees(response.data);
+  } catch (error) {
+    // console.error('Error fetching all attendees:', error);
+  }
+};
+
+ const handleMenuSelect = (event) => {
+    const eventId = event.target.value;
+    const selectedEventName = menuOptions.find(option => option.value === eventId)?.label;
+    setSelectedEvent(selectedEventName);
+    //  setSelectedEvent(selectedEvent);
+    setSelectedEventId(eventId);
+    console.log("Selected Event:", eventId);
+ };
+
+ useEffect(() => {
+  if (selectedEventId) {
+     const attendeesForSelectedEvent = allAttendees.filter(attendee => attendee.eventId === selectedEventId);
+     setAttendees(attendeesForSelectedEvent);
+  }
+ }, [selectedEventId, allAttendees]); 
+
+   
+   
+  // // Filter attendees based on the selected event ID
+  // const attendeesForSelectedEvent = attendees.filter(attendee => attendee.eventId === selectedEvent);
+  // setAttendees(attendeesForSelectedEvent);
+ 
   const handleModalOpen = () => {
     setIsModalOpen(true);
   };
@@ -42,19 +97,12 @@ export default function Attendees() {
     setIsModalOpen(false);
   };
 
-  const fetchAttendees = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get('/api/attendees');
-      setAttendees(response.data);
-    } catch (error) {
-      console.error('Error fetching attendees:', error);
-    }
-  }, []);
+  
 
   const updateAttendees = useCallback(
     async (newRow) => {
       try {
-        await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow);
+        await axiosInstance.patch(`/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
         fetchAttendees();
         setSnackbar({ children: 'User successfully saved', severity: 'success' });
         return newRow;
@@ -62,22 +110,33 @@ export default function Attendees() {
         console.error('Error fetching attendees:', error);
       }
     },
-    [fetchAttendees]
+    []
   );
 
   const handleProcessRowUpdateError = useCallback((error) => {
     setSnackbar({ children: error.message, severity: 'error' });
   }, []);
 
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   fetchEvents();
+  //   return () => {
+  //     controller.abort();
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    fetchAttendees();
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
-
+    fetchEvents();
     fetchAttendees();
-
     return () => {
       controller.abort();
     };
-  }, [fetchAttendees]);
+  }, []);
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
@@ -106,67 +165,106 @@ export default function Attendees() {
       </Container>
 
       <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-          <div
+        <div key={selectedEventId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* <div
             style={{
               marginLeft: 'auto',
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'flex-end',
             }}
+          > */}
+          <Select
+            value={selectedEvent}
+            onChange={handleMenuSelect}
+            variant="outlined"
+            displayEmpty
+            renderValue={(selected) => {
+              if (!selected) {
+                return (
+                  <Typography variant="body2" color="textSecondary">
+                    Select Event
+                  </Typography>
+                );
+              }
+              return selected;
+            }}
           >
+            <MenuItem disabled value="">
+              <em>Select Event</em>
+            </MenuItem>
+            {menuOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+
             <Button onClick={handleModalOpen} endIcon={<Iconify icon="material-symbols:add" />}>
               Create
             </Button>
-          </div>
         </div>
 
         <Dialog open={isModalOpen} onClose={handleModalClose}>
           <DialogTitle> Add Attendee Information</DialogTitle>
           <DialogContent sx={{ py: 4 }}>
-            <CreateAttendeeForm setIsModalOpen={setIsModalOpen} fetchAttendees={fetchAttendees} />
+            <CreateAttendeeForm setIsModalOpen={setIsModalOpen} fetchAttendees={fetchAttendees} selectedEventId={selectedEventId} />
           </DialogContent>
         </Dialog>
       </Container>
-      <Box sx={{ height: 400, width: '100%' }}>
-        <DataGrid
-          editMode="row"
-          apiRef={apiRef}
-          rows={attendees}
-          columns={columns}
-          pagination
-          pageSize={5}
-          checkboxSelection
-          disableSelectionOnClick
-          selectionModel={selected}
-          onPageChange={(newPage) => setPage(newPage)}
-          autoHeight
-          // disableColumnMenu
-          processRowUpdate={(newRow, oldRow) => {
-            if (JSON.stringify(newRow) === JSON.stringify(oldRow)) {
-              return oldRow;
-            }
-            return updateAttendees(newRow);
-          }}
-          onProcessRowUpdateError={handleProcessRowUpdateError}
-          slots={{ toolbar: GridToolbar }}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-            },
-          }}
-        />
-        {!!snackbar && (
-          <Snackbar
-            open
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            onClose={() => setSnackbar(null)}
-            autoHideDuration={6000}
-          >
-            <Alert icon={<CheckIcon fontSize="inherit" />} {...snackbar} />
-          </Snackbar>
-        )}
+
+       {/* Attendees Table  */}
+       {selectedEvent ? (
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            editMode="row"
+            apiRef={apiRef}
+            rows={attendees.filter(attendee => attendee.eventId === selectedEventId)}// Filtered attendees based on selected event
+            columns={columns}
+            pagination
+            pageSize={5}
+            checkboxSelection
+            disableSelectionOnClick
+            selectionModel={selectedRows}
+            onPageChange={(newPage) => setPage(newPage)}
+            autoHeight
+            processRowUpdate={(newRow, oldRow) => {
+              if (JSON.stringify(newRow) === JSON.stringify(oldRow)) {
+                return oldRow;
+              }
+              return updateAttendees(newRow);
+            }}                  
+            onProcessRowUpdateError={handleProcessRowUpdateError}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+              },
+            }}
+          />
+          {!!snackbar && (
+            <Snackbar
+              open
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+              onClose={() => setSnackbar(null)}
+              autoHideDuration={6000}
+            >
+              <Alert icon={<CheckIcon fontSize="inherit" />} {...snackbar} />
+            </Snackbar>
+          )}
+        </Box>
+      ) : (
+        <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '60vh', // Adjust height as needed
+        }}
+      >
+        <Typography>Please Select an event to display Attendees</Typography>
       </Box>
+      )}
     </>
   );
 }
