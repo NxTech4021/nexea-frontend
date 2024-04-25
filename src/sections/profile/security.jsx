@@ -10,12 +10,15 @@ import { Card, Grid, TextField } from '@mui/material';
 
 import { toast } from 'react-toastify';
 
+import { useRouter } from 'src/routes/hooks';
+
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useAuthContext } from 'src/auth/hooks';
 
 const AccountSecurity = () => {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext();
+  const router = useRouter();
 
   const passSchema = yup.object().shape({
     currentPassword: yup.string().required('Current Password is required.'),
@@ -64,6 +67,10 @@ const AccountSecurity = () => {
       toast.success('Successfully updated!', {
         position: 'top-center',
       });
+
+      await logout();
+
+      router.replace('/');
 
       actions.resetForm();
     } catch (errors) {
