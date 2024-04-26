@@ -5,7 +5,9 @@ import React from 'react';
 import axios from 'axios';
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as yup from 'yup';
+import { toast } from 'react-toastify';
 import { Form, Field, Formik } from 'formik';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Grid, Button, TextField } from '@mui/material';
 
@@ -44,10 +46,10 @@ const initialValues = {
 };
 
 // eslint-disable-next-line react/prop-types
-const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees }) => {
+const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
     try {
-      await axiosInstance.post('/api/attendee/create', {
+      await axiosInstance.post('/attendee/create', {                 // Add/remove /api if it doesnt work
         firstName: values.firstName,
         lastName: values.lastName,
         name: values.name,
@@ -63,18 +65,20 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees }) => {
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
         attendance: values.attendance,
+        eventId: selectedEventId,
       });
       fetchAttendees();
       setIsModalOpen(false);
       resetForm();
-      alert('Attendee created successfully!');
+      toast.success('Attendeed added successfully!');
     } catch (error) {
-      console.error('Error creating attendee:', error);
+      toast.error('Error creating attendee:', error);
     }
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={schema}>
+    <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={schema}  validateOnBlur={false}
+    validateOnChange={false} >
       {({ isSubmitting }) => (
         <Form style={{ paddingTop: '10px' }}>
           <Grid container spacing={2}>

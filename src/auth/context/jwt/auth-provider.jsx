@@ -44,35 +44,32 @@ const reducer = (state, action) => {
       user: null,
     };
   }
+  if (action.type === 'VERIFY') {
+    return {
+      ...state,
+      user: action.payload.user,
+    };
+  }
   return state;
 };
 
 // ----------------------------------------------------------------------
-
-const STORAGE_KEY = 'accessToken';
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const initialize = useCallback(async () => {
     try {
-      // const accessToken = sessionStorage.getItem(STORAGE_KEY);
       const response = await axios.get(endpoints.auth.me);
 
       // Using HTTPOnly cookie
       if (response.status === 200) {
-        // setSession(accessToken);
-
-        // const response = await axios.get(endpoints.auth.me);
-
         const { user } = response.data;
-
         dispatch({
           type: 'INITIAL',
           payload: {
             user: {
               ...user,
-              // accessToken,
             },
           },
         });
@@ -109,8 +106,6 @@ export function AuthProvider({ children }) {
 
     const { accessToken, user } = response.data;
 
-    // setSession(accessToken);
-
     dispatch({
       type: 'LOGIN',
       payload: {
@@ -135,8 +130,6 @@ export function AuthProvider({ children }) {
 
     const { accessToken, user } = response.data;
 
-    sessionStorage.setItem(STORAGE_KEY, accessToken);
-
     dispatch({
       type: 'REGISTER',
       payload: {
@@ -157,9 +150,29 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  const verify = useCallback(async (email, code) => {
+    const data = {
+      email,
+      code,
+    };
+
+    const response = await axios.post(endpoints.auth.verify, data);
+
+    const { user } = response.data;
+
+    dispatch({
+      type: 'VERIFY',
+      payload: {
+        user: {
+          ...user,
+        },
+      },
+    });
+  }, []);
+
   // ----------------------------------------------------------------------
 
-  const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
+  const checkAuthenticated = state.user?.verified ? 'authenticated' : 'unauthenticated';
 
   const status = state.loading ? 'loading' : checkAuthenticated;
 
@@ -173,8 +186,9 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      verify,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, register, verify, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

@@ -35,6 +35,7 @@ export const endpoints = {
     register: '/api/auth/register',
     logout: '/api/auth/logout',
     update: '/api/update',
+    verify: '/api/auth/verify',
   },
   mail: {
     list: '/api/mail/list',

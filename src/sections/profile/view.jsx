@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import dayjs from 'dayjs';
 /* eslint-disable no-unused-vars */
 import * as yup from 'yup';
 import { useTheme } from '@emotion/react';
 import { Form, Field, Formik } from 'formik';
 import React, { useState, useCallback } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -32,6 +34,8 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcru
 
 import UploadPhoto from './dropzone';
 import AccountSecurity from './security';
+
+dayjs.extend(localizedFormat);
 
 const Profile = () => {
   const settings = useSettingsContext();
@@ -234,6 +238,9 @@ const Profile = () => {
         />
 
         {tabs}
+        <Typography variant="caption" display="block" gutterBottom color="GrayText">
+          Last update: {dayjs(user?.updatedAt).format('LLL')}
+        </Typography>
 
         {currentTab === 'security' && <AccountSecurity />}
 
