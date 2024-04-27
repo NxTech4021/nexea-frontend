@@ -60,7 +60,7 @@ export default function Attendees() {
 
  const fetchAttendees = async () => {
   try {
-    const response = await axiosInstance.get('/attendees');
+    const response = await axiosInstance.get('/api/attendees');
     setAllAttendees(response.data);
   } catch (error) {
     // console.error('Error fetching all attendees:', error);
@@ -102,7 +102,7 @@ export default function Attendees() {
   const updateAttendees = useCallback(
     async (newRow) => {
       try {
-        await axiosInstance.patch(`/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
+        await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
         fetchAttendees();
         setSnackbar({ children: 'User successfully saved', severity: 'success' });
         return newRow;
@@ -155,7 +155,7 @@ export default function Attendees() {
     { field: 'buyerEmail', headerName: 'Buyer Email', width: 120, editable: true },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
-    { field: 'attendance', headerName: 'Attendance', editable: true },
+    { field: 'attendance', headerName: 'Attendance'},
   ];
 
   return (

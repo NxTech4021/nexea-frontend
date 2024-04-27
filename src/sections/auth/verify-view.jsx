@@ -57,7 +57,6 @@ export default function ClassicVerifyView() {
   const renderForm = (
     <Stack spacing={3} alignItems="center">
       <RHFTextField
-        value={user?.email}
         name="email"
         label="Email"
         placeholder="example@gmail.com"

@@ -42,14 +42,14 @@ const initialValues = {
   ticketType: '',
   buyerFirstName: '',
   buyerLastName: '',
-  attendance: '',
+  attendance: 'absent',
 };
 
 // eslint-disable-next-line react/prop-types
 const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
     try {
-      await axiosInstance.post('/attendee/create', {                 // Add/remove /api if it doesnt work
+      await axiosInstance.post('/api/attendee/create', {                 // Add/remove /api if it doesnt work
         firstName: values.firstName,
         lastName: values.lastName,
         name: values.name,
@@ -214,20 +214,6 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
                     error={errors.companyName}
                     fullWidth
                     helperText={errors.companyName}
-                  />
-                )}
-              </Field>
-            </Grid>
-
-            <Grid item xs={6}>
-              <Field fullWidth name="attendance">
-                {({ field, form: { errors } }) => (
-                  <TextField
-                    label="Attendance"
-                    {...field}
-                    error={errors.attendance}
-                    fullWidth
-                    helperText={errors.attendance}
                   />
                 )}
               </Field>
