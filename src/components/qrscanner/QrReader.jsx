@@ -40,18 +40,21 @@ const QrReader = () => {
     }
   }, []);
 
-  const updateAttendees = useCallback(async (id) => {
-    try {
-      await axiosInstance.patch(
-        `/api/attendee/update/${id}`,
-        { attendance: AttendanceStatus.present },
-        { headers: { 'content-type': 'application/json' } }
-      );
-      await fetchTicketDatabase();
-    } catch (error) {
-      console.error('Error updating attendance:', error);
-    }
-  }, [fetchTicketDatabase]);
+  const updateAttendees = useCallback(
+    async (id) => {
+      try {
+        await axiosInstance.patch(
+          `/api/attendee/update/${id}`,
+          { attendance: AttendanceStatus.present },
+          { headers: { 'content-type': 'application/json' } }
+        );
+        await fetchTicketDatabase();
+      } catch (error) {
+        console.error('Error updating attendance:', error);
+      }
+    },
+    [fetchTicketDatabase]
+  );
 
   // eslint-disable-next-line no-shadow
   const updateEmail = async (id, newEmail) => {
@@ -70,7 +73,9 @@ const QrReader = () => {
   const handleYesButtonClick = async () => {
     if (newEmail !== '') {
       if (scannedResult) {
-        const scannedAttendee = attendeesData.find((attendee) => attendee.ticketID === scannedResult);
+        const scannedAttendee = attendeesData.find(
+          (attendee) => attendee.ticketID === scannedResult
+        );
         if (scannedAttendee) {
           const ownerTicketID = attendeesData.filter(
             (attendee) =>
@@ -112,14 +117,15 @@ const QrReader = () => {
       if (ticketMatch) {
         setTicketMatch(false);
         if (scannedResult) {
-          const scannedAttendee = attendeesData.find((attendee) => attendee.ticketID === scannedResult);
+          const scannedAttendee = attendeesData.find(
+            (attendee) => attendee.ticketID === scannedResult
+          );
           if (scannedAttendee) {
             setScannedName(scannedAttendee.name);
             setScannedEmail(scannedAttendee.buyerEmail);
             if (
-              attendeesData.filter(
-                (attendee) => attendee.buyerEmail === scannedAttendee.buyerEmail
-              ).length > 1
+              attendeesData.filter((attendee) => attendee.buyerEmail === scannedAttendee.buyerEmail)
+                .length > 1
             ) {
               setOpenModalEmail(true);
             } else {
@@ -138,7 +144,7 @@ const QrReader = () => {
     } catch (error) {
       console.error('Error updating attendance:', error);
     } finally {
-      console.log('Verification failed')
+      console.log('Verification failed');
     }
   }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
@@ -176,7 +182,7 @@ const QrReader = () => {
         });
     }
 
-    if ((!cameraScannerActive) && scanner?.current) {
+    if (!cameraScannerActive && scanner?.current) {
       scanner.current.stop();
     }
 
@@ -216,7 +222,7 @@ const QrReader = () => {
   };
 
   const textfieldEmail = () => {
-    setShowNewEmailInput(true)
+    setShowNewEmailInput(true);
   };
 
   return (
@@ -229,27 +235,33 @@ const QrReader = () => {
           alignItems: 'center',
           minHeight: '100vh',
           bgcolor: '#cfe8fc',
-          padding: '20px', 
+          padding: '20px',
         }}
       >
         {cameraScannerActive && (
-         <Box
-         sx={{
-           display: 'flex',
-           justifyContent: 'center',
-           alignItems: 'center',
-           width: '100%',
-           maxWidth: '60%',
-           maxHeight: '100%',
-           marginBottom: '20px',
-         }}
-       >
-         <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }} />
-       </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              maxWidth: '60%',
+              maxHeight: '100%',
+              marginBottom: '20px',
+            }}
+          >
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }} />
+          </Box>
         )}
 
         {!cameraScannerActive && (
-          <Button onClick={handleCamera} variant="contained" color="primary" style={{ marginBottom: '20px' }}>
+          <Button
+            onClick={handleCamera}
+            variant="contained"
+            color="primary"
+            style={{ marginBottom: '20px' }}
+          >
             Scan QR
           </Button>
         )}
@@ -317,11 +329,7 @@ const QrReader = () => {
                 <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
                   Please confirm your data
                 </Typography>
-                <Button
-                  onClick={handleNoButtonClick}
-                  variant="contained"
-                  color="secondary"
-                >
+                <Button onClick={handleNoButtonClick} variant="contained" color="secondary">
                   Yes
                 </Button>
                 <Button
@@ -360,10 +368,9 @@ const QrReader = () => {
               </div>
             )}
           </Box>
-
         </Box>
       </Modal>
-    </Container >
+    </Container>
   );
 };
 
