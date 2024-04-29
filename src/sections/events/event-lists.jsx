@@ -69,7 +69,7 @@ const EventStatus = {
 
 const EventLists = () => {
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dataExists, setDataExist] = useState(false);
   const [users, setUsers] = useState([]); // State to store users data
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
@@ -80,6 +80,13 @@ const EventLists = () => {
       const response = await axios.get('http://localhost:3001/event/events'); // remove/add /api if it doesnt work
       const eventsArray = response.data.events;
       setEvents(eventsArray);
+
+      if (events.length > 0) {
+        setDataExist(true);
+      } else {
+        setDataExist(false);
+      };
+
       setDaysLeft(events.map(
         (event) => {
           const currentDate = new Date();
@@ -104,7 +111,6 @@ const EventLists = () => {
         const response = await fetch('http://localhost:3001/users');
         const data = await response.json();
         setUsers(data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -136,8 +142,8 @@ const EventLists = () => {
         }}
         marginTop={5}
       >
-        {loading ? (
-          <div>Loading...</div>
+        {!dataExists ? (
+          <div>No event for now</div>
         ) : (
           events.map((event, index) => (
             <Card
@@ -321,8 +327,8 @@ const EventLists = () => {
                                   required
                                 >
                                   <MenuItem value="">Select Person in Charge</MenuItem>
-                                  {loading ? (
-                                    <MenuItem disabled>Loading...</MenuItem>
+                                  {!dataExists ? (
+                                    <MenuItem disabled>No data</MenuItem>
                                   ) : (
                                     users.map((user) => (
                                       <MenuItem key={user.id} value={user.id}>
