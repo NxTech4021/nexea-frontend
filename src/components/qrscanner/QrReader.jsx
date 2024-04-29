@@ -1,9 +1,16 @@
 import QrScanner from 'qr-scanner';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
-import { Box, Modal, Button, Container, Typography } from '@mui/material';
+import { Box, Modal, Button, Container, TextField, Typography } from '@mui/material';
 
 import axiosInstance from 'src/utils/axios';
+
+const AttendanceStatus = {
+  present: 'present',
+  absent: 'absent',
+};
 
 const QrReader = () => {
   const scanner = useRef(null);
@@ -11,12 +18,15 @@ const QrReader = () => {
   const qrBoxRef = useRef(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [scannedResult, setScannedResult] = useState('');
-  const [openModal, setOpenModal] = useState(false);
+  const [scannedName, setScannedName] = useState('');
+  const [scannedEmail, setScannedEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [openModalConfirm, setOpenModalConfirm] = useState(false);
+  const [openModalEmail, setOpenModalEmail] = useState(false);
   const [ticketMatch, setTicketMatch] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
   const [attendeesData, setAttendeesData] = useState([]);
-  const [verificationInProgress, setVerificationInProgress] = useState(false);
   const [cameraScannerActive, setCameraScannerActive] = useState(false);
+  const [showNewEmailInput, setShowNewEmailInput] = useState(false);
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
@@ -35,8 +45,8 @@ const QrReader = () => {
       try {
         await axiosInstance.patch(
           `/api/attendee/update/${id}`,
-          { attendance: 'attended' },
-          { headers: { 'content-type': 'multipart/form-data' } }
+          { attendance: AttendanceStatus.present },
+          { headers: { 'content-type': 'application/json' } }
         );
         await fetchTicketDatabase();
       } catch (error) {
@@ -46,85 +56,107 @@ const QrReader = () => {
     [fetchTicketDatabase]
   );
 
-  const handleVerify = useCallback(async () => {
+  // eslint-disable-next-line no-shadow
+  const updateEmail = async (id, newEmail) => {
     try {
-      if (ticketMatch) {
-        setVerificationInProgress(true);
+      await axiosInstance.patch(
+        `/api/attendee/update/${id}`,
+        { buyerEmail: newEmail },
+        { headers: { 'content-type': 'application/json' } }
+      );
+      await fetchTicketDatabase();
+    } catch (error) {
+      console.error('Error updating email:', error);
+    }
+  };
 
-        const scannedAttendee = attendeesData.filter(
+  const handleYesButtonClick = async () => {
+    if (newEmail !== '') {
+      if (scannedResult) {
+        const scannedAttendee = attendeesData.find(
           (attendee) => attendee.ticketID === scannedResult
         );
-
-        const updateEmail = async (id, newEmail) => {
-          try {
-            await axiosInstance.patch(
-              `/api/attendee/update/${id}`,
-              { buyerEmail: newEmail },
-              { headers: { 'content-type': 'application/json' } }
-            );
-            await fetchTicketDatabase();
-          } catch (error) {
-            console.error('Error updating email:', error);
+        if (scannedAttendee) {
+          const ownerTicketID = attendeesData.filter(
+            (attendee) =>
+              attendee.buyerEmail === scannedAttendee.buyerEmail &&
+              attendee.ticketID === scannedAttendee.ticketID
+          );
+          if (ownerTicketID) {
+            await updateEmail(ownerTicketID[0].id, newEmail);
+            await updateAttendees(scannedAttendee.id);
+            toast.success(`Attendance updated successfully for ${scannedResult}`);
           }
-        };
-
-        const uniqueEmails = [...new Set(scannedAttendee.map((attendee) => attendee.buyerEmail))];
-
-        const listEmails = attendeesData
-          .filter((attendee) => uniqueEmails.includes(attendee.buyerEmail))
-          .map(({ id, buyerEmail, ticketID }) => ({ id, buyerEmail, ticketID }));
-
-        if (scannedAttendee.length > 0) {
-          if (listEmails.length === 1) {
-            await updateAttendees(scannedAttendee[0].id);
-          } else {
-            const confirmEmail = window.confirm(
-              `Multiple emails associated with this ticket. Click yes to update only your ticket ID ${scannedAttendee} attendance. Click no to update the other ticket ID's emails associated.`
-            );
-            if (!confirmEmail) {
-              const oppositeTicket = listEmails.find(({ ticketID }) => ticketID !== scannedResult);
-              if (oppositeTicket) {
-                const newEmail = prompt(
-                  `Enter new email for ticket ID ${oppositeTicket.ticketID}:`
-                );
-                if (newEmail !== null) {
-                  await updateEmail(oppositeTicket.id, newEmail);
-                }
-              } else {
-                console.error('Opposite ticket not found.');
-              }
-            } else {
-              await updateAttendees(scannedAttendee[0].id);
-            }
-          }
-          setIsVerified(true);
         } else {
           console.log('Attendee not found for scanned ticket ID:', scannedResult);
         }
       } else {
+        console.log('Scanned result is empty or ticket does not match.');
+      }
+    } else {
+      console.error('New email is required.');
+    }
+    setOpenModalEmail(false);
+  };
+
+  const handleNoButtonClick = async () => {
+    if (scannedResult) {
+      const scannedAttendee = attendeesData.find((attendee) => attendee.ticketID === scannedResult);
+      if (scannedAttendee) {
+        await updateAttendees(scannedAttendee.id);
+        toast.success(`Attendance updated successfully for ${scannedResult}`);
+      } else {
+        console.log('Attendee not found for scanned ticket ID:', scannedResult);
+      }
+    }
+    setOpenModalEmail(false);
+  };
+
+  const handleVerify = useCallback(async () => {
+    try {
+      if (ticketMatch) {
+        setTicketMatch(false);
+        if (scannedResult) {
+          const scannedAttendee = attendeesData.find(
+            (attendee) => attendee.ticketID === scannedResult
+          );
+          if (scannedAttendee) {
+            setScannedName(scannedAttendee.name);
+            setScannedEmail(scannedAttendee.buyerEmail);
+            if (
+              attendeesData.filter((attendee) => attendee.buyerEmail === scannedAttendee.buyerEmail)
+                .length > 1
+            ) {
+              setOpenModalEmail(true);
+            } else {
+              setOpenModalConfirm(true);
+              await updateAttendees(scannedAttendee.id);
+            }
+          } else {
+            console.log('Attendee not found for scanned ticket ID:', scannedResult);
+          }
+        } else {
+          console.error('Scanned result is empty.');
+        }
+      } else {
         console.log('Verification failed! Scanned QR does not match any ticket in the database.');
-        setIsVerified(false);
       }
     } catch (error) {
       console.error('Error updating attendance:', error);
     } finally {
-      setVerificationInProgress(false);
+      console.log('Verification failed');
     }
-  }, [ticketMatch, updateAttendees, attendeesData, scannedResult, fetchTicketDatabase]);
+  }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
   useEffect(() => {
     const handleScanSuccess = async (result) => {
       const scannedData = result?.data.trim();
       setScannedResult(scannedData);
-      setOpenModal(true);
-
       try {
         const { ticketIDs } = await fetchTicketDatabase();
         if (ticketIDs.includes(scannedData)) {
-          console.log('Scanned QR matches');
           setTicketMatch(true);
         } else {
-          console.log('Not match');
           setTicketMatch(false);
         }
       } catch (error) {
@@ -169,13 +201,28 @@ const QrReader = () => {
     }
   }, [cameraOn]);
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
+  useEffect(() => {
+    if (ticketMatch) {
+      handleVerify();
+    }
+  }, [handleVerify, ticketMatch]);
+
+  const handleCloseModalEmail = () => {
+    setOpenModalEmail(false);
+  };
+
+  const handleCloseModalConfirm = () => {
+    setOpenModalConfirm(false);
+    toast.success(`Attendance updated successfully for ${scannedResult}`);
   };
 
   const handleCamera = () => {
-    setOpenModal(false);
+    setOpenModalEmail(false);
     setCameraScannerActive(true);
+  };
+
+  const textfieldEmail = () => {
+    setShowNewEmailInput(true);
   };
 
   return (
@@ -186,8 +233,9 @@ const QrReader = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '100vh',
+          minHeight: '100vh',
           bgcolor: '#cfe8fc',
+          padding: '20px',
         }}
       >
         {cameraScannerActive && (
@@ -208,7 +256,12 @@ const QrReader = () => {
         )}
 
         {!cameraScannerActive && (
-          <Button onClick={handleCamera} variant="contained" color="primary">
+          <Button
+            onClick={handleCamera}
+            variant="contained"
+            color="primary"
+            style={{ marginBottom: '20px' }}
+          >
             Scan QR
           </Button>
         )}
@@ -217,10 +270,10 @@ const QrReader = () => {
       </Box>
 
       <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
+        open={openModalConfirm}
+        onClose={handleCloseModalConfirm}
+        aria-labelledby="modal-email-title"
+        aria-describedby="modal-email-description"
       >
         <Box
           sx={{
@@ -232,42 +285,89 @@ const QrReader = () => {
             bgcolor: '#f0f0f0',
             boxShadow: 24,
             p: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+            borderRadius: '8px',
+            textAlign: 'center',
           }}
         >
-          <Typography id="modal-title" variant="h6" component="h6">
-            Scanned Output
+          <Typography id="modal-email-title" variant="h6" component="h6">
+            Attendance Update Form
           </Typography>
-          <Box
-            sx={{
-              width: '100%',
-              padding: '20px',
-              backgroundColor: 'background.paper',
-              borderRadius: '10px',
-              margintTop: '10px',
-              marginBottom: '20px',
-              textAlign: 'center',
-            }}
-          >
-            <Typography id="modal-description" sx={{ mt: 2 }}>
-              {scannedResult}
-            </Typography>
+          <Typography id="modal-email-title" sx={{ mt: 2, margin: '10px' }}>
+            {scannedName} {scannedEmail}
+          </Typography>
+        </Box>
+      </Modal>
+      <Modal
+        open={openModalEmail}
+        onClose={handleCloseModalEmail}
+        aria-labelledby="modal-email-title"
+        aria-describedby="modal-email-description"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: '#f0f0f0',
+            boxShadow: 24,
+            p: 2,
+            borderRadius: '8px',
+            textAlign: 'center',
+          }}
+        >
+          <Box sx={{ mt: 2 }}>
+            {!showNewEmailInput && (
+              <div>
+                <Typography id="modal-email-title" variant="h6" component="h6">
+                  Attendance Update Form
+                </Typography>
+                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
+                  {scannedName} {scannedEmail}
+                </Typography>
+                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
+                  Please confirm your data
+                </Typography>
+                <Button onClick={handleNoButtonClick} variant="contained" color="secondary">
+                  Yes
+                </Button>
+                <Button
+                  onClick={textfieldEmail}
+                  variant="contained"
+                  color="primary"
+                  sx={{ ml: 1, margin: '10px' }}
+                >
+                  No
+                </Button>
+              </div>
+            )}
+            {showNewEmailInput && (
+              <div>
+                <Typography id="modal-email-title" variant="h6" component="h6">
+                  Change Email Form
+                </Typography>
+                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
+                  Please enter a new email
+                </Typography>
+                <TextField
+                  label="New Email"
+                  variant="outlined"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  sx={{ mt: 2, width: '100%' }}
+                />
+                <Button
+                  onClick={handleYesButtonClick}
+                  variant="contained"
+                  color="primary"
+                  sx={{ ml: 1, margin: '10px' }}
+                >
+                  Update Your Email and Attendance
+                </Button>
+              </div>
+            )}
           </Box>
-          <Button
-            size="medium"
-            variant="contained"
-            color="primary"
-            fullWidth
-            disabled={!ticketMatch || verificationInProgress}
-            onClick={handleVerify}
-          >
-            Submit Attendance
-          </Button>
-          {isVerified && <Typography>Submitted</Typography>}
-          {!isVerified && <Typography>Not yet submit</Typography>}
         </Box>
       </Modal>
     </Container>
