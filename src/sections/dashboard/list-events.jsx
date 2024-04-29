@@ -1,5 +1,6 @@
-import React from 'react';
+import dayjs from 'dayjs';
 import { Icon } from '@iconify/react';
+import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -17,12 +18,41 @@ import {
   TableContainer,
 } from '@mui/material';
 
+import { useRouter } from 'src/routes/hooks';
+
+import axios from 'src/utils/axios';
+
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import CustomPopover from 'src/components/custom-popover/custom-popover';
 
 const EventListsDashboard = () => {
+
+  const [events, setEvents] = useState([]);
+  const [status, setStatus] = useState('');
+
   const popover = usePopover();
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push('/dashboard/events');
+  };
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/event/events');
+        const eventsArray = response.data;
+        setEvents(eventsArray.events.filter(
+          (event) => event.status === "live"
+        ));
+        setStatus('Live')
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+    fetchEvent();
+  }, [events, status]);
 
   return (
     <>
@@ -33,36 +63,39 @@ const EventListsDashboard = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>PIC</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell>Event Name</TableCell>
+                  <TableCell>PIC</TableCell>
+                  <TableCell>Date</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell>Startup Event</TableCell>
-                  <TableCell>Jan 20, 2023</TableCell>
-                  <TableCell>Sara</TableCell>
-                  <TableCell>Done</TableCell>
-                  <TableCell>
-                    <IconButton onClick={popover.onOpen}>
-                      <Icon
-                        icon="pepicons-pop:dots-y"
-                        width={20}
-                        color={popover.open ? 'inherit' : 'default'}
-                      />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+                {events.map((event, index) => (
+                  <TableRow key={event.id}>
+                    <TableCell>{status}</TableCell>
+                    <TableCell>{event.name}</TableCell>
+                    <TableCell>{event.personInCharge.name}</TableCell>
+                    <TableCell>{dayjs(event.date).format('DD-MMM-YYYY')}
+                    </TableCell>
+                    <TableCell>
+                      <IconButton onClick={popover.onOpen}>
+                        <Icon
+                          icon="pepicons-pop:dots-y"
+                          width={20}
+                          color={popover.open ? 'inherit' : 'default'}
+                        />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         </Box>
         <Divider sx={{ borderStyle: 'dashed' }} />
         <Box sx={{ textAlign: 'end', px: 4, p: 3 }}>
-          <Button>View All</Button>
+          <Button onClick={handleClick}>View All</Button>
         </Box>
       </Card>
       <CustomPopover

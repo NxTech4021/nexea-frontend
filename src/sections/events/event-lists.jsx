@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 //  import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import EditIcon from '@mui/icons-material/Edit';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -73,16 +73,29 @@ const EventLists = () => {
   const [users, setUsers] = useState([]); // State to store users data
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
+  const [daysLeft, setDaysLeft] = useState([]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:3001/event/events'); // remove/add /api if it doesnt work
       const eventsArray = response.data.events;
       setEvents(eventsArray);
+      setDaysLeft(events.map(
+        (event) => {
+          const currentDate = new Date();
+          const date = new Date(event.date);
+          const formatDate = date.toLocaleDateString();
+          const splitDate = formatDate.split('/');
+          const eventDate = new Date(splitDate[2], splitDate[1] - 1, splitDate[0]);
+          const difference = eventDate.getTime() - currentDate.getTime();
+          const days = Math.ceil(difference / (1000 * 3600 * 24));
+          return days <= 0 ? '0' : days;
+        }
+      ));
     } catch (error) {
       console.error('Error fetching events:', error);
     }
-  };
+  }, [events]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -98,7 +111,7 @@ const EventLists = () => {
     };
     fetchEvents();
     fetchUsers();
-  }, []);
+  }, [fetchEvents]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -126,7 +139,7 @@ const EventLists = () => {
         {loading ? (
           <div>Loading...</div>
         ) : (
-          events.map((event) => (
+          events.map((event, index) => (
             <Card
             // sx={{
             //   width: '100%',
@@ -200,9 +213,21 @@ const EventLists = () => {
                   alignItems="center"
                   sx={{ color: 'text.disabled', minWidth: 0 }}
                 >
+                  <Iconify icon="mdi:alarm" />
+                  <Typography variant="caption" noWrap>
+                    {daysLeft[index]} days
+                  </Typography>
+                </Stack>
+                <Stack
+                  spacing={0.5}
+                  flexShrink={0}
+                  direction="row"
+                  alignItems="center"
+                  sx={{ color: 'text.disabled', minWidth: 0 }}
+                >
                   <Iconify icon="mdi:calendar" />
                   <Typography variant="caption" noWrap>
-                    {dayjs(event.date).format('LL')}
+                    {dayjs(event.date).format('DD-MMM-YYYY')}
                   </Typography>
                 </Stack>
               </Box>
@@ -339,7 +364,6 @@ const EventLists = () => {
                                   name="api"
                                   label="Tickera API"
                                   fullWidth
-                                  required
                                 />
                                 <ErrorMessage name="api" component="div" />
                               </Grid>
