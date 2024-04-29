@@ -48,7 +48,6 @@ export default function JwtLoginView() {
   });
 
   const {
-    reset,
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
@@ -59,7 +58,6 @@ export default function JwtLoginView() {
 
       router.push(returnTo || PATH_AFTER_LOGIN);
     } catch (error) {
-      reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
