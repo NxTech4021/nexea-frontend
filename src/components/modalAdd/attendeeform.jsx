@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { Grid, Button, TextField } from '@mui/material';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
@@ -49,7 +49,8 @@ const initialValues = {
 const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
     try {
-      await axiosInstance.post('/api/attendee/create', {                 // Add/remove /api if it doesnt work
+      await axiosInstance.post(endpoints.attendee.create, {
+        // Add/remove /api if it doesnt work
         firstName: values.firstName,
         lastName: values.lastName,
         name: values.name,
@@ -77,8 +78,13 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={schema}  validateOnBlur={false}
-    validateOnChange={false} >
+    <Formik
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+      validationSchema={schema}
+      validateOnBlur={false}
+      validateOnChange={false}
+    >
       {({ isSubmitting }) => (
         <Form style={{ paddingTop: '10px' }}>
           <Grid container spacing={2}>
