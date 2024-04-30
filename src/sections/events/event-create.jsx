@@ -262,7 +262,6 @@ const CreateEvent = () => {
                   name="api"
                   label="Tickera API"
                   fullWidth
-                  required
                 />
                 <ErrorMessage name="api" component="div" />
               </Grid>

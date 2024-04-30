@@ -1,5 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import CheckIcon from '@mui/icons-material/Check';
@@ -31,7 +33,7 @@ export default function Attendees() {
   //  const [checkAll, setCheckAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
- // const [filteredAttendees, setFilteredAttendees] = useState([]);
+  // const [filteredAttendees, setFilteredAttendees] = useState([]);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
@@ -43,61 +45,67 @@ export default function Attendees() {
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [allAttendees, setAllAttendees] = useState([]);
 
+  const [clickedEvent, setClickedEvent] = useState('false');
+
 
   const fetchEvents = async () => {
     try {
       const response = await axiosInstance.get('http://localhost:3001/event/events'); // Add/remove /api if it doesnt work
       const eventsArray = response.data.events;
       const options = eventsArray.map(event => ({
-        value: event.id, 
+        value: event.id,
         label: event.name,
       }));
       setMenuOptions(options);
     } catch (error) {
       console.error('Error fetching events:', error);
     }
- };
+  };
 
- const fetchAttendees = async () => {
-  try {
-    const response = await axiosInstance.get('/api/attendees');
-    setAllAttendees(response.data);
-  } catch (error) {
-    // console.error('Error fetching all attendees:', error);
-  }
-};
+  const fetchAttendees = async () => {
+    try {
+      const response = await axiosInstance.get('/api/attendees');
+      setAllAttendees(response.data);
+    } catch (error) {
+      // console.error('Error fetching all attendees:', error);
+    }
+  };
 
- const handleMenuSelect = (event) => {
+  const handleMenuSelect = (event) => {
     const eventId = event.target.value;
     const selectedEventName = menuOptions.find(option => option.value === eventId)?.label;
     setSelectedEvent(selectedEventName);
     //  setSelectedEvent(selectedEvent);
     setSelectedEventId(eventId);
-    console.log("Selected Event:", eventId);
- };
+    setClickedEvent(true);
+  };
 
- useEffect(() => {
-  if (selectedEventId) {
-     const attendeesForSelectedEvent = allAttendees.filter(attendee => attendee.eventId === selectedEventId);
-     setAttendees(attendeesForSelectedEvent);
-  }
- }, [selectedEventId, allAttendees]); 
+  useEffect(() => {
+    if (selectedEventId) {
+      const attendeesForSelectedEvent = allAttendees.filter(attendee => attendee.eventId === selectedEventId);
+      setAttendees(attendeesForSelectedEvent);
+    }
+  }, [selectedEventId, allAttendees]);
 
-   
-   
+
+
   // // Filter attendees based on the selected event ID
   // const attendeesForSelectedEvent = attendees.filter(attendee => attendee.eventId === selectedEvent);
   // setAttendees(attendeesForSelectedEvent);
- 
+
   const handleModalOpen = () => {
-    setIsModalOpen(true);
+    if (!selectedEventId) {
+      toast.warning('Please choose the event first.');
+    } else {
+      setIsModalOpen(true);
+    }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
 
-  
+
 
   const updateAttendees = useCallback(
     async (newRow) => {
@@ -155,7 +163,7 @@ export default function Attendees() {
     { field: 'buyerEmail', headerName: 'Buyer Email', width: 120, editable: true },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
-    { field: 'attendance', headerName: 'Attendance'},
+    { field: 'attendance', headerName: 'Attendance' },
   ];
 
   return (
@@ -200,9 +208,9 @@ export default function Attendees() {
             ))}
           </Select>
 
-            <Button onClick={handleModalOpen} endIcon={<Iconify icon="material-symbols:add" />}>
-              Create
-            </Button>
+          <Button onClick={handleModalOpen} endIcon={<Iconify icon="material-symbols:add" />}>
+            Create
+          </Button>
         </div>
 
         <Dialog open={isModalOpen} onClose={handleModalClose}>
@@ -213,8 +221,8 @@ export default function Attendees() {
         </Dialog>
       </Container>
 
-       {/* Attendees Table  */}
-       {selectedEvent ? (
+      {/* Attendees Table  */}
+      {selectedEvent ? (
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid
             editMode="row"
@@ -233,7 +241,7 @@ export default function Attendees() {
                 return oldRow;
               }
               return updateAttendees(newRow);
-            }}                  
+            }}
             onProcessRowUpdateError={handleProcessRowUpdateError}
             slots={{ toolbar: GridToolbar }}
             slotProps={{
@@ -255,15 +263,15 @@ export default function Attendees() {
         </Box>
       ) : (
         <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '60vh', // Adjust height as needed
-        }}
-      >
-        <Typography>Please Select an event to display Attendees</Typography>
-      </Box>
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '60vh', // Adjust height as needed
+          }}
+        >
+          <Typography>Please Select an event to display Attendees</Typography>
+        </Box>
       )}
     </>
   );
