@@ -33,6 +33,6 @@ export default defineConfig({
     origin: 'http://0.0.0.0:3031',
   },
   preview: {
-    port: 3032,
+    port: 3031,
   },
 });
