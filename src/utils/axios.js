@@ -65,4 +65,7 @@ export const endpoints = {
   users: {
     list: '/api/users',
   },
+  bodoke: {
+    test: '/api/attendees',
+  },
 };
