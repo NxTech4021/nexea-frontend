@@ -22,6 +22,8 @@ import {
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
+import { HOST_API } from 'src/config-global';
+
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
@@ -63,7 +65,7 @@ export default function Attendees() {
 
   const fetchAttendees = async () => {
     try {
-      const response = await axiosInstance.get(`${process.env.VITE_HOST_API}/api/attendees`);
+      const response = await axiosInstance.get(`${HOST_API}/api/attendees`);
       setAllAttendees(response.data);
     } catch (error) {
       console.error('Error fetching all attendees:', error);
