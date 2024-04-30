@@ -1,0 +1,26 @@
+FROM node:20-alpine3.17 as development
+
+WORKDIR /app
+
+COPY package.json ./
+
+# Install esbuild
+
+RUN yarn install
+
+RUN yarn build
+
+COPY . .
+
+EXPOSE 3031
+
+
+FROM node:20-alpine3.17 as staging
+
+WORKDIR /app
+
+COPY --from=development dist /app
+
+EXPOSE 3031
+
+CMD [ "yarn", "start" ]
