@@ -52,8 +52,8 @@ export default function Attendees() {
       const response = await axiosInstance.get(endpoints.events.list); // Add/remove /api if it doesnt work
       const eventsArray = response.data.events;
       const options = eventsArray.map((event) => ({
-        value: event.id,
         label: event.name,
+        value: event.id,
       }));
       setMenuOptions(options);
     } catch (error) {
@@ -74,7 +74,6 @@ export default function Attendees() {
     const eventId = event.target.value;
     const selectedEventName = menuOptions.find((option) => option.value === eventId)?.label;
     setSelectedEvent(selectedEventName);
-    //  setSelectedEvent(selectedEvent);
     setSelectedEventId(eventId);
     setClickedEvent(true);
   };
@@ -195,9 +194,6 @@ export default function Attendees() {
               return selected;
             }}
           >
-            <MenuItem disabled value="">
-              <em>Select Event</em>
-            </MenuItem>
             {menuOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
