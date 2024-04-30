@@ -21,8 +21,6 @@ import {
 
 import { paths } from 'src/routes/paths';
 
-// import { useResponsive } from 'src/hooks/use-responsive';
-
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useSettingsContext } from 'src/components/settings';
@@ -53,8 +51,7 @@ const CreateEvent = () => {
     const fetchUsers = async () => {
       try {
         // Fetch users data from an API
-        const response = await axiosInstance.get(endpoints.users.list);
-        console.log(response.data);
+        const response = await axiosInstance.get('https://staging.appdevelopers.my/api/users');
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
