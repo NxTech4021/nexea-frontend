@@ -36,6 +36,7 @@ import {
 import Iconify from 'src/components/iconify';
 import { popover } from 'src/theme/overrides/components/popover';
 import { fDate } from 'src/utils/format-time';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const EventStatus = {
   live: 'live',
@@ -77,7 +78,7 @@ const EventLists = () => {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:3001/event/events'); // remove/add /api if it doesnt work
+      const response = await axiosInstance.get(endpoints.events.list); // remove/add /api if it doesnt work
       const eventsArray = response.data.events;
       setEvents(eventsArray);
 
@@ -85,10 +86,10 @@ const EventLists = () => {
         setDataExist(true);
       } else {
         setDataExist(false);
-      };
+      }
 
-      setDaysLeft(events.map(
-        (event) => {
+      setDaysLeft(
+        events.map((event) => {
           const currentDate = new Date();
           const date = new Date(event.date);
           const formatDate = date.toLocaleDateString();
@@ -97,8 +98,8 @@ const EventLists = () => {
           const difference = eventDate.getTime() - currentDate.getTime();
           const days = Math.ceil(difference / (1000 * 3600 * 24));
           return days <= 0 ? '0' : days;
-        }
-      ));
+        })
+      );
     } catch (error) {
       console.error('Error fetching events:', error);
     }

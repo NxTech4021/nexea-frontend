@@ -17,7 +17,7 @@ import {
   Container,
   Typography,
   DialogTitle,
-  DialogContent
+  DialogContent,
 } from '@mui/material';
 
 import axiosInstance from 'src/utils/axios';
@@ -39,20 +39,19 @@ export default function Attendees() {
   const [snackbar, setSnackbar] = useState(null);
   const apiRef = useGridApiRef();
   const [menuOptions, setMenuOptions] = useState([]);
-  // To select the event in the menu item 
+  // To select the event in the menu item
   const [selectedEvent, setSelectedEvent] = useState('');
-  // To filter to attendees data when an event is selected 
+  // To filter to attendees data when an event is selected
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [allAttendees, setAllAttendees] = useState([]);
 
   const [clickedEvent, setClickedEvent] = useState('false');
 
-
   const fetchEvents = async () => {
     try {
       const response = await axiosInstance.get('http://localhost:3001/event/events'); // Add/remove /api if it doesnt work
       const eventsArray = response.data.events;
-      const options = eventsArray.map(event => ({
+      const options = eventsArray.map((event) => ({
         value: event.id,
         label: event.name,
       }));
@@ -73,7 +72,7 @@ export default function Attendees() {
 
   const handleMenuSelect = (event) => {
     const eventId = event.target.value;
-    const selectedEventName = menuOptions.find(option => option.value === eventId)?.label;
+    const selectedEventName = menuOptions.find((option) => option.value === eventId)?.label;
     setSelectedEvent(selectedEventName);
     //  setSelectedEvent(selectedEvent);
     setSelectedEventId(eventId);
@@ -82,12 +81,12 @@ export default function Attendees() {
 
   useEffect(() => {
     if (selectedEventId) {
-      const attendeesForSelectedEvent = allAttendees.filter(attendee => attendee.eventId === selectedEventId);
+      const attendeesForSelectedEvent = allAttendees.filter(
+        (attendee) => attendee.eventId === selectedEventId
+      );
       setAttendees(attendeesForSelectedEvent);
     }
   }, [selectedEventId, allAttendees]);
-
-
 
   // // Filter attendees based on the selected event ID
   // const attendeesForSelectedEvent = attendees.filter(attendee => attendee.eventId === selectedEvent);
@@ -105,21 +104,16 @@ export default function Attendees() {
     setIsModalOpen(false);
   };
 
-
-
-  const updateAttendees = useCallback(
-    async (newRow) => {
-      try {
-        await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
-        fetchAttendees();
-        setSnackbar({ children: 'User successfully saved', severity: 'success' });
-        return newRow;
-      } catch (error) {
-        console.error('Error fetching attendees:', error);
-      }
-    },
-    []
-  );
+  const updateAttendees = useCallback(async (newRow) => {
+    try {
+      await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
+      fetchAttendees();
+      setSnackbar({ children: 'User successfully saved', severity: 'success' });
+      return newRow;
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    }
+  }, []);
 
   const handleProcessRowUpdateError = useCallback((error) => {
     setSnackbar({ children: error.message, severity: 'error' });
@@ -173,7 +167,10 @@ export default function Attendees() {
       </Container>
 
       <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
-        <div key={selectedEventId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          key={selectedEventId}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
           {/* <div
             style={{
               marginLeft: 'auto',
@@ -216,7 +213,11 @@ export default function Attendees() {
         <Dialog open={isModalOpen} onClose={handleModalClose}>
           <DialogTitle> Add Attendee Information</DialogTitle>
           <DialogContent sx={{ py: 4 }}>
-            <CreateAttendeeForm setIsModalOpen={setIsModalOpen} fetchAttendees={fetchAttendees} selectedEventId={selectedEventId} />
+            <CreateAttendeeForm
+              setIsModalOpen={setIsModalOpen}
+              fetchAttendees={fetchAttendees}
+              selectedEventId={selectedEventId}
+            />
           </DialogContent>
         </Dialog>
       </Container>
@@ -227,7 +228,7 @@ export default function Attendees() {
           <DataGrid
             editMode="row"
             apiRef={apiRef}
-            rows={attendees.filter(attendee => attendee.eventId === selectedEventId)}// Filtered attendees based on selected event
+            rows={attendees.filter((attendee) => attendee.eventId === selectedEventId)} // Filtered attendees based on selected event
             columns={columns}
             pagination
             pageSize={5}
