@@ -20,7 +20,7 @@ import {
   DialogContent,
 } from '@mui/material';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -49,7 +49,7 @@ export default function Attendees() {
 
   const fetchEvents = async () => {
     try {
-      const response = await axiosInstance.get('http://localhost:3001/event/events'); // Add/remove /api if it doesnt work
+      const response = await axiosInstance.get(endpoints.events.list); // Add/remove /api if it doesnt work
       const eventsArray = response.data.events;
       const options = eventsArray.map((event) => ({
         value: event.id,
@@ -63,7 +63,7 @@ export default function Attendees() {
 
   const fetchAttendees = async () => {
     try {
-      const response = await axiosInstance.get('/api/attendees');
+      const response = await axiosInstance.get(endpoints.attendee.list);
       setAllAttendees(response.data);
     } catch (error) {
       // console.error('Error fetching all attendees:', error);

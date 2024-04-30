@@ -51,7 +51,7 @@ const CreateEvent = () => {
     const fetchUsers = async () => {
       try {
         // Fetch users data from an API
-        const response = await axiosInstance.get('https://staging.appdevelopers.my/api/users');
+        const response = await axiosInstance.get(endpoints.users.list);
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
