@@ -54,6 +54,7 @@ const CreateEvent = () => {
       try {
         // Fetch users data from an API
         const response = await axiosInstance.get(endpoints.users.list);
+        console.log(response.data);
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
