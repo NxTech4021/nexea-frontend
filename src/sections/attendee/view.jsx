@@ -63,7 +63,7 @@ export default function Attendees() {
 
   const fetchAttendees = async () => {
     try {
-      const response = await axiosInstance.get(endpoints.bodoke.test);
+      const response = await axiosInstance.get(endpoints.attendee.list);
       setAllAttendees(response.data);
     } catch (error) {
       console.error('Error fetching all attendees:', error);

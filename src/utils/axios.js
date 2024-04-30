@@ -58,14 +58,11 @@ export const endpoints = {
     list: '/api/event/events',
   },
   attendee: {
-    list: '/api/attendees',
     create: '/api/attendee/create',
     upload: '/api/attendee/upload',
+    list: '/api/attendees',
   },
   users: {
     list: '/api/users',
-  },
-  bodoke: {
-    test: '/api/attendees',
   },
 };
