@@ -14,7 +14,7 @@ RUN yarn build
 
 FROM development as staging
 
-COPY --from=development /app/dist .
+COPY --from=development /app/dist/ .
 
 EXPOSE 3031
 
