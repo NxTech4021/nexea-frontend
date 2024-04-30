@@ -53,8 +53,7 @@ const CreateEvent = () => {
     const fetchUsers = async () => {
       try {
         // Fetch users data from an API
-        const response = await fetch('http://localhost:3001/users');
-        const data = await response.json();
+        const data = await axiosInstance.get(endpoints.users.list);
         setUsers(data);
         setLoading(false);
       } catch (error) {
