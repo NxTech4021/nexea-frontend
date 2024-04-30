@@ -12,10 +12,10 @@ COPY . .
 
 RUN yarn build
 
-FROM development as staging
+# FROM development as staging
 
-COPY --from=development /app/dist/ .
+# COPY --from=development /app/dist/ .
 
-EXPOSE 3031
+# EXPOSE 3031
 
 CMD [ "yarn", "start" ]
