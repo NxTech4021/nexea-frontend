@@ -53,8 +53,8 @@ const CreateEvent = () => {
     const fetchUsers = async () => {
       try {
         // Fetch users data from an API
-        const data = await axiosInstance.get(endpoints.users.list);
-        setUsers(data);
+        const response = await axiosInstance.get(endpoints.users.list);
+        setUsers(response.data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching users:', error);
