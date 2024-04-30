@@ -54,7 +54,7 @@ export const endpoints = {
     search: '/api/product/search',
   },
   events: {
-    list: '/api/events/event',
+    list: '/api/event/events',
   },
   attendee: {
     create: '/api/attendee/create',
