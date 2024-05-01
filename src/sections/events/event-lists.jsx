@@ -1,10 +1,8 @@
 /* eslint-disable perfectionist/sort-imports */
 /* eslint-disable import/no-unresolved */
 
-import axios from 'axios';
 import dayjs from 'dayjs';
 //  import PropTypes from 'prop-types';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
@@ -24,6 +22,7 @@ import {
   Avatar,
   Divider,
   MenuItem,
+  Skeleton,
   TextField,
   Typography,
   IconButton,
@@ -37,6 +36,7 @@ import Iconify from 'src/components/iconify';
 import { popover } from 'src/theme/overrides/components/popover';
 import { fDate } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+import { toast } from 'react-toastify';
 
 const EventStatus = {
   live: 'live',
@@ -71,25 +71,26 @@ const EventStatus = {
 const EventLists = () => {
   const [events, setEvents] = useState([]);
   const [dataExists, setDataExist] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [users, setUsers] = useState([]); // State to store users data
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
   const [daysLeft, setDaysLeft] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(endpoints.events.list); // remove/add /api if it doesnt work
+      setLoading(true);
+      const response = await axiosInstance.get(endpoints.events.list);
+      setEvents(response.data.events);
       const eventsArray = response.data.events;
-      setEvents(eventsArray);
-
-      if (events.length > 0) {
+      if (eventsArray.length > 0) {
         setDataExist(true);
       } else {
         setDataExist(false);
       }
-
       setDaysLeft(
-        events.map((event) => {
+        eventsArray.map((event) => {
           const currentDate = new Date();
           const date = new Date(event.date);
           const formatDate = date.toLocaleDateString();
@@ -100,24 +101,30 @@ const EventLists = () => {
           return days <= 0 ? '0' : days;
         })
       );
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [events]);
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         // Fetch users data from user API
-        const response = await fetch('http://localhost:3001/users');
-        const data = await response.json();
+        const response = await axiosInstance.get(endpoints.users.list);
+        const { data } = response;
         setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
-    fetchEvents();
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
   }, [fetchEvents]);
 
   const handleClickOpen = () => {
@@ -143,330 +150,338 @@ const EventLists = () => {
         }}
         marginTop={5}
       >
-        {!dataExists ? (
-          <div>No event for now</div>
+        {loading ? (
+          <>
+            <Skeleton variant="rounded" width="400px" height="400px" />
+            <Skeleton variant="rounded" width="400px" height="400px" />
+            <Skeleton variant="rounded" width="400px" height="400px" />
+          </>
         ) : (
-          events.map((event, index) => (
-            <Card
-            // sx={{
-            //   width: '100%',
-            //   display: 'flex',
-            //   flexDirection: 'column',
-            //   justifyContent: 'space-between',
-            // }}
-            // key={event.id}
-            // variant="outlined"
-            >
-              <IconButton onClick={popover.onOpen} sx={{ position: 'absolute', top: 8, right: 8 }}>
-                <Iconify icon="eva:more-vertical-fill" />
-              </IconButton>
-              <Stack sx={{ p: 3, pb: 2 }}>
-                <Avatar
-                  alt="test"
-                  src="/logo/logo_single.svg"
-                  variant="rounded"
-                  sx={{ width: 48, height: 48, mb: 2 }}
-                />
-                <ListItemText
-                  sx={{ mb: 1 }}
-                  primary={
-                    <Typography fontWeight={900} variant="h4">
-                      {event.name}
-                    </Typography>
-                  }
-                  secondary={`Posted date: ${fDate(Date.now())}`}
-                  primaryTypographyProps={{
-                    typography: 'subtitle1',
-                  }}
-                  secondaryTypographyProps={{
-                    mt: 1,
-                    component: 'span',
-                    typography: 'caption',
-                    color: 'text.disabled',
-                  }}
-                />
+          <>
+            {events && !dataExists ? (
+              <h1>No event for now</h1>
+            ) : (
+              events.map((event, index) => (
+                <Card key={event.id}>
+                  <IconButton
+                    onClick={popover.onOpen}
+                    sx={{ position: 'absolute', top: 8, right: 8 }}
+                  >
+                    <Iconify icon="eva:more-vertical-fill" />
+                  </IconButton>
+                  <Stack sx={{ p: 3, pb: 2 }}>
+                    <Avatar
+                      alt="test"
+                      src="/logo/logo_single.svg"
+                      variant="rounded"
+                      sx={{ width: 48, height: 48, mb: 2 }}
+                    />
+                    <ListItemText
+                      sx={{ mb: 1 }}
+                      primary={
+                        <Typography fontWeight={900} variant="h4">
+                          {event.name}
+                        </Typography>
+                      }
+                      secondary={`Posted date: ${fDate(Date.now())}`}
+                      primaryTypographyProps={{
+                        typography: 'subtitle1',
+                      }}
+                      secondaryTypographyProps={{
+                        mt: 1,
+                        component: 'span',
+                        typography: 'caption',
+                        color: 'text.disabled',
+                      }}
+                    />
 
-                <Stack
-                  spacing={0.5}
-                  direction="row"
-                  alignItems="center"
-                  sx={{ color: 'primary.main', typography: 'caption' }}
-                >
-                  <Iconify width={16} icon="solar:users-group-rounded-bold" />
-                  {12} Attendees
-                </Stack>
-              </Stack>
-              <Divider sx={{ borderStyle: 'dashed' }} />
+                    <Stack
+                      spacing={0.5}
+                      direction="row"
+                      alignItems="center"
+                      sx={{ color: 'primary.main', typography: 'caption' }}
+                    >
+                      <Iconify width={16} icon="solar:users-group-rounded-bold" />
+                      {12} Attendees
+                    </Stack>
+                  </Stack>
+                  <Divider sx={{ borderStyle: 'dashed' }} />
 
-              <Box rowGap={1.5} display="grid" gridTemplateColumns="repeat(2, 1fr)" sx={{ p: 3 }}>
-                <Stack
-                  spacing={0.5}
-                  flexShrink={0}
-                  direction="row"
-                  alignItems="center"
-                  sx={{ color: 'text.disabled', minWidth: 0 }}
-                >
-                  <Iconify icon="mdi:user" />
-                  <Typography variant="caption" noWrap>
-                    {`${event.personInCharge.name
-                      .charAt(0)
-                      .toUpperCase()}${event?.personInCharge?.name.slice(1)}`}
-                  </Typography>
-                </Stack>
-                <Stack
-                  spacing={0.5}
-                  flexShrink={0}
-                  direction="row"
-                  alignItems="center"
-                  sx={{ color: 'text.disabled', minWidth: 0 }}
-                >
-                  <Iconify icon="mdi:alarm" />
-                  <Typography variant="caption" noWrap>
-                    {daysLeft[index]} days
-                  </Typography>
-                </Stack>
-                <Stack
-                  spacing={0.5}
-                  flexShrink={0}
-                  direction="row"
-                  alignItems="center"
-                  sx={{ color: 'text.disabled', minWidth: 0 }}
-                >
-                  <Iconify icon="mdi:calendar" />
-                  <Typography variant="caption" noWrap>
-                    {dayjs(event.date).format('DD-MMM-YYYY')}
-                  </Typography>
-                </Stack>
-              </Box>
-              <CardActions
-                sx={{
-                  marginTop: 0,
-                  paddingRight: 3,
-                  paddingLeft: 3,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                }}
-              >
-                {/* <Typography> {dayjs(event.date).format('DD-MMM-YYYY')} </Typography> */}
-                {/* MODAL */}
-                <Dialog
-                  sx={{
-                    '& .MuiDialog-paper': {
-                      width: { xs: '90%', sm: '50%', md: '40%' }, // Adjust width for different screen sizes
-                      maxWidth: '500px',
-                      height: 'auto', // Adjust height to auto to prevent squashing
-                      overflow: 'auto', // Enable scrolling if content overflows
-                    },
-                  }}
-                  open={open}
-                  onClose={handleClose}
-                >
-                  <DialogTitle
+                  <Box
+                    rowGap={1.5}
+                    display="grid"
+                    gridTemplateColumns="repeat(2, 1fr)"
+                    sx={{ p: 3 }}
+                  >
+                    <Stack
+                      spacing={0.5}
+                      flexShrink={0}
+                      direction="row"
+                      alignItems="center"
+                      sx={{ color: 'text.disabled', minWidth: 0 }}
+                    >
+                      <Iconify icon="mdi:user" />
+                      <Typography variant="caption" noWrap>
+                        {`${event.personInCharge.name
+                          .charAt(0)
+                          .toUpperCase()}${event?.personInCharge?.name.slice(1)}`}
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      spacing={0.5}
+                      flexShrink={0}
+                      direction="row"
+                      alignItems="center"
+                      sx={{ color: 'text.disabled', minWidth: 0 }}
+                    >
+                      <Iconify icon="mdi:alarm" />
+                      <Typography variant="caption" noWrap>
+                        {daysLeft[index]} days
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      spacing={0.5}
+                      flexShrink={0}
+                      direction="row"
+                      alignItems="center"
+                      sx={{ color: 'text.disabled', minWidth: 0 }}
+                    >
+                      <Iconify icon="mdi:calendar" />
+                      <Typography variant="caption" noWrap>
+                        {dayjs(event.date).format('DD-MMM-YYYY')}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                  <CardActions
                     sx={{
+                      marginTop: 0,
+                      paddingRight: 3,
+                      paddingLeft: 3,
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center',
+                      width: '100%',
                     }}
                   >
-                    {event.name}
-                    <IconButton onClick={handleIcon} edge="end">
-                      <EditIcon />
-                    </IconButton>
-                  </DialogTitle>
-
-                  <DialogContent dividers sx={{ padding: 2 }}>
-                    {/* Editing View */}
-                    {isEditing ? (
-                      <Formik
-                        initialValues={{
-                          name: event.name,
-                          description: event.description,
-                          date: event.date,
-                          personInCharge: event.personInCharge.name,
-                          tickera_api: event.tickera_api,
-                          status: event.status,
-                        }}
-                        onSubmit={(values, { setSubmitting }) => {
-                          axios
-                            .put(`http://localhost:3001/event/update/${event.id}`, values) // remove/add /api if it doesnt work
-                            .then((response) => {
-                              //  alert(JSON.stringify(response.data, null, 2));
-                              setSubmitting(false);
-                              fetchEvents();
-                              toast.success('Event updated successfully!');
-                            })
-                            .catch((error) => {
-                              console.error('Error updating event:', error);
-                              setSubmitting(false);
-                              toast.error('Update Failed, Try again!');
-                            });
+                    {/* <Typography> {dayjs(event.date).format('DD-MMM-YYYY')} </Typography> */}
+                    {/* MODAL */}
+                    <Dialog
+                      sx={{
+                        '& .MuiDialog-paper': {
+                          width: { xs: '90%', sm: '50%', md: '40%' }, // Adjust width for different screen sizes
+                          maxWidth: '500px',
+                          height: 'auto', // Adjust height to auto to prevent squashing
+                          overflow: 'auto', // Enable scrolling if content overflows
+                        },
+                      }}
+                      open={open}
+                      onClose={handleClose}
+                    >
+                      <DialogTitle
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                         }}
                       >
-                        {({ isSubmitting, setFieldValue, values }) => (
-                          <Form>
-                            <Grid container spacing={2}>
-                              <Grid item xs={6}>
-                                <Field
-                                  as={TextField}
-                                  type="text"
-                                  name="name"
-                                  label="Event Name"
-                                  fullWidth
-                                  required
-                                />
-                                <ErrorMessage name="name" component="div" />
-                              </Grid>
+                        {event.name}
+                        <IconButton onClick={handleIcon} edge="end">
+                          <EditIcon />
+                        </IconButton>
+                      </DialogTitle>
 
-                              <Grid item xs={6}>
-                                <Field
-                                  as={TextField}
-                                  select
-                                  name="personInCharge"
-                                  label="Person in Charge"
-                                  fullWidth
-                                  required
-                                >
-                                  <MenuItem value="">Select Person in Charge</MenuItem>
-                                  {!dataExists ? (
-                                    <MenuItem disabled>No data</MenuItem>
-                                  ) : (
-                                    users.map((user) => (
-                                      <MenuItem key={user.id} value={user.id}>
-                                        {user.name}
-                                      </MenuItem>
-                                    ))
-                                  )}
-                                </Field>
-                                <ErrorMessage name="personInCharge" component="div" />
-                              </Grid>
+                      <DialogContent dividers sx={{ padding: 2 }}>
+                        {/* Editing View */}
+                        {isEditing ? (
+                          <Formik
+                            initialValues={{
+                              name: event.name,
+                              description: event.description,
+                              date: event.date,
+                              personInCharge: event.personInCharge.id,
+                              tickera_api: event.tickera_api,
+                              status: event.status,
+                            }}
+                            onSubmit={(values, { setSubmitting }) => {
+                              axiosInstance
+                                .put(`${endpoints.events.update}/${event.id}`, values)
+                                .then((response) => {
+                                  setIsEditing(false);
+                                  setSubmitting(false);
+                                  fetchEvents();
+                                  toast.success('Event updated successfully.');
+                                })
+                                .catch((error) => {
+                                  console.error('Error updating event:', error);
+                                  setSubmitting(false);
+                                  toast.error('Update Failed, Try again!');
+                                });
+                            }}
+                          >
+                            {({ isSubmitting, setFieldValue, values }) => (
+                              <Form>
+                                <Grid container spacing={2}>
+                                  <Grid item xs={6}>
+                                    <Field
+                                      as={TextField}
+                                      type="text"
+                                      name="name"
+                                      label="Event Name"
+                                      fullWidth
+                                      required
+                                    />
+                                    <ErrorMessage name="name" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={12}>
-                                <Field
-                                  as={TextField}
-                                  type="text"
-                                  name="description"
-                                  label="Event Description"
-                                  fullWidth
-                                />
-                                <ErrorMessage name="description" component="div" />
-                              </Grid>
+                                  <Grid item xs={6}>
+                                    <Field
+                                      as={Select}
+                                      name="personInCharge"
+                                      label="Person in Charge"
+                                      fullWidth
+                                      required
+                                    >
+                                      {!dataExists ? (
+                                        <MenuItem disabled>No data</MenuItem>
+                                      ) : (
+                                        users.map((user) => (
+                                          <MenuItem key={user.id} value={user.id}>
+                                            {user.name}
+                                          </MenuItem>
+                                        ))
+                                      )}
+                                    </Field>
+                                    <ErrorMessage name="personInCharge" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                  <DatePicker
-                                    selected={values.date}
-                                    onChange={(date) => setFieldValue('date', date)}
-                                    className="form-control"
-                                    required
-                                  />
-                                </LocalizationProvider>
-                                <ErrorMessage name="date" component="div" />
-                              </Grid>
+                                  <Grid item xs={12}>
+                                    <Field
+                                      as={TextField}
+                                      type="text"
+                                      name="description"
+                                      label="Event Description"
+                                      fullWidth
+                                    />
+                                    <ErrorMessage name="description" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={6}>
-                                <Field
-                                  as={TextField}
-                                  type="text"
-                                  name="api"
-                                  label="Tickera API"
-                                  fullWidth
-                                />
-                                <ErrorMessage name="api" component="div" />
-                              </Grid>
+                                  <Grid item xs={6}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                      <DatePicker
+                                        defaultValue={dayjs(event.date)}
+                                        selected={values.date}
+                                        onChange={(date) => setFieldValue('date', date)}
+                                        className="form-control"
+                                        required
+                                      />
+                                    </LocalizationProvider>
+                                    <ErrorMessage name="date" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={8}>
-                                <Field
-                                  as={Select}
-                                  name="status"
-                                  label="Event Status"
-                                  fullWidth
-                                  required
-                                >
-                                  {Object.values(EventStatus).map((status) => (
-                                    <MenuItem key={status} value={status}>
-                                      {status}
-                                    </MenuItem>
-                                  ))}
-                                </Field>
-                                <ErrorMessage name="status" component="div" />
-                              </Grid>
+                                  <Grid item xs={6}>
+                                    <Field
+                                      as={TextField}
+                                      type="text"
+                                      name="api"
+                                      label="Tickera API"
+                                      fullWidth
+                                    />
+                                    <ErrorMessage name="api" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={6}>
-                                <Button
-                                  type="submit"
-                                  variant="contained"
-                                  color="secondary"
-                                  onClick={handleIcon}
-                                  disabled={isSubmitting}
-                                  fullWidth
-                                >
-                                  Back
-                                </Button>
-                              </Grid>
+                                  <Grid item xs={8}>
+                                    <Field
+                                      as={Select}
+                                      name="status"
+                                      label="Event Status"
+                                      fullWidth
+                                      required
+                                    >
+                                      {Object.values(EventStatus).map((status) => (
+                                        <MenuItem key={status} value={status}>
+                                          {status}
+                                        </MenuItem>
+                                      ))}
+                                    </Field>
+                                    <ErrorMessage name="status" component="div" />
+                                  </Grid>
 
-                              <Grid item xs={6}>
-                                <Button
-                                  type="submit"
-                                  variant="contained"
-                                  color="primary"
-                                  disabled={isSubmitting}
-                                  fullWidth
-                                >
-                                  Submit
-                                </Button>
-                              </Grid>
-                            </Grid>
-                          </Form>
+                                  <Grid item xs={6}>
+                                    <Button
+                                      type="submit"
+                                      variant="contained"
+                                      color="secondary"
+                                      onClick={handleIcon}
+                                      disabled={isSubmitting}
+                                      fullWidth
+                                    >
+                                      Back
+                                    </Button>
+                                  </Grid>
+
+                                  <Grid item xs={6}>
+                                    <Button
+                                      type="submit"
+                                      variant="contained"
+                                      color="primary"
+                                      disabled={isSubmitting}
+                                      fullWidth
+                                    >
+                                      Submit
+                                    </Button>
+                                  </Grid>
+                                </Grid>
+                              </Form>
+                            )}
+                          </Formik>
+                        ) : (
+                          <>
+                            <Typography gutterBottom>Description: {event.description}</Typography>
+                            <Typography gutterBottom>
+                              Person in Charge: {event.personInCharge.name}
+                            </Typography>
+                            <Typography gutterBottom>
+                              Date: {dayjs(event.date).format('DD-MMM-YYYY')}
+                            </Typography>
+                            {/* <Typography gutterBottom>
+              Tickera API: {event.tickera_api}
+            </Typography> */}
+                            <Typography gutterBottom>Status: {event.status}</Typography>
+                            <Box
+                              display="flex"
+                              flexDirection="column"
+                              justifyContent="center"
+                              alignItems="center"
+                              height="100%"
+                              marginTop={5}
+                            >
+                              <Button type="submit" variant="contained" color="primary">
+                                Open QR Scanner
+                              </Button>
+                            </Box>
+                          </>
                         )}
-                      </Formik>
-                    ) : (
-                      <>
-                        <Typography gutterBottom>Description: {event.description}</Typography>
-                        <Typography gutterBottom>
-                          Person in Charge: {event.personInCharge.name}
-                        </Typography>
-                        <Typography gutterBottom>
-                          Date: {dayjs(event.date).format('DD-MMM-YYYY')}
-                        </Typography>
-                        {/* <Typography gutterBottom>
-                        Tickera API: {event.tickera_api}
-                      </Typography> */}
-                        <Typography gutterBottom>Status: {event.status}</Typography>
-                        <Box
-                          display="flex"
-                          flexDirection="column"
-                          justifyContent="center"
-                          alignItems="center"
-                          height="100%"
-                          marginTop={5}
-                        >
-                          <Button type="submit" variant="contained" color="primary">
-                            Open QR Scanner
-                          </Button>
-                        </Box>
-                      </>
-                    )}
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose}>Close</Button>
-                  </DialogActions>
-                </Dialog>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleClose}>Close</Button>
+                      </DialogActions>
+                    </Dialog>
 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleClickOpen}
-                  fullWidth
-                  sx={{
-                    marginY: 2,
-                  }}
-                >
-                  View Event
-                </Button>
-              </CardActions>
-            </Card>
-          ))
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleClickOpen}
+                      fullWidth
+                      sx={{
+                        marginY: 2,
+                      }}
+                    >
+                      View Event
+                    </Button>
+                  </CardActions>
+                </Card>
+              ))
+            )}
+          </>
         )}
       </Box>
 

@@ -56,6 +56,7 @@ export const endpoints = {
   events: {
     create: '/api/event/create',
     list: '/api/event/events',
+    update: '/api/event/update',
   },
   attendee: {
     create: '/api/attendee/create',
