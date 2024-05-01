@@ -46,6 +46,10 @@ export const dashboardRoutes = [
         children: [
           { element: <Event />, index: true },
           { path: 'create', element: <CreateEvent /> },
+          {
+            path: 'qr/:eventId',
+            element: <QrReader />,
+          },
         ],
       },
       { path: 'attendees', element: <PageThree /> },

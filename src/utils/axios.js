@@ -54,6 +54,7 @@ export const endpoints = {
     search: '/api/product/search',
   },
   events: {
+    event: '/api/event',
     create: '/api/event/create',
     list: '/api/event/events',
     update: '/api/event/update',

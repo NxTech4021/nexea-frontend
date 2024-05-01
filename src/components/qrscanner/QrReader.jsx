@@ -1,11 +1,12 @@
 import QrScanner from 'qr-scanner';
 import { toast } from 'react-toastify';
+import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Box, Modal, Button, Container, TextField, Typography } from '@mui/material';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const AttendanceStatus = {
   present: 'present',
@@ -13,6 +14,7 @@ const AttendanceStatus = {
 };
 
 const QrReader = () => {
+  const { eventId } = useParams();
   const scanner = useRef(null);
   const videoRef = useRef(null);
   const qrBoxRef = useRef(null);
@@ -27,6 +29,8 @@ const QrReader = () => {
   const [attendeesData, setAttendeesData] = useState([]);
   const [cameraScannerActive, setCameraScannerActive] = useState(false);
   const [showNewEmailInput, setShowNewEmailInput] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [event, setEvent] = useState({});
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
@@ -148,6 +152,24 @@ const QrReader = () => {
     }
   }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
+  const handleCloseModalEmail = () => {
+    setOpenModalEmail(false);
+  };
+
+  const handleCloseModalConfirm = () => {
+    setOpenModalConfirm(false);
+    toast.success(`Attendance updated successfully for ${scannedResult}`);
+  };
+
+  const handleCamera = () => {
+    setOpenModalEmail(false);
+    setCameraScannerActive(true);
+  };
+
+  const textfieldEmail = () => {
+    setShowNewEmailInput(true);
+  };
+
   useEffect(() => {
     const handleScanSuccess = async (result) => {
       const scannedData = result?.data.trim();
@@ -207,23 +229,18 @@ const QrReader = () => {
     }
   }, [handleVerify, ticketMatch]);
 
-  const handleCloseModalEmail = () => {
-    setOpenModalEmail(false);
-  };
+  useEffect(() => {
+    const getEvent = async () => {
+      try {
+        const data = await axiosInstance.get(`${endpoints.events.event}/${eventId}`);
+        setEvent(data);
+      } catch (error) {
+        toast.error('Error fetching event in QR page');
+      }
+    };
 
-  const handleCloseModalConfirm = () => {
-    setOpenModalConfirm(false);
-    toast.success(`Attendance updated successfully for ${scannedResult}`);
-  };
-
-  const handleCamera = () => {
-    setOpenModalEmail(false);
-    setCameraScannerActive(true);
-  };
-
-  const textfieldEmail = () => {
-    setShowNewEmailInput(true);
-  };
+    getEvent();
+  }, [eventId]);
 
   return (
     <Container maxWidth="lg">
@@ -238,6 +255,7 @@ const QrReader = () => {
           padding: '20px',
         }}
       >
+        <h1>{eventId && eventId}</h1>
         {cameraScannerActive && (
           <Box
             sx={{
@@ -370,6 +388,8 @@ const QrReader = () => {
           </Box>
         </Box>
       </Modal>
+
+      {/* {event && JSON.stringify(event)} */}
     </Container>
   );
 };

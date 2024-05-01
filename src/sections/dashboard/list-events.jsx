@@ -20,14 +20,13 @@ import {
 
 import { useRouter } from 'src/routes/hooks';
 
-import axios from 'src/utils/axios';
+import axios, { endpoints } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import CustomPopover from 'src/components/custom-popover/custom-popover';
 
 const EventListsDashboard = () => {
-
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState('');
 
@@ -41,12 +40,10 @@ const EventListsDashboard = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/event/events');
+        const response = await axios.get(endpoints.events.list);
         const eventsArray = response.data;
-        setEvents(eventsArray.events.filter(
-          (event) => event.status === "live"
-        ));
-        setStatus('Live')
+        setEvents(eventsArray.events.filter((event) => event.status === 'live'));
+        setStatus('Live');
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -76,8 +73,7 @@ const EventListsDashboard = () => {
                     <TableCell>{status}</TableCell>
                     <TableCell>{event.name}</TableCell>
                     <TableCell>{event.personInCharge.name}</TableCell>
-                    <TableCell>{dayjs(event.date).format('DD-MMM-YYYY')}
-                    </TableCell>
+                    <TableCell>{dayjs(event.date).format('DD-MMM-YYYY')}</TableCell>
                     <TableCell>
                       <IconButton onClick={popover.onOpen}>
                         <Icon
