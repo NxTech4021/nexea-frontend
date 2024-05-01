@@ -18,6 +18,7 @@ const QrReader = () => {
   const scanner = useRef(null);
   const videoRef = useRef(null);
   const qrBoxRef = useRef(null);
+
   const [cameraOn, setCameraOn] = useState(false);
   const [scannedResult, setScannedResult] = useState('');
   const [scannedName, setScannedName] = useState('');
@@ -190,7 +191,7 @@ const QrReader = () => {
       scanner.current = new QrScanner(videoRef?.current, handleScanSuccess, {
         onDecodeError: (err) => console.error(err),
         preferredCamera: 'environment',
-        highlightScanRegion: true,
+        highlightScanRegion: false,
         highlightCodeOutline: true,
         overlay: qrBoxRef?.current || undefined,
       });
@@ -199,7 +200,6 @@ const QrReader = () => {
         ?.start()
         .then(() => setCameraOn(true))
         .catch((err) => {
-          console.error(err);
           setCameraOn(false);
         });
     }
@@ -246,45 +246,70 @@ const QrReader = () => {
     <Container maxWidth="lg">
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
+          height: '85vh',
           bgcolor: '#cfe8fc',
-          padding: '20px',
+          position: 'relative',
+          borderRadius: 2,
         }}
       >
-        <h1>{eventId && eventId}</h1>
         {cameraScannerActive && (
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
               width: '100%',
-              maxWidth: '60%',
-              maxHeight: '100%',
-              marginBottom: '20px',
+              height: '100%',
+              margin: 'auto',
+              textAlign: 'center',
+              position: 'relative',
             }}
           >
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video ref={videoRef} autoPlay style={{ width: '100%', height: 'auto' }} />
+            <video
+              ref={videoRef}
+              autoPlay
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 10,
+              }}
+            />
+            <Box ref={qrBoxRef}>
+              <img
+                src="/test.svg"
+                alt="qr"
+                width={256}
+                height={256}
+                style={{
+                  position: 'absolute',
+                  fill: 'none',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translateX(-50%) translateY(-50%)',
+                }}
+              />
+            </Box>
           </Box>
         )}
 
         {!cameraScannerActive && (
-          <Button
-            onClick={handleCamera}
-            variant="contained"
-            color="primary"
-            style={{ marginBottom: '20px' }}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translateX(-50%) translateY(-50%)',
+            }}
           >
-            Scan QR
-          </Button>
+            <Button
+              onClick={handleCamera}
+              variant="contained"
+              color="primary"
+              style={{ marginBottom: '20px' }}
+            >
+              Scan QR
+            </Button>
+          </Box>
         )}
-
-        <div ref={qrBoxRef} />
       </Box>
 
       <Modal
