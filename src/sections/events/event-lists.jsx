@@ -112,10 +112,9 @@ const EventLists = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Fetch users data from user API
+        // Fetch users data from an API
         const response = await axiosInstance.get(endpoints.users.list);
-        const { data } = response;
-        setUsers(data);
+        setUsers(response.data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
