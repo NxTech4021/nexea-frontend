@@ -21,6 +21,9 @@ export default function OneView() {
   const { totalAttendees } = useGetAttendees();
   const { totalEvents } = useGetEvents();
 
+  console.log('total attendees', totalAttendees);
+  console.log('Total events:', totalEvents);
+  
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Typography variant="h4"> Dashboard </Typography>

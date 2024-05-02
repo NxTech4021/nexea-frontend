@@ -1,26 +1,25 @@
 import { useState, useEffect } from 'react';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const useGetEvents = () => {
-    const [totalEvents, setTotalEvents] = useState(0);
-  
+  const [totalEvents, setTotalEvents] = useState(0);
+
+  useEffect(() => {
     const getEvents = async () => {
       try {
         console.log('Fetching total events...');
-        const response = await axiosInstance.get('');
-        setTotalEvents(response.data.length);
+        const response = await axiosInstance.get(endpoints.events.list);
+        setTotalEvents(response.data.events.length);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
     };
-  
-    useEffect(() => {
-      getEvents();
-    }, []); // Run only once on component mount
-  
-    return { totalEvents };
-  };
-  
-  export default useGetEvents;
-  
+
+    getEvents();
+  }, []); // Run only once on component mount
+
+  return { totalEvents };
+};
+
+export default useGetEvents;
