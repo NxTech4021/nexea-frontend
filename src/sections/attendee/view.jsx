@@ -118,14 +118,6 @@ export default function Attendees() {
     setSnackbar({ children: error.message, severity: 'error' });
   }, []);
 
-  // useEffect(() => {
-  //   const controller = new AbortController();
-  //   fetchEvents();
-  //   return () => {
-  //     controller.abort();
-  //   };
-  // }, []);
-
   useEffect(() => {
     fetchAttendees();
   }, []);
@@ -145,6 +137,7 @@ export default function Attendees() {
     { field: 'firstName', headerName: 'First Name', width: 120, editable: true },
     { field: 'lastName', headerName: 'Last Name', width: 120, editable: true },
     { field: 'name', headerName: 'Name', width: 120 },
+    { field: 'email', headerName: 'Email', width: 120 },
     { field: 'orderNumber', headerName: 'Order Number' },
     { field: 'ticketTotal', headerName: 'Ticket Total' },
     { field: 'discountCode', headerName: 'Discount Code' },
@@ -156,7 +149,7 @@ export default function Attendees() {
     { field: 'buyerEmail', headerName: 'Buyer Email', width: 120, editable: true },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
-    { field: 'attendance', headerName: 'Attendance' },
+    { field: 'checkedIn', headerName: 'Attendance' },
   ];
 
   return (

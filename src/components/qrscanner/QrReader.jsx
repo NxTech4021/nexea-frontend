@@ -9,8 +9,8 @@ import { Box, Modal, Button, Container, TextField, Typography } from '@mui/mater
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const AttendanceStatus = {
-  present: 'present',
-  absent: 'absent',
+  present: 'Yes',
+  absent: 'No',
 };
 
 const QrReader = () => {
@@ -36,7 +36,7 @@ const QrReader = () => {
   const fetchTicketDatabase = useCallback(async () => {
     try {
       const response = await axiosInstance.get('/api/attendees');
-      const ticketIDs = response.data.map((obj) => obj.ticketID);
+      const ticketIDs = response.data.map((obj) => obj.ticketCode);
       setAttendeesData(response.data);
       return { ticketIDs };
     } catch (error) {
@@ -45,12 +45,26 @@ const QrReader = () => {
     }
   }, []);
 
+  // eslint-disable-next-line consistent-return
+  const isCheckIn = async (id) => {
+    try {
+      const { data } = await axiosInstance.get(`/api/attendee/${id}`);
+
+      if (data?.checkedIn === 'Yes') {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return error;
+    }
+  };
+
   const updateAttendees = useCallback(
     async (id) => {
       try {
         await axiosInstance.patch(
           `/api/attendee/update/${id}`,
-          { attendance: AttendanceStatus.present },
+          { checkedIn: AttendanceStatus.present },
           { headers: { 'content-type': 'application/json' } }
         );
         await fetchTicketDatabase();
@@ -117,15 +131,19 @@ const QrReader = () => {
     setOpenModalEmail(false);
   };
 
+  // eslint-disable-next-line consistent-return
   const handleVerify = useCallback(async () => {
     try {
       if (ticketMatch) {
         setTicketMatch(false);
         if (scannedResult) {
           const scannedAttendee = attendeesData.find(
-            (attendee) => attendee.ticketID === scannedResult
+            (attendee) => attendee.ticketCode === scannedResult
           );
           if (scannedAttendee) {
+            if (await isCheckIn(scannedAttendee.id)) {
+              return toast.warn(`${scannedAttendee.name} is already checked in.`);
+            }
             setScannedName(scannedAttendee.name);
             setScannedEmail(scannedAttendee.buyerEmail);
             if (
@@ -138,18 +156,17 @@ const QrReader = () => {
               await updateAttendees(scannedAttendee.id);
             }
           } else {
-            console.log('Attendee not found for scanned ticket ID:', scannedResult);
+            return toast.error('Attendee not found for scanned ticket ID:', scannedResult);
           }
         } else {
-          console.error('Scanned result is empty.');
+          return toast.error('Scanned result is empty.');
         }
       } else {
-        console.log('Verification failed! Scanned QR does not match any ticket in the database.');
+        return toast.error('QR does not match any ticket in the database');
       }
     } catch (error) {
-      console.error('Error updating attendance:', error);
-    } finally {
-      console.log('Verification failed');
+      return toast.error('Error updating attendance:');
+      // console.error('Error updating attendance:', error);
     }
   }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
@@ -178,21 +195,23 @@ const QrReader = () => {
       try {
         const { ticketIDs } = await fetchTicketDatabase();
         if (ticketIDs.includes(scannedData)) {
-          setTicketMatch(true);
-        } else {
-          setTicketMatch(false);
+          return setTicketMatch(true);
         }
+        toast.warn('Ticket ID not found.');
+        return setTicketMatch(false);
       } catch (error) {
         console.error('Error checking ticket ID:', error);
+        return error;
       }
     };
 
     if (cameraScannerActive && videoRef?.current && !scanner.current) {
       scanner.current = new QrScanner(videoRef?.current, handleScanSuccess, {
-        onDecodeError: (err) => console.error(err),
+        // onDecodeError: (err) => console.error(err),
         preferredCamera: 'environment',
-        highlightScanRegion: false,
+        highlightScanRegion: true,
         highlightCodeOutline: true,
+        maxScansPerSecond: 1,
         overlay: qrBoxRef?.current || undefined,
       });
 
@@ -413,8 +432,6 @@ const QrReader = () => {
           </Box>
         </Box>
       </Modal>
-
-      {/* {event && JSON.stringify(event)} */}
     </Container>
   );
 };

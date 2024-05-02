@@ -98,7 +98,6 @@ const CreateEvent = () => {
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-    console.log('Uploaded file:', file);
 
     // Create a FormData object
     const formData = new FormData();
