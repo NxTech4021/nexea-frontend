@@ -71,6 +71,7 @@ const EventStatus = {
 const EventLists = () => {
   const theme = useTheme();
   const [events, setEvents] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [dataExists, setDataExist] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [users, setUsers] = useState([]); // State to store users data
@@ -81,7 +82,26 @@ const EventLists = () => {
   const [currentEvent, setCurrentEvent] = useState({});
   const navigate = useNavigate();
 
+  const ITEMS_PER_PAGE = 6;
+
+
   const openn = Boolean(anchorEl);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'live':
+        return 'primary.main'; 
+      case 'completed':
+        return 'grey.500'; 
+      case 'scheduled':
+        return 'primary.dark'; 
+      case 'postponed':
+        return 'red'; 
+      default:
+        return 'inherit'; 
+    }
+  };
+  
 
   const handleClick = (event) => {
     const { id } = event.currentTarget;
@@ -140,10 +160,29 @@ const EventLists = () => {
     fetchEvents();
   }, [fetchEvents]);
 
+  const handleDelete = (eventId) => {
+    axiosInstance
+      .delete(`${endpoints.events.delete}/${eventId}`)
+      .then((response) => {
+        fetchEvents(); // Refresh the events list after deletion
+        toast.success('Event deleted successfully.');
+      })
+      .catch((error) => {
+        console.error('Error deleting event:', error);
+        toast.error('Delete Failed, Try again!');
+      });
+  };
+  
   const handleCloseEdit = () => {
     setOpenEdit(false);
     handleClosee();
   };
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  const paginatedEvents = events.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <>
@@ -160,15 +199,15 @@ const EventLists = () => {
         {loading ? (
           <>
             <Skeleton variant="rounded" width="400px" height="400px" />
-            <Skeleton variant="rounded" width="400px" height="400px" />
-            <Skeleton variant="rounded" width="400px" height="400px" />
+            {/* <Skeleton variant="rounded" width="400px" height="400px" />
+            <Skeleton variant="rounded" width="400px" height="400px" /> */}
           </>
         ) : (
           <>
-            {events && !dataExists ? (
-              <h1>No event for now</h1>
-            ) : (
-              events.map((event, index) => (
+          {paginatedEvents && paginatedEvents.length === 0 ? (
+            <Typography>No events to display.</Typography>
+          ) : (
+            paginatedEvents.map((event, index) => (
                 <Card key={event.id}>
                   <IconButton
                     id={event.id}
@@ -222,7 +261,7 @@ const EventLists = () => {
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem onClick={() => handleDelete(event.id)}>
                       <Stack
                         direction="row"
                         alignItems="center"
@@ -468,6 +507,19 @@ const EventLists = () => {
                         {dayjs(event.date).format('DD-MMM-YYYY')}
                       </Typography>
                     </Stack>
+
+                    <Stack
+                    spacing={0.5}
+                    direction="row"
+                    alignItems="center"
+                    sx={{ 
+                      color: getStatusColor(event.status),
+                      typography: 'caption' }}
+                    >
+                      <Iconify width={16} icon="grommet-icons:status-good-small" />
+                      {event.status}
+
+                    </Stack>
                   </Box>
                 </Card>
               ))
@@ -477,12 +529,12 @@ const EventLists = () => {
       </Box>
 
       <Pagination
-        count={3}
+        count={Math.ceil(events.length / ITEMS_PER_PAGE)}
+        page={currentPage}
+        onChange={handlePageChange}
         sx={{
           mt: 8,
-          [`& .${paginationClasses.ul}`]: {
-            justifyContent: 'center',
-          },
+          justifyContent: 'center',
         }}
       />
     </>
