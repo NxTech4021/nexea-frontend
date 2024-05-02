@@ -62,7 +62,7 @@ export const endpoints = {
   attendee: {
     create: '/api/attendee/create',
     upload: '/api/attendee/upload',
-    list: '/api/attendees',
+    list: '/attendees',
   },
   users: {
     list: '/api/users',

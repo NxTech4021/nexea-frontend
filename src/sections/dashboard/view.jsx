@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
+import useGetEvents from 'src/hooks/use-get-events';
 import useGetAttendees from 'src/hooks/use-get-attendees';
 
 import { useSettingsContext } from 'src/components/settings';
@@ -18,6 +19,7 @@ import EventListsEventListsDashboard from './list-events';
 export default function OneView() {
   const settings = useSettingsContext();
   const { totalAttendees } = useGetAttendees();
+  const { totalEvents } = useGetEvents();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -32,15 +34,19 @@ export default function OneView() {
           />
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
-          <AnalyticsWidget title="Total Events" num="100" color="info" icon="mdi:events" />
+          <AnalyticsWidget 
+          title="Total Events" 
+          num={<CountUp start={0} end={totalEvents} />} 
+          color="info" 
+          icon="mdi:events" />
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
-          <AnalyticsWidget title="Total Investors" num="100" color="warning" icon="fa:users" />
+          <AnalyticsWidget title="Total Investors" num="0" color="warning" icon="fa:users" />
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget
             title="Total Startups"
-            num="100"
+            num="0"
             color="error"
             icon="streamline:startup-solid"
           />

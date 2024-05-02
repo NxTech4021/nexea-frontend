@@ -36,6 +36,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 import { toast } from 'react-toastify';
 import { paths } from 'src/routes/paths';
 import { useNavigate } from 'react-router';
+import { useTheme } from '@mui/material/styles';
 
 const EventStatus = {
   live: 'live',
@@ -68,7 +69,7 @@ const EventStatus = {
 // }));
 
 const EventLists = () => {
-  // const theme = useTheme();
+  const theme = useTheme();
   const [events, setEvents] = useState([]);
   const [dataExists, setDataExist] = useState(false);
   // eslint-disable-next-line no-unused-vars
@@ -208,7 +209,7 @@ const EventLists = () => {
                     }}
                   >
                     <MenuItem
-                      onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.id}`)}
+                      onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.name}`)}
                     >
                       <Stack direction="row" alignItems="center" gap={1}>
                         <Iconify icon="bx:qr" />
@@ -221,7 +222,7 @@ const EventLists = () => {
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
-                    {/* <MenuItem>
+                    <MenuItem>
                       <Stack
                         direction="row"
                         alignItems="center"
@@ -231,7 +232,7 @@ const EventLists = () => {
                         <Iconify icon="material-symbols:delete" />
                         <Typography variant="button">Delete</Typography>
                       </Stack>
-                    </MenuItem> */}
+                    </MenuItem>
                   </Menu>
 
                   <Dialog

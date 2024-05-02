@@ -1,5 +1,4 @@
 /* eslint-disable consistent-return */
-/* eslint-disable no-unused-vars */
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -49,7 +48,7 @@ export default function Attendees() {
 
   const fetchEvents = async () => {
     try {
-      const response = await axiosInstance.get(endpoints.events.list); // Add/remove /api if it doesnt work
+      const response = await axiosInstance.get(endpoints.events.list);
       const eventsArray = response.data.events;
       const options = eventsArray.map((event) => ({
         label: event.name,
@@ -86,10 +85,6 @@ export default function Attendees() {
       setAttendees(attendeesForSelectedEvent);
     }
   }, [selectedEventId, allAttendees]);
-
-  // // Filter attendees based on the selected event ID
-  // const attendeesForSelectedEvent = attendees.filter(attendee => attendee.eventId === selectedEvent);
-  // setAttendees(attendeesForSelectedEvent);
 
   const handleModalOpen = () => {
     if (!selectedEventId) {
