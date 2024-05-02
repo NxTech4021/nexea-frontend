@@ -65,6 +65,6 @@ export const endpoints = {
     list: '/attendees',
   },
   users: {
-    list: '/api/users',
+    list: '/users',
   },
 };
