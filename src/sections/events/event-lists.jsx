@@ -8,7 +8,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import Pagination, { paginationClasses } from '@mui/material/Pagination';
+import Pagination from '@mui/material/Pagination';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
@@ -29,6 +29,7 @@ import {
   DialogTitle,
   ListItemText,
   DialogContent,
+  DialogActions,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
@@ -79,29 +80,28 @@ const EventLists = () => {
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState();
   const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [currentEvent, setCurrentEvent] = useState({});
   const navigate = useNavigate();
 
   const ITEMS_PER_PAGE = 6;
-
 
   const openn = Boolean(anchorEl);
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'live':
-        return 'primary.main'; 
+        return 'primary.main';
       case 'completed':
-        return 'grey.500'; 
+        return 'grey.500';
       case 'scheduled':
-        return 'primary.dark'; 
+        return 'primary.dark';
       case 'postponed':
-        return 'red'; 
+        return 'red';
       default:
-        return 'inherit'; 
+        return 'inherit';
     }
   };
-  
 
   const handleClick = (event) => {
     const { id } = event.currentTarget;
@@ -172,7 +172,7 @@ const EventLists = () => {
         toast.error('Delete Failed, Try again!');
       });
   };
-  
+
   const handleCloseEdit = () => {
     setOpenEdit(false);
     handleClosee();
@@ -182,7 +182,10 @@ const EventLists = () => {
     setCurrentPage(value);
   };
 
-  const paginatedEvents = events.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginatedEvents = events.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <>
@@ -204,10 +207,10 @@ const EventLists = () => {
           </>
         ) : (
           <>
-          {paginatedEvents && paginatedEvents.length === 0 ? (
-            <Typography>No events to display.</Typography>
-          ) : (
-            paginatedEvents.map((event, index) => (
+            {paginatedEvents && paginatedEvents.length === 0 ? (
+              <Typography>No events to display.</Typography>
+            ) : (
+              paginatedEvents.map((event, index) => (
                 <Card key={event.id}>
                   <IconButton
                     id={event.id}
@@ -261,7 +264,7 @@ const EventLists = () => {
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
-                    <MenuItem onClick={() => handleDelete(event.id)}>
+                    <MenuItem onClick={() => setOpenDelete(true)}>
                       <Stack
                         direction="row"
                         alignItems="center"
@@ -274,6 +277,37 @@ const EventLists = () => {
                     </MenuItem>
                   </Menu>
 
+                  {/* Delete modal */}
+                  <Dialog
+                    open={openDelete}
+                    onClose={() => setOpenDelete(false)}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">
+                      Are you sure to delete this event ?
+                    </DialogTitle>
+                    <DialogActions>
+                      <Button onClick={() => setOpenDelete(false)} color="error">
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          // Delete function
+                          handleDelete(event.id);
+                          // Close the modal
+                          setOpenDelete(false);
+                          // Close the menu
+                          handleClosee();
+                        }}
+                        autoFocus
+                      >
+                        Agree
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+
+                  {/* Edit modal */}
                   <Dialog
                     open={openEdit}
                     onClose={handleCloseEdit}
@@ -457,7 +491,7 @@ const EventLists = () => {
                       sx={{ color: 'primary.main', typography: 'caption' }}
                     >
                       <Iconify width={16} icon="solar:users-group-rounded-bold" />
-                      {12} Attendees
+                      {event?.attendees.length} Attendees
                     </Stack>
                   </Stack>
 
@@ -509,16 +543,16 @@ const EventLists = () => {
                     </Stack>
 
                     <Stack
-                    spacing={0.5}
-                    direction="row"
-                    alignItems="center"
-                    sx={{ 
-                      color: getStatusColor(event.status),
-                      typography: 'caption' }}
+                      spacing={0.5}
+                      direction="row"
+                      alignItems="center"
+                      sx={{
+                        color: getStatusColor(event.status),
+                        typography: 'caption',
+                      }}
                     >
                       <Iconify width={16} icon="grommet-icons:status-good-small" />
                       {event.status}
-
                     </Stack>
                   </Box>
                 </Card>
@@ -528,15 +562,17 @@ const EventLists = () => {
         )}
       </Box>
 
-      <Pagination
-        count={Math.ceil(events.length / ITEMS_PER_PAGE)}
-        page={currentPage}
-        onChange={handlePageChange}
-        sx={{
-          mt: 8,
-          justifyContent: 'center',
-        }}
-      />
+      {events.length > ITEMS_PER_PAGE && (
+        <Pagination
+          count={Math.ceil(events.length / ITEMS_PER_PAGE)}
+          page={currentPage}
+          onChange={handlePageChange}
+          sx={{
+            mt: 8,
+            justifyContent: 'center',
+          }}
+        />
+      )}
     </>
   );
 };

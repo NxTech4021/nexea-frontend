@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { Icon } from '@iconify/react';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from 'react';
 
@@ -53,8 +52,6 @@ const EventListsDashboard = () => {
   useEffect(() => {
     fetchEvent();
   }, [events, status]);
-
-  
 
   // const handleDeleteEvent = async (eventId) => {
   //   try {

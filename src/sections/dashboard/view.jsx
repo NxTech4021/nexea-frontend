@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography';
 import useGetEvents from 'src/hooks/use-get-events';
 import useGetAttendees from 'src/hooks/use-get-attendees';
 
+import { formatLargeNumber } from 'src/utils/format-number';
+
 import { useSettingsContext } from 'src/components/settings';
 
 import AnalyticsWidget from './analytic-widget-summary';
@@ -21,9 +23,6 @@ export default function OneView() {
   const { totalAttendees } = useGetAttendees();
   const { totalEvents } = useGetEvents();
 
-  console.log('total attendees', totalAttendees);
-  console.log('Total events:', totalEvents);
-  
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Typography variant="h4"> Dashboard </Typography>
@@ -31,17 +30,20 @@ export default function OneView() {
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget
             title="Total Attendees"
-            num={<CountUp start={0} end={totalAttendees} />}
+            num={
+              <CountUp start={0} end={totalAttendees} formattingFn={(e) => formatLargeNumber(e)} />
+            }
             color="success"
             icon="heroicons:users-16-solid"
           />
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
-          <AnalyticsWidget 
-          title="Total Events" 
-          num={<CountUp start={0} end={totalEvents} />} 
-          color="info" 
-          icon="mdi:events" />
+          <AnalyticsWidget
+            title="Total Events"
+            num={<CountUp start={0} end={totalEvents} formattingFn={(e) => formatLargeNumber(e)} />}
+            color="info"
+            icon="mdi:events"
+          />
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget title="Total Investors" num="0" color="warning" icon="fa:users" />

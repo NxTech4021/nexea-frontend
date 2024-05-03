@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable consistent-return */
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
