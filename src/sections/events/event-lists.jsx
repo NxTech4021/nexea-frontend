@@ -38,6 +38,8 @@ import { toast } from 'react-toastify';
 import { paths } from 'src/routes/paths';
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
+import { MuiFileInput } from 'mui-file-input';
+import useUploadCSV from 'src/hooks/use-upload-csv';
 
 const EventStatus = {
   live: 'live',
@@ -74,7 +76,6 @@ const EventLists = () => {
   const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataExists, setDataExist] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [users, setUsers] = useState([]); // State to store users data
   const [daysLeft, setDaysLeft] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -83,6 +84,9 @@ const EventLists = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [currentEvent, setCurrentEvent] = useState({});
   const navigate = useNavigate();
+  const [openCSV, setOpenCSV] = useState(false);
+  const [file, setFile] = React.useState(null);
+  const { handleFileUpload } = useUploadCSV();
 
   const ITEMS_PER_PAGE = 6;
 
@@ -182,6 +186,10 @@ const EventLists = () => {
     setCurrentPage(value);
   };
 
+  const handleChangeFile = (newFile) => {
+    setFile(newFile);
+  };
+
   const paginatedEvents = events.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -250,8 +258,28 @@ const EventLists = () => {
                       horizontal: 'right',
                     }}
                   >
+                    {!currentEvent?.attendees?.length > 0 ? (
+                      <MenuItem onClick={() => setOpenCSV(true)}>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          gap={1}
+                          color={theme.palette.success.main}
+                        >
+                          <Iconify icon="material-symbols:upload" />
+                          <Typography variant="button">Upload CSV</Typography>
+                        </Stack>
+                      </MenuItem>
+                    ) : (
+                      <MenuItem disabled>
+                        <Stack direction="row" alignItems="center" gap={1}>
+                          <Iconify icon="material-symbols:upload" />
+                          <Typography variant="button">Uploaded</Typography>
+                        </Stack>
+                      </MenuItem>
+                    )}
                     <MenuItem
-                      onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.name}`)}
+                      onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.id}`)}
                     >
                       <Stack direction="row" alignItems="center" gap={1}>
                         <Iconify icon="bx:qr" />
@@ -458,6 +486,62 @@ const EventLists = () => {
                     </DialogContent>
                   </Dialog>
 
+                  {/* Upload CSV modal */}
+                  <Dialog
+                    open={openCSV}
+                    onClose={() => setOpenCSV(false)}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">Upload attendees</DialogTitle>
+                    <DialogContent>
+                      Please make sure the file are correct before uploads
+                      <MuiFileInput
+                        value={file}
+                        onChange={handleChangeFile}
+                        sx={{
+                          marginTop: 5,
+                        }}
+                        fullWidth
+                        size="medium"
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: !file && (
+                            <Stack direction="row" gap={2}>
+                              <Iconify icon="material-symbols:upload" />
+                              <Typography>Upload file</Typography>
+                            </Stack>
+                          ),
+                        }}
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button
+                        onClick={() => {
+                          setOpenCSV(false);
+                          setFile(null);
+                          handleClosee();
+                        }}
+                        color="error"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          // Upload function
+                          handleFileUpload(file, currentEvent.id);
+                          // Close the modal
+                          setOpenCSV(false);
+                          // Close the menu
+                          handleClosee();
+                        }}
+                        autoFocus
+                      >
+                        Upload
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+
                   <Stack sx={{ p: 3, pb: 2 }}>
                     <Avatar
                       alt="test"
@@ -484,14 +568,27 @@ const EventLists = () => {
                       }}
                     />
 
-                    <Stack
-                      spacing={0.5}
-                      direction="row"
-                      alignItems="center"
-                      sx={{ color: 'primary.main', typography: 'caption' }}
-                    >
-                      <Iconify width={16} icon="solar:users-group-rounded-bold" />
-                      {event?.attendees.length} Attendees
+                    <Stack direction="row" justifyContent="space-between">
+                      <Stack
+                        spacing={0.5}
+                        direction="row"
+                        alignItems="center"
+                        sx={{ color: 'primary.main', typography: 'caption' }}
+                      >
+                        <Iconify width={16} icon="solar:users-group-rounded-bold" />
+                        {event?.attendees.length} Attendees
+                      </Stack>
+                      <Stack
+                        spacing={0.5}
+                        direction="row"
+                        alignItems="center"
+                        sx={{ color: 'primary.main', typography: 'caption' }}
+                      >
+                        <Iconify width={16} icon="oui:check-in-circle-filled" />
+                        {`${
+                          event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
+                        } of ${event?.attendees.length} checked in`}
+                      </Stack>
                     </Stack>
                   </Stack>
 

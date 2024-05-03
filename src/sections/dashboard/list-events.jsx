@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from 'react';
 
@@ -7,31 +7,33 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import {
+  Chip,
   Table,
+  Stack,
   Button,
   Divider,
   TableRow,
-  MenuItem,
   TableBody,
   TableHead,
   TableCell,
-  IconButton,
   TableContainer,
 } from '@mui/material';
 
+import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-import Iconify from 'src/components/iconify';
-import { usePopover } from 'src/components/custom-popover';
-import CustomPopover from 'src/components/custom-popover/custom-popover';
+import Iconify from 'src/components/iconify/iconify';
+
+// import { usePopover } from 'src/components/custom-popover';
 
 const EventListsDashboard = () => {
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState('');
+  const navigate = useNavigate();
 
-  const popover = usePopover();
+  // const popover = usePopover();
   const router = useRouter();
 
   const handleClick = () => {
@@ -53,19 +55,6 @@ const EventListsDashboard = () => {
     fetchEvent();
   }, [events, status]);
 
-  // const handleDeleteEvent = async (eventId) => {
-  //   try {
-  //     await axiosInstance.delete(`${endpoints.events.delete}/${eventId}`);
-  //     setEvents(events.filter((event) => event.id !== eventId));
-  //     toast.success('Event deleted successfully');
-  //   } catch (error) {
-  //     console.error('Error deleting event:', error);
-  //     toast.error('Delete Failed, Please Try again!');
-  //   } finally {
-  //     popover.onClose();
-  //   }
-  // };
-
   return (
     <>
       <Card>
@@ -85,11 +74,28 @@ const EventListsDashboard = () => {
               <TableBody>
                 {events.map((event, index) => (
                   <TableRow key={event.id}>
-                    <TableCell>{status}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" gap={1} alignItems="center">
+                        <Chip
+                          label={status}
+                          color="error"
+                          icon={<Iconify icon="svg-spinners:pulse" />}
+                        />
+                      </Stack>
+                    </TableCell>
                     <TableCell>{event.name}</TableCell>
                     <TableCell>{event.personInCharge.name}</TableCell>
-                    <TableCell>{dayjs(event.date).format('DD-MMM-YYYY')}</TableCell>
+                    <TableCell>{dayjs(event.date).format('LL')}</TableCell>
                     <TableCell>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
+                      >
+                        Check in attendees
+                      </Button>
+                    </TableCell>
+                    {/* <TableCell>
                       <IconButton onClick={popover.onOpen}>
                         <Icon
                           icon="pepicons-pop:dots-y"
@@ -97,7 +103,7 @@ const EventListsDashboard = () => {
                           color={popover.open ? 'inherit' : 'default'}
                         />
                       </IconButton>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -109,7 +115,8 @@ const EventListsDashboard = () => {
           <Button onClick={handleClick}>View All</Button>
         </Box>
       </Card>
-      <CustomPopover
+
+      {/* <CustomPopover
         open={popover.open}
         onClose={popover.onClose}
         arrow="right-top"
@@ -136,7 +143,7 @@ const EventListsDashboard = () => {
           <Iconify icon="solar:trash-bin-trash-bold" />
           Delete
         </MenuItem>
-      </CustomPopover>
+      </CustomPopover> */}
     </>
   );
 };

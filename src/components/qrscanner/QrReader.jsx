@@ -35,7 +35,7 @@ const QrReader = () => {
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/api/attendees');
+      const response = await axiosInstance.get(`/api/attendee/event/${eventId}`);
       const ticketIDs = response.data.map((obj) => obj.ticketCode);
       setAttendeesData(response.data);
       return { ticketIDs };
@@ -43,7 +43,7 @@ const QrReader = () => {
       console.error('Error fetching attendees:', error);
       throw error;
     }
-  }, []);
+  }, [eventId]);
 
   // eslint-disable-next-line consistent-return
   const isCheckIn = async (id) => {

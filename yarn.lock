@@ -2541,6 +2541,13 @@ ms@2.1.2, ms@^2.1.1:
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
+mui-file-input@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/mui-file-input/-/mui-file-input-4.0.4.tgz#7cb2b82b6337b180cf3a4425dc1e44b2510a4724"
+  integrity sha512-WYzPqKg4lahGyuUIt7674vwbgW6WS1CO066ujuvCwcvr7mw7IDPPhCCJ/rD6i36OhVN2f+1hlTMX5dmsCyYxrQ==
+  dependencies:
+    pretty-bytes "^6.1.1"
+
 mui-one-time-password-input@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/mui-one-time-password-input/-/mui-one-time-password-input-2.0.2.tgz#48c44a2fe2eede8f76e0a391c2f5f79719844476"
@@ -2801,6 +2808,11 @@ prettier@^3.0.3:
   version "3.0.3"
   resolved "https://registry.npmjs.org/prettier/-/prettier-3.0.3.tgz"
   integrity sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==
+
+pretty-bytes@^6.1.1:
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-6.1.1.tgz#38cd6bb46f47afbf667c202cfc754bffd2016a3b"
+  integrity sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==
 
 prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
