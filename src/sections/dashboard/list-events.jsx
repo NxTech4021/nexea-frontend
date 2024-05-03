@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
@@ -20,7 +22,7 @@ import {
 
 import { useRouter } from 'src/routes/hooks';
 
-import axios, { endpoints } from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
@@ -37,19 +39,35 @@ const EventListsDashboard = () => {
     router.push('/dashboard/events');
   };
 
+  const fetchEvent = async () => {
+    try {
+      const response = await axiosInstance.get(endpoints.events.list);
+      const eventsArray = response.data;
+      setEvents(eventsArray.events.filter((event) => event.status === 'live'));
+      setStatus('Live');
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const response = await axios.get(endpoints.events.list);
-        const eventsArray = response.data;
-        setEvents(eventsArray.events.filter((event) => event.status === 'live'));
-        setStatus('Live');
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
     fetchEvent();
   }, [events, status]);
+
+  
+
+  // const handleDeleteEvent = async (eventId) => {
+  //   try {
+  //     await axiosInstance.delete(`${endpoints.events.delete}/${eventId}`);
+  //     setEvents(events.filter((event) => event.id !== eventId));
+  //     toast.success('Event deleted successfully');
+  //   } catch (error) {
+  //     console.error('Error deleting event:', error);
+  //     toast.error('Delete Failed, Please Try again!');
+  //   } finally {
+  //     popover.onClose();
+  //   }
+  // };
 
   return (
     <>

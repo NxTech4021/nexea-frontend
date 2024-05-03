@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const useGetAttendees = () => {
   const [totalAttendees, setTotalAttendees] = useState(0);
 
-  const getAttendees = async () => {
-    try {
-      console.log('Rendered');
-      const res = await axiosInstance.get('/api/attendees');
-      setTotalAttendees(res?.data.length);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
+    const getAttendees = async () => {
+      try {
+        console.log('Fetching total attendees...');
+        const response = await axiosInstance.get(endpoints.attendee.list);
+        setTotalAttendees(response.data.attendee.length);
+      } catch (error) {
+        console.error('Error fetching attendees:', error);
+      }
+    };
+
     getAttendees();
-  }, [totalAttendees]);
+  }, []); // Run only once on component mount
 
   return { totalAttendees };
 };

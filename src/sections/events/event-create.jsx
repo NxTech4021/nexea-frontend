@@ -39,7 +39,7 @@ const CreateEvent = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axiosInstance.get(endpoints.events.list); // remove/add /api if it doesnt work
+      const response = await axiosInstance.get(endpoints.events.list); 
       const eventsArray = response.data.events;
       setEvents(eventsArray);
     } catch (error) {
