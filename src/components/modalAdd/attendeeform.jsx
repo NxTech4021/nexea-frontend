@@ -30,10 +30,10 @@ const schema = yup
 const initialValues = {
   firstName: '',
   lastName: '',
+  name: '',
   email: '',
   phoneNumber: '',
   companyName: '',
-  name: '',
   orderNumber: '',
   ticketTotal: '',
   discountCode: '',
@@ -42,7 +42,8 @@ const initialValues = {
   ticketType: '',
   buyerFirstName: '',
   buyerLastName: '',
-  attendance: 'absent',
+  buyerEmail: '',
+  checkedIn: 'No',
 };
 
 // eslint-disable-next-line react/prop-types
@@ -54,6 +55,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
         firstName: values.firstName,
         lastName: values.lastName,
         name: values.name,
+        email: values.email,
         orderNumber: values.orderNumber,
         ticketTotal: values.ticketTotal,
         discountCode: values.discountCode,
@@ -62,10 +64,10 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
         ticketType: values.ticketType,
         buyerFirstName: values.buyerFirstName,
         buyerLastName: values.buyerLastName,
-        email: values.email,
+        buyerEmail: values.buyerEmail,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
-        attendance: values.attendance,
+        checkedIn: values.checkedIn,
         eventId: selectedEventId,
       });
       fetchAttendees();
@@ -110,6 +112,19 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
                     error={errors.lastName}
                     helperText={errors.lastName}
                     fullWidth
+                  />
+                )}
+              </Field>
+            </Grid>
+            <Grid item xs={6}>
+              <Field name="email">
+                {({ field, form: { errors } }) => (
+                  <TextField
+                    label="Email"
+                    {...field}
+                    error={errors.email}
+                    fullWidth
+                    helperText={errors.email}
                   />
                 )}
               </Field>
@@ -184,14 +199,14 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               />
             </Grid>
             <Grid item xs={6}>
-              <Field name="email">
+              <Field name="buyerEmail">
                 {({ field, form: { errors } }) => (
                   <TextField
-                    label="Email"
+                    label="Buyer Email"
                     {...field}
-                    error={errors.email}
+                    error={errors.buyerEmail}
                     fullWidth
-                    helperText={errors.email}
+                    helperText={errors.buyerEmail}
                   />
                 )}
               </Field>
