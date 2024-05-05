@@ -2,6 +2,7 @@
 import QrScanner from 'qr-scanner';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
+import { useTheme } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
@@ -15,6 +16,7 @@ const AttendanceStatus = {
 };
 
 const QrReader = () => {
+  const theme = useTheme();
   const { eventId } = useParams();
   const scanner = useRef(null);
   const videoRef = useRef(null);
@@ -29,7 +31,7 @@ const QrReader = () => {
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
 
-    // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+  // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
   // const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [openModalEmail, setOpenModalEmail] = useState(false);
   const [ticketMatch, setTicketMatch] = useState(null);
@@ -54,6 +56,7 @@ const QrReader = () => {
   const isCheckIn = async (id) => {
     try {
       // const { data } = await axiosInstance.get(`${endpoints.attendee.checkedIn}/${id}`);
+      console.log(id);
       const { data } = await axiosInstance.get(`/api/attendee/${id}`);
 
       if (data?.checkedIn === 'Yes') {
@@ -102,7 +105,6 @@ const QrReader = () => {
     }
   };
 
-
   const handleSubmitButtonClick = async () => {
     if (scannedResult) {
       const scannedAttendee = attendeesData.find(
@@ -149,7 +151,7 @@ const QrReader = () => {
             ) {
               setOpenModalEmail(true);
             } else {
-              // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+              // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
               // setOpenModalConfirm(true);
               setOpenModalEmail(true);
               await updateAttendees(scannedAttendee.id);
@@ -173,7 +175,7 @@ const QrReader = () => {
     setOpenModalEmail(false);
   };
 
-  // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+  // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
   // const handleCloseModalConfirm = () => {
   //   setOpenModalConfirm(false);
   //   toast.success(`Attendance updated successfully for ${scannedResult}`);
@@ -326,9 +328,8 @@ const QrReader = () => {
           </Box>
         )}
       </Box>
-      
-      {
-      /* Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail */
+
+      {/* Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail */
       /* <Modal
         open={openModalConfirm}
         onClose={handleCloseModalConfirm}
@@ -370,11 +371,12 @@ const QrReader = () => {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: 400,
-            bgcolor: '#f0f0f0',
+            bgcolor: theme.palette.background.paper,
             boxShadow: 24,
             p: 2,
             borderRadius: '8px',
             textAlign: 'center',
+            color: theme.palette.grey[100],
           }}
         >
           <Typography id="modal-email-title" variant="h6" component="h6">
@@ -389,6 +391,7 @@ const QrReader = () => {
             defaultValue={scannedName}
             onChange={(e) => setNewName(e.target.value)}
             sx={{ mt: 2, width: '100%' }}
+            color="primary"
           />
           <TextField
             label="Email"
@@ -406,7 +409,6 @@ const QrReader = () => {
             Submit
           </Button>
         </Box>
-
       </Modal>
     </Container>
   );

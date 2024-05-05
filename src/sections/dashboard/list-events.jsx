@@ -16,6 +16,7 @@ import {
   TableBody,
   TableHead,
   TableCell,
+  Typography,
   TableContainer,
 } from '@mui/material';
 
@@ -59,43 +60,45 @@ const EventListsDashboard = () => {
     <>
       <Card>
         <CardHeader title="Events" subheader="List of events in Nexea" />
-        <Box sx={{ mt: 3 }}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Event Name</TableCell>
-                  <TableCell>PIC</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {events.map((event, index) => (
-                  <TableRow key={event.id}>
-                    <TableCell>
-                      <Stack direction="row" gap={1} alignItems="center">
-                        <Chip
-                          label={status}
-                          color="error"
-                          icon={<Iconify icon="svg-spinners:pulse" />}
-                        />
-                      </Stack>
-                    </TableCell>
-                    <TableCell>{event.name}</TableCell>
-                    <TableCell>{event.personInCharge.name}</TableCell>
-                    <TableCell>{dayjs(event.date).format('LL')}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
-                      >
-                        Check in attendees
-                      </Button>
-                    </TableCell>
-                    {/* <TableCell>
+        {events.length > 0 ? (
+          <>
+            <Box sx={{ mt: 3 }}>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Event Name</TableCell>
+                      <TableCell>PIC</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {events.map((event, index) => (
+                      <TableRow key={event.id}>
+                        <TableCell>
+                          <Stack direction="row" gap={1} alignItems="center">
+                            <Chip
+                              label={status}
+                              color="error"
+                              icon={<Iconify icon="svg-spinners:pulse" />}
+                            />
+                          </Stack>
+                        </TableCell>
+                        <TableCell>{event.name}</TableCell>
+                        <TableCell>{event.personInCharge.name}</TableCell>
+                        <TableCell>{dayjs(event.date).format('LL')}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
+                          >
+                            Check in attendees
+                          </Button>
+                        </TableCell>
+                        {/* <TableCell>
                       <IconButton onClick={popover.onOpen}>
                         <Icon
                           icon="pepicons-pop:dots-y"
@@ -104,16 +107,22 @@ const EventListsDashboard = () => {
                         />
                       </IconButton>
                     </TableCell> */}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        <Divider sx={{ borderStyle: 'dashed' }} />
-        <Box sx={{ textAlign: 'end', px: 4, p: 3 }}>
-          <Button onClick={handleClick}>View All</Button>
-        </Box>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+            <Divider sx={{ borderStyle: 'dashed' }} />
+            <Box sx={{ textAlign: 'end', px: 4, p: 3 }}>
+              <Button onClick={handleClick}>View All</Button>
+            </Box>
+          </>
+        ) : (
+          <Stack p={5} alignItems="center">
+            <Typography>No live event today.</Typography>
+          </Stack>
+        )}
       </Card>
 
       {/* <CustomPopover

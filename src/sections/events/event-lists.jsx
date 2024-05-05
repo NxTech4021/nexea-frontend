@@ -40,6 +40,7 @@ import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
 import { MuiFileInput } from 'mui-file-input';
 import useUploadCSV from 'src/hooks/use-upload-csv';
+import { useAuthContext } from 'src/auth/hooks';
 
 const EventStatus = {
   live: 'live',
@@ -73,6 +74,7 @@ const EventStatus = {
 
 const EventLists = () => {
   const theme = useTheme();
+  const a = useAuthContext();
   const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataExists, setDataExist] = useState(false);
@@ -172,8 +174,7 @@ const EventLists = () => {
         toast.success('Event deleted successfully.');
       })
       .catch((error) => {
-        console.error('Error deleting event:', error);
-        toast.error('Delete Failed, Try again!');
+        toast.error(error?.message);
       });
   };
 
@@ -197,28 +198,31 @@ const EventLists = () => {
 
   return (
     <>
-      <Box
-        display="grid"
-        gap={3}
-        gridTemplateColumns={{
-          xs: 'repeat(1, 1fr)',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
-        }}
-        marginTop={5}
-      >
-        {loading ? (
-          <>
-            <Skeleton variant="rounded" width="400px" height="400px" />
-            {/* <Skeleton variant="rounded" width="400px" height="400px" />
-            <Skeleton variant="rounded" width="400px" height="400px" /> */}
-          </>
-        ) : (
-          <>
-            {paginatedEvents && paginatedEvents.length === 0 ? (
+      {loading ? (
+        <>
+          <Skeleton variant="rounded" width="400px" height="400px" />
+          <Skeleton variant="rounded" width="400px" height="400px" />
+          <Skeleton variant="rounded" width="400px" height="400px" />
+        </>
+      ) : (
+        <>
+          {paginatedEvents && paginatedEvents.length === 0 ? (
+            <Stack alignItems="center" gap={5} my={10}>
+              <img src="/assets/empty.svg" alt="empty" width={300} />
               <Typography>No events to display.</Typography>
-            ) : (
-              paginatedEvents.map((event, index) => (
+            </Stack>
+          ) : (
+            paginatedEvents.map((event, index) => (
+              <Box
+                display="grid"
+                gap={3}
+                gridTemplateColumns={{
+                  xs: 'repeat(1, 1fr)',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                }}
+                marginTop={5}
+              >
                 <Card key={event.id}>
                   <IconButton
                     id={event.id}
@@ -292,7 +296,10 @@ const EventLists = () => {
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
-                    <MenuItem onClick={() => setOpenDelete(true)}>
+                    <MenuItem
+                      onClick={() => setOpenDelete(true)}
+                      disabled={a.user.userType === 'normal'}
+                    >
                       <Stack
                         direction="row"
                         alignItems="center"
@@ -653,11 +660,11 @@ const EventLists = () => {
                     </Stack>
                   </Box>
                 </Card>
-              ))
-            )}
-          </>
-        )}
-      </Box>
+              </Box>
+            ))
+          )}
+        </>
+      )}
 
       {events.length > ITEMS_PER_PAGE && (
         <Pagination
