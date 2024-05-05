@@ -1,3 +1,4 @@
+/* eslint-disable no-unneeded-ternary */
 import QrScanner from 'qr-scanner';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
@@ -20,25 +21,29 @@ const QrReader = () => {
   const qrBoxRef = useRef(null);
 
   const [cameraOn, setCameraOn] = useState(false);
+
   const [scannedResult, setScannedResult] = useState('');
   const [scannedName, setScannedName] = useState('');
   const [scannedEmail, setScannedEmail] = useState('');
+
   const [newEmail, setNewEmail] = useState('');
-  const [openModalConfirm, setOpenModalConfirm] = useState(false);
+  const [newName, setNewName] = useState('');
+
+    // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+  // const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [openModalEmail, setOpenModalEmail] = useState(false);
   const [ticketMatch, setTicketMatch] = useState(null);
   const [attendeesData, setAttendeesData] = useState([]);
   const [cameraScannerActive, setCameraScannerActive] = useState(false);
-  const [showNewEmailInput, setShowNewEmailInput] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [event, setEvent] = useState({});
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`/api/attendee/event/${eventId}`);
-      const ticketIDs = response.data.map((obj) => obj.ticketCode);
+      const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${eventId}`);
+      const ticketCode = response.data.map((obj) => obj.ticketCode);
       setAttendeesData(response.data);
-      return { ticketIDs };
+      return { ticketCode };
     } catch (error) {
       console.error('Error fetching attendees:', error);
       throw error;
@@ -48,6 +53,7 @@ const QrReader = () => {
   // eslint-disable-next-line consistent-return
   const isCheckIn = async (id) => {
     try {
+      // const { data } = await axiosInstance.get(`${endpoints.attendee.checkedIn}/${id}`);
       const { data } = await axiosInstance.get(`/api/attendee/${id}`);
 
       if (data?.checkedIn === 'Yes') {
@@ -63,7 +69,7 @@ const QrReader = () => {
     async (id) => {
       try {
         await axiosInstance.patch(
-          `/api/attendee/update/${id}`,
+          `${endpoints.attendee.update}/${id}`,
           { checkedIn: AttendanceStatus.present },
           { headers: { 'content-type': 'application/json' } }
         );
@@ -76,57 +82,48 @@ const QrReader = () => {
   );
 
   // eslint-disable-next-line no-shadow
-  const updateEmail = async (id, newEmail) => {
+  const updateInfo = async (id, newEmail, newName) => {
     try {
+      const emailToUpdate = newEmail ? newEmail : scannedEmail;
+      const nameToUpdate = newName ? newName : scannedName;
       await axiosInstance.patch(
-        `/api/attendee/update/${id}`,
-        { buyerEmail: newEmail },
+        `${endpoints.attendee.update}/${id}`,
+        {
+          name: nameToUpdate,
+          email: emailToUpdate,
+        },
         { headers: { 'content-type': 'application/json' } }
       );
       await fetchTicketDatabase();
+      setNewEmail('');
+      setNewName('');
     } catch (error) {
       console.error('Error updating email:', error);
     }
   };
 
-  const handleYesButtonClick = async () => {
-    if (newEmail !== '') {
-      if (scannedResult) {
-        const scannedAttendee = attendeesData.find(
-          (attendee) => attendee.ticketID === scannedResult
-        );
-        if (scannedAttendee) {
-          const ownerTicketID = attendeesData.filter(
-            (attendee) =>
-              attendee.buyerEmail === scannedAttendee.buyerEmail &&
-              attendee.ticketID === scannedAttendee.ticketID
-          );
-          if (ownerTicketID) {
-            await updateEmail(ownerTicketID[0].id, newEmail);
-            await updateAttendees(scannedAttendee.id);
-            toast.success(`Attendance updated successfully for ${scannedResult}`);
-          }
-        } else {
-          console.log('Attendee not found for scanned ticket ID:', scannedResult);
-        }
-      } else {
-        console.log('Scanned result is empty or ticket does not match.');
-      }
-    } else {
-      console.error('New email is required.');
-    }
-    setOpenModalEmail(false);
-  };
 
-  const handleNoButtonClick = async () => {
+  const handleSubmitButtonClick = async () => {
     if (scannedResult) {
-      const scannedAttendee = attendeesData.find((attendee) => attendee.ticketID === scannedResult);
+      const scannedAttendee = attendeesData.find(
+        (attendee) => attendee.ticketCode === scannedResult
+      );
       if (scannedAttendee) {
-        await updateAttendees(scannedAttendee.id);
-        toast.success(`Attendance updated successfully for ${scannedResult}`);
+        const ownerTicketCode = attendeesData.filter(
+          (attendee) =>
+            attendee.email === scannedAttendee.email &&
+            attendee.ticketCode === scannedAttendee.ticketCode
+        );
+        if (ownerTicketCode) {
+          await updateInfo(ownerTicketCode[0].id, newEmail, newName);
+          await updateAttendees(scannedAttendee.id);
+          toast.success(`Attendance updated successfully for ${scannedResult}`);
+        }
       } else {
         console.log('Attendee not found for scanned ticket ID:', scannedResult);
       }
+    } else {
+      console.log('Scanned result is empty or ticket does not match.');
     }
     setOpenModalEmail(false);
   };
@@ -145,14 +142,16 @@ const QrReader = () => {
               return toast.warn(`${scannedAttendee.name} is already checked in.`);
             }
             setScannedName(scannedAttendee.name);
-            setScannedEmail(scannedAttendee.buyerEmail);
+            setScannedEmail(scannedAttendee.email);
             if (
               attendeesData.filter((attendee) => attendee.buyerEmail === scannedAttendee.buyerEmail)
                 .length > 1
             ) {
               setOpenModalEmail(true);
             } else {
-              setOpenModalConfirm(true);
+              // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+              // setOpenModalConfirm(true);
+              setOpenModalEmail(true);
               await updateAttendees(scannedAttendee.id);
             }
           } else {
@@ -174,18 +173,15 @@ const QrReader = () => {
     setOpenModalEmail(false);
   };
 
-  const handleCloseModalConfirm = () => {
-    setOpenModalConfirm(false);
-    toast.success(`Attendance updated successfully for ${scannedResult}`);
-  };
+  // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail 
+  // const handleCloseModalConfirm = () => {
+  //   setOpenModalConfirm(false);
+  //   toast.success(`Attendance updated successfully for ${scannedResult}`);
+  // };
 
   const handleCamera = () => {
     setOpenModalEmail(false);
     setCameraScannerActive(true);
-  };
-
-  const textfieldEmail = () => {
-    setShowNewEmailInput(true);
   };
 
   useEffect(() => {
@@ -193,8 +189,8 @@ const QrReader = () => {
       const scannedData = result?.data.trim();
       setScannedResult(scannedData);
       try {
-        const { ticketIDs } = await fetchTicketDatabase();
-        if (ticketIDs.includes(scannedData)) {
+        const { ticketCode } = await fetchTicketDatabase();
+        if (ticketCode.includes(scannedData)) {
           return setTicketMatch(true);
         }
         toast.warn('Ticket ID not found.');
@@ -330,8 +326,10 @@ const QrReader = () => {
           </Box>
         )}
       </Box>
-
-      <Modal
+      
+      {
+      /* Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail */
+      /* <Modal
         open={openModalConfirm}
         onClose={handleCloseModalConfirm}
         aria-labelledby="modal-email-title"
@@ -358,7 +356,7 @@ const QrReader = () => {
             {scannedName} {scannedEmail}
           </Typography>
         </Box>
-      </Modal>
+      </Modal> */}
       <Modal
         open={openModalEmail}
         onClose={handleCloseModalEmail}
@@ -379,58 +377,36 @@ const QrReader = () => {
             textAlign: 'center',
           }}
         >
-          <Box sx={{ mt: 2 }}>
-            {!showNewEmailInput && (
-              <div>
-                <Typography id="modal-email-title" variant="h6" component="h6">
-                  Attendance Update Form
-                </Typography>
-                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
-                  {scannedName} {scannedEmail}
-                </Typography>
-                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
-                  Please confirm your data
-                </Typography>
-                <Button onClick={handleNoButtonClick} variant="contained" color="secondary">
-                  Yes
-                </Button>
-                <Button
-                  onClick={textfieldEmail}
-                  variant="contained"
-                  color="primary"
-                  sx={{ ml: 1, margin: '10px' }}
-                >
-                  No
-                </Button>
-              </div>
-            )}
-            {showNewEmailInput && (
-              <div>
-                <Typography id="modal-email-title" variant="h6" component="h6">
-                  Change Email Form
-                </Typography>
-                <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
-                  Please enter a new email
-                </Typography>
-                <TextField
-                  label="New Email"
-                  variant="outlined"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  sx={{ mt: 2, width: '100%' }}
-                />
-                <Button
-                  onClick={handleYesButtonClick}
-                  variant="contained"
-                  color="primary"
-                  sx={{ ml: 1, margin: '10px' }}
-                >
-                  Update Your Email and Attendance
-                </Button>
-              </div>
-            )}
-          </Box>
+          <Typography id="modal-email-title" variant="h6" component="h6">
+            Attendance Update Form
+          </Typography>
+          <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
+            Please confirm your data
+          </Typography>
+          <TextField
+            label="Name"
+            variant="outlined"
+            defaultValue={scannedName}
+            onChange={(e) => setNewName(e.target.value)}
+            sx={{ mt: 2, width: '100%' }}
+          />
+          <TextField
+            label="Email"
+            variant="outlined"
+            defaultValue={scannedEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            sx={{ mt: 2, width: '100%' }}
+          />
+          <Button
+            onClick={handleSubmitButtonClick}
+            variant="contained"
+            color="primary"
+            sx={{ ml: 1, margin: '10px' }}
+          >
+            Submit
+          </Button>
         </Box>
+
       </Modal>
     </Container>
   );
