@@ -64,6 +64,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
         ticketType: values.ticketType,
         buyerFirstName: values.buyerFirstName,
         buyerLastName: values.buyerLastName,
+        buyerName: values.buyerName,
         buyerEmail: values.buyerEmail,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
@@ -116,6 +117,9 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
                 )}
               </Field>
             </Grid>
+            <Grid item xs={12}>
+              <Field fullWidth label="Name" id="name" name="name" as={TextField} />
+            </Grid>
             <Grid item xs={6}>
               <Field name="email">
                 {({ field, form: { errors } }) => (
@@ -128,9 +132,6 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
                   />
                 )}
               </Field>
-            </Grid>
-            <Grid item xs={12}>
-              <Field fullWidth label="Name" id="name" name="name" as={TextField} />
             </Grid>
             <Grid item xs={4}>
               <Field
@@ -195,6 +196,15 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
                 label="Buyer Last Name"
                 id="buyerLastName"
                 name="buyerLastName"
+                as={TextField}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Field
+                fullWidth
+                label="Buyer Name"
+                id="buyerName"
+                name="buyerName"
                 as={TextField}
               />
             </Grid>
