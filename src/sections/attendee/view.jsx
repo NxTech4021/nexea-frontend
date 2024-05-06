@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable consistent-return */
 import { toast } from 'react-toastify';
+import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -29,11 +30,10 @@ import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
 // ----------------------------------------------------------------------
 
 export default function Attendees() {
+  const { id } = useParams();
   const settings = useSettingsContext();
-  //  const [checkAll, setCheckAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
-  // const [filteredAttendees, setFilteredAttendees] = useState([]);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
@@ -133,7 +133,7 @@ export default function Attendees() {
     { field: 'firstName', headerName: 'First Name', width: 120, editable: true },
     { field: 'lastName', headerName: 'Last Name', width: 120, editable: true },
     { field: 'name', headerName: 'Name', width: 120 },
-    { field: 'email', headerName: 'Email', width: 120, editable: true  },
+    { field: 'email', headerName: 'Email', width: 120, editable: true },
     { field: 'orderNumber', headerName: 'Order Number' },
     { field: 'ticketTotal', headerName: 'Ticket Total' },
     { field: 'discountCode', headerName: 'Discount Code' },
@@ -143,7 +143,7 @@ export default function Attendees() {
     { field: 'buyerFirstName', headerName: 'Buyer First Name', width: 120, editable: true },
     { field: 'buyerLastName', headerName: 'Buyer Last Name', width: 120, editable: true },
     { field: 'buyerName', headerName: 'Buyer Name', width: 120, editable: true },
-    { field: 'buyerEmail', headerName: 'Buyer Email', width: 120},
+    { field: 'buyerEmail', headerName: 'Buyer Email', width: 120 },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
     { field: 'checkedIn', headerName: 'Attendance' },

@@ -15,6 +15,7 @@ import {
   Grid,
   Card,
   Menu,
+  Chip,
   Stack,
   Button,
   Dialog,
@@ -35,12 +36,12 @@ import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 import { toast } from 'react-toastify';
-import { paths } from 'src/routes/paths';
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
 import { MuiFileInput } from 'mui-file-input';
 import useUploadCSV from 'src/hooks/use-upload-csv';
 import { useAuthContext } from 'src/auth/hooks';
+import { paths } from 'src/routes/paths';
 
 const EventStatus = {
   live: 'live',
@@ -282,14 +283,14 @@ const EventLists = () => {
                         </Stack>
                       </MenuItem>
                     )}
-                    <MenuItem
+                    {/* <MenuItem
                       onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.id}`)}
                     >
                       <Stack direction="row" alignItems="center" gap={1}>
                         <Iconify icon="bx:qr" />
                         <Typography variant="button">QR</Typography>
                       </Stack>
-                    </MenuItem>
+                    </MenuItem> */}
                     <MenuItem onClick={() => setOpenEdit(true)}>
                       <Stack direction="row" alignItems="center" gap={1}>
                         <Iconify icon="material-symbols:edit" />
@@ -550,12 +551,22 @@ const EventLists = () => {
                   </Dialog>
 
                   <Stack sx={{ p: 3, pb: 2 }}>
-                    <Avatar
-                      alt="test"
-                      src="/logo/logo_single.svg"
-                      variant="rounded"
-                      sx={{ width: 48, height: 48, mb: 2 }}
-                    />
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Avatar
+                        alt="test"
+                        src="/logo/logo_single.svg"
+                        variant="rounded"
+                        sx={{ width: 48, height: 48, mb: 2 }}
+                      />
+                      {event.status === 'live' && (
+                        <Chip
+                          label={event.status}
+                          color="error"
+                          icon={<Iconify icon="svg-spinners:pulse" />}
+                        />
+                      )}
+                    </Stack>
+
                     <ListItemText
                       sx={{ mb: 1 }}
                       primary={
@@ -659,6 +670,27 @@ const EventLists = () => {
                       {event.status}
                     </Stack>
                   </Box>
+
+                  <Stack direction="row" alignItems="center" justifyContent="stretch" gap={3} p={2}>
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<Iconify icon="bx:qr" />}
+                      fullWidth
+                      onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
+                    >
+                      QR
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="info"
+                      startIcon={<Iconify icon="mdi:users" />}
+                      fullWidth
+                      onClick={() => navigate(`${paths.dashboard.events.attendees}/${event.id}`)}
+                    >
+                      Attendees
+                    </Button>
+                  </Stack>
                 </Card>
               </Box>
             ))

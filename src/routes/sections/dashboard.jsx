@@ -7,6 +7,7 @@ import DashboardLayout from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/components/loading-screen';
 
 import Profile from 'src/sections/profile/view';
+import EventAttendee from 'src/sections/events/event-attendee';
 
 // ----------------------------------------------------------------------
 
@@ -50,6 +51,7 @@ export const dashboardRoutes = [
             path: 'qr/:eventId',
             element: <QrReader />,
           },
+          { path: 'attendees/:id', element: <EventAttendee /> },
         ],
       },
       { path: 'attendees', element: <PageThree /> },
