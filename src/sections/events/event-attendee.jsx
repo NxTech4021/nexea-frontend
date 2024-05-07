@@ -99,6 +99,7 @@ export default function EventAttendee() {
     { field: 'buyerEmail', headerName: 'Buyer Email', width: 120 },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
+    { field: 'checkedIn', headerName: 'Check In', editable: true },
   ];
 
   return (
