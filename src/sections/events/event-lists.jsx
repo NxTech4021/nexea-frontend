@@ -589,9 +589,9 @@ const EventLists = () => {
                         variant="rounded"
                         sx={{ width: 48, height: 48, mb: 2 }}
                       />
-                      {event.status === 'live' && (
+                      {updateStatus[index] && updateStatus[index].status === 'live' && (
                         <Chip
-                          label={event.status}
+                          label={updateStatus[index] && updateStatus[index].status}
                           color="error"
                           icon={<Iconify icon="svg-spinners:pulse" />}
                         />
