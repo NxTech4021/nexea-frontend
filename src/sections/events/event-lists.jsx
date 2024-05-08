@@ -395,7 +395,7 @@ const EventLists = () => {
                         }}
                         onSubmit={(values, { setSubmitting }) => {
                           axiosInstance
-                            .put(`${endpoints.events.update}/${event.id}`, values)
+                            .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
                             .then((response) => {
                               setSubmitting(false);
                               fetchEvents();
@@ -494,7 +494,7 @@ const EventLists = () => {
                                 >
                                   {Object.values(EventStatus).map((status) => (
                                     <MenuItem key={status} value={status}>
-                                      {status}
+                                      {updateStatus[index] && updateStatus[index].status}
                                     </MenuItem>
                                   ))}
                                 </Field>
