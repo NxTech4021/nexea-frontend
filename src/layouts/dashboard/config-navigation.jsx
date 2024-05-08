@@ -42,7 +42,7 @@ const ICONS = {
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
-  qr: <QrCodeIcon />, 
+  qr: <QrCodeIcon />,
 };
 
 // ----------------------------------------------------------------------

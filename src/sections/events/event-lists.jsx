@@ -213,17 +213,17 @@ const EventLists = () => {
               <Typography>No events to display.</Typography>
             </Stack>
           ) : (
-            paginatedEvents.map((event, index) => (
-              <Box
-                display="grid"
-                gap={3}
-                gridTemplateColumns={{
-                  xs: 'repeat(1, 1fr)',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                }}
-                marginTop={5}
-              >
+            <Box
+              display="grid"
+              gap={3}
+              gridTemplateColumns={{
+                xs: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+              }}
+              marginTop={5}
+            >
+              {paginatedEvents.map((event, index) => (
                 <Card key={event.id}>
                   <IconButton
                     id={event.id}
@@ -692,8 +692,8 @@ const EventLists = () => {
                     </Button>
                   </Stack>
                 </Card>
-              </Box>
-            ))
+              ))}
+            </Box>
           )}
         </>
       )}
