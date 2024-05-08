@@ -78,6 +78,7 @@ const EventLists = () => {
   const a = useAuthContext();
   const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [updateStatus, setUpdateStatus] = useState([]);
   const [dataExists, setDataExist] = useState(false);
   const [users, setUsers] = useState([]); // State to store users data
   const [daysLeft, setDaysLeft] = useState([]);
@@ -142,13 +143,43 @@ const EventLists = () => {
           return days <= 0 ? '0' : days;
         })
       );
+
+      const updatedEvents = await Promise.all(eventsArray.map(async (event) => {
+        try {
+          const currentDate = new Date();
+          const eventDate = new Date(event.date);
+          let status = '';
+          if (eventDate.toDateString() === currentDate.toDateString()) {
+            status = EventStatus.live;
+          } else if (eventDate > currentDate) {
+            status = EventStatus.scheduled;
+          } else {
+            status = EventStatus.completed;
+          }
+          await updateEventStatus(event.id, status, event.personInCharge.id);
+          return { ...event, status };
+        } catch (error) {
+          console.error('Error updating event status:', error);
+          return event; 
+        }
+      }));
+
+      setUpdateStatus(updatedEvents);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
-    } finally {
       setLoading(false);
     }
   }, []);
+
+  const updateEventStatus = async (id, status, personInCharge) => {
+    try {
+      await axiosInstance.put(`${endpoints.events.update}/${id}`, { status, personInCharge });
+      console.log(`Event ${id} status updated to ${status}`);
+    } catch (error) {
+      console.error(`Error updating event ${id} status:`, error);
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -605,7 +636,7 @@ const EventLists = () => {
                         <Iconify width={16} icon="oui:check-in-circle-filled" />
                         {`${
                           event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
-                        } of ${event?.attendees.length} checked in`}
+                          } of ${event?.attendees.length} checked in`}
                       </Stack>
                     </Stack>
                   </Stack>
@@ -667,7 +698,7 @@ const EventLists = () => {
                       }}
                     >
                       <Iconify width={16} icon="grommet-icons:status-good-small" />
-                      {event.status}
+                      {updateStatus[index] && updateStatus[index].status}
                     </Stack>
                   </Box>
 
