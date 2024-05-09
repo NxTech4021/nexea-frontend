@@ -54,7 +54,6 @@ export function useNavData() {
       // ----------------------------------------------------------------------
       {
         items: [
-          { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
           {
             title: 'Events',
             path: paths.dashboard.events.root,
@@ -64,6 +63,7 @@ export function useNavData() {
               { title: 'Create', path: paths.dashboard.events.create },
             ],
           },
+          { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
           {
             title: 'Attendees',
             path: paths.dashboard.attendees,
