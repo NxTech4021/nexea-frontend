@@ -78,7 +78,6 @@ const EventLists = () => {
   const a = useAuthContext();
   const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [updateStatus, setUpdateStatus] = useState([]);
   const [dataExists, setDataExist] = useState(false);
   const [users, setUsers] = useState([]); // State to store users data
   const [daysLeft, setDaysLeft] = useState([]);
@@ -131,6 +130,7 @@ const EventLists = () => {
       } else {
         setDataExist(false);
       }
+
       setDaysLeft(
         eventsArray.map((event) => {
           const currentDate = new Date();
@@ -144,42 +144,12 @@ const EventLists = () => {
         })
       );
 
-      const updatedEvents = await Promise.all(eventsArray.map(async (event) => {
-        try {
-          const currentDate = new Date();
-          const eventDate = new Date(event.date);
-          let status = '';
-          if (eventDate.toDateString() === currentDate.toDateString()) {
-            status = EventStatus.live;
-          } else if (eventDate > currentDate) {
-            status = EventStatus.scheduled;
-          } else {
-            status = EventStatus.completed;
-          }
-          await updateEventStatus(event.id, status, event.personInCharge.id);
-          return { ...event, status };
-        } catch (error) {
-          console.error('Error updating event status:', error);
-          return event; 
-        }
-      }));
-
-      setUpdateStatus(updatedEvents);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
       setLoading(false);
     }
   }, []);
-
-  const updateEventStatus = async (id, status, personInCharge) => {
-    try {
-      await axiosInstance.put(`${endpoints.events.update}/${id}`, { status, personInCharge });
-      console.log(`Event ${id} status updated to ${status}`);
-    } catch (error) {
-      console.error(`Error updating event ${id} status:`, error);
-    }
-  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -493,8 +463,11 @@ const EventLists = () => {
                                   required
                                 >
                                   {Object.values(EventStatus).map((status) => (
+                                    // <MenuItem key={status} value={status}>
+                                    //   {updateStatus[index] && updateStatus[index].status}
+                                    // </MenuItem>
                                     <MenuItem key={status} value={status}>
-                                      {updateStatus[index] && updateStatus[index].status}
+                                      {status}
                                     </MenuItem>
                                   ))}
                                 </Field>
@@ -589,9 +562,9 @@ const EventLists = () => {
                         variant="rounded"
                         sx={{ width: 48, height: 48, mb: 2 }}
                       />
-                      {updateStatus[index] && updateStatus[index].status === 'live' && (
+                      {event.status === 'live' && (
                         <Chip
-                          label={updateStatus[index] && updateStatus[index].status}
+                          label={event.status}
                           color="error"
                           icon={<Iconify icon="svg-spinners:pulse" />}
                         />
@@ -634,8 +607,7 @@ const EventLists = () => {
                         sx={{ color: 'primary.main', typography: 'caption' }}
                       >
                         <Iconify width={16} icon="oui:check-in-circle-filled" />
-                        {`${
-                          event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
+                        {`${event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
                           } of ${event?.attendees.length} checked in`}
                       </Stack>
                     </Stack>
@@ -698,7 +670,8 @@ const EventLists = () => {
                       }}
                     >
                       <Iconify width={16} icon="grommet-icons:status-good-small" />
-                      {updateStatus[index] && updateStatus[index].status}
+                      {/* {updateStatus[index] && updateStatus[index].status} */}
+                      {event.status}
                     </Stack>
                   </Box>
 
