@@ -146,7 +146,7 @@ export default function Attendees() {
     { field: 'buyerEmail', headerName: 'Buyer Email', width: 120 },
     { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
     { field: 'companyName', headerName: 'Company Name', editable: true },
-    { field: 'checkedIn', headerName: 'Attendance' },
+    { field: 'checkedIn', headerName: 'Checked In', editable: true },
   ];
 
   return (
