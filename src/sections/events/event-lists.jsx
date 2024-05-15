@@ -130,6 +130,7 @@ const EventLists = () => {
       } else {
         setDataExist(false);
       }
+
       setDaysLeft(
         eventsArray.map((event) => {
           const currentDate = new Date();
@@ -142,10 +143,10 @@ const EventLists = () => {
           return days <= 0 ? '0' : days;
         })
       );
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
-    } finally {
       setLoading(false);
     }
   }, []);
@@ -364,7 +365,7 @@ const EventLists = () => {
                         }}
                         onSubmit={(values, { setSubmitting }) => {
                           axiosInstance
-                            .put(`${endpoints.events.update}/${event.id}`, values)
+                            .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
                             .then((response) => {
                               setSubmitting(false);
                               fetchEvents();
@@ -462,6 +463,9 @@ const EventLists = () => {
                                   required
                                 >
                                   {Object.values(EventStatus).map((status) => (
+                                    // <MenuItem key={status} value={status}>
+                                    //   {updateStatus[index] && updateStatus[index].status}
+                                    // </MenuItem>
                                     <MenuItem key={status} value={status}>
                                       {status}
                                     </MenuItem>
@@ -603,9 +607,8 @@ const EventLists = () => {
                         sx={{ color: 'primary.main', typography: 'caption' }}
                       >
                         <Iconify width={16} icon="oui:check-in-circle-filled" />
-                        {`${
-                          event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
-                        } of ${event?.attendees.length} checked in`}
+                        {`${event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
+                          } of ${event?.attendees.length} checked in`}
                       </Stack>
                     </Stack>
                   </Stack>
@@ -667,6 +670,7 @@ const EventLists = () => {
                       }}
                     >
                       <Iconify width={16} icon="grommet-icons:status-good-small" />
+                      {/* {updateStatus[index] && updateStatus[index].status} */}
                       {event.status}
                     </Stack>
                   </Box>
