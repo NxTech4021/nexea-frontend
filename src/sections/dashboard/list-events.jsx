@@ -58,7 +58,11 @@ const EventListsDashboard = () => {
 
   return (
     <>
-      <Card>
+      <Card
+        sx={{
+          bgcolor: (theme) => theme.palette.background.paper,
+        }}
+      >
         <CardHeader title="Events" subheader="List of events in Nexea" />
         {events.length > 0 ? (
           <>

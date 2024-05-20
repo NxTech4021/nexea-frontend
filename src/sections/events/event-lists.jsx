@@ -169,6 +169,7 @@ const EventLists = () => {
   }, [fetchEvents]);
 
   const handleDelete = (eventId) => {
+    alert(eventId);
     axiosInstance
       .delete(`${endpoints.events.delete}/${eventId}`)
       .then((response) => {
@@ -607,8 +608,9 @@ const EventLists = () => {
                         sx={{ color: 'primary.main', typography: 'caption' }}
                       >
                         <Iconify width={16} icon="oui:check-in-circle-filled" />
-                        {`${event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
-                          } of ${event?.attendees.length} checked in`}
+                        {`${
+                          event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
+                        } of ${event?.attendees.length} checked in`}
                       </Stack>
                     </Stack>
                   </Stack>
