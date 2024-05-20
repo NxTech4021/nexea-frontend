@@ -81,26 +81,13 @@ export default function EventAttendee() {
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-    { field: 'id', headerName: 'ID', width: 50 },
-    { field: 'firstName', headerName: 'First Name', width: 120, editable: true },
-    { field: 'lastName', headerName: 'Last Name', width: 120, editable: true },
-    { field: 'name', headerName: 'Name', width: 120 },
-    { field: 'email', headerName: 'Email', width: 120, editable: true },
-    { field: 'discountCode', headerName: 'Discount Code' },
-    { field: 'ticketCode', headerName: 'Ticket Code' },
-    { field: 'checkedIn', headerName: 'Attendance' },
-    { field: 'orderNumber', headerName: 'Order Number' },
-    { field: 'ticketTotal', headerName: 'Ticket Total' },
-    { field: 'ticketID', headerName: 'Ticket ID' },
-    { field: 'ticketType', headerName: 'Ticket Type' },
-    { field: 'buyerFirstName', headerName: 'Buyer First Name', width: 120, editable: true },
-    { field: 'buyerLastName', headerName: 'Buyer Last Name', width: 120, editable: true },
-    { field: 'buyerName', headerName: 'Buyer Name', width: 120, editable: true },
-    { field: 'buyerEmail', headerName: 'Buyer Email', width: 120 },
-    { field: 'phoneNumber', headerName: 'Phone Number', editable: true },
-    { field: 'companyName', headerName: 'Company Name', editable: true },
-    { field: 'checkedIn', headerName: 'Check In', editable: true },
-  ];
+      { field: 'name', headerName: 'Name', width: 200, editable: true },
+      { field: 'email', headerName: 'Email', width: 200, editable: true },
+      { field: 'orderNumber', headerName: 'Order Number', width: 200 },
+      { field: 'discountCode', headerName: 'Discount Code', width: 200 },
+      { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
+      { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
+    ];
 
   return (
     <>

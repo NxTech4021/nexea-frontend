@@ -129,12 +129,12 @@ export default function Attendees() {
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-    { field: 'name', headerName: 'Name', width: 120, editable: true },
-    { field: 'email', headerName: 'Email', width: 120, editable: true },
-    { field: 'orderNumber', headerName: 'Order Number' },
-    { field: 'discountCode', headerName: 'Discount Code' },
-    { field: 'ticketCode', headerName: 'Ticket Code' },
-    { field: 'checkedIn', headerName: 'Checked In', editable: true },
+    { field: 'name', headerName: 'Name', width: 200, editable: true },
+    { field: 'email', headerName: 'Email', width: 200, editable: true },
+    { field: 'orderNumber', headerName: 'Order Number', width: 200 },
+    { field: 'discountCode', headerName: 'Discount Code', width: 200 },
+    { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
+    { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
   ];
 
   return (
