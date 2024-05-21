@@ -169,7 +169,6 @@ const EventLists = () => {
   }, [fetchEvents]);
 
   const handleDelete = (eventId) => {
-    alert(eventId);
     axiosInstance
       .delete(`${endpoints.events.delete}/${eventId}`)
       .then((response) => {
