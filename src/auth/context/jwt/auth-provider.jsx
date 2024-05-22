@@ -38,6 +38,18 @@ const reducer = (state, action) => {
       user: action.payload.user,
     };
   }
+  if (action.type === 'FORGOTPASSWORD') {
+    return {
+      ...state,
+      user: action.payload.user,
+    };
+  }
+  if (action.type === 'NEWPASSWORD') {
+    return {
+      ...state,
+      user: action.payload.user,
+    };
+  }
   if (action.type === 'LOGOUT') {
     return {
       ...state,
@@ -150,6 +162,18 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  const forgotPassword = useCallback(async (email) => {
+    const response = await axios.post(endpoints.auth.forgetPassword, { email });
+    const { user } = response.data;
+    return user;
+  }, []);
+
+  const resetPassword = useCallback(async (email, code, password) => {
+    const response = await axios.post(endpoints.auth.resetPassword, { email, code, password });
+    const { user } = response.data;
+    return user;
+  }, []);
+
   const verify = useCallback(async (email, code) => {
     const data = {
       email,
@@ -187,8 +211,10 @@ export function AuthProvider({ children }) {
       register,
       logout,
       verify,
+      forgotPassword,
+      resetPassword,
     }),
-    [login, logout, register, verify, state.user, status]
+    [login, logout, register, verify, state.user, status, forgotPassword, resetPassword]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

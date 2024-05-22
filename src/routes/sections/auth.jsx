@@ -13,6 +13,8 @@ import { SplashScreen } from 'src/components/loading-screen';
 const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
 const JwtRegisterPage = lazy(() => import('src/pages/auth/jwt/register'));
 const VerifyClassicPage = lazy(() => import('src/pages/auth/verify'));
+const NewPasswordPage = lazy(() => import('src/pages/auth/new-password'));
+const ForgotPasswordPage = lazy(() => import('src/pages/auth/forgot-password'));
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +42,22 @@ const authJwt = {
         <AuthClassicLayout title="Register for an account">
           <JwtRegisterPage />
         </AuthClassicLayout>
+      ),
+    },
+    {
+      path: 'forgot-password',
+      element: (
+        <CompactLayout>
+          <ForgotPasswordPage />
+        </CompactLayout>
+      ),
+    },
+    {
+      path: 'new-password',
+      element: (
+        <CompactLayout>
+          <NewPasswordPage />
+        </CompactLayout>
       ),
     },
     {
