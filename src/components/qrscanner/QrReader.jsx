@@ -154,7 +154,7 @@ const QrReader = () => {
               // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
               // setOpenModalConfirm(true);
               setOpenModalEmail(true);
-              await updateAttendees(scannedAttendee.id);
+              // await updateAttendees(scannedAttendee.id);
             }
           } else {
             return toast.error('Attendee not found for scanned ticket ID:', scannedResult);
@@ -169,7 +169,7 @@ const QrReader = () => {
       return toast.error('Error updating attendance:');
       // console.error('Error updating attendance:', error);
     }
-  }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
+  }, [ticketMatch, scannedResult, attendeesData]);
 
   const handleCloseModalEmail = () => {
     setOpenModalEmail(false);
@@ -267,6 +267,7 @@ const QrReader = () => {
           bgcolor: '#cfe8fc',
           position: 'relative',
           borderRadius: 2,
+          width: '100%',
         }}
       >
         {cameraScannerActive && (
@@ -370,7 +371,7 @@ const QrReader = () => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            width: 350,
             bgcolor: theme.palette.background.paper,
             boxShadow: 24,
             p: 2,
@@ -379,10 +380,19 @@ const QrReader = () => {
             color: theme.palette.grey[100],
           }}
         >
-          <Typography id="modal-email-title" variant="h6" component="h6">
+          <Typography
+            id="modal-email-title"
+            variant="h6"
+            component="h6"
+            color={theme.palette.text.primary}
+          >
             Attendance Update Form
           </Typography>
-          <Typography id="modal-email-description" sx={{ mt: 2, margin: '10px' }}>
+          <Typography
+            id="modal-email-description"
+            sx={{ mt: 2, margin: '10px' }}
+            color={theme.palette.text.secondary}
+          >
             Please confirm your data
           </Typography>
           <TextField
@@ -402,9 +412,12 @@ const QrReader = () => {
           />
           <Button
             onClick={handleSubmitButtonClick}
+            fullWidth
             variant="contained"
             color="primary"
-            sx={{ ml: 1, margin: '10px' }}
+            sx={{
+              my: 2,
+            }}
           >
             Submit
           </Button>

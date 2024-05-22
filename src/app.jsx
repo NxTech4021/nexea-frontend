@@ -47,7 +47,8 @@ export default function App() {
       >
         <ThemeProvider>
           <MotionLazy>
-            <ToastContainer position="bottom-right" />
+            {/* <ToastContainer position="bottom-right" /> */}
+            <ToastContainer position="top-center" />
             <SettingsDrawer />
             <ProgressBar />
             <Router />
