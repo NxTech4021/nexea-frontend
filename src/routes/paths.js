@@ -31,6 +31,7 @@ export const paths = {
       create: `${ROOTS.DASHBOARD}/events/create`,
       qr: `${ROOTS.DASHBOARD}/events/qr`,
       attendees: `${ROOTS.DASHBOARD}/events/attendees`,
+      notification: (id) => `${ROOTS.DASHBOARD}/events/notifcationStatus/${id}`,
     },
     attendees: `${ROOTS.DASHBOARD}/attendees`,
     test: `${ROOTS.DASHBOARD}/test`,

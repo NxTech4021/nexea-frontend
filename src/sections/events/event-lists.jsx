@@ -91,6 +91,8 @@ const EventLists = () => {
   const [openCSV, setOpenCSV] = useState(false);
   const [file, setFile] = React.useState(null);
   const { handleFileUpload } = useUploadCSV();
+  const [anchorEl2, setAnchorEl2] = useState();
+  const openMenu = Boolean(anchorEl2);
 
   const ITEMS_PER_PAGE = 6;
 
@@ -265,7 +267,18 @@ const EventLists = () => {
                       horizontal: 'right',
                     }}
                   >
-                    {!currentEvent?.attendees?.length > 0 ? (
+                    <MenuItem onClick={() => setOpenCSV(true)}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        gap={1}
+                        color={theme.palette.success.main}
+                      >
+                        <Iconify icon="material-symbols:upload" />
+                        <Typography variant="button">Upload CSV</Typography>
+                      </Stack>
+                    </MenuItem>
+                    {/* {!currentEvent?.attendees?.length > 0 ? (
                       <MenuItem onClick={() => setOpenCSV(true)}>
                         <Stack
                           direction="row"
@@ -284,7 +297,7 @@ const EventLists = () => {
                           <Typography variant="button">Uploaded</Typography>
                         </Stack>
                       </MenuItem>
-                    )}
+                    )} */}
                     {/* <MenuItem
                       onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.id}`)}
                     >
@@ -740,12 +753,70 @@ const EventLists = () => {
                     <Button
                       variant="outlined"
                       color="info"
+                      aria-controls={openn ? event.id : undefined}
+                      aria-expanded={openn ? 'true' : undefined}
+                      aria-haspopup="true"
+                      // startIcon={<Iconify icon="mdi:users" />}
+                      endIcon={<Iconify icon="raphael:arrowdown" width={14} />}
+                      fullWidth
+                      onClick={(e) => setAnchorEl2(e.currentTarget)}
+                    >
+                      Attendees
+                    </Button>
+                    <Menu
+                      id={event.id}
+                      MenuListProps={{
+                        'aria-labelledby': event.id,
+                      }}
+                      anchorEl={anchorEl2}
+                      open={openMenu}
+                      onClose={() => setAnchorEl2()}
+                      sx={{
+                        '& .MuiMenu-paper': {
+                          maxHeight: 200, // Set max height
+                          width: 200, // Set width
+                          mt: 1.5,
+                        },
+                        '& .MuiPaper-root': {
+                          boxShadow:
+                            '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
+                        },
+                      }}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => navigate(`${paths.dashboard.events.attendees}/${event.id}`)}
+                      >
+                        <Stack direction="row" alignItems="center" gap={1}>
+                          <Iconify icon="mdi:users" />
+                          <Typography variant="button">List</Typography>
+                        </Stack>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => navigate(`${paths.dashboard.events.notification(event.id)}`)}
+                      >
+                        <Stack direction="row" alignItems="center" gap={1}>
+                          <Iconify icon="lets-icons:status" />
+                          <Typography variant="button">Notification Status</Typography>
+                        </Stack>
+                      </MenuItem>
+                    </Menu>
+                    {/* <Button
+                      variant="outlined"
+                      color="info"
                       startIcon={<Iconify icon="mdi:users" />}
                       fullWidth
                       onClick={() => navigate(`${paths.dashboard.events.attendees}/${event.id}`)}
                     >
                       Attendees
-                    </Button>
+                    </Button> */}
                   </Stack>
                 </Card>
               ))}

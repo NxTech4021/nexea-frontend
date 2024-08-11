@@ -18,6 +18,7 @@ const PageThree = lazy(() => import('src/pages/dashboard/three'));
 const PageFour = lazy(() => import('src/pages/dashboard/employee/four'));
 const TestView = lazy(() => import('src/pages/dashboard/test'));
 const QrReader = lazy(() => import('src/components/qrscanner/QrReader'));
+const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifications-status'));
 
 // ----------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ export const dashboardRoutes = [
             element: <QrReader />,
           },
           { path: 'attendees/:id', element: <EventAttendee /> },
+          { path: 'notifcationStatus/:id', element: <NotificationStatus /> },
         ],
       },
       { path: 'attendees', element: <PageThree /> },

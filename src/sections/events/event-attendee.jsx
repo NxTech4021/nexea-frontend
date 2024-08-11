@@ -81,13 +81,18 @@ export default function EventAttendee() {
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-      { field: 'name', headerName: 'Name', width: 200, editable: true },
-      { field: 'email', headerName: 'Email', width: 200, editable: true },
-      { field: 'orderNumber', headerName: 'Order Number', width: 200 },
-      { field: 'discountCode', headerName: 'Discount Code', width: 200 },
-      { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
-      { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
-    ];
+    { field: 'name', headerName: 'Name', width: 200, editable: true },
+    { field: 'email', headerName: 'Email', width: 200, editable: true },
+    { field: 'companyName', headerName: 'Company Name', width: 200, editable: true },
+    { field: 'orderNumber', headerName: 'Order Number', width: 200 },
+    { field: 'discountCode', headerName: 'Discount Code', width: 200 },
+    { field: 'ticketType', headerName: 'Ticket Type', width: 200, editable: true },
+    { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
+    { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
+    // { field: 'templateOne', headerName: 'N1', width: 100, editable: true },
+    // { field: 'templateTwo', headerName: 'N2', width: 100, editable: true },
+    // { field: 'templateThree', headerName: 'N3', width: 100, editable: true },
+  ];
 
   return (
     <>
