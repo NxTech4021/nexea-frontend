@@ -8,6 +8,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
+  Box,
   Grid,
   Button,
   Dialog,
@@ -19,16 +20,16 @@ import {
   DialogContent,
 } from '@mui/material';
 
-import { paths } from 'src/routes/paths';
+// import { paths } from 'src/routes/paths';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
 
-const CreateEvent = () => {
+const CreateEvent = (props) => {
   const settings = useSettingsContext();
   // const [file, setFile] = useState();
+  // const {step}=props;
 
   //  const mdUp = useResponsive('up', 'md');
   const [openModal, setOpenModal] = useState(false);
@@ -120,9 +121,23 @@ const CreateEvent = () => {
     }
   };
 
+  const sendText = async () => {
+    try{
+      const response = axiosInstance.post(endpoints.events.sendText);
+      if (response.data.message) {
+        toast.success('send text successfully!');
+      } else {
+        toast.error('Error sending text2.');
+      }
+    }
+    catch (error) {
+      console.error('Error sending text:', error)
+    }
+  };
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
+      {/* <CustomBreadcrumbs
         heading="Create new event"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
@@ -135,9 +150,9 @@ const CreateEvent = () => {
         sx={{
           mb: { xs: 3, md: 5 },
         }}
-      />
-
-      <div>
+      /> */}
+      {/* Create Event */}
+      <Box  sx={{ display: props.step === 0 ? "" : "none" }}>
         <h2>Create Event</h2>
         <Formik
           initialValues={{
@@ -269,7 +284,87 @@ const CreateEvent = () => {
             </Form>
           )}
         </Formik>
-      </div>
+      </Box>
+
+      {/* Create Whatsapp */}
+      <Box  sx={{ display: props.step === 1 ? "" : "none" }} >
+      <Typography variant="h4" mt={2}>Create Whatsapp</Typography>
+      {/* <Formik
+          initialValues={{
+            description: '',
+            image:'',
+            location:''
+          }}
+          validate={(values) => {
+            const errors = {};
+            if (!values.description) {
+              errors.description = 'Required';
+            }
+            return errors;
+          }}
+          onSubmit={()=> {
+            try {
+              sendText();
+            } catch (error) {
+              toast.error('Error submitting form. Please try again.');  
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Field
+                    as={TextField}
+                    type="text"
+                    name="description" 
+                    label="Event Message"
+                    fullWidth
+                    // required
+                    multiline
+                  />
+                  <ErrorMessage name="description" component="div" />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={isSubmitting}
+                    fullWidth
+                  >
+                    Submit
+                  </Button>
+                </Grid>
+              </Grid>
+            </Form>
+          )}
+        </Formik> */}
+
+        <TextField 
+          fullWidth 
+          id="first" 
+          label="Message" 
+          margin='normal'
+          maxRows={4} 
+          multiline/>
+        <TextField 
+          fullWidth 
+          id="second" 
+          label="QR Image"
+          margin='normal'
+          maxRows={4}  
+          multiline/>
+        <TextField 
+          fullWidth 
+          id="third" 
+          label="Location"
+          margin='normal' 
+          maxRows={4} 
+          multiline/>
+      </Box>
 
       <Dialog
         open={openModal}

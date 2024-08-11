@@ -85,6 +85,7 @@ const EventLists = () => {
   const [anchorEl, setAnchorEl] = useState();
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openWhatsapp, setOpenWhatsapp] = useState(false);
   const [currentEvent, setCurrentEvent] = useState({});
   const navigate = useNavigate();
   const [openCSV, setOpenCSV] = useState(false);
@@ -298,6 +299,12 @@ const EventLists = () => {
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
+                    <MenuItem onClick={() => setOpenWhatsapp(true)}>
+                      <Stack direction="row" alignItems="center" gap={1}>
+                        <Iconify icon="la:whatsapp" />
+                        <Typography variant="button">Template Notification</Typography>
+                      </Stack>
+                    </MenuItem>
                     <MenuItem
                       onClick={() => setOpenDelete(true)}
                       disabled={a.user.userType === 'normal'}
@@ -342,6 +349,50 @@ const EventLists = () => {
                         Agree
                       </Button>
                     </DialogActions>
+                  </Dialog>
+
+                  {/* Edit Whatsapp */}
+                  <Dialog
+                    open={openWhatsapp}
+                    onClose={() => setOpenWhatsapp(false)}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">Edit Whatsapp</DialogTitle>
+
+                    <DialogContent>
+                      <Formik
+                        initialValues={{
+                          name: currentEvent?.name,
+                          description: currentEvent?.description,
+                          date: currentEvent?.date,
+                          personInCharge: currentEvent?.personInCharge?.id,
+                          tickera_api: currentEvent?.tickera_api,
+                          status: currentEvent?.status,
+                        }}
+                        onSubmit={(values, { setSubmitting }) => {
+                          axiosInstance
+                            .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
+                            .then((response) => {
+                              setSubmitting(false);
+                              fetchEvents();
+                              toast.success('Event updated successfully.');
+                            })
+                            .catch((error) => {
+                              console.error('Error updating event:', error);
+                              setSubmitting(false);
+                              toast.error('Update Failed, Try again!');
+                            });
+                          handleCloseEdit();
+                        }}
+                      >
+                        {({ isSubmitting, setFieldValue, values }) => (
+                          <Form>
+                            
+                          </Form>
+                        )}
+                      </Formik>
+                    </DialogContent>
                   </Dialog>
 
                   {/* Edit modal */}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { HOST_API } from 'src/config-global';
+import { textField } from 'src/theme/overrides/components/textfield';
 
 // ----------------------------------------------------------------------
 
@@ -61,6 +62,9 @@ export const endpoints = {
     list: '/api/event/events',
     update: '/api/event/update',
     delete: '/api/event/delete',
+    text:'/api/event/sendtext',
+    image:'/api/event/sendimage',
+    location:'/api/event/sendlocation',
   },
   attendee: {
     create: '/api/attendee/create',

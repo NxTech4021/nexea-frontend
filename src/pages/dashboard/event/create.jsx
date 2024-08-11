@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import CreateEvent from 'src/sections/events/event-create';
+import LinearStepper from 'src/sections/events/event-stepper';
 
 // ----------------------------------------------------------------------
 
@@ -11,7 +11,7 @@ export default function Page() {
         <title> Dashboard: Create a new event</title>
       </Helmet>
 
-      <CreateEvent />
+      <LinearStepper />
     </>
   );
 }
