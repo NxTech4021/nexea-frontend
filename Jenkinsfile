@@ -31,7 +31,7 @@ pipeline {
         }
         stage('Build Docker Images') {
             parallel {
-                stage('Build Frontend Docker Image') {
+                stage('Build Frontend Docker Image...') {
                     steps {
                         echo 'Building Frontend Docker Image...'
                         dir('frontend') {
