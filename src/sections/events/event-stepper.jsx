@@ -1,19 +1,20 @@
+/* eslint-disable no-unused-vars */
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import {
-  Button,
-  Container,
-  Typography,
-} from '@mui/material';
-import CreateEvent from 'src/sections/events/event-create';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
-import { useSettingsContext } from 'src/components/settings';
-import { RouterLink } from 'src/routes/components';
-import { paths } from 'src/routes/paths';
+import { useNavigate } from 'react-router';
 
+import Box from '@mui/material/Box';
+import Step from '@mui/material/Step';
+import Stepper from '@mui/material/Stepper';
+import StepLabel from '@mui/material/StepLabel';
+import { Button, Container, Typography } from '@mui/material';
+
+import { paths } from 'src/routes/paths';
+import { RouterLink } from 'src/routes/components';
+
+import { useSettingsContext } from 'src/components/settings';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
+
+import CreateEvent from 'src/sections/events/event-create';
 
 const steps = ['Create Event', 'Create WhatsApp'];
 
@@ -21,14 +22,11 @@ export default function LinearStepper() {
   const settings = useSettingsContext();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
+  const navigate = useNavigate();
 
-  const isStepOptional = (step) => {
-    return step === 1;
-  };
+  const isStepOptional = (step) => step === 1;
 
-  const isStepSkipped = (step) => {
-    return skipped.has(step);
-  };
+  const isStepSkipped = (step) => skipped.has(step);
 
   const handleNext = () => {
     let newSkipped = skipped;
@@ -45,9 +43,9 @@ export default function LinearStepper() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const backList=()=>{
-    navigate("/event-list");
-  }
+  const backList = () => {
+    navigate('/event-list');
+  };
 
   // const handleSkip = () => {
   //   if (!isStepOptional(activeStep)) {
@@ -70,7 +68,7 @@ export default function LinearStepper() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-    <CustomBreadcrumbs
+      <CustomBreadcrumbs
         heading="Create new event"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
@@ -83,15 +81,13 @@ export default function LinearStepper() {
         sx={{
           mb: { xs: 3, md: 5 },
         }}
-      />   
+      />
       <Stepper activeStep={activeStep}>
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
           if (isStepOptional(index)) {
-            labelProps.optional = (
-              <Typography variant="caption">Optional</Typography>
-            );
+            labelProps.optional = <Typography variant="caption">Optional</Typography>;
           }
           if (isStepSkipped(index)) {
             stepProps.completed = false;
@@ -102,27 +98,22 @@ export default function LinearStepper() {
             </Step>
           );
         })}
-      </Stepper> 
+      </Stepper>
       {activeStep === steps.length ? (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
-          </Typography>
+        <>
+          <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Box sx={{ flex: '1 1 auto' }} />
-            <Button component={RouterLink} href="/" size="large" variant="contained">Done</Button>
+            <Button component={RouterLink} href="/" size="large" variant="contained">
+              Done
+            </Button>
           </Box>
-        </React.Fragment>
+        </>
       ) : (
-        <React.Fragment>
-         <CreateEvent step={activeStep} />
+        <>
+          <CreateEvent step={activeStep} />
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button
-              color="inherit"
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
+            <Button color="inherit" disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
               Back
             </Button>
             {/* <Box sx={{ flex: '1 1 auto' }} />
@@ -132,11 +123,11 @@ export default function LinearStepper() {
               </Button>
             )} */}
 
-            <Button onClick={handleNext} style={{ marginLeft: "auto" }}>
+            <Button onClick={handleNext} style={{ marginLeft: 'auto' }}>
               {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
             </Button>
           </Box>
-        </React.Fragment>
+        </>
       )}
     </Container>
   );

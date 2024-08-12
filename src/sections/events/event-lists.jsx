@@ -400,9 +400,7 @@ const EventLists = () => {
                         }}
                       >
                         {({ isSubmitting, setFieldValue, values }) => (
-                          <Form>
-                            
-                          </Form>
+                          <Form />
                         )}
                       </Formik>
                     </DialogContent>

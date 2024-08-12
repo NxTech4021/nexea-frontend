@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
-import { Box, Chip } from '@mui/material';
+import { Box, Chip, Button } from '@mui/material';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 
 import Iconify from 'src/components/iconify';
@@ -33,14 +33,19 @@ const NotificationListItem = ({ attendees }) => {
       headerName: 'Stage 1',
       width: 150,
       flex: 1,
-      renderCell: (value, row) => (
-        <Chip
-          icon={<Iconify icon="ic:baseline-whatsapp" />}
-          label={value.row.templateOne}
-          size="small"
-          color={value.row.templateOne === 'Pending' ? 'warning' : 'success'}
-        />
-      ),
+      renderCell: (value, row) =>
+        value.row.templateOne === 'Error' ? (
+          <Button size="small" variant="contained" color="primary">
+            Resend Notification
+          </Button>
+        ) : (
+          <Chip
+            icon={<Iconify icon="ic:baseline-whatsapp" />}
+            label={value.row.templateOne}
+            size="small"
+            color={value.row.templateOne === 'Pending' ? 'warning' : 'success'}
+          />
+        ),
     },
     {
       field: 'templateTwo',

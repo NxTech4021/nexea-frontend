@@ -26,7 +26,8 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useSettingsContext } from 'src/components/settings';
 
-const CreateEvent = (props) => {
+// eslint-disable-next-line react/prop-types
+const CreateEvent = ({ step }) => {
   const settings = useSettingsContext();
   // const [file, setFile] = useState();
   // const {step}=props;
@@ -121,19 +122,18 @@ const CreateEvent = (props) => {
     }
   };
 
-  const sendText = async () => {
-    try{
-      const response = axiosInstance.post(endpoints.events.sendText);
-      if (response.data.message) {
-        toast.success('send text successfully!');
-      } else {
-        toast.error('Error sending text2.');
-      }
-    }
-    catch (error) {
-      console.error('Error sending text:', error)
-    }
-  };
+  // const sendText = async () => {
+  //   try {
+  //     const response = axiosInstance.post(endpoints.events.sendText);
+  //     if (response.data.message) {
+  //       toast.success('send text successfully!');
+  //     } else {
+  //       toast.error('Error sending text2.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending text:', error);
+  //   }
+  // };
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -152,7 +152,7 @@ const CreateEvent = (props) => {
         }}
       /> */}
       {/* Create Event */}
-      <Box  sx={{ display: props.step === 0 ? "" : "none" }}>
+      <Box sx={{ display: step === 0 ? '' : 'none' }}>
         <h2>Create Event</h2>
         <Formik
           initialValues={{
@@ -287,9 +287,11 @@ const CreateEvent = (props) => {
       </Box>
 
       {/* Create Whatsapp */}
-      <Box  sx={{ display: props.step === 1 ? "" : "none" }} >
-      <Typography variant="h4" mt={2}>Create Whatsapp</Typography>
-      {/* <Formik
+      <Box sx={{ display: step === 1 ? '' : 'none' }}>
+        <Typography variant="h4" mt={2}>
+          Create Whatsapp
+        </Typography>
+        {/* <Formik
           initialValues={{
             description: '',
             image:'',
@@ -343,27 +345,9 @@ const CreateEvent = (props) => {
           )}
         </Formik> */}
 
-        <TextField 
-          fullWidth 
-          id="first" 
-          label="Message" 
-          margin='normal'
-          maxRows={4} 
-          multiline/>
-        <TextField 
-          fullWidth 
-          id="second" 
-          label="QR Image"
-          margin='normal'
-          maxRows={4}  
-          multiline/>
-        <TextField 
-          fullWidth 
-          id="third" 
-          label="Location"
-          margin='normal' 
-          maxRows={4} 
-          multiline/>
+        <TextField fullWidth id="first" label="Message" margin="normal" maxRows={4} multiline />
+        <TextField fullWidth id="second" label="QR Image" margin="normal" maxRows={4} multiline />
+        <TextField fullWidth id="third" label="Location" margin="normal" maxRows={4} multiline />
       </Box>
 
       <Dialog
