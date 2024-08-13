@@ -102,12 +102,12 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sshagent([NEXEA_EVENTAPP_SSH_CREDENTIAL_ID]) {
+                sshagent([NEXEA_EVENTAPP_SSH_CREDENTIAL]) {
                     script {
                         sh '''
                         # SSH into the GCP instance to clone the backend repository
-                        ssh -o StrictHostKeyChecking=no famintech@$NEXEA_GCP_INSTANCE_ID "
-                        cd ~ &&
+                        ssh -o StrictHostKeyChecking=no famintech@$NEXEA_GCP_INSTANCE_ID
+                        "cd ~ &&
                         if [ ! -d 'nexea-backend' ]; then
                             git clone https://github.com/NxTech4021/nexea-backend.git
                         else
