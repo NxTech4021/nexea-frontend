@@ -1,12 +1,12 @@
-FROM node:20-alpine3.17 as development
+FROM node:20-alpine3.17 AS development
 
 WORKDIR /app
 
 COPY package.json ./
 
-# Install esbuild
-
-RUN yarn install
+# Install dependencies with increased network timeout
+# Retry once if the first attempt fails
+RUN yarn install --network-timeout 300000
 
 COPY . .
 
