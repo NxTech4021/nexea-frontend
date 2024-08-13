@@ -12,7 +12,7 @@ pipeline {
         NEXEA_EVENTAPP_SERVICEACCOUNT_KEYFILE = 'NEXEA_EventApp_ServiceAccount_Keyfile.json'
     }
     stages {
-        stage('Checkout Repositories') {
+        stage('Checkout NEXEA Event App Repositories') {
             parallel {
                 stage('Checkout Frontend Repository') {
                     steps {
