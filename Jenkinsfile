@@ -114,8 +114,8 @@ pipeline {
                             cd nexea-backend && git pull origin main && cd ..
                         fi"
                         
-                        # Copy necessary files to the deployment server
-                        scp -o StrictHostKeyChecking=no -r backend/nginx backend/docker-compose.yml famintech@$NEXEA_GCP_INSTANCE_ID:~/
+                        mv /home/famintech/nexea-backend/docker-compose.yml ~/
+                        mv /home/famintech/nexea-backend/nginx ~/
                         
                         # SSH into the GCP instance to run docker-compose commands
                         ssh -o StrictHostKeyChecking=no famintech@$NEXEA_GCP_INSTANCE_ID "
