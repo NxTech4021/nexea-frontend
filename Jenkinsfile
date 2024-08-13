@@ -12,7 +12,7 @@ pipeline {
         NEXEA_EVENTAPP_SERVICEACCOUNT_KEYFILE = 'NEXEA_EventApp_ServiceAccount_Keyfile.json'
     }
     stages {
-        stage('Checkout NEXEA Event App Repositories') {
+        stage('Checkout Repositories') {
             parallel {
                 stage('Checkout Frontend Repository') {
                     steps {
@@ -74,9 +74,6 @@ pipeline {
         stage('Push Docker Images') {
             parallel {
                 stage('Push Frontend Docker Image') {
-                    when {
-                        successful
-                    }
                     steps {
                         echo 'Pushing Frontend Docker Image...'
                         script {
@@ -96,9 +93,6 @@ pipeline {
                     }
                 }
                 stage('Push Backend Docker Image') {
-                    when {
-                        successful
-                    }
                     steps {
                         echo 'Pushing Backend Docker Image...'
                         script {
