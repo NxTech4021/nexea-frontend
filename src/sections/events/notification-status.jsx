@@ -15,8 +15,6 @@ import NotificationListItem from './notification-list-item';
 const NotificationStatus = ({ id }) => {
   const { attendees } = useGetAttendees(id);
 
-  console.log(attendees);
-
   return (
     <Container maxWidth="lg">
       <CustomBreadcrumbs

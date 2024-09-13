@@ -64,6 +64,7 @@ export default function Events() {
             href={paths.dashboard.events.create}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
+            size="small"
           >
             New Event
           </Button>

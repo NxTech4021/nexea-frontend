@@ -92,6 +92,7 @@ const EventLists = () => {
   const [file, setFile] = React.useState(null);
   const { handleFileUpload } = useUploadCSV();
   const [anchorEl2, setAnchorEl2] = useState();
+  const [currentEventId, setCurrentEventId] = useState('');
   const openMenu = Boolean(anchorEl2);
 
   const ITEMS_PER_PAGE = 6;
@@ -278,46 +279,14 @@ const EventLists = () => {
                         <Typography variant="button">Upload CSV</Typography>
                       </Stack>
                     </MenuItem>
-                    {/* {!currentEvent?.attendees?.length > 0 ? (
-                      <MenuItem onClick={() => setOpenCSV(true)}>
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          gap={1}
-                          color={theme.palette.success.main}
-                        >
-                          <Iconify icon="material-symbols:upload" />
-                          <Typography variant="button">Upload CSV</Typography>
-                        </Stack>
-                      </MenuItem>
-                    ) : (
-                      <MenuItem disabled>
-                        <Stack direction="row" alignItems="center" gap={1}>
-                          <Iconify icon="material-symbols:upload" />
-                          <Typography variant="button">Uploaded</Typography>
-                        </Stack>
-                      </MenuItem>
-                    )} */}
-                    {/* <MenuItem
-                      onClick={() => navigate(`${paths.dashboard.events.qr}/${currentEvent.id}`)}
-                    >
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <Iconify icon="bx:qr" />
-                        <Typography variant="button">QR</Typography>
-                      </Stack>
-                    </MenuItem> */}
+
                     <MenuItem onClick={() => setOpenEdit(true)}>
                       <Stack direction="row" alignItems="center" gap={1}>
                         <Iconify icon="material-symbols:edit" />
                         <Typography variant="button">Edit</Typography>
                       </Stack>
                     </MenuItem>
-                    <MenuItem onClick={() => setOpenWhatsapp(true)}>
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <Iconify icon="la:whatsapp" />
-                        <Typography variant="button">Template Notification</Typography>
-                      </Stack>
-                    </MenuItem>
+
                     <MenuItem
                       onClick={() => setOpenDelete(true)}
                       disabled={a.user.userType === 'normal'}
@@ -399,9 +368,7 @@ const EventLists = () => {
                           handleCloseEdit();
                         }}
                       >
-                        {({ isSubmitting, setFieldValue, values }) => (
-                          <Form />
-                        )}
+                        {({ isSubmitting, setFieldValue, values }) => <Form />}
                       </Formik>
                     </DialogContent>
                   </Dialog>
@@ -620,7 +587,7 @@ const EventLists = () => {
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Avatar
                         alt="test"
-                        src="/logo/logo_single.svg"
+                        src="/logo/nexea.png"
                         variant="rounded"
                         sx={{ width: 48, height: 48, mb: 2 }}
                       />
@@ -669,9 +636,10 @@ const EventLists = () => {
                         sx={{ color: 'primary.main', typography: 'caption' }}
                       >
                         <Iconify width={16} icon="oui:check-in-circle-filled" />
-                        {`${
-                          event?.attendees.map((e) => e.checkedIn).filter((e) => e === 'Yes').length
-                        } of ${event?.attendees.length} checked in`}
+
+                        {`${event?.attendees.filter((attendee) => attendee.checkedIn).length} of ${
+                          event?.attendees.length
+                        } checked in`}
                       </Stack>
                     </Stack>
                   </Stack>
@@ -757,7 +725,10 @@ const EventLists = () => {
                       // startIcon={<Iconify icon="mdi:users" />}
                       endIcon={<Iconify icon="raphael:arrowdown" width={14} />}
                       fullWidth
-                      onClick={(e) => setAnchorEl2(e.currentTarget)}
+                      onClick={(e) => {
+                        setAnchorEl2(e.currentTarget);
+                        setCurrentEventId(event?.id);
+                      }}
                     >
                       Attendees
                     </Button>
@@ -790,7 +761,9 @@ const EventLists = () => {
                       }}
                     >
                       <MenuItem
-                        onClick={() => navigate(`${paths.dashboard.events.attendees}/${event.id}`)}
+                        onClick={() =>
+                          navigate(`${paths.dashboard.events.attendees}/${currentEventId}`)
+                        }
                       >
                         <Stack direction="row" alignItems="center" gap={1}>
                           <Iconify icon="mdi:users" />
@@ -798,7 +771,9 @@ const EventLists = () => {
                         </Stack>
                       </MenuItem>
                       <MenuItem
-                        onClick={() => navigate(`${paths.dashboard.events.notification(event.id)}`)}
+                        onClick={() =>
+                          navigate(`${paths.dashboard.events.notification(currentEventId)}`)
+                        }
                       >
                         <Stack direction="row" alignItems="center" gap={1}>
                           <Iconify icon="lets-icons:status" />
@@ -806,15 +781,6 @@ const EventLists = () => {
                         </Stack>
                       </MenuItem>
                     </Menu>
-                    {/* <Button
-                      variant="outlined"
-                      color="info"
-                      startIcon={<Iconify icon="mdi:users" />}
-                      fullWidth
-                      onClick={() => navigate(`${paths.dashboard.events.attendees}/${event.id}`)}
-                    >
-                      Attendees
-                    </Button> */}
                   </Stack>
                 </Card>
               ))}

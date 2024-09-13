@@ -129,10 +129,10 @@ export default function Attendees() {
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-    { field: 'name', headerName: 'Name', width: 200, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
+    { field: 'attendeeFullName', headerName: 'Attendee Name', width: 200, editable: true },
+    { field: 'attendeeEmail', headerName: 'Attendee Email', width: 200, editable: true },
     { field: 'orderNumber', headerName: 'Order Number', width: 200 },
-    { field: 'discountCode', headerName: 'Discount Code', width: 200 },
+    { field: 'companyName', headerName: 'Company Name', width: 200, editable: true },
     { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
     { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
   ];
@@ -148,14 +148,6 @@ export default function Attendees() {
           key={selectedEventId}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
-          {/* <div
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-            }}
-          > */}
           <Select
             value={selectedEvent}
             onChange={handleMenuSelect}

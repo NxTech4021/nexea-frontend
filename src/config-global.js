@@ -5,6 +5,8 @@ import { paths } from 'src/routes/paths';
 
 export const HOST_API = import.meta.env.VITE_HOST_API;
 export const ASSETS_API = import.meta.env.VITE_ASSETS_API;
+export const APP_ID = import.meta.env.GUPSHUP_APP_ID || '2e10518a-ecf4-481c-8f81-330871b725ec';
+export const APP_KEY = import.meta.env.GUPSHUP_APP_KEY || 'gbb3xcvdd67hah3v0so5bwiuwwyd6yyq';
 
 // export const FIREBASE_API = {
 //   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

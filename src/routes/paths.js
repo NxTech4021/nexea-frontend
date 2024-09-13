@@ -33,6 +33,9 @@ export const paths = {
       attendees: `${ROOTS.DASHBOARD}/events/attendees`,
       notification: (id) => `${ROOTS.DASHBOARD}/events/notifcationStatus/${id}`,
     },
+    whatsappTemplate: {
+      root: `${ROOTS.DASHBOARD}/templates`,
+    },
     attendees: `${ROOTS.DASHBOARD}/attendees`,
     test: `${ROOTS.DASHBOARD}/test`,
     employee: `${ROOTS.DASHBOARD}/employee`,

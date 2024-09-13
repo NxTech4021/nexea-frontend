@@ -61,14 +61,15 @@ export const endpoints = {
     list: '/api/event/events',
     update: '/api/event/update',
     delete: '/api/event/delete',
-    text:'/api/event/sendtext',
-    image:'/api/event/sendimage',
-    location:'/api/event/sendlocation',
+    text: '/api/event/sendtext',
+    image: '/api/event/sendimage',
+    location: '/api/event/sendlocation',
   },
   attendee: {
     create: '/api/attendee/create',
     upload: '/api/attendee/upload',
     update: '/api/attendee/update',
+    checkIn: '/api/attendee/checkInAttendee',
     list: '/api/attendees',
     event: {
       list: '/api/attendee/event',

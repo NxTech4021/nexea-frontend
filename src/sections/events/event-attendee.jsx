@@ -5,7 +5,7 @@ import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Chip, Container, Typography } from '@mui/material';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
@@ -33,6 +33,7 @@ export default function EventAttendee() {
   const fetchAttendees = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${id}`);
+      console.log(response.data);
       setAttendees(response.data);
     } catch (error) {
       console.error('Error fetching all attendees:', error);
@@ -81,17 +82,34 @@ export default function EventAttendee() {
 
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-    { field: 'name', headerName: 'Name', width: 200, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
-    { field: 'companyName', headerName: 'Company Name', width: 200, editable: true },
+    { field: 'attendeeFullName', headerName: 'Attendee Name', width: 200, editable: true },
+    { field: 'attendeeEmail', headerName: 'Attendee Email', width: 200, editable: true },
     { field: 'orderNumber', headerName: 'Order Number', width: 200 },
-    { field: 'discountCode', headerName: 'Discount Code', width: 200 },
-    { field: 'ticketType', headerName: 'Ticket Type', width: 200, editable: true },
+    {
+      field: 'companyName',
+      headerName: 'Company Name',
+      width: 200,
+      editable: true,
+      renderCell: (params) => {
+        if (params.value) {
+          return params.value;
+        }
+        return 'Not Available';
+      },
+    },
     { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
-    { field: 'checkedIn', headerName: 'Checked In', width: 100, editable: true },
-    // { field: 'templateOne', headerName: 'N1', width: 100, editable: true },
-    // { field: 'templateTwo', headerName: 'N2', width: 100, editable: true },
-    // { field: 'templateThree', headerName: 'N3', width: 100, editable: true },
+    {
+      field: 'checkedIn',
+      headerName: 'Checked In',
+      width: 100,
+      editable: true,
+      renderCell: (params) =>
+        !params.value ? (
+          <Chip size="small" label="Pending" color="warning" />
+        ) : (
+          <Chip size="small" label="Done" color="success" />
+        ),
+    },
   ];
 
   return (

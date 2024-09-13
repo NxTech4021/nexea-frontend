@@ -20,6 +20,8 @@ const TestView = lazy(() => import('src/pages/dashboard/test'));
 const QrReader = lazy(() => import('src/components/qrscanner/QrReader'));
 const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifications-status'));
 
+const WhatsappTemplate = lazy(() => import('src/pages/dashboard/whatsappTemplate/index'));
+
 // ----------------------------------------------------------------------
 
 export const dashboardRoutes = [
@@ -55,6 +57,10 @@ export const dashboardRoutes = [
           { path: 'attendees/:id', element: <EventAttendee /> },
           { path: 'notifcationStatus/:id', element: <NotificationStatus /> },
         ],
+      },
+      {
+        path: 'templates',
+        children: [{ element: <WhatsappTemplate />, index: true }],
       },
       { path: 'attendees', element: <PageThree /> },
       { path: 'test', element: <TestView /> },

@@ -29,10 +29,7 @@ import { useSettingsContext } from 'src/components/settings';
 // eslint-disable-next-line react/prop-types
 const CreateEvent = ({ step }) => {
   const settings = useSettingsContext();
-  // const [file, setFile] = useState();
-  // const {step}=props;
 
-  //  const mdUp = useResponsive('up', 'md');
   const [openModal, setOpenModal] = useState(false);
   const [users, setUsers] = useState([]); // State to store users data
   const [loading, setLoading] = useState(true);
@@ -74,30 +71,6 @@ const CreateEvent = ({ step }) => {
     setOpenModal(false);
   };
 
-  // const renderInfo = (
-  //   <Grid container>
-  //     {mdUp && (
-  //       <Grid md={4} >
-  //         <Typography variant="h6" sx={{ mb: 0.5 }}>
-  //           Details
-  //         </Typography>
-  //         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-  //           Title, short description, image...
-  //         </Typography>
-  //       </Grid>
-  //     )}
-
-  //     <Grid xs={12} md={8}>
-  //       <Card>
-  //         <Stack spacing={1.5} sx={{ p: 3 }}>
-  //           <Typography variant="subtitle2">Event name</Typography>
-  //           <TextField placeholder="Ex: DisruptInvest..." />
-  //         </Stack>
-  //       </Card>
-  //     </Grid>
-  //   </Grid>
-  // );
-
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
 
@@ -122,38 +95,11 @@ const CreateEvent = ({ step }) => {
     }
   };
 
-  // const sendText = async () => {
-  //   try {
-  //     const response = axiosInstance.post(endpoints.events.sendText);
-  //     if (response.data.message) {
-  //       toast.success('send text successfully!');
-  //     } else {
-  //       toast.error('Error sending text2.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error sending text:', error);
-  //   }
-  // };
-
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      {/* <CustomBreadcrumbs
-        heading="Create new event"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          {
-            name: 'Event',
-            href: paths.dashboard.events.root,
-          },
-          { name: 'New Event' },
-        ]}
-        sx={{
-          mb: { xs: 3, md: 5 },
-        }}
-      /> */}
       {/* Create Event */}
       <Box sx={{ display: step === 0 ? '' : 'none' }}>
-        <h2>Create Event</h2>
+        <h2>Event Information</h2>
         <Formik
           initialValues={{
             name: '',
@@ -284,70 +230,6 @@ const CreateEvent = ({ step }) => {
             </Form>
           )}
         </Formik>
-      </Box>
-
-      {/* Create Whatsapp */}
-      <Box sx={{ display: step === 1 ? '' : 'none' }}>
-        <Typography variant="h4" mt={2}>
-          Create Whatsapp
-        </Typography>
-        {/* <Formik
-          initialValues={{
-            description: '',
-            image:'',
-            location:''
-          }}
-          validate={(values) => {
-            const errors = {};
-            if (!values.description) {
-              errors.description = 'Required';
-            }
-            return errors;
-          }}
-          onSubmit={()=> {
-            try {
-              sendText();
-            } catch (error) {
-              toast.error('Error submitting form. Please try again.');  
-            } finally {
-              setSubmitting(false);
-            }
-          }}
-        >
-          {({ isSubmitting }) => (
-            <Form>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Field
-                    as={TextField}
-                    type="text"
-                    name="description" 
-                    label="Event Message"
-                    fullWidth
-                    // required
-                    multiline
-                  />
-                  <ErrorMessage name="description" component="div" />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={isSubmitting}
-                    fullWidth
-                  >
-                    Submit
-                  </Button>
-                </Grid>
-              </Grid>
-            </Form>
-          )}
-        </Formik> */}
-
-        <TextField fullWidth id="first" label="Message" margin="normal" maxRows={4} multiline />
-        <TextField fullWidth id="second" label="QR Image" margin="normal" maxRows={4} multiline />
-        <TextField fullWidth id="third" label="Location" margin="normal" maxRows={4} multiline />
       </Box>
 
       <Dialog

@@ -70,6 +70,11 @@ export function useNavData() {
             icon: <Icon icon="heroicons:users-16-solid" width={25} />,
           },
           {
+            title: 'Whatsapp Templates',
+            path: paths.dashboard.whatsappTemplate.root,
+            icon: <Icon icon="ic:baseline-whatsapp" width={25} />,
+          },
+          {
             title: 'QR',
             path: paths.dashboard.Qr,
             icon: ICONS.qr,

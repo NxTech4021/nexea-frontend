@@ -25,11 +25,17 @@ const QrReader = () => {
   const [cameraOn, setCameraOn] = useState(false);
 
   const [scannedResult, setScannedResult] = useState('');
-  const [scannedName, setScannedName] = useState('');
-  const [scannedEmail, setScannedEmail] = useState('');
+  // const [scannedName, setScannedName] = useState('');
+  // const [scannedEmail, setScannedEmail] = useState('');
+  const [scannedAttendee, setScannedAttendee] = useState({
+    name: '',
+    email: '',
+    companyName: '',
+  });
 
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
+  const [newCompanyName, setNewCompanyName] = useState('');
 
   // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
   // const [openModalConfirm, setOpenModalConfirm] = useState(false);
@@ -56,10 +62,10 @@ const QrReader = () => {
   const isCheckIn = async (id) => {
     try {
       // const { data } = await axiosInstance.get(`${endpoints.attendee.checkedIn}/${id}`);
-      console.log(id);
+
       const { data } = await axiosInstance.get(`/api/attendee/${id}`);
 
-      if (data?.checkedIn === 'Yes') {
+      if (data?.checkedIn) {
         return true;
       }
       return false;
@@ -85,21 +91,31 @@ const QrReader = () => {
   );
 
   // eslint-disable-next-line no-shadow
-  const updateInfo = async (id, newEmail, newName) => {
+  const updateInfo = async (id, newEmail, newName, newCompany) => {
     try {
-      const emailToUpdate = newEmail ? newEmail : scannedEmail;
-      const nameToUpdate = newName ? newName : scannedName;
+      const emailToUpdate = newEmail ? newEmail : scannedAttendee.email;
+      const companyNameToUpdate = newCompany ? newCompany : scannedAttendee.companyName;
+      const nameToUpdate = newName ? newName : scannedAttendee.name;
+
       await axiosInstance.patch(
-        `${endpoints.attendee.update}/${id}`,
+        endpoints.attendee.checkIn,
         {
           name: nameToUpdate,
           email: emailToUpdate,
+          companyName: companyNameToUpdate,
+          id,
         },
         { headers: { 'content-type': 'application/json' } }
       );
       await fetchTicketDatabase();
-      setNewEmail('');
-      setNewName('');
+      setScannedAttendee((prev) => ({
+        ...prev,
+        email: '',
+        name: '',
+        companyName: '',
+      }));
+      // setNewEmail('');
+      // setNewName('');
     } catch (error) {
       console.error('Error updating email:', error);
     }
@@ -107,18 +123,15 @@ const QrReader = () => {
 
   const handleSubmitButtonClick = async () => {
     if (scannedResult) {
-      const scannedAttendee = attendeesData.find(
-        (attendee) => attendee.ticketCode === scannedResult
-      );
-      if (scannedAttendee) {
+      const attendeeData = attendeesData.find((attendee) => attendee.ticketCode === scannedResult);
+      if (attendeeData) {
         const ownerTicketCode = attendeesData.filter(
           (attendee) =>
-            attendee.email === scannedAttendee.email &&
-            attendee.ticketCode === scannedAttendee.ticketCode
+            attendee.email === attendeeData.email && attendee.ticketCode === attendeeData.ticketCode
         );
         if (ownerTicketCode) {
-          await updateInfo(ownerTicketCode[0].id, newEmail, newName);
-          await updateAttendees(scannedAttendee.id);
+          await updateInfo(ownerTicketCode[0].id, newEmail, newName, newCompanyName);
+          // await updateAttendees(attendeeData.id);
           toast.success(`Attendance updated successfully for ${scannedResult}`);
         }
       } else {
@@ -136,19 +149,22 @@ const QrReader = () => {
       if (ticketMatch) {
         setTicketMatch(false);
         if (scannedResult) {
-          const scannedAttendee = attendeesData.find(
+          const attendeeData = attendeesData.find(
             (attendee) => attendee.ticketCode === scannedResult
           );
-          if (scannedAttendee) {
-            if (await isCheckIn(scannedAttendee.id)) {
-              return toast.warn(`${scannedAttendee.name} is already checked in.`);
+          if (attendeeData) {
+            if (await isCheckIn(attendeeData.id)) {
+              return toast.warn(`${attendeeData.attendeeFullName} is already checked in.`);
             }
-            setScannedName(scannedAttendee.name);
-            setScannedEmail(scannedAttendee.email);
-            if (
-              attendeesData.filter((attendee) => attendee.buyerEmail === scannedAttendee.buyerEmail)
-                .length > 1
-            ) {
+            setScannedAttendee((prev) => ({
+              ...prev,
+              email: attendeeData.attendeeEmail,
+              name: attendeeData.attendeeFullName,
+              companyName: attendeeData.companyName,
+            }));
+            // setScannedName(attendeeData.attendeeFullName);
+            // setScannedEmail(attendeeData.attendeeEmail);
+            if (attendeesData.find((attendee) => attendee.buyerEmail === attendeeData.buyerEmail)) {
               setOpenModalEmail(true);
             } else {
               // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
@@ -361,7 +377,7 @@ const QrReader = () => {
       </Modal> */}
       <Modal
         open={openModalEmail}
-        onClose={handleCloseModalEmail}
+        // onClose={handleCloseModalEmail}
         aria-labelledby="modal-email-title"
         aria-describedby="modal-email-description"
       >
@@ -396,9 +412,17 @@ const QrReader = () => {
             Please confirm your data
           </Typography>
           <TextField
+            label="Company Name"
+            variant="outlined"
+            defaultValue={scannedAttendee.companyName}
+            onChange={(e) => setNewCompanyName(e.target.value)}
+            sx={{ mt: 2, width: '100%' }}
+            color="primary"
+          />
+          <TextField
             label="Name"
             variant="outlined"
-            defaultValue={scannedName}
+            defaultValue={scannedAttendee.name}
             onChange={(e) => setNewName(e.target.value)}
             sx={{ mt: 2, width: '100%' }}
             color="primary"
@@ -406,7 +430,7 @@ const QrReader = () => {
           <TextField
             label="Email"
             variant="outlined"
-            defaultValue={scannedEmail}
+            defaultValue={scannedAttendee.email}
             onChange={(e) => setNewEmail(e.target.value)}
             sx={{ mt: 2, width: '100%' }}
           />
