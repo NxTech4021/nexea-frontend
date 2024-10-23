@@ -24,7 +24,7 @@ const EventAttendees = ({ watchData, resetData, setData }) => {
             border: 2,
             p: 2,
             borderRadius: 2,
-            borderColor: 'text.secondary',
+            borderColor: !file ? 'text.secondary' : 'success.main',
             borderStyle: 'dashed',
             textAlign: 'center',
             cursor: 'pointer',
@@ -61,6 +61,7 @@ const EventAttendees = ({ watchData, resetData, setData }) => {
             )} */}
           </Stack>
         </Box>
+        <input {...getInputProps()} />
       </Box>
       {file && (
         <Button

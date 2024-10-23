@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 
-import { Button } from '@mui/material';
 import Container from '@mui/material/Container';
+import { Card, Stack, Button, TextField, IconButton } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
+
+import { useResponsive } from 'src/hooks/use-responsive';
 
 import { _jobs } from 'src/_mock';
 
@@ -13,17 +15,14 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import EventLists from './event-lists';
-import EventSearch from './event-search';
 
 // ----------------------------------------------------------------------
 
 export default function Events() {
   const settings = useSettingsContext();
+  const smUp = useResponsive('down', 'sm');
 
-  const [search, setSearch] = useState({
-    query: '',
-    results: [],
-  });
+  const [search, setSearch] = useState('');
 
   const handleSearch = useCallback(
     (inputValue) => {
@@ -58,30 +57,68 @@ export default function Events() {
           },
           { name: 'List' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.dashboard.events.create}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            size="small"
-          >
-            New Event
-          </Button>
-        }
+        // action={
+        //   <Button
+        //     component={RouterLink}
+        //     href={paths.dashboard.events.create}
+        //     variant="contained"
+        //     startIcon={<Iconify icon="mingcute:add-line" />}
+        //     size="small"
+        //   >
+        //     New Event
+        //   </Button>
+        // }
         sx={{
           mb: { xs: 3, md: 5 },
         }}
       />
 
-      <EventSearch
+      <Card
+        sx={{
+          p: 1.5,
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <TextField
+            name="search"
+            label="Search"
+            sx={{
+              width: { xs: 'auto', md: 300 },
+            }}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          {smUp ? (
+            <IconButton
+              sx={{
+                border: 1,
+              }}
+              component={RouterLink}
+              href={paths.dashboard.events.create}
+            >
+              <Iconify icon="mingcute:add-line" />
+            </IconButton>
+          ) : (
+            <Button
+              component={RouterLink}
+              href={paths.dashboard.events.create}
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+            >
+              New Event
+            </Button>
+          )}
+        </Stack>
+      </Card>
+
+      {/* <EventSearch
         query={search.query}
         results={search.results}
         onSearch={handleSearch}
         hrefItem={(id) => paths.dashboard.job.details(id)}
-      />
+      /> */}
 
-      <EventLists />
+      <EventLists query={search} />
     </Container>
   );
 }

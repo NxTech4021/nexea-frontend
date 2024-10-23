@@ -5,12 +5,19 @@ import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { Box, Chip, Container, Typography } from '@mui/material';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
+import { Box, Chip, Button, Dialog, Container, DialogTitle, DialogContent } from '@mui/material';
+
+import { paths } from 'src/routes/paths';
+
+import { useBoolean } from 'src/hooks/use-boolean';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
+import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
+import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
 
 // ----------------------------------------------------------------------
 
@@ -23,20 +30,28 @@ export default function EventAttendee() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
   const apiRef = useGridApiRef();
-  const [menuOptions, setMenuOptions] = useState([]);
-  // To select the event in the menu item
-  const [selectedEvent, setSelectedEvent] = useState('');
-  // To filter to attendees data when an event is selected
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [allAttendees, setAllAttendees] = useState([]);
+  const [event, setEvent] = useState(null);
+  const dialog = useBoolean();
 
   const fetchAttendees = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${id}`);
-      console.log(response.data);
-      setAttendees(response.data);
+      setAttendees(
+        response.data?.attendee?.sort((a, b) => {
+          if (a.checkedIn && !b.checkedIn) {
+            return -1;
+          }
+          if (!a.checkedIn && b.checkedIn) {
+            return 1;
+          }
+          return 0;
+        })
+      );
+      setEvent(response?.data?.event);
     } catch (error) {
-      console.error('Error fetching all attendees:', error);
+      toast.error('Error fetch attendees');
     }
   }, [id]);
 
@@ -54,7 +69,7 @@ export default function EventAttendee() {
       try {
         await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
         fetchAttendees();
-        toast.success('User successfully saved.');
+        toast.success(`Attendee ${newRow.buyerFullName} successfully saved.`);
         setSnackbar({ children: 'User successfully saved', severity: 'success' });
         return newRow;
       } catch (error) {
@@ -84,7 +99,18 @@ export default function EventAttendee() {
   const columns = [
     { field: 'attendeeFullName', headerName: 'Attendee Name', width: 200, editable: true },
     { field: 'attendeeEmail', headerName: 'Attendee Email', width: 200, editable: true },
-    { field: 'orderNumber', headerName: 'Order Number', width: 200 },
+    { field: 'phoneNumber', headerName: 'Attendee Phone Number', width: 200, editable: true },
+    {
+      field: 'orderNumber',
+      headerName: 'Order Number',
+      width: 200,
+      renderCell: (params) => {
+        if (params.value) {
+          return params.value;
+        }
+        return 'No order number';
+      },
+    },
     {
       field: 'companyName',
       headerName: 'Company Name',
@@ -94,31 +120,74 @@ export default function EventAttendee() {
         if (params.value) {
           return params.value;
         }
-        return 'Not Available';
+        return 'No company';
       },
     },
-    { field: 'ticketCode', headerName: 'Ticket Code', width: 200 },
+    {
+      field: 'ticketType',
+      headerName: 'Ticket Type',
+      width: 200,
+      renderCell: (params) => {
+        if (params.value) {
+          return params.value;
+        }
+        return 'No ticket type.';
+      },
+    },
+    {
+      field: 'ticketCode',
+      headerName: 'Ticket Code',
+      width: 200,
+      renderCell: (params) => {
+        if (params.value) {
+          return params.value;
+        }
+        return 'No ticket code.';
+      },
+    },
     {
       field: 'checkedIn',
       headerName: 'Checked In',
-      width: 100,
+      width: 150,
       editable: true,
       renderCell: (params) =>
         !params.value ? (
           <Chip size="small" label="Pending" color="warning" />
         ) : (
-          <Chip size="small" label="Done" color="success" />
+          <Chip size="small" label="Checked In" color="success" />
         ),
     },
   ];
 
   return (
-    <>
-      <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
-        <Typography variant="h4">Attendees</Typography>
-      </Container>
+    <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
+      <CustomBreadcrumbs
+        heading="Attendees"
+        links={[
+          { name: 'Dashboard', href: paths.dashboard.root },
+          {
+            name: event?.name || 'Event',
+            href: paths.dashboard.events.root,
+          },
+          { name: 'Attendees' },
+        ]}
+        action={
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="material-symbols:add" />}
+            onClick={dialog.onTrue}
+          >
+            New Attendee
+          </Button>
+        }
+      />
 
-      <Box sx={{ height: 400, width: '100%' }}>
+      {/* <Stack direction="row" justifyContent="space-between">
+        <Typography variant="h4">Attendees</Typography>
+        <Button variant="outlined">New Attendee</Button>
+      </Stack> */}
+
+      <Box sx={{ height: 400, width: '100%', mt: 2 }}>
         <DataGrid
           editMode="row"
           apiRef={apiRef}
@@ -146,6 +215,17 @@ export default function EventAttendee() {
           }}
         />
       </Box>
-    </>
+
+      <Dialog open={dialog.value} onClose={dialog.onFalse}>
+        <DialogTitle> Add Attendee Information</DialogTitle>
+        <DialogContent sx={{ py: 4 }}>
+          <CreateAttendeeForm
+            dialog={dialog}
+            fetchAttendees={fetchAttendees}
+            selectedEventId={event?.id}
+          />
+        </DialogContent>
+      </Dialog>
+    </Container>
   );
 }

@@ -5,6 +5,7 @@ import React from 'react';
 import axios from 'axios';
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as yup from 'yup';
+import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { Form, Field, Formik } from 'formik';
 import 'react-toastify/dist/ReactToastify.css';
@@ -47,7 +48,7 @@ const initialValues = {
 };
 
 // eslint-disable-next-line react/prop-types
-const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId }) => {
+const CreateAttendeeForm = ({ dialog, fetchAttendees, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
     try {
       await axiosInstance.post(endpoints.attendee.create, {
@@ -56,26 +57,28 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
         lastName: values.lastName,
         name: values.name,
         email: values.email,
-        orderNumber: values.orderNumber,
-        ticketTotal: values.ticketTotal,
-        discountCode: values.discountCode,
-        ticketCode: values.ticketCode,
-        ticketID: values.ticketID,
-        ticketType: values.ticketType,
-        buyerFirstName: values.buyerFirstName,
-        buyerLastName: values.buyerLastName,
-        buyerName: values.buyerName,
+        // orderNumber: values.orderNumber,
+        // ticketTotal: values.ticketTotal,
+        // discountCode: values.discountCode,
+        // ticketCode: values.ticketCode,
+        // ticketID: values.ticketID,
+        // ticketType: values.ticketType,
+        // buyerFirstName: values.buyerFirstName,
+        // buyerLastName: values.buyerLastName,
+        // buyerName: values.buyerName,
         buyerEmail: values.buyerEmail,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
-        checkedIn: values.checkedIn,
+        checkedIn: true,
         eventId: selectedEventId,
       });
       fetchAttendees();
-      setIsModalOpen(false);
+      dialog.onFalse();
+      // setIsModalOpen(false);
       resetForm();
       toast.success('Attendeed added successfully!');
     } catch (error) {
+      console.log(error);
       toast.error('Error creating attendee:', error);
     }
   };
@@ -95,6 +98,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               <Field name="firstName">
                 {({ field, form: { errors } }) => (
                   <TextField
+                    required
                     label="First Name"
                     {...field}
                     error={errors.firstName}
@@ -108,6 +112,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               <Field name="lastName">
                 {({ field, form: { errors } }) => (
                   <TextField
+                    required
                     label="Last Name"
                     {...field}
                     error={errors.lastName}
@@ -124,6 +129,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               <Field name="email">
                 {({ field, form: { errors } }) => (
                   <TextField
+                    required
                     label="Email"
                     {...field}
                     error={errors.email}
@@ -200,13 +206,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               />
             </Grid>
             <Grid item xs={6}>
-              <Field
-                fullWidth
-                label="Buyer Name"
-                id="buyerName"
-                name="buyerName"
-                as={TextField}
-              />
+              <Field fullWidth label="Buyer Name" id="buyerName" name="buyerName" as={TextField} />
             </Grid>
             <Grid item xs={6}>
               <Field name="buyerEmail">
@@ -225,6 +225,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               <Field fullWidth name="phoneNumber">
                 {({ field, form: { errors } }) => (
                   <TextField
+                    required
                     label="Phone Number"
                     {...field}
                     error={errors.phoneNumber}
@@ -240,6 +241,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
               <Field fullWidth name="companyName">
                 {({ field, form: { errors } }) => (
                   <TextField
+                    required
                     label="Company name"
                     {...field}
                     error={errors.companyName}
@@ -253,7 +255,13 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
             <Grid item xs={12}>
               <Grid container justifyContent="flex-end">
                 <Grid item>
-                  <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                  >
                     Submit
                   </Button>
                 </Grid>
@@ -266,3 +274,7 @@ const CreateAttendeeForm = ({ setIsModalOpen, fetchAttendees, selectedEventId })
   );
 };
 export default CreateAttendeeForm;
+
+CreateAttendeeForm.propTypes = {
+  dialog: PropTypes.object,
+};

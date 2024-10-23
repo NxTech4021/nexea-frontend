@@ -92,7 +92,12 @@ export default function LinearStepper() {
       reset();
       router.push(paths.dashboard.events.root);
       toast.success('Event Created');
+      await axiosInstance.get(endpoints.events.list);
     } catch (error) {
+      if (error?.missingColumns) {
+        toast.error(`Missing Columns: ${JSON.stringify(error?.missingColumns)}`);
+        return;
+      }
       toast.error('Error');
     }
   });

@@ -4,7 +4,7 @@
 import dayjs from 'dayjs';
 //  import PropTypes from 'prop-types';
 import 'react-toastify/dist/ReactToastify.css';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -42,6 +42,8 @@ import { MuiFileInput } from 'mui-file-input';
 import useUploadCSV from 'src/hooks/use-upload-csv';
 import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
+import PropTypes from 'prop-types';
+import { grey } from '@mui/material/colors';
 
 const EventStatus = {
   live: 'live',
@@ -73,7 +75,7 @@ const EventStatus = {
 //   },
 // }));
 
-const EventLists = () => {
+const EventLists = ({ query }) => {
   const theme = useTheme();
   const a = useAuthContext();
   const [events, setEvents] = useState([]);
@@ -150,7 +152,9 @@ const EventLists = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      toast.error(error.message);
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -197,25 +201,30 @@ const EventLists = () => {
     setFile(newFile);
   };
 
-  const paginatedEvents = events.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedEvents = useMemo(() => {
+    if (query) {
+      return events
+        .filter((event) => event.name.includes(query))
+        .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    }
+    return events.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [events, query, currentPage]);
 
   return (
     <>
       {loading ? (
-        <>
+        <Stack direction="row" mt={2} gap={2} flexWrap="wrap">
           <Skeleton variant="rounded" width="400px" height="400px" />
           <Skeleton variant="rounded" width="400px" height="400px" />
           <Skeleton variant="rounded" width="400px" height="400px" />
-        </>
+          <Skeleton variant="rounded" width="400px" height="400px" />
+        </Stack>
       ) : (
         <>
           {paginatedEvents && paginatedEvents.length === 0 ? (
             <Stack alignItems="center" gap={5} my={10}>
               <img src="/assets/empty.svg" alt="empty" width={300} />
-              <Typography>No events to display.</Typography>
+              <Typography>No events with name {query} to display.</Typography>
             </Stack>
           ) : (
             <Box
@@ -619,29 +628,42 @@ const EventLists = () => {
                       }}
                     />
 
-                    <Stack direction="row" justifyContent="space-between">
-                      <Stack
-                        spacing={0.5}
-                        direction="row"
-                        alignItems="center"
-                        sx={{ color: 'primary.main', typography: 'caption' }}
-                      >
-                        <Iconify width={16} icon="solar:users-group-rounded-bold" />
-                        {event?.attendees.length} Attendees
+                    <Card
+                      sx={{
+                        p: 2,
+                        boxShadow: 2,
+                        bgcolor: grey[100],
+                      }}
+                    >
+                      <Stack direction="row" justifyContent="space-between">
+                        <Stack
+                          spacing={1}
+                          direction="row"
+                          alignItems="center"
+                          sx={{ color: 'info.main', typography: 'caption' }}
+                        >
+                          <Iconify width={35} icon="solar:users-group-rounded-bold" />
+                          <Typography variant="h6">{event?.attendees.length} Attendees</Typography>
+                        </Stack>
+                        <Divider
+                          sx={{
+                            border: 1,
+                            color: grey[400],
+                          }}
+                        />
+                        <Stack
+                          spacing={1}
+                          direction="row"
+                          alignItems="center"
+                          sx={{ color: 'info.main', typography: 'caption' }}
+                        >
+                          <Iconify width={35} icon="oui:check-in-circle-filled" />
+                          <Typography variant="h6">{`${event?.attendees.filter((attendee) => attendee.checkedIn).length} of ${
+                            event?.attendees.length
+                          } checked in`}</Typography>
+                        </Stack>
                       </Stack>
-                      <Stack
-                        spacing={0.5}
-                        direction="row"
-                        alignItems="center"
-                        sx={{ color: 'primary.main', typography: 'caption' }}
-                      >
-                        <Iconify width={16} icon="oui:check-in-circle-filled" />
-
-                        {`${event?.attendees.filter((attendee) => attendee.checkedIn).length} of ${
-                          event?.attendees.length
-                        } checked in`}
-                      </Stack>
-                    </Stack>
+                    </Card>
                   </Stack>
 
                   <Divider sx={{ borderStyle: 'dashed' }} />
@@ -701,7 +723,7 @@ const EventLists = () => {
                       }}
                     >
                       <Iconify width={16} icon="grommet-icons:status-good-small" />
-                      {/* {updateStatus[index] && updateStatus[index].status} */}
+
                       {event.status}
                     </Stack>
                   </Box>
@@ -805,6 +827,10 @@ const EventLists = () => {
 };
 
 export default EventLists;
+
+EventLists.propTypes = {
+  query: PropTypes.string,
+};
 // TestCard.propTypes = {
 //   backgroundImage: PropTypes.string.isRequired,
 // };

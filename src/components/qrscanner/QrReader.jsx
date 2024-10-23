@@ -15,6 +15,10 @@ const AttendanceStatus = {
   absent: 'No',
 };
 
+const LANYARD_COLOR = {
+  Startups: 'Green',
+};
+
 const QrReader = () => {
   const theme = useTheme();
   const { eventId } = useParams();
@@ -31,11 +35,14 @@ const QrReader = () => {
     name: '',
     email: '',
     companyName: '',
+    phoneNumber: '',
+    ticketType: '',
   });
 
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
   const [newCompanyName, setNewCompanyName] = useState('');
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
 
   // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
   // const [openModalConfirm, setOpenModalConfirm] = useState(false);
@@ -49,8 +56,9 @@ const QrReader = () => {
   const fetchTicketDatabase = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${eventId}`);
-      const ticketCode = response.data.map((obj) => obj.ticketCode);
-      setAttendeesData(response.data);
+
+      const ticketCode = response.data.attendee.map((obj) => obj.ticketCode);
+      setAttendeesData(response.data.attendee);
       return { ticketCode };
     } catch (error) {
       console.error('Error fetching attendees:', error);
@@ -91,7 +99,7 @@ const QrReader = () => {
   );
 
   // eslint-disable-next-line no-shadow
-  const updateInfo = async (id, newEmail, newName, newCompany) => {
+  const updateInfo = async (id, newEmail, newName, newCompany, newPhoneNumber) => {
     try {
       const emailToUpdate = newEmail ? newEmail : scannedAttendee.email;
       const companyNameToUpdate = newCompany ? newCompany : scannedAttendee.companyName;
@@ -103,6 +111,7 @@ const QrReader = () => {
           name: nameToUpdate,
           email: emailToUpdate,
           companyName: companyNameToUpdate,
+          phoneNumber: newPhoneNumber || scannedAttendee.phoneNumber,
           id,
         },
         { headers: { 'content-type': 'application/json' } }
@@ -113,9 +122,9 @@ const QrReader = () => {
         email: '',
         name: '',
         companyName: '',
+        phoneNumber: '',
+        ticketType: '',
       }));
-      // setNewEmail('');
-      // setNewName('');
     } catch (error) {
       console.error('Error updating email:', error);
     }
@@ -130,8 +139,13 @@ const QrReader = () => {
             attendee.email === attendeeData.email && attendee.ticketCode === attendeeData.ticketCode
         );
         if (ownerTicketCode) {
-          await updateInfo(ownerTicketCode[0].id, newEmail, newName, newCompanyName);
-          // await updateAttendees(attendeeData.id);
+          await updateInfo(
+            ownerTicketCode[0].id,
+            newEmail,
+            newName,
+            newCompanyName,
+            newPhoneNumber
+          );
           toast.success(`Attendance updated successfully for ${scannedResult}`);
         }
       } else {
@@ -152,6 +166,7 @@ const QrReader = () => {
           const attendeeData = attendeesData.find(
             (attendee) => attendee.ticketCode === scannedResult
           );
+
           if (attendeeData) {
             if (await isCheckIn(attendeeData.id)) {
               return toast.warn(`${attendeeData.attendeeFullName} is already checked in.`);
@@ -161,6 +176,8 @@ const QrReader = () => {
               email: attendeeData.attendeeEmail,
               name: attendeeData.attendeeFullName,
               companyName: attendeeData.companyName,
+              phoneNumber: attendeeData.phoneNumber,
+              ticketType: attendeeData.ticketType,
             }));
             // setScannedName(attendeeData.attendeeFullName);
             // setScannedEmail(attendeeData.attendeeEmail);
@@ -206,6 +223,7 @@ const QrReader = () => {
     const handleScanSuccess = async (result) => {
       const scannedData = result?.data.trim();
       setScannedResult(scannedData);
+      console.log(scannedData);
       try {
         const { ticketCode } = await fetchTicketDatabase();
         if (ticketCode.includes(scannedData)) {
@@ -377,7 +395,6 @@ const QrReader = () => {
       </Modal> */}
       <Modal
         open={openModalEmail}
-        // onClose={handleCloseModalEmail}
         aria-labelledby="modal-email-title"
         aria-describedby="modal-email-description"
       >
@@ -398,19 +415,46 @@ const QrReader = () => {
         >
           <Typography
             id="modal-email-title"
-            variant="h6"
-            component="h6"
+            variant="h4"
+            // component="h6"
             color={theme.palette.text.primary}
           >
             Attendance Update Form
           </Typography>
-          <Typography
+          {/* <Typography
             id="modal-email-description"
             sx={{ mt: 2, margin: '10px' }}
             color={theme.palette.text.secondary}
           >
             Please confirm your data
+          </Typography> */}
+
+          <Typography
+            component={Box}
+            sx={{
+              mt: 2,
+              margin: '10px',
+              width: 'auto',
+              height: 50,
+              borderRadius: 2,
+              bgcolor: scannedAttendee?.ticketType.includes('Startups') ? '#1a39c2' : '#237a3b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            variant="h6"
+          >
+            Lanyard color: {scannedAttendee?.ticketType.includes('Startups') ? 'Blue' : 'Green'}
           </Typography>
+
+          <TextField
+            label="Phone Number"
+            variant="outlined"
+            defaultValue={scannedAttendee.phoneNumber}
+            onChange={(e) => setNewPhoneNumber(e.target.value)}
+            sx={{ mt: 2, width: '100%' }}
+            color="primary"
+          />
           <TextField
             label="Company Name"
             variant="outlined"
@@ -443,7 +487,7 @@ const QrReader = () => {
               my: 2,
             }}
           >
-            Submit
+            Check In
           </Button>
         </Box>
       </Modal>

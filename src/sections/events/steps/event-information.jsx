@@ -14,7 +14,12 @@ const EventInformation = () => {
   return (
     <Box mt={2}>
       <Typography variant="h6">Event Information</Typography>
-      <Box mt={2} display="grid" gridTemplateColumns={{ xs: 'repeat(2, 1fr)' }} gap={2}>
+      <Box
+        mt={2}
+        display="grid"
+        gridTemplateColumns={{ xs: 'repeat(1, 1fr)', sm: 'repeat(2,1fr)' }}
+        gap={2}
+      >
         <RHFTextField name="eventName" label="Event Name" />
         <RHFAutocomplete
           name="personInCharge"
