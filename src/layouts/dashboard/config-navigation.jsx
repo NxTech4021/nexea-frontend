@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Icon } from '@iconify/react';
 
 import QrCodeIcon from '@mui/icons-material/QrCode';
 
 import { paths } from 'src/routes/paths';
 
+import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -57,44 +57,50 @@ export function useNavData() {
           {
             title: 'Events',
             path: paths.dashboard.events.root,
-            icon: <Icon icon="material-symbols:event" width={25} />,
+            icon: <Iconify icon="material-symbols:campaign" width={25} />,
             children: [
-              { title: 'List', path: paths.dashboard.events.root },
+              {
+                title: 'List',
+                path: paths.dashboard.events.root,
+              },
               { title: 'Create', path: paths.dashboard.events.create },
+              { title: 'Ticket Types', path: paths.dashboard.events.ticketType },
+              { title: 'Discount Codes', path: paths.dashboard.events.discountCode },
+              { title: 'Orders', path: paths.dashboard.events.order },
             ],
           },
           { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
-          {
-            title: 'Attendees',
-            path: paths.dashboard.attendees,
-            icon: <Icon icon="heroicons:users-16-solid" width={25} />,
-          },
-          {
-            title: 'Whatsapp Templates',
-            path: paths.dashboard.whatsappTemplate.root,
-            icon: <Icon icon="ic:baseline-whatsapp" width={25} />,
-          },
-          {
-            title: 'QR',
-            path: paths.dashboard.Qr,
-            icon: ICONS.qr,
-          },
+          // {
+          //   title: 'Attendees',
+          //   path: paths.dashboard.attendees,
+          //   icon: <Icon icon="heroicons:users-16-solid" width={25} />,
+          // },
+          // {
+          //   title: 'Whatsapp Templates',
+          //   path: paths.dashboard.whatsappTemplate.root,
+          //   icon: <Icon icon="ic:baseline-whatsapp" width={25} />,
+          // },
+          // {
+          //   title: 'QR',
+          //   path: paths.dashboard.Qr,
+          //   icon: ICONS.qr,
+          // },
         ],
       },
 
       // MANAGEMENT
       // ----------------------------------------------------------------------
-      {
-        subheader: 'nexea management',
-        items: [
-          {
-            title: 'employee',
-            path: paths.dashboard.employee,
-            icon: ICONS.user,
-            // children: [{ title: 'employee', path: paths.dashboard.group.root }],
-          },
-        ],
-      },
+      // {
+      //   subheader: 'nexea management',
+      //   items: [
+      //     {
+      //       title: 'employee',
+      //       path: paths.dashboard.employee,
+      //       icon: ICONS.user,
+      //       // children: [{ title: 'employee', path: paths.dashboard.group.root }],
+      //     },
+      //   ],
+      // },
     ],
     []
   );

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import Events from 'src/sections/events/view';
+import Dashboard from 'src/sections/dashboard/view';
 
 // ----------------------------------------------------------------------
 
@@ -8,10 +8,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Events</title>
+        <title>Dashboard</title>
       </Helmet>
 
-      <Events />
+      <Dashboard />
     </>
   );
 }

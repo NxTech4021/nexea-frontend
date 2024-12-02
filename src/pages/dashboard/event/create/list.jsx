@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import LinearStepper from 'src/sections/events/event-stepper';
+import Events from 'src/sections/events/create/view/view';
 
 // ----------------------------------------------------------------------
 
@@ -8,10 +8,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new event</title>
+        <title> Dashboard: Events</title>
       </Helmet>
 
-      <LinearStepper />
+      <Events />
     </>
   );
 }

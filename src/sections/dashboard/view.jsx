@@ -18,14 +18,14 @@ import EventListsEventListsDashboard from './list-events';
 
 // ----------------------------------------------------------------------
 
-export default function OneView() {
+export default function Dashboard() {
   const settings = useSettingsContext();
   const { totalAttendees } = useGetAttendees();
   const { totalEvents } = useGetEvents();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Typography variant="h4"> Dashboard </Typography>
+      <Typography variant="h4">Dashboard</Typography>
       <Grid container spacing={3} mt={2}>
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget

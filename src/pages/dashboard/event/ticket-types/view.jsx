@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import SixView from 'src/sections/six/view';
+import TicketTypeView from 'src/sections/events/ticket-types/view/view';
 
 // ----------------------------------------------------------------------
 
@@ -8,10 +8,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Six</title>
+        <title> Dashboard: Discount Codes</title>
       </Helmet>
 
-      <SixView />
+      <TicketTypeView />
     </>
   );
 }

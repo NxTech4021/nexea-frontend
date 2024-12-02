@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'src/routes/hooks';
 
-import NotificationStatus from 'src/sections/events/notification-status';
+import NotificationStatus from 'src/sections/events/create/notification-status';
 
 // ----------------------------------------------------------------------
 

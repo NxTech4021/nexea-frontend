@@ -23,8 +23,9 @@ export default function AuthClassicLayout({ children, image, title }) {
     <Logo
       sx={{
         zIndex: 9,
-        position: 'absolute',
-        m: { xs: 2, md: 5 },
+        // position: 'absolute',
+        // m: { xs: 2, md: 5 },
+        mt: 10,
       }}
     />
   );
@@ -36,7 +37,7 @@ export default function AuthClassicLayout({ children, image, title }) {
         mx: 'auto',
         maxWidth: 480,
         px: { xs: 2, md: 8 },
-        pt: { xs: 15, md: 20 },
+        pt: { xs: 5, md: 10 },
         pb: { xs: 15, md: 0 },
       }}
     >
@@ -93,19 +94,30 @@ export default function AuthClassicLayout({ children, image, title }) {
   );
 
   return (
-    <Stack
-      component="main"
-      direction="row"
+    <Box
       sx={{
         minHeight: '100vh',
+        textAlign: 'center',
       }}
     >
       {renderLogo}
 
-      {mdUp && renderSection}
-
       {renderContent}
-    </Stack>
+    </Box>
+
+    // <Stack
+    //   component="main"
+    //   direction="row"
+    // sx={{
+    //   minHeight: '100vh',
+    // }}
+    // >
+    //   {renderLogo}
+
+    //   {mdUp && renderSection}
+
+    //   {renderContent}
+    // </Stack>
   );
 }
 

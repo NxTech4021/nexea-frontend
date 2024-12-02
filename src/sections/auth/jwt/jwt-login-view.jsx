@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { Card } from '@mui/material';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -64,15 +65,15 @@ export default function JwtLoginView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">Sign in to Nexea Event App</Typography>
+      <Typography variant="h4">Welcome back!</Typography>
 
-      <Stack direction="row" spacing={0.5}>
+      {/* <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">New user?</Typography>
 
         <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2">
           Create an account
         </Link>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 
@@ -102,7 +103,7 @@ export default function JwtLoginView() {
         component={RouterLink}
         color="inherit"
         underline="always"
-        sx={{ alignSelf: 'flex-end' }}
+        sx={{ alignSelf: 'flex-start' }}
         href={paths.auth.jwt.forgotPassword}
       >
         Forgot password?
@@ -115,6 +116,9 @@ export default function JwtLoginView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
+        sx={{
+          boxShadow: '0px -3px 0px 0px #E7E7E7 inset',
+        }}
       >
         Login
       </LoadingButton>
@@ -123,13 +127,15 @@ export default function JwtLoginView() {
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
-      {renderHead}
+      <Card sx={{ p: 3, borderRadius: 2, boxShadow: 20 }}>
+        {renderHead}
 
-      <Alert severity="info" sx={{ mb: 3 }}>
+        {/* <Alert severity="info" sx={{ mb: 3 }}>
         Use nexea email : <strong>example@nexea.co or example@m.nexea.co</strong>
-      </Alert>
+      </Alert> */}
 
-      {renderForm}
+        {renderForm}
+      </Card>
     </FormProvider>
   );
 }

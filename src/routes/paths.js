@@ -29,6 +29,9 @@ export const paths = {
     events: {
       root: `${ROOTS.DASHBOARD}/events`,
       create: `${ROOTS.DASHBOARD}/events/create`,
+      discountCode: `${ROOTS.DASHBOARD}/events/discount-code`,
+      ticketType: `${ROOTS.DASHBOARD}/events/ticket-type`,
+      order: `${ROOTS.DASHBOARD}/events/order`,
       qr: `${ROOTS.DASHBOARD}/events/qr`,
       attendees: `${ROOTS.DASHBOARD}/events/attendees`,
       notification: (id) => `${ROOTS.DASHBOARD}/events/notifcationStatus/${id}`,

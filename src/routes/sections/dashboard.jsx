@@ -7,20 +7,24 @@ import DashboardLayout from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/components/loading-screen';
 
 import Profile from 'src/sections/profile/view';
-import EventAttendee from 'src/sections/events/event-attendee';
+import EventAttendee from 'src/sections/events/create/event-attendee';
 
 // ----------------------------------------------------------------------
 
-const IndexPage = lazy(() => import('src/pages/dashboard/one'));
-const Event = lazy(() => import('src/pages/dashboard/event/list'));
-const CreateEvent = lazy(() => import('src/pages/dashboard/event/create'));
+const Dashboard = lazy(() => import('src/pages/dashboard/view'));
 const PageThree = lazy(() => import('src/pages/dashboard/three'));
 const PageFour = lazy(() => import('src/pages/dashboard/employee/four'));
-const TestView = lazy(() => import('src/pages/dashboard/test'));
 const QrReader = lazy(() => import('src/components/qrscanner/QrReader'));
-const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifications-status'));
 
 const WhatsappTemplate = lazy(() => import('src/pages/dashboard/whatsappTemplate/index'));
+
+// Event
+const Event = lazy(() => import('src/pages/dashboard/event/create/list'));
+const CreateEvent = lazy(() => import('src/pages/dashboard/event/create/create'));
+const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifications-status'));
+const DiscountCodeView = lazy(() => import('src/pages/dashboard/event/discount-code/view'));
+const OrderView = lazy(() => import('src/pages/dashboard/event/orders/view'));
+const TicketTypeView = lazy(() => import('src/pages/dashboard/event/ticket-types/view'));
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +41,7 @@ export const dashboardRoutes = [
       </AuthGuard>
     ),
     children: [
-      { element: <IndexPage />, index: true },
+      { element: <Dashboard />, index: true },
       {
         path: 'user',
         children: [
@@ -50,6 +54,9 @@ export const dashboardRoutes = [
         children: [
           { element: <Event />, index: true },
           { path: 'create', element: <CreateEvent /> },
+          { path: 'discount-code', element: <DiscountCodeView /> },
+          { path: 'ticket-type', element: <TicketTypeView /> },
+          { path: 'order', element: <OrderView /> },
           {
             path: 'qr/:eventId',
             element: <QrReader />,
@@ -63,7 +70,6 @@ export const dashboardRoutes = [
         children: [{ element: <WhatsappTemplate />, index: true }],
       },
       { path: 'attendees', element: <PageThree /> },
-      { path: 'test', element: <TestView /> },
       { path: 'employee', element: <PageFour /> },
       { path: 'qr', element: <QrReader /> },
     ],
