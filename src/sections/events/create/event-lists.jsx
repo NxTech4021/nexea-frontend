@@ -683,9 +683,9 @@ const EventLists = ({ query }) => {
                     >
                       <Iconify icon="mdi:user" />
                       <Typography variant="caption" noWrap>
-                        {`${event.personInCharge.name
-                          .charAt(0)
-                          .toUpperCase()}${event?.personInCharge?.name.slice(1)}`}
+                        {`${event.personInCharge.fullName
+                          ?.charAt(0)
+                          .toUpperCase()}${event?.personInCharge?.fullName?.slice(1)}`}
                       </Typography>
                     </Stack>
                     <Stack

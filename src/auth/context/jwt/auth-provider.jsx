@@ -196,7 +196,7 @@ export function AuthProvider({ children }) {
 
   // ----------------------------------------------------------------------
 
-  const checkAuthenticated = state.user?.verified ? 'authenticated' : 'unauthenticated';
+  const checkAuthenticated = state.user?.isVerified ? 'authenticated' : 'unauthenticated';
 
   const status = state.loading ? 'loading' : checkAuthenticated;
 

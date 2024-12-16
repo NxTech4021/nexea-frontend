@@ -100,7 +100,7 @@ const EmployeeLists = () => {
         <TableCell>{item.email}</TableCell>
         <TableCell>{item.position}</TableCell>
         <TableCell>
-          {item.verified ? (
+          {item.isVerified ? (
             <Chip label="Verified" variant="outlined" color="primary" />
           ) : (
             <Chip label="Unverified" variant="outlined" color="error" />
