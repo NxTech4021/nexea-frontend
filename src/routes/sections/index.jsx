@@ -4,6 +4,7 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import { mainRoutes } from './main';
 import { authRoutes } from './auth';
+import { ticketRoutes } from './ticket';
 import { dashboardRoutes } from './dashboard';
 
 // ----------------------------------------------------------------------
@@ -23,6 +24,8 @@ export default function Router() {
 
     // Main routes
     ...mainRoutes,
+
+    ...ticketRoutes,
 
     // { path: '/test', element: <TestView /> },
 
