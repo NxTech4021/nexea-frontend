@@ -79,4 +79,7 @@ export const endpoints = {
   users: {
     list: '/api/users',
   },
+  tickets: {
+    toggle: '/api/tickets/toggle',
+  },
 };
