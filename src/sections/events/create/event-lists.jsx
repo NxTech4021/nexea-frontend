@@ -13,34 +13,32 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Grid,
-  Card,
   Menu,
   Chip,
   Stack,
+  Table,
+  Paper,
   Button,
   Dialog,
   Select,
   Avatar,
-  Table,
+  Divider,
   TableRow,
+  MenuItem,
+  Skeleton,
   TableBody,
   TableCell,
   TableHead,
-  TableContainer,
-  Paper,
-  Divider,
-  MenuItem,
-  Skeleton,
   TextField,
   Typography,
   IconButton,
+  InputLabel,
   DialogTitle,
-  ListItemText,
+  FormControl,
   DialogContent,
   DialogActions,
   useMediaQuery,
-  FormControl,
-  InputLabel,
+  TableContainer,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
@@ -48,7 +46,6 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
-import { MuiFileInput } from 'mui-file-input';
 import useUploadCSV from 'src/hooks/use-upload-csv';
 import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
@@ -109,12 +106,28 @@ const EventLists = ({ query }) => {
   const [openTickets, setOpenTickets] = useState(false);
   const [tickets, setTickets] = useState([
     // Mock data, delete later
-    { id: 1, name: "Standard - Startups", type: "Early Bird", validity: "2023-12-31", category: "Startup", price: 50, quantity: 100 }, 
-    { id: 2, name: "Standard - General", type: "Standard", validity: "2023-12-31", category: "General", price: 75, quantity: 200 },
+    {
+      id: 1,
+      name: 'Standard - Startups',
+      type: 'Early Bird',
+      validity: '2023-12-31',
+      category: 'Startup',
+      price: 50,
+      quantity: 100,
+    },
+    {
+      id: 2,
+      name: 'Standard - General',
+      type: 'Standard',
+      validity: '2023-12-31',
+      category: 'General',
+      price: 75,
+      quantity: 200,
+    },
   ]);
   const [anchorElFilter, setAnchorElFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [openCreateTicket, setOpenCreateTicket] = useState(false);
   const [openEditTicket, setOpenEditTicket] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
@@ -127,30 +140,30 @@ const EventLists = ({ query }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'live':
-        return 'error'; 
+        return 'error';
       case 'completed':
-        return 'success'; 
+        return 'success';
       case 'scheduled':
-        return 'info'; 
+        return 'info';
       case 'postponed':
-        return 'warning'; 
+        return 'warning';
       default:
-        return 'default'; 
+        return 'default';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'live':
-        return "mdi:play-circle";
+        return 'mdi:play-circle';
       case 'completed':
-        return "mdi:check-circle";
+        return 'mdi:check-circle';
       case 'scheduled':
-        return "mdi:calendar-clock";
+        return 'mdi:calendar-clock';
       case 'postponed':
-        return "mdi:clock-alert";
+        return 'mdi:clock-alert';
       default:
-        return "mdi:help-circle";
+        return 'mdi:help-circle';
     }
   };
 
@@ -254,7 +267,7 @@ const EventLists = ({ query }) => {
 
   const filteredEvents = useMemo(() => {
     if (statusFilter) {
-      return events.filter(event => event.status === statusFilter);
+      return events.filter((event) => event.status === statusFilter);
     }
     return events;
   }, [events, statusFilter]);
@@ -267,7 +280,7 @@ const EventLists = ({ query }) => {
   };
 
   const handleEditTicket = (values) => {
-    const updatedTickets = tickets.map(ticket => 
+    const updatedTickets = tickets.map((ticket) =>
       ticket.id === currentTicket.id ? { ...ticket, ...values } : ticket
     );
     setTickets(updatedTickets);
@@ -275,22 +288,20 @@ const EventLists = ({ query }) => {
   };
 
   const handleDeleteTicket = (ticketId) => {
-    const updatedTickets = tickets.filter(ticket => ticket.id !== ticketId);
+    const updatedTickets = tickets.filter((ticket) => ticket.id !== ticketId);
     setTickets(updatedTickets);
   };
 
-  // Handler for ticket status (Active/Inactive) 
+  // Handler for ticket status (Active/Inactive)
   // Needs bug fixing***
   const handleToggleStatus = async (ticketId) => {
     try {
       const response = await axiosInstance.patch(`${endpoints.tickets.toggle}/${ticketId}`);
-      
+
       if (response.data.success) {
         // Update the local state to reflect the change
-        const updatedTickets = tickets.map(ticket => 
-          ticket.id === ticketId 
-            ? { ...ticket, isActive: !ticket.isActive }
-            : ticket
+        const updatedTickets = tickets.map((ticket) =>
+          ticket.id === ticketId ? { ...ticket, isActive: !ticket.isActive } : ticket
         );
         setTickets(updatedTickets);
         toast.success(response.data.message);
@@ -322,9 +333,15 @@ const EventLists = ({ query }) => {
               <Table sx={{ minWidth: 650 }} aria-label="events table">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: theme.palette.grey[200] }}>
-                    <TableCell align="flex-start" sx={{ fontWeight: 'bold', paddingLeft: 3 }}>Event Name</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Person in Charge</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Posted Date</TableCell>
+                    <TableCell align="flex-start" sx={{ fontWeight: 'bold', paddingLeft: 3 }}>
+                      Event Name
+                    </TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                      Person in Charge
+                    </TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                      Posted Date
+                    </TableCell>
                     <TableCell align="center" sx={{ fontWeight: 'bold', paddingLeft: 8 }}>
                       <Stack direction="row" alignItems="center" spacing={-1}>
                         Status
@@ -340,9 +357,14 @@ const EventLists = ({ query }) => {
                             <MenuItem key={status} onClick={() => handleStatusFilterChange(status)}>
                               <Stack direction="row" alignItems="center">
                                 {status === statusFilter && (
-                                  <Iconify icon="mdi:check" sx={{ marginRight: 1, color: 'green' }} />
+                                  <Iconify
+                                    icon="mdi:check"
+                                    sx={{ marginRight: 1, color: 'green' }}
+                                  />
                                 )}
-                                <Typography variant="body2">{status.charAt(0).toUpperCase() + status.slice(1)}</Typography>
+                                <Typography variant="body2">
+                                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </Typography>
                               </Stack>
                             </MenuItem>
                           ))}
@@ -357,7 +379,9 @@ const EventLists = ({ query }) => {
                         </Menu>
                       </Stack>
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                      Actions
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -366,7 +390,10 @@ const EventLists = ({ query }) => {
                       <TableCell colSpan={4} align="center">
                         <Stack alignItems="center" gap={5} my={10}>
                           <img src="/assets/empty.svg" alt="empty" width={300} />
-                          <Typography>No events available for the status: {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}.</Typography>
+                          <Typography>
+                            No events available for the status:{' '}
+                            {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}.
+                          </Typography>
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -374,12 +401,21 @@ const EventLists = ({ query }) => {
                     filteredEvents.map((event) => (
                       <TableRow
                         key={event.id}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 }, '&:hover': { backgroundColor: grey[100] } }}
+                        sx={{
+                          '&:last-child td, &:last-child th': { border: 0 },
+                          '&:hover': { backgroundColor: grey[100] },
+                        }}
                       >
                         <TableCell align="center">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt="Event" src="/logo/nexea.png" sx={{ width: 40, height: 40 }} />
-                            <Typography variant="subtitle1" fontWeight={600}>{event.name}</Typography>
+                            <Avatar
+                              alt="Event"
+                              src="/logo/nexea.png"
+                              sx={{ width: 40, height: 40 }}
+                            />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              {event.name}
+                            </Typography>
                           </Stack>
                         </TableCell>
                         <TableCell align="center">{event.personInCharge.fullName}</TableCell>
@@ -388,19 +424,27 @@ const EventLists = ({ query }) => {
                           <Chip
                             label={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                             color={getStatusColor(event.status)}
-                            icon={<Iconify icon={getStatusIcon(event.status)} sx={{ marginRight: 0.5 }} />}
-                            sx={{ 
+                            icon={
+                              <Iconify
+                                icon={getStatusIcon(event.status)}
+                                sx={{ marginRight: 0.5 }}
+                              />
+                            }
+                            sx={{
                               width: '120px',
                               height: '30px',
                               borderRadius: '16px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontWeight: 600
+                              fontWeight: 600,
                             }}
                           />
                         </TableCell>
-                        <TableCell align="right" sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <TableCell
+                          align="right"
+                          sx={{ display: 'flex', justifyContent: 'flex-end' }}
+                        >
                           <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
                             <Button
                               variant="outlined"
@@ -413,13 +457,21 @@ const EventLists = ({ query }) => {
                             <Button
                               variant="outlined"
                               sx={{ color: 'black' }}
-                              onClick={(e) => { setAnchorEl2(e.currentTarget); setCurrentEventId(event.id); }}
+                              onClick={(e) => {
+                                setAnchorEl2(e.currentTarget);
+                                setCurrentEventId(event.id);
+                              }}
                               endIcon={<Iconify icon="raphael:arrowdown" width={14} />}
                             >
                               <Iconify icon="mdi:users" />
                               {!isSmallScreen}
                             </Button>
-                            <IconButton onClick={(e) => { setAnchorEl(e.currentTarget); setCurrentEvent(event); }}>
+                            <IconButton
+                              onClick={(e) => {
+                                setAnchorEl(e.currentTarget);
+                                setCurrentEvent(event);
+                              }}
+                            >
                               <Iconify icon="eva:more-vertical-fill" />
                             </IconButton>
                             <Menu
@@ -526,7 +578,9 @@ const EventLists = ({ query }) => {
                               >
                                 <Stack direction="row" alignItems="center" gap={1}>
                                   <Iconify icon="material-symbols:delete" sx={{ color: 'red' }} />
-                                  <Typography variant="button" sx={{ color: 'red' }}>Delete</Typography>
+                                  <Typography variant="button" sx={{ color: 'red' }}>
+                                    Delete
+                                  </Typography>
                                 </Stack>
                               </MenuItem>
                             </Menu>
@@ -563,24 +617,26 @@ const EventLists = ({ query }) => {
         maxWidth="xs"
         fullWidth
       >
-           <Box sx={{ mb: 1, mt: 3 }}>
-            <Box
-              sx={{
-                backgroundColor: 'rgba(255, 0, 0, 0.2)',
-                borderRadius: '50%',
-                width: 60,
-                height: 60,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto',
-              }}
-            >
-              <Iconify icon="mdi:alert" color="red" width={30} />
-            </Box>
+        <Box sx={{ mb: 1, mt: 3 }}>
+          <Box
+            sx={{
+              backgroundColor: 'rgba(255, 0, 0, 0.2)',
+              borderRadius: '50%',
+              width: 60,
+              height: 60,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto',
+            }}
+          >
+            <Iconify icon="mdi:alert" color="red" width={30} />
           </Box>
-        <DialogTitle id="alert-dialog-title" sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}>
-
+        </Box>
+        <DialogTitle
+          id="alert-dialog-title"
+          sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}
+        >
           Delete Event
         </DialogTitle>
         <DialogContent>
@@ -589,17 +645,17 @@ const EventLists = ({ query }) => {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Button 
-            onClick={() => setOpenDelete(false)} 
-            sx={{ 
-              borderRadius: 6, 
-              backgroundColor: '#f0f0f0', 
-              color: '#555', 
-              flex: 1, 
+          <Button
+            onClick={() => setOpenDelete(false)}
+            sx={{
+              borderRadius: 6,
+              backgroundColor: '#f0f0f0',
+              color: '#555',
+              flex: 1,
               height: '48px',
               '&:hover': {
                 backgroundColor: '#d0d0d0',
-              }
+              },
             }}
           >
             Cancel
@@ -611,15 +667,15 @@ const EventLists = ({ query }) => {
               handleClosee();
             }}
             autoFocus
-            sx={{ 
-              borderRadius: 6, 
-              color: 'white', 
-              backgroundColor: 'red', 
-              flex: 1, 
+            sx={{
+              borderRadius: 6,
+              color: 'white',
+              backgroundColor: 'red',
+              flex: 1,
               height: '48px',
               '&:hover': {
                 backgroundColor: '#c62828',
-              }
+              },
             }}
           >
             Confirm
@@ -677,7 +733,11 @@ const EventLists = ({ query }) => {
         fullWidth
       >
         <DialogTitle id="alert-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt="Event" src="/logo/nexea.png" sx={{ width: 64, height: 64, marginRight: 2 }} />
+          <Avatar
+            alt="Event"
+            src="/logo/nexea.png"
+            sx={{ width: 64, height: 64, marginRight: 2 }}
+          />
           <Box>
             <Typography variant="h6">{currentEvent.name}</Typography>
             <Typography variant="subtitle1">Edit Information</Typography>
@@ -726,7 +786,11 @@ const EventLists = ({ query }) => {
                         shrink: true,
                       }}
                     />
-                    <ErrorMessage name="name" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      style={{ color: 'red', fontSize: '0.8rem' }}
+                    />
                   </Grid>
 
                   <Grid item xs={12} sm={6}>
@@ -751,7 +815,11 @@ const EventLists = ({ query }) => {
                         ))
                       )}
                     </Field>
-                    <ErrorMessage name="personInCharge" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                    <ErrorMessage
+                      name="personInCharge"
+                      component="div"
+                      style={{ color: 'red', fontSize: '0.8rem' }}
+                    />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -768,7 +836,11 @@ const EventLists = ({ query }) => {
                         shrink: true,
                       }}
                     />
-                    <ErrorMessage name="description" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                    <ErrorMessage
+                      name="description"
+                      component="div"
+                      style={{ color: 'red', fontSize: '0.8rem' }}
+                    />
                   </Grid>
 
                   <Grid item xs={12} sm={6}>
@@ -778,11 +850,17 @@ const EventLists = ({ query }) => {
                         minDate={dayjs()}
                         value={dayjs(values.date)}
                         onChange={(date) => setFieldValue('date', date.toISOString())}
-                        renderInput={(params) => <TextField {...params} fullWidth variant="outlined" />}
+                        renderInput={(params) => (
+                          <TextField {...params} fullWidth variant="outlined" />
+                        )}
                         required
                       />
                     </LocalizationProvider>
-                    <ErrorMessage name="date" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                    <ErrorMessage
+                      name="date"
+                      component="div"
+                      style={{ color: 'red', fontSize: '0.8rem' }}
+                    />
                   </Grid>
 
                   <Grid item xs={12} sm={6}>
@@ -797,12 +875,18 @@ const EventLists = ({ query }) => {
                         shrink: true,
                       }}
                     />
-                    <ErrorMessage name="api" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                    <ErrorMessage
+                      name="api"
+                      component="div"
+                      style={{ color: 'red', fontSize: '0.8rem' }}
+                    />
                   </Grid>
 
                   <Grid item xs={12}>
                     <FormControl fullWidth required variant="outlined">
-                      <InputLabel shrink htmlFor="status">Event Status</InputLabel>
+                      <InputLabel shrink htmlFor="status">
+                        Event Status
+                      </InputLabel>
                       <Field
                         as={Select}
                         name="status"
@@ -819,43 +903,47 @@ const EventLists = ({ query }) => {
                           </MenuItem>
                         ))}
                       </Field>
-                      <ErrorMessage name="status" component="div" style={{ color: 'red', fontSize: '0.8rem' }} />
+                      <ErrorMessage
+                        name="status"
+                        component="div"
+                        style={{ color: 'red', fontSize: '0.8rem' }}
+                      />
                     </FormControl>
                   </Grid>
 
                   <Grid item xs={12}>
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button 
-                        onClick={handleCloseEdit} 
-                        disabled={isSubmitting} 
-                        variant="contained" 
+                      <Button
+                        onClick={handleCloseEdit}
+                        disabled={isSubmitting}
+                        variant="contained"
                         sx={{
                           borderRadius: 6,
                           backgroundColor: '#f0f0f0',
                           height: '36px',
                           padding: '0 16px',
-                          color: '#555', 
+                          color: '#555',
                           '&:hover': {
                             backgroundColor: '#d0d0d0',
-                          }
+                          },
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        type="submit" 
-                        variant="contained" 
-                        color="primary" 
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
                         disabled={isSubmitting}
                         sx={{
                           borderRadius: 6,
                           color: 'white',
                           height: '36px',
                           padding: '0 16px',
-                          backgroundColor: '#1976d2', 
+                          backgroundColor: '#1976d2',
                           '&:hover': {
                             backgroundColor: '#115293',
-                          }
+                          },
                         }}
                       >
                         Update Event
@@ -879,7 +967,11 @@ const EventLists = ({ query }) => {
         fullWidth
       >
         <DialogTitle id="upload-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt="Event" src="/logo/nexea.png" sx={{ width: 64, height: 64, marginRight: 2 }} />
+          <Avatar
+            alt="Event"
+            src="/logo/nexea.png"
+            sx={{ width: 64, height: 64, marginRight: 2 }}
+          />
           <Box>
             <Typography variant="h6">{currentEvent.name}</Typography>
             <Typography variant="subtitle1">Upload Attendees</Typography>
@@ -891,7 +983,12 @@ const EventLists = ({ query }) => {
             Upload a CSV file of the attendees.
           </Typography>
           {file ? (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2, border: '1px solid #ccc', padding: 1, borderRadius: 1 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mt: 2, border: '1px solid #ccc', padding: 1, borderRadius: 1 }}
+            >
               <Iconify icon="mdi:file-csv" />
               <Typography variant="body2">
                 {file.name} ({(file.size / 1024).toFixed(2)} KB)
@@ -911,17 +1008,17 @@ const EventLists = ({ query }) => {
             <Button
               variant="contained"
               component="label"
-              sx={{ 
-                marginTop: 2, 
+              sx={{
+                marginTop: 2,
                 backgroundColor: '#3874cb',
                 color: 'white',
-                display: 'flex', 
+                display: 'flex',
                 alignItems: 'center',
                 borderRadius: 1,
                 height: '40px',
                 '&:hover': {
                   backgroundColor: '#2e5a9b',
-                }
+                },
               }}
             >
               <Iconify icon="material-symbols:upload" sx={{ marginRight: 1 }} />
@@ -952,10 +1049,10 @@ const EventLists = ({ query }) => {
               backgroundColor: '#f0f0f0',
               height: '36px',
               padding: '0 16px',
-              color: '#555', 
+              color: '#555',
               '&:hover': {
                 backgroundColor: '#d0d0d0',
-              }
+              },
             }}
           >
             Cancel
@@ -973,10 +1070,10 @@ const EventLists = ({ query }) => {
               color: 'white',
               height: '36px',
               padding: '0 16px',
-              backgroundColor: '#1976d2', 
+              backgroundColor: '#1976d2',
               '&:hover': {
                 backgroundColor: '#115293',
-              }
+              },
             }}
             disabled={!file}
           >
@@ -992,10 +1089,14 @@ const EventLists = ({ query }) => {
         aria-labelledby="tickets-dialog-title"
         aria-describedby="tickets-dialog-description"
         maxWidth="lg"
-        fullWidth 
+        fullWidth
       >
         <DialogTitle id="tickets-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt="Event" src="/logo/nexea.png" sx={{ width: 64, height: 64, marginRight: 2 }} />
+          <Avatar
+            alt="Event"
+            src="/logo/nexea.png"
+            sx={{ width: 64, height: 64, marginRight: 2 }}
+          />
           <Box>
             <Typography variant="h6">{currentEvent.name}</Typography>
             <Typography variant="subtitle1">Tickets</Typography>
@@ -1021,8 +1122,13 @@ const EventLists = ({ query }) => {
                 </TableHead>
                 <TableBody>
                   {tickets.map((ticket) => (
-                    <TableRow key={ticket.id} sx={{ '&:hover': { backgroundColor: theme.palette.grey[200] } }}>
-                      <TableCell><strong>{ticket.name}</strong></TableCell>
+                    <TableRow
+                      key={ticket.id}
+                      sx={{ '&:hover': { backgroundColor: theme.palette.grey[200] } }}
+                    >
+                      <TableCell>
+                        <strong>{ticket.name}</strong>
+                      </TableCell>
                       <TableCell>{ticket.type}</TableCell>
                       <TableCell>{ticket.validity}</TableCell>
                       <TableCell>{ticket.category}</TableCell>
@@ -1030,17 +1136,31 @@ const EventLists = ({ query }) => {
                       <TableCell>{ticket.quantity}</TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={1}>
-                          <IconButton onClick={() => { setCurrentTicket(ticket); setOpenEditTicket(true); }} color="primary">
+                          <IconButton
+                            onClick={() => {
+                              setCurrentTicket(ticket);
+                              setOpenEditTicket(true);
+                            }}
+                            color="primary"
+                          >
                             <Iconify icon="material-symbols:edit" />
                           </IconButton>
-                          <IconButton onClick={() => { setCurrentTicket(ticket); setOpenDeleteTicket(true); }} color="error">
+                          <IconButton
+                            onClick={() => {
+                              setCurrentTicket(ticket);
+                              setOpenDeleteTicket(true);
+                            }}
+                            color="error"
+                          >
                             <Iconify icon="material-symbols:delete" />
                           </IconButton>
-                          <IconButton 
+                          <IconButton
                             onClick={() => handleToggleStatus(ticket.id)}
-                            color={ticket.isActive ? "success" : "default"}
+                            color={ticket.isActive ? 'success' : 'default'}
                           >
-                            <Iconify icon={ticket.isActive ? "mdi:toggle-switch" : "mdi:toggle-switch-off"} />
+                            <Iconify
+                              icon={ticket.isActive ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off'}
+                            />
                           </IconButton>
                         </Stack>
                       </TableCell>
@@ -1052,32 +1172,32 @@ const EventLists = ({ query }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setOpenTickets(false)} 
+          <Button
+            onClick={() => setOpenTickets(false)}
             sx={{
               borderRadius: 6,
               backgroundColor: '#f0f0f0',
               height: '36px',
               padding: '0 16px',
-              color: '#555', 
+              color: '#555',
               '&:hover': {
                 backgroundColor: '#d0d0d0',
-              }
+              },
             }}
           >
             Close
           </Button>
-          <Button 
-            onClick={() => setOpenCreateTicket(true)} 
-            sx={{ 
+          <Button
+            onClick={() => setOpenCreateTicket(true)}
+            sx={{
               borderRadius: 6,
               color: 'white',
               height: '36px',
               padding: '0 16px',
-              backgroundColor: '#1976d2', 
+              backgroundColor: '#1976d2',
               '&:hover': {
                 backgroundColor: '#115293',
-              }
+              },
             }}
           >
             Create New Ticket
@@ -1111,7 +1231,7 @@ const EventLists = ({ query }) => {
             {({ handleChange, handleSubmit, setFieldValue, values }) => (
               <Form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
-                <Grid item xs={12} sx={{ mt: 2 }}>
+                  <Grid item xs={12} sx={{ mt: 2 }}>
                     <Field as={TextField} name="name" label="Ticket Name" fullWidth required />
                   </Grid>
                   <Grid item xs={12}>
@@ -1122,7 +1242,7 @@ const EventLists = ({ query }) => {
                         name="type"
                         labelId="ticket-type-label"
                         label="Ticket Type"
-                        onChange={(event) => setFieldValue("type", event.target.value)}
+                        onChange={(event) => setFieldValue('type', event.target.value)}
                       >
                         <MenuItem value="Early Bird">Early Bird</MenuItem>
                         <MenuItem value="Standard">Standard</MenuItem>
@@ -1130,7 +1250,15 @@ const EventLists = ({ query }) => {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12}>
-                    <Field as={TextField} name="validity" label="Ticket Validity" type="date" fullWidth required InputLabelProps={{ shrink: true }} />
+                    <Field
+                      as={TextField}
+                      name="validity"
+                      label="Ticket Validity"
+                      type="date"
+                      fullWidth
+                      required
+                      InputLabelProps={{ shrink: true }}
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     <FormControl fullWidth required variant="outlined">
@@ -1140,7 +1268,7 @@ const EventLists = ({ query }) => {
                         name="category"
                         labelId="ticket-category-label"
                         label="Ticket Category"
-                        onChange={(event) => setFieldValue("category", event.target.value)}
+                        onChange={(event) => setFieldValue('category', event.target.value)}
                       >
                         <MenuItem value="Startup">Startup</MenuItem>
                         <MenuItem value="General">General</MenuItem>
@@ -1150,39 +1278,53 @@ const EventLists = ({ query }) => {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12}>
-                    <Field as={TextField} name="price" label="Ticket Price" type="number" fullWidth required />
+                    <Field
+                      as={TextField}
+                      name="price"
+                      label="Ticket Price"
+                      type="number"
+                      fullWidth
+                      required
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <Field as={TextField} name="quantity" label="Ticket Quantity" type="number" fullWidth required />
+                    <Field
+                      as={TextField}
+                      name="quantity"
+                      label="Ticket Quantity"
+                      type="number"
+                      fullWidth
+                      required
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <DialogActions sx={{ justifyContent: 'flex-end', paddingRight: '-0px'}}>
-                      <Button 
-                        onClick={() => setOpenCreateTicket(false)} 
+                    <DialogActions sx={{ justifyContent: 'flex-end', paddingRight: '-0px' }}>
+                      <Button
+                        onClick={() => setOpenCreateTicket(false)}
                         sx={{
                           borderRadius: 6,
                           backgroundColor: '#f0f0f0',
                           height: '36px',
                           padding: '0 16px',
-                          color: '#555', 
+                          color: '#555',
                           '&:hover': {
                             backgroundColor: '#d0d0d0',
-                          }
+                          },
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        type="submit" 
-                        sx={{ 
+                      <Button
+                        type="submit"
+                        sx={{
                           borderRadius: 6,
                           color: 'white',
                           height: '36px',
                           padding: '0 16px',
-                          backgroundColor: '#1976d2', 
+                          backgroundColor: '#1976d2',
                           '&:hover': {
                             backgroundColor: '#115293',
-                          }
+                          },
                         }}
                       >
                         Create Ticket
@@ -1234,7 +1376,7 @@ const EventLists = ({ query }) => {
                           name="type"
                           labelId="edit-ticket-type-label"
                           label="Ticket Type"
-                          onChange={(event) => setFieldValue("type", event.target.value)}
+                          onChange={(event) => setFieldValue('type', event.target.value)}
                         >
                           <MenuItem value="Early Bird">Early Bird</MenuItem>
                           <MenuItem value="Standard">Standard</MenuItem>
@@ -1242,7 +1384,15 @@ const EventLists = ({ query }) => {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                      <Field as={TextField} name="validity" label="Ticket Validity" type="date" fullWidth required InputLabelProps={{ shrink: true }} />
+                      <Field
+                        as={TextField}
+                        name="validity"
+                        label="Ticket Validity"
+                        type="date"
+                        fullWidth
+                        required
+                        InputLabelProps={{ shrink: true }}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <FormControl fullWidth required variant="outlined">
@@ -1252,7 +1402,7 @@ const EventLists = ({ query }) => {
                           name="category"
                           labelId="edit-ticket-category-label"
                           label="Ticket Category"
-                          onChange={(event) => setFieldValue("category", event.target.value)}
+                          onChange={(event) => setFieldValue('category', event.target.value)}
                         >
                           <MenuItem value="Startup">Startup</MenuItem>
                           <MenuItem value="General">General</MenuItem>
@@ -1262,17 +1412,36 @@ const EventLists = ({ query }) => {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                      <Field as={TextField} name="price" label="Ticket Price" type="number" fullWidth required />
+                      <Field
+                        as={TextField}
+                        name="price"
+                        label="Ticket Price"
+                        type="number"
+                        fullWidth
+                        required
+                      />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field as={TextField} name="quantity" label="Ticket Quantity" type="number" fullWidth required />
+                      <Field
+                        as={TextField}
+                        name="quantity"
+                        label="Ticket Quantity"
+                        type="number"
+                        fullWidth
+                        required
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <DialogActions sx={{ justifyContent: 'flex-end' }}>
                         <Button onClick={() => setOpenEditTicket(false)} color="primary">
                           Cancel
                         </Button>
-                        <Button type="submit" variant="contained" color="primary" sx={{ marginLeft: 1 }}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          sx={{ marginLeft: 1 }}
+                        >
                           Update Ticket
                         </Button>
                       </DialogActions>
@@ -1310,7 +1479,10 @@ const EventLists = ({ query }) => {
             <Iconify icon="mdi:trash-can" color="red" width={30} />
           </Box>
         </Box>
-        <DialogTitle id="delete-ticket-dialog-title" sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}>
+        <DialogTitle
+          id="delete-ticket-dialog-title"
+          sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}
+        >
           Delete Ticket
         </DialogTitle>
         <DialogContent>
@@ -1319,17 +1491,17 @@ const EventLists = ({ query }) => {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Button 
-            onClick={() => setOpenDeleteTicket(false)} 
-            sx={{ 
-              borderRadius: 6, 
-              backgroundColor: '#f0f0f0', 
-              color: '#555', 
-              flex: 1, 
+          <Button
+            onClick={() => setOpenDeleteTicket(false)}
+            sx={{
+              borderRadius: 6,
+              backgroundColor: '#f0f0f0',
+              color: '#555',
+              flex: 1,
               height: '48px',
               '&:hover': {
                 backgroundColor: '#d0d0d0',
-              }
+              },
             }}
           >
             Cancel
@@ -1340,15 +1512,15 @@ const EventLists = ({ query }) => {
               setOpenDeleteTicket(false);
             }}
             autoFocus
-            sx={{ 
-              borderRadius: 6, 
-              color: 'white', 
-              backgroundColor: 'red', 
-              flex: 1, 
+            sx={{
+              borderRadius: 6,
+              color: 'white',
+              backgroundColor: 'red',
+              flex: 1,
               height: '48px',
               '&:hover': {
                 backgroundColor: '#c62828',
-              }
+              },
             }}
           >
             Confirm
@@ -1367,4 +1539,3 @@ EventLists.propTypes = {
 // TestCard.propTypes = {
 //   backgroundImage: PropTypes.string.isRequired,
 // };
-

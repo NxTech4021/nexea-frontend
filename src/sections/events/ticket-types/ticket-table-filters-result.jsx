@@ -56,7 +56,12 @@ export default function TicketTableFiltersResult({
         {!!filters.eventName.length && (
           <Block label="Event Name:">
             {filters.eventName.map((item) => (
-              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveEventName(item)} />
+              <Chip
+                key={item}
+                label={item}
+                size="small"
+                onDelete={() => handleRemoveEventName(item)}
+              />
             ))}
           </Block>
         )}

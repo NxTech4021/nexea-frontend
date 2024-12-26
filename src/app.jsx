@@ -12,9 +12,9 @@ import { useScrollToTop } from 'src/hooks/use-scroll-to-top';
 import ProgressBar from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { SettingsDrawer, SettingsProvider } from 'src/components/settings';
-import { ToastContainer } from 'react-toastify';
 
 import { AuthProvider } from 'src/auth/context/jwt';
+import { SnackbarProvider } from './components/snackbar';
 
 // ----------------------------------------------------------------------
 
@@ -46,13 +46,15 @@ export default function App() {
         }}
       >
         <ThemeProvider>
-          <MotionLazy>
-            {/* <ToastContainer position="bottom-right" /> */}
-            <ToastContainer position="top-center" />
-            <SettingsDrawer />
-            <ProgressBar />
-            <Router />
-          </MotionLazy>
+          <SnackbarProvider>
+            <MotionLazy>
+              {/* <ToastContainer position="bottom-right" /> */}
+              {/* <ToastContainer position="top-center" /> */}
+              <SettingsDrawer />
+              <ProgressBar />
+              <Router />
+            </MotionLazy>
+          </SnackbarProvider>
         </ThemeProvider>
       </SettingsProvider>
     </AuthProvider>

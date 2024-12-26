@@ -25,15 +25,8 @@ export default function CustomBreadcrumbs({
     <Box sx={{ ...sx }}>
       <Stack direction="row" alignItems="center">
         <Box sx={{ flexGrow: 1 }}>
-          {/* HEADING */}
           {heading && (
-            // <Typography variant="h4" gutterBottom>
-            <Typography
-              variant="h2"
-              fontFamily="fontSecondaryFamily" // Corrected to a string
-              fontWeight="normal"
-              gutterBottom
-            >
+            <Typography variant="h3" fontWeight="normal" gutterBottom letterSpacing={-1}>
               {heading}
             </Typography>
           )}

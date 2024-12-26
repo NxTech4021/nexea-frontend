@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
+
 import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -40,8 +41,7 @@ export default function TicketTableToolbar({
   );
 
   return (
-    <>
-      <Stack
+    <Stack
         spacing={2}
         alignItems={{ xs: 'flex-end', md: 'center' }}
         direction={{
@@ -92,7 +92,6 @@ export default function TicketTableToolbar({
 
         </Stack>
       </Stack>
-    </>
   );
 }
 
