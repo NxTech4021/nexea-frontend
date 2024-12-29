@@ -65,7 +65,7 @@ export default function JwtLoginView() {
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5 }}>
+    <Stack spacing={2} sx={{ mb: 3 }}>
       <Typography variant="h4">Welcome back!</Typography>
 
       <Stack direction="row" spacing={0.5}>
@@ -82,11 +82,12 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="email" label="Email address" />
+      <RHFTextField name="email" label="Email address" placeholder="Enter your emaill address" />
 
       <RHFTextField
         name="password"
         label="Password"
+        placeholder="Enter your password"
         type={password.value ? 'text' : 'password'}
         InputProps={{
           endAdornment: (

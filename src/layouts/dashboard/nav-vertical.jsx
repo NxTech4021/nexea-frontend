@@ -77,10 +77,19 @@ export default function NavVertical({ openNav, onCloseNav }) {
       {lgUp ? (
         <Stack
           sx={{
-            height: 1,
+            // height: 1,
+            zIndex: 2,
             position: 'fixed',
+            left: 10,
             width: NAV.W_VERTICAL,
-            borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
+            // borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
+            border: 1,
+            borderRadius: 2,
+            borderColor: (theme) => theme.palette.divider,
+            height: '95vh',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'black' : 'whitesmoke'),
           }}
         >
           {renderContent}

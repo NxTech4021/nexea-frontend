@@ -60,10 +60,10 @@ export function useNavData() {
             icon: <Iconify icon="material-symbols:campaign" width={25} />,
             children: [
               {
-                title: 'List',
+                title: 'Overview',
                 path: paths.dashboard.events.root,
               },
-              { title: 'Create', path: paths.dashboard.events.create },
+              // { title: 'Create', path: paths.dashboard.events.create },
               { title: 'Ticket Types', path: paths.dashboard.events.ticketType },
               { title: 'Discount Codes', path: paths.dashboard.events.discountCode },
               { title: 'Orders', path: paths.dashboard.events.order },

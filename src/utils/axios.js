@@ -56,9 +56,10 @@ export const endpoints = {
     search: '/api/product/search',
   },
   events: {
+    detail: (id) => `/api/event/${id}`,
     event: '/api/event',
-    create: '/api/event/create',
-    list: '/api/event/events',
+    create: '/api/event/',
+    list: '/api/event/',
     update: '/api/event/update',
     delete: '/api/event/delete',
     text: '/api/event/sendtext',
@@ -81,5 +82,11 @@ export const endpoints = {
   },
   tickets: {
     toggle: '/api/tickets/toggle',
+  },
+  ticketType: {
+    get: '/api/ticket-type/',
+    create: '/api/ticket-type/',
+    edit: (id) => `/api/ticket-type/${id}`,
+    delete: (id) => `/api/ticket-type/${id}`,
   },
 };

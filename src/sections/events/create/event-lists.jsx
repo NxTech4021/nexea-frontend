@@ -4,7 +4,7 @@
 import dayjs from 'dayjs';
 //  import PropTypes from 'prop-types';
 import 'react-toastify/dist/ReactToastify.css';
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -51,6 +51,11 @@ import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
 import PropTypes from 'prop-types';
 import { grey } from '@mui/material/colors';
+import { useGetAllEvents } from 'src/api/event';
+import { enqueueSnackbar } from 'notistack';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useRouter } from 'src/routes/hooks';
+import EventTicketDialog from './dialog/event-ticket-dialog';
 
 const EventStatus = {
   live: 'live',
@@ -84,54 +89,50 @@ const EventStatus = {
 
 const EventLists = ({ query }) => {
   const theme = useTheme();
+
   const a = useAuthContext();
-  const [events, setEvents] = useState([]);
+
+  const { data, isLoading, error: errorEvents } = useGetAllEvents();
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [dataExists, setDataExist] = useState(false);
-  const [users, setUsers] = useState([]); // State to store users data
-  const [daysLeft, setDaysLeft] = useState([]);
-  const [loading, setLoading] = useState(false);
+
   const [anchorEl, setAnchorEl] = useState();
+
   const [openEdit, setOpenEdit] = useState(false);
+
   const [openDelete, setOpenDelete] = useState(false);
+
   const [openWhatsapp, setOpenWhatsapp] = useState(false);
+
   const [currentEvent, setCurrentEvent] = useState({});
+
   const navigate = useNavigate();
+
   const [openCSV, setOpenCSV] = useState(false);
+
   const [file, setFile] = React.useState(null);
+
   const { handleFileUpload } = useUploadCSV();
+
   const [anchorEl2, setAnchorEl2] = useState();
+
   const [currentEventId, setCurrentEventId] = useState('');
-  const openMenu = Boolean(anchorEl2);
-  const [openTickets, setOpenTickets] = useState(false);
-  const [tickets, setTickets] = useState([
-    // Mock data, delete later
-    {
-      id: 1,
-      name: 'Standard - Startups',
-      type: 'Early Bird',
-      validity: '2023-12-31',
-      category: 'Startup',
-      price: 50,
-      quantity: 100,
-    },
-    {
-      id: 2,
-      name: 'Standard - General',
-      type: 'Standard',
-      validity: '2023-12-31',
-      category: 'General',
-      price: 75,
-      quantity: 200,
-    },
-  ]);
+
+  // const [openTickets, setOpenTickets] = useState(false);
+
   const [anchorElFilter, setAnchorElFilter] = useState(null);
+
   const [statusFilter, setStatusFilter] = useState('');
+
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [openCreateTicket, setOpenCreateTicket] = useState(false);
-  const [openEditTicket, setOpenEditTicket] = useState(false);
-  const [currentTicket, setCurrentTicket] = useState(null);
-  const [openDeleteTicket, setOpenDeleteTicket] = useState(false);
+
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const ticketDialog = useBoolean();
+
+  const router = useRouter();
 
   const ITEMS_PER_PAGE = 6;
 
@@ -167,76 +168,14 @@ const EventLists = ({ query }) => {
     }
   };
 
-  const handleClick = (event) => {
-    const { id } = event.currentTarget;
-    setCurrentEvent(events.find((elem) => elem.id === id));
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleClick = (event) => {
+  //   const { id } = event.currentTarget;
+  //   setCurrentEvent(events.find((elem) => elem.id === id));
+  //   setAnchorEl(event.currentTarget);
+  // };
+
   const handleClosee = () => {
     setAnchorEl(null);
-  };
-
-  const fetchEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(endpoints.events.list);
-      setEvents(response.data.events);
-      const eventsArray = response.data.events;
-      if (eventsArray.length > 0) {
-        setDataExist(true);
-      } else {
-        setDataExist(false);
-      }
-
-      setDaysLeft(
-        eventsArray.map((event) => {
-          const currentDate = new Date();
-          const date = new Date(event.date);
-          const formatDate = date.toLocaleDateString();
-          const splitDate = formatDate.split('/');
-          const eventDate = new Date(splitDate[2], splitDate[1] - 1, splitDate[0]);
-          const difference = eventDate.getTime() - currentDate.getTime();
-          const days = Math.ceil(difference / (1000 * 3600 * 24));
-          return days <= 0 ? '0' : days;
-        })
-      );
-
-      setLoading(false);
-    } catch (error) {
-      toast.error(error.message);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        // Fetch users data from an API
-        const response = await axiosInstance.get(endpoints.users.list);
-        setUsers(response.data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
-
-  const handleDelete = (eventId) => {
-    axiosInstance
-      .delete(`${endpoints.events.delete}/${eventId}`)
-      .then((response) => {
-        fetchEvents(); // Refresh the events list after deletion
-        toast.success('Event deleted successfully.');
-      })
-      .catch((error) => {
-        toast.error(error?.message);
-      });
   };
 
   const handleCloseEdit = () => {
@@ -248,18 +187,14 @@ const EventLists = ({ query }) => {
     setCurrentPage(value);
   };
 
-  const handleChangeFile = (newFile) => {
-    setFile(newFile);
-  };
-
   const paginatedEvents = useMemo(() => {
     if (query) {
-      return events
-        .filter((event) => event.name.includes(query))
+      return data?.events
+        .filter((event) => event.name.toLowerCase().includes(query.toLowerCase()))
         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
     }
-    return events.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [events, query, currentPage]);
+    return data?.events.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [data, query, currentPage]);
 
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
@@ -267,338 +202,340 @@ const EventLists = ({ query }) => {
 
   const filteredEvents = useMemo(() => {
     if (statusFilter) {
-      return events.filter((event) => event.status === statusFilter);
+      return data?.events?.filter((event) => event.status === statusFilter);
     }
-    return events;
-  }, [events, statusFilter]);
+    return data?.events;
+  }, [statusFilter, data]);
 
-  const handleCreateTicket = (values) => {
-    // Logic to create a new ticket
-    const newTicket = { id: tickets.length + 1, ...values };
-    setTickets([...tickets, newTicket]);
-    setOpenCreateTicket(false);
-  };
+  // const handleCreateTicket = (values) => {
+  //   // Logic to create a new ticket
+  //   const newTicket = { id: tickets.length + 1, ...values };
+  //   setTickets([...tickets, newTicket]);
+  //   setOpenCreateTicket(false);
+  // };
 
-  const handleEditTicket = (values) => {
-    const updatedTickets = tickets.map((ticket) =>
-      ticket.id === currentTicket.id ? { ...ticket, ...values } : ticket
-    );
-    setTickets(updatedTickets);
-    setOpenEditTicket(false);
-  };
+  // const handleEditTicket = (values) => {
+  //   const updatedTickets = tickets.map((ticket) =>
+  //     ticket.id === currentTicket.id ? { ...ticket, ...values } : ticket
+  //   );
+  //   setTickets(updatedTickets);
+  //   setOpenEditTicket(false);
+  // };
 
-  const handleDeleteTicket = (ticketId) => {
-    const updatedTickets = tickets.filter((ticket) => ticket.id !== ticketId);
-    setTickets(updatedTickets);
-  };
+  // const handleDeleteTicket = (ticketId) => {
+  //   const updatedTickets = tickets.filter((ticket) => ticket.id !== ticketId);
+  //   setTickets(updatedTickets);
+  // };
 
   // Handler for ticket status (Active/Inactive)
   // Needs bug fixing***
-  const handleToggleStatus = async (ticketId) => {
-    try {
-      const response = await axiosInstance.patch(`${endpoints.tickets.toggle}/${ticketId}`);
+  // const handleToggleStatus = async (ticketId) => {
+  //   try {
+  //     const response = await axiosInstance.patch(`${endpoints.tickets.toggle}/${ticketId}`);
 
-      if (response.data.success) {
-        // Update the local state to reflect the change
-        const updatedTickets = tickets.map((ticket) =>
-          ticket.id === ticketId ? { ...ticket, isActive: !ticket.isActive } : ticket
-        );
-        setTickets(updatedTickets);
-        toast.success(response.data.message);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error toggling ticket status');
-      console.error(error);
+  //     if (response.data.success) {
+  //       // Update the local state to reflect the change
+  //       const updatedTickets = tickets.map((ticket) =>
+  //         ticket.id === ticketId ? { ...ticket, isActive: !ticket.isActive } : ticket
+  //       );
+  //       setTickets(updatedTickets);
+  //       toast.success(response.data.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.response?.data?.message || 'Error toggling ticket status');
+  //     console.error(error);
+  //   }
+  // };
+
+  const openModal = (dialog) => {
+    if (dialog) {
+      dialog.onTrue();
     }
   };
 
+  if (isLoading)
+    return (
+      <Stack direction="row" mt={2} gap={2} flexWrap="wrap">
+        <Skeleton variant="rounded" width="400px" height="400px" />
+        <Skeleton variant="rounded" width="400px" height="400px" />
+        <Skeleton variant="rounded" width="400px" height="400px" />
+        <Skeleton variant="rounded" width="400px" height="400px" />
+      </Stack>
+    );
+
+  if (errorEvents)
+    enqueueSnackbar(errorEvents?.message, {
+      variant: 'error',
+    });
+
   return (
     <>
-      {loading ? (
-        <Stack direction="row" mt={2} gap={2} flexWrap="wrap">
-          <Skeleton variant="rounded" width="400px" height="400px" />
-          <Skeleton variant="rounded" width="400px" height="400px" />
-          <Skeleton variant="rounded" width="400px" height="400px" />
-          <Skeleton variant="rounded" width="400px" height="400px" />
+      {paginatedEvents && paginatedEvents.length === 0 ? (
+        <Stack alignItems="center" gap={5} my={10}>
+          <img src="/assets/empty.svg" alt="empty" width={300} />
+          <Typography>No events with name {query} to display.</Typography>
         </Stack>
       ) : (
-        <>
-          {paginatedEvents && paginatedEvents.length === 0 ? (
-            <Stack alignItems="center" gap={5} my={10}>
-              <img src="/assets/empty.svg" alt="empty" width={300} />
-              <Typography>No events with name {query} to display.</Typography>
-            </Stack>
-          ) : (
-            <TableContainer component={Paper} sx={{ mt: 4 }}>
-              <Table sx={{ minWidth: 650 }} aria-label="events table">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.grey[200] }}>
-                    <TableCell align="flex-start" sx={{ fontWeight: 'bold', paddingLeft: 3 }}>
-                      Event Name
+        <TableContainer component={Paper} sx={{ mt: 4 }}>
+          <Table sx={{ minWidth: 650 }} aria-label="events table">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: theme.palette.grey[200] }}>
+                <TableCell align="left" sx={{ fontWeight: 'bold', paddingLeft: 3 }}>
+                  Event Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                  Person in Charge
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                  Posted Date
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold', paddingLeft: 8 }}>
+                  <Stack direction="row" alignItems="center" spacing={-1}>
+                    Status
+                    <IconButton onClick={(e) => setAnchorElFilter(e.currentTarget)}>
+                      <Iconify icon="mdi:filter" />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorElFilter}
+                      open={Boolean(anchorElFilter)}
+                      onClose={() => setAnchorElFilter(null)}
+                    >
+                      {Object.values(EventStatus).map((status) => (
+                        <MenuItem key={status} onClick={() => handleStatusFilterChange(status)}>
+                          <Stack direction="row" alignItems="center">
+                            {status === statusFilter && (
+                              <Iconify icon="mdi:check" sx={{ marginRight: 1, color: 'green' }} />
+                            )}
+                            <Typography variant="body2">
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </Typography>
+                          </Stack>
+                        </MenuItem>
+                      ))}
+                      <MenuItem onClick={() => handleStatusFilterChange('')}>
+                        <Stack direction="row" alignItems="center">
+                          {statusFilter === '' && (
+                            <Iconify icon="mdi:check" sx={{ marginRight: 1, color: 'green' }} />
+                          )}
+                          All
+                        </Stack>
+                      </MenuItem>
+                    </Menu>
+                  </Stack>
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredEvents.length === 0 && statusFilter ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    <Stack alignItems="center" gap={5} my={10}>
+                      <img src="/assets/empty.svg" alt="empty" width={300} />
+                      <Typography>
+                        No events available for the status:{' '}
+                        {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}.
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredEvents.map((event) => (
+                  <TableRow
+                    key={event.id}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      '&:hover': { backgroundColor: grey[100], cursor: 'pointer' },
+                    }}
+                  >
+                    <TableCell align="center">
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Avatar alt="Event" src="/logo/nexea.png" sx={{ width: 40, height: 40 }} />
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          {event.name}
+                        </Typography>
+                      </Stack>
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                      Person in Charge
+                    <TableCell align="center">{event.personInCharge.fullName}</TableCell>
+                    <TableCell align="center">{fDate(Date.now())}</TableCell>
+                    <TableCell align="center" sx={{ paddingLeft: 5 }}>
+                      <Chip
+                        label={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        color={getStatusColor(event.status)}
+                        icon={
+                          <Iconify icon={getStatusIcon(event.status)} sx={{ marginRight: 0.5 }} />
+                        }
+                        sx={{
+                          width: '120px',
+                          height: '30px',
+                          borderRadius: '16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 600,
+                        }}
+                      />
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                      Posted Date
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', paddingLeft: 8 }}>
-                      <Stack direction="row" alignItems="center" spacing={-1}>
-                        Status
-                        <IconButton onClick={(e) => setAnchorElFilter(e.currentTarget)}>
-                          <Iconify icon="mdi:filter" />
+                    <TableCell align="right" sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+                        <Button
+                          variant="outlined"
+                          sx={{ color: 'black' }}
+                          startIcon={<Iconify icon="bx:qr" />}
+                          onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
+                        >
+                          {!isSmallScreen && 'QR'}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          sx={{ color: 'black' }}
+                          onClick={(e) => {
+                            setAnchorEl2(e.currentTarget);
+                            setCurrentEventId(event.id);
+                          }}
+                          endIcon={<Iconify icon="raphael:arrowdown" width={14} />}
+                        >
+                          <Iconify icon="mdi:users" />
+                        </Button>
+                        <IconButton
+                          onClick={(e) => {
+                            setAnchorEl(e.currentTarget);
+                            setSelectedEvent(event);
+                          }}
+                        >
+                          <Iconify icon="eva:more-vertical-fill" />
                         </IconButton>
                         <Menu
-                          anchorEl={anchorElFilter}
-                          open={Boolean(anchorElFilter)}
-                          onClose={() => setAnchorElFilter(null)}
+                          id={event.id}
+                          MenuListProps={{
+                            'aria-labelledby': event.id,
+                          }}
+                          anchorEl={anchorEl2}
+                          open={Boolean(anchorEl2)}
+                          onClose={() => {
+                            setAnchorEl2(null);
+                          }}
+                          sx={{
+                            '& .MuiMenu-paper': {
+                              maxHeight: 200,
+                              width: 200,
+                              mt: 1.5,
+                            },
+                            '& .MuiPaper-root': {
+                              boxShadow:
+                                '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
+                            },
+                          }}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                          }}
+                          transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                          }}
                         >
-                          {Object.values(EventStatus).map((status) => (
-                            <MenuItem key={status} onClick={() => handleStatusFilterChange(status)}>
-                              <Stack direction="row" alignItems="center">
-                                {status === statusFilter && (
-                                  <Iconify
-                                    icon="mdi:check"
-                                    sx={{ marginRight: 1, color: 'green' }}
-                                  />
-                                )}
-                                <Typography variant="body2">
-                                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </Typography>
-                              </Stack>
-                            </MenuItem>
-                          ))}
-                          <MenuItem onClick={() => handleStatusFilterChange('')}>
-                            <Stack direction="row" alignItems="center">
-                              {statusFilter === '' && (
-                                <Iconify icon="mdi:check" sx={{ marginRight: 1, color: 'green' }} />
-                              )}
-                              All
+                          <MenuItem
+                            onClick={() =>
+                              navigate(`${paths.dashboard.events.attendees}/${currentEventId}`)
+                            }
+                          >
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="mdi:users" />
+                              <Typography variant="button">Attendee List</Typography>
+                            </Stack>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() =>
+                              navigate(`${paths.dashboard.events.notification(currentEventId)}`)
+                            }
+                          >
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="lets-icons:status" />
+                              <Typography variant="button">Notification Status</Typography>
+                            </Stack>
+                          </MenuItem>
+                        </Menu>
+                        <Menu
+                          id={event.id}
+                          MenuListProps={{
+                            'aria-labelledby': event.id,
+                          }}
+                          anchorEl={anchorEl}
+                          open={openn}
+                          onClose={handleClosee}
+                          sx={{
+                            '& .MuiMenu-paper': {
+                              maxHeight: 200,
+                              width: 250,
+                              mt: 1.5,
+                            },
+                            '& .MuiPaper-root': {
+                              boxShadow:
+                                '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
+                            },
+                          }}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                          }}
+                          transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                          }}
+                        >
+                          <MenuItem
+                            onClick={() =>
+                              router.push(paths.dashboard.events.details(selectedEvent.id))
+                            }
+                          >
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="bxs:detail" />
+                              <Typography variant="button">Details</Typography>
+                            </Stack>
+                          </MenuItem>
+                          <MenuItem onClick={() => setOpenEdit(true)}>
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="material-symbols:edit" />
+                              <Typography variant="button">Edit Event</Typography>
+                            </Stack>
+                          </MenuItem>
+                          <MenuItem onClick={() => openModal(ticketDialog)}>
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="mdi:ticket" />
+                              <Typography variant="button">Tickets</Typography>
+                            </Stack>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              setCurrentEvent(event);
+                              setOpenDelete(true);
+                            }}
+                            disabled={a.user.userType === 'normal'}
+                          >
+                            <Stack direction="row" alignItems="center" gap={1}>
+                              <Iconify icon="material-symbols:delete" sx={{ color: 'red' }} />
+                              <Typography variant="button" sx={{ color: 'red' }}>
+                                Delete
+                              </Typography>
                             </Stack>
                           </MenuItem>
                         </Menu>
                       </Stack>
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                      Actions
-                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredEvents.length === 0 && statusFilter ? (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        <Stack alignItems="center" gap={5} my={10}>
-                          <img src="/assets/empty.svg" alt="empty" width={300} />
-                          <Typography>
-                            No events available for the status:{' '}
-                            {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}.
-                          </Typography>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredEvents.map((event) => (
-                      <TableRow
-                        key={event.id}
-                        sx={{
-                          '&:last-child td, &:last-child th': { border: 0 },
-                          '&:hover': { backgroundColor: grey[100] },
-                        }}
-                      >
-                        <TableCell align="center">
-                          <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar
-                              alt="Event"
-                              src="/logo/nexea.png"
-                              sx={{ width: 40, height: 40 }}
-                            />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              {event.name}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-                        <TableCell align="center">{event.personInCharge.fullName}</TableCell>
-                        <TableCell align="center">{fDate(Date.now())}</TableCell>
-                        <TableCell align="center" sx={{ paddingLeft: 5 }}>
-                          <Chip
-                            label={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                            color={getStatusColor(event.status)}
-                            icon={
-                              <Iconify
-                                icon={getStatusIcon(event.status)}
-                                sx={{ marginRight: 0.5 }}
-                              />
-                            }
-                            sx={{
-                              width: '120px',
-                              height: '30px',
-                              borderRadius: '16px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 600,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ display: 'flex', justifyContent: 'flex-end' }}
-                        >
-                          <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-                            <Button
-                              variant="outlined"
-                              sx={{ color: 'black' }}
-                              startIcon={<Iconify icon="bx:qr" />}
-                              onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
-                            >
-                              {!isSmallScreen && 'QR'}
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              sx={{ color: 'black' }}
-                              onClick={(e) => {
-                                setAnchorEl2(e.currentTarget);
-                                setCurrentEventId(event.id);
-                              }}
-                              endIcon={<Iconify icon="raphael:arrowdown" width={14} />}
-                            >
-                              <Iconify icon="mdi:users" />
-                              {!isSmallScreen}
-                            </Button>
-                            <IconButton
-                              onClick={(e) => {
-                                setAnchorEl(e.currentTarget);
-                                setCurrentEvent(event);
-                              }}
-                            >
-                              <Iconify icon="eva:more-vertical-fill" />
-                            </IconButton>
-                            <Menu
-                              id={event.id}
-                              MenuListProps={{
-                                'aria-labelledby': event.id,
-                              }}
-                              anchorEl={anchorEl2}
-                              open={Boolean(anchorEl2)}
-                              onClose={() => setAnchorEl2(null)}
-                              sx={{
-                                '& .MuiMenu-paper': {
-                                  maxHeight: 200,
-                                  width: 200,
-                                  mt: 1.5,
-                                },
-                                '& .MuiPaper-root': {
-                                  boxShadow:
-                                    '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
-                                },
-                              }}
-                              anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                              }}
-                              transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                              }}
-                            >
-                              <MenuItem
-                                onClick={() =>
-                                  navigate(`${paths.dashboard.events.attendees}/${currentEventId}`)
-                                }
-                              >
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="mdi:users" />
-                                  <Typography variant="button">Attendee List</Typography>
-                                </Stack>
-                              </MenuItem>
-                              <MenuItem
-                                onClick={() =>
-                                  navigate(`${paths.dashboard.events.notification(currentEventId)}`)
-                                }
-                              >
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="lets-icons:status" />
-                                  <Typography variant="button">Notification Status</Typography>
-                                </Stack>
-                              </MenuItem>
-                            </Menu>
-                            <Menu
-                              id={event.id}
-                              MenuListProps={{
-                                'aria-labelledby': event.id,
-                              }}
-                              anchorEl={anchorEl}
-                              open={openn}
-                              onClose={handleClosee}
-                              sx={{
-                                '& .MuiMenu-paper': {
-                                  maxHeight: 200,
-                                  width: 250,
-                                  mt: 1.5,
-                                },
-                                '& .MuiPaper-root': {
-                                  boxShadow:
-                                    '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
-                                },
-                              }}
-                              anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                              }}
-                              transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                              }}
-                            >
-                              <MenuItem onClick={() => setOpenCSV(true)}>
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="material-symbols:upload" />
-                                  <Typography variant="button">Upload CSV</Typography>
-                                </Stack>
-                              </MenuItem>
-                              <MenuItem onClick={() => setOpenEdit(true)}>
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="material-symbols:edit" />
-                                  <Typography variant="button">Edit Event</Typography>
-                                </Stack>
-                              </MenuItem>
-                              <MenuItem onClick={() => setOpenTickets(true)}>
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="mdi:ticket" />
-                                  <Typography variant="button">Tickets</Typography>
-                                </Stack>
-                              </MenuItem>
-                              <MenuItem
-                                onClick={() => {
-                                  setCurrentEvent(event);
-                                  setOpenDelete(true);
-                                }}
-                                disabled={a.user.userType === 'normal'}
-                              >
-                                <Stack direction="row" alignItems="center" gap={1}>
-                                  <Iconify icon="material-symbols:delete" sx={{ color: 'red' }} />
-                                  <Typography variant="button" sx={{ color: 'red' }}>
-                                    Delete
-                                  </Typography>
-                                </Stack>
-                              </MenuItem>
-                            </Menu>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
-      {events.length > ITEMS_PER_PAGE && (
+      {data.events.length > ITEMS_PER_PAGE && (
         <Pagination
-          count={Math.ceil(events.length / ITEMS_PER_PAGE)}
+          count={Math.ceil(data.events.length / ITEMS_PER_PAGE)}
           page={currentPage}
           onChange={handlePageChange}
           sx={{
@@ -662,7 +599,7 @@ const EventLists = ({ query }) => {
           </Button>
           <Button
             onClick={() => {
-              handleDelete(currentEvent.id);
+              // handleDelete(currentEvent.id);
               setOpenDelete(false);
               handleClosee();
             }}
@@ -707,7 +644,7 @@ const EventLists = ({ query }) => {
                 .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
                 .then((response) => {
                   setSubmitting(false);
-                  fetchEvents();
+                  // fetchEvents();
                   toast.success('Event updated successfully.');
                 })
                 .catch((error) => {
@@ -759,7 +696,7 @@ const EventLists = ({ query }) => {
                 .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
                 .then((response) => {
                   setSubmitting(false);
-                  fetchEvents();
+                  // fetchEvents();
                   toast.success('Event updated successfully.');
                 })
                 .catch((error) => {
@@ -805,7 +742,7 @@ const EventLists = ({ query }) => {
                         shrink: true,
                       }}
                     >
-                      {!dataExists ? (
+                      {/* {!dataExists ? (
                         <MenuItem disabled>No data</MenuItem>
                       ) : (
                         users.map((user) => (
@@ -813,7 +750,7 @@ const EventLists = ({ query }) => {
                             {user.name}
                           </MenuItem>
                         ))
-                      )}
+                      )} */}
                     </Field>
                     <ErrorMessage
                       name="personInCharge"
@@ -1082,128 +1019,12 @@ const EventLists = ({ query }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Tickets modal */}
-      <Dialog
-        open={openTickets}
-        onClose={() => setOpenTickets(false)}
-        aria-labelledby="tickets-dialog-title"
-        aria-describedby="tickets-dialog-description"
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle id="tickets-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
-          />
-          <Box>
-            <Typography variant="h6">{currentEvent.name}</Typography>
-            <Typography variant="subtitle1">Tickets</Typography>
-          </Box>
-        </DialogTitle>
-        <Divider sx={{ my: -1, mb: 3 }} />
-        <DialogContent>
-          {tickets.length === 0 ? (
-            <Typography>No tickets available for this event.</Typography>
-          ) : (
-            <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 1, mb: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.primary.main, color: 'white' }}>
-                    <TableCell>Ticket Name</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Validity</TableCell>
-                    <TableCell>Category</TableCell>
-                    <TableCell>Price</TableCell>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {tickets.map((ticket) => (
-                    <TableRow
-                      key={ticket.id}
-                      sx={{ '&:hover': { backgroundColor: theme.palette.grey[200] } }}
-                    >
-                      <TableCell>
-                        <strong>{ticket.name}</strong>
-                      </TableCell>
-                      <TableCell>{ticket.type}</TableCell>
-                      <TableCell>{ticket.validity}</TableCell>
-                      <TableCell>{ticket.category}</TableCell>
-                      <TableCell>RM{ticket.price.toFixed(2)}</TableCell>
-                      <TableCell>{ticket.quantity}</TableCell>
-                      <TableCell>
-                        <Stack direction="row" spacing={1}>
-                          <IconButton
-                            onClick={() => {
-                              setCurrentTicket(ticket);
-                              setOpenEditTicket(true);
-                            }}
-                            color="primary"
-                          >
-                            <Iconify icon="material-symbols:edit" />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => {
-                              setCurrentTicket(ticket);
-                              setOpenDeleteTicket(true);
-                            }}
-                            color="error"
-                          >
-                            <Iconify icon="material-symbols:delete" />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => handleToggleStatus(ticket.id)}
-                            color={ticket.isActive ? 'success' : 'default'}
-                          >
-                            <Iconify
-                              icon={ticket.isActive ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off'}
-                            />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenTickets(false)}
-            sx={{
-              borderRadius: 6,
-              backgroundColor: '#f0f0f0',
-              height: '36px',
-              padding: '0 16px',
-              color: '#555',
-              '&:hover': {
-                backgroundColor: '#d0d0d0',
-              },
-            }}
-          >
-            Close
-          </Button>
-          <Button
-            onClick={() => setOpenCreateTicket(true)}
-            sx={{
-              borderRadius: 6,
-              color: 'white',
-              height: '36px',
-              padding: '0 16px',
-              backgroundColor: '#1976d2',
-              '&:hover': {
-                backgroundColor: '#115293',
-              },
-            }}
-          >
-            Create New Ticket
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EventTicketDialog
+        open={ticketDialog.value}
+        onClose={ticketDialog.onFalse}
+        tickets={selectedEvent?.ticketType}
+        event={selectedEvent}
+      />
 
       {/* Create New Ticket Modal */}
       <Dialog
@@ -1226,7 +1047,7 @@ const EventLists = ({ query }) => {
               price: '',
               quantity: '',
             }}
-            onSubmit={handleCreateTicket}
+            // onSubmit={handleCreateTicket}
           >
             {({ handleChange, handleSubmit, setFieldValue, values }) => (
               <Form onSubmit={handleSubmit}>
@@ -1339,7 +1160,7 @@ const EventLists = ({ query }) => {
       </Dialog>
 
       {/* Edit Ticket Modal */}
-      <Dialog
+      {/* <Dialog
         open={openEditTicket}
         onClose={() => setOpenEditTicket(false)}
         aria-labelledby="edit-ticket-dialog-title"
@@ -1360,7 +1181,7 @@ const EventLists = ({ query }) => {
                 price: currentTicket.price,
                 quantity: currentTicket.quantity,
               }}
-              onSubmit={handleEditTicket}
+              // onSubmit={handleEditTicket}
             >
               {({ handleChange, handleSubmit, setFieldValue }) => (
                 <Form onSubmit={handleSubmit}>
@@ -1452,10 +1273,10 @@ const EventLists = ({ query }) => {
             </Formik>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Delete Ticket Modal */}
-      <Dialog
+      {/* <Dialog
         open={openDeleteTicket}
         onClose={() => setOpenDeleteTicket(false)}
         aria-labelledby="delete-ticket-dialog-title"
@@ -1508,7 +1329,7 @@ const EventLists = ({ query }) => {
           </Button>
           <Button
             onClick={() => {
-              handleDeleteTicket(currentTicket.id);
+              // handleDeleteTicket(currentTicket.id);
               setOpenDeleteTicket(false);
             }}
             autoFocus
@@ -1526,7 +1347,7 @@ const EventLists = ({ query }) => {
             Confirm
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };

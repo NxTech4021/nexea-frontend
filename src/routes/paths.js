@@ -35,6 +35,7 @@ export const paths = {
       qr: `${ROOTS.DASHBOARD}/events/qr`,
       attendees: `${ROOTS.DASHBOARD}/events/attendees`,
       notification: (id) => `${ROOTS.DASHBOARD}/events/notifcationStatus/${id}`,
+      details: (id) => `${ROOTS.DASHBOARD}/events/${id}`,
     },
     whatsappTemplate: {
       root: `${ROOTS.DASHBOARD}/templates`,

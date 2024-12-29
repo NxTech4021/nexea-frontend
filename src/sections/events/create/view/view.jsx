@@ -6,6 +6,7 @@ import { Card, Stack, Button, TextField, IconButton } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { _jobs } from 'src/_mock';
@@ -15,14 +16,18 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import EventLists from '../event-lists';
+import EventCreateDialog from '../dialog/event-create-dialog';
 
 // ----------------------------------------------------------------------
 
 export default function Events() {
   const settings = useSettingsContext();
+
   const smUp = useResponsive('down', 'sm');
 
   const [search, setSearch] = useState('');
+
+  const createDialog = useBoolean();
 
   const handleSearch = useCallback(
     (inputValue) => {
@@ -53,23 +58,12 @@ export default function Events() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Event',
-            href: paths.dashboard.events,
+            link: paths.dashboard.events,
           },
           { name: 'List' },
         ]}
-        // action={
-        //   <Button
-        //     component={RouterLink}
-        //     href={paths.dashboard.events.create}
-        //     variant="contained"
-        //     startIcon={<Iconify icon="mingcute:add-line" />}
-        //     size="small"
-        //   >
-        //     New Event
-        //   </Button>
-        // }
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: 3,
         }}
       />
 
@@ -100,8 +94,7 @@ export default function Events() {
             </IconButton>
           ) : (
             <Button
-              component={RouterLink}
-              href={paths.dashboard.events.create}
+              onClick={createDialog.onTrue}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -119,6 +112,8 @@ export default function Events() {
       /> */}
 
       <EventLists query={search} />
+
+      <EventCreateDialog open={createDialog.value} onClose={createDialog.onFalse} />
     </Container>
   );
 }

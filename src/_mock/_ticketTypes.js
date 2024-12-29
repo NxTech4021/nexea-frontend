@@ -1,6 +1,6 @@
 export const TICKET_STATUS_OPTIONS = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { value: true, label: 'Active' },
+  { value: false, label: 'Inactive' },
 ];
 
 export const _TicketTypes = [

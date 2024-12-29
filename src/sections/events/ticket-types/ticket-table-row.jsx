@@ -23,8 +23,24 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 
 // ----------------------------------------------------------------------
 
+export const dataMapping = {
+  earlyBird: 'Early Bird',
+  general: 'General',
+  startup: 'Startup',
+  vip: 'Vip',
+  standard: 'Standard',
+  speaker: 'Speaker',
+};
+
 export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
-  const { eventName, type, category, price, status } = row;
+  const {
+    event: { name },
+    type,
+    category,
+    price,
+    title,
+    isActive,
+  } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -32,7 +48,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
-  const title = `${type} - ${category} (${eventName})`;
+  // const title = `${type} - ${category} (${name})`;
 
   const handleViewDetails = () => {
     setSelectedTicket(row);
@@ -43,15 +59,11 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
   };
 
   // Define the color based on the status
-  const getStatusColor = () => {
-    switch (status) {
-      case 'active':
-        return 'success';
-      case 'inactive':
-        return 'error';
-      default:
-        return 'default';
+  const getStatusColor = (item) => {
+    if (item) {
+      return 'success';
     }
+    return 'error';
   };
 
   return (
@@ -61,14 +73,14 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{eventName}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{type}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{category}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>RM {price.toFixed(2)}</TableCell>
 
         <TableCell>
-          <Label variant="soft" color={getStatusColor(status)}>
-            {status}
+          <Label variant="soft" color={getStatusColor(isActive)}>
+            {isActive ? 'Active' : 'Inactive'}
           </Label>
         </TableCell>
 
@@ -100,7 +112,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
         <DialogContent>
           <TextField
             label="Event Name"
-            value={selectedTicket?.eventName}
+            value={selectedTicket?.event?.name}
             InputProps={{ readOnly: true }}
             fullWidth
             margin="normal"
@@ -128,7 +140,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
           />
           <TextField
             label="Status"
-            value={selectedTicket?.status}
+            value={selectedTicket?.isActive ? 'Active' : 'Inactive'}
             InputProps={{ readOnly: true }}
             fullWidth
             margin="normal"

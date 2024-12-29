@@ -1,0 +1,67 @@
+// eslint-disable-next-line import/no-unresolved
+import useSWR from 'swr';
+import { useMemo } from 'react';
+
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+
+export const useGetAllTicketTypes = () => {
+  const { data, isLoading, mutate } = useSWR(endpoints.ticketType.get, fetcher, {
+    revalidateIfStale: true,
+    revalidateOnMount: true,
+    revalidateOnReconnect: true,
+  });
+
+  const memoizedValue = useMemo(() => ({ data, isLoading, mutate }), [data, isLoading, mutate]);
+
+  return memoizedValue;
+};
+
+export const createTicketType = async ({
+  title,
+  type,
+  eventId,
+  category,
+  validity,
+  price,
+  quantity,
+  minimumTicketPerOrder,
+  maximumTicketPerOrder,
+  isActive = false,
+  isDraft = false,
+}) => {
+  try {
+    if (!isDraft && (!title || !type || !eventId || !category || !price || !quantity)) {
+      throw new Error('Arguments not enough');
+    }
+
+    const data = await axiosInstance.post(endpoints.ticketType.create, {
+      title,
+      type,
+      eventId,
+      category,
+      validity,
+      price,
+      quantity,
+      isActive,
+      isDraft,
+      minimumTicketPerOrder,
+      maximumTicketPerOrder,
+    });
+
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const editTicketType = async () => {};
+
+export const deleteTicketType = async (id) => {
+  try {
+    await axiosInstance.delete(endpoints.ticketType.delete(id));
+
+    return 'Successfully deleted';
+  } catch (error) {
+    throw new Error(error);
+  }
+};

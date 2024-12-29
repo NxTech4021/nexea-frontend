@@ -1,19 +1,21 @@
 import { Helmet } from 'react-helmet-async';
 
-import Events from 'src/sections/events/create/view/view';
+import { useParams } from 'src/routes/hooks';
 
-// import Events from 'src/sections/events/create/view/view';
+import EventDetails from 'src/sections/events/details/view';
 
 // ----------------------------------------------------------------------
 
 export default function Page() {
+  const { id } = useParams();
+
   return (
     <>
       <Helmet>
         <title> Dashboard: Events</title>
       </Helmet>
 
-      <Events />
+      <EventDetails id={id} />
     </>
   );
 }
