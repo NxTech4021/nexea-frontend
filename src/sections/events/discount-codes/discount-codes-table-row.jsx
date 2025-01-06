@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
+import CheckBox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -22,8 +23,8 @@ import EditDiscountCode from './discount-codes-edit';
 
 // ----------------------------------------------------------------------
 
-export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSave }) {
-  const { codeName, codeType, codeValue, codeAvailability, codeCategory, codeLimit, endDate } = row;
+export default function DiscountCodeTableRow({ row, selected, onSelectRow, onDeleteRow, onSave }) {
+  const { codeName, codeType, codeValue, codeAvailability, codeLimit, endDate } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -40,7 +41,6 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
       codeType: row.codeType,
       codeValue: row.codeValue,
       codeAvailability: row.codeAvailability,
-      codeCategory: row.codeCategory,
       codeLimit: row.codeLimit,
       endDate: row.endDate,
     });
@@ -55,7 +55,9 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
   return (
     <>
       <TableRow hover selected={selected}>
-
+        <TableCell padding="checkbox">
+          <CheckBox checked={selected} onClick={onSelectRow} />
+        </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeName}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeType}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeValue}</TableCell>
@@ -64,7 +66,6 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
             <div key={index}>{availability}</div>
           ))}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeCategory}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeLimit}</TableCell>
         <TableCell>
           <ListItemText
@@ -151,6 +152,7 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
 
 DiscountCodeTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
+  onSelectRow: PropTypes.func,
   onSave: PropTypes.func,  
   row: PropTypes.object,
   selected: PropTypes.bool,
