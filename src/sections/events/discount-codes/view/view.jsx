@@ -9,7 +9,6 @@ import {
     Table, 
     Container, 
     TableBody, 
-    Typography, 
     TableContainer, 
     Tabs, 
     Tab, 
@@ -172,12 +171,21 @@ export default function DiscountCodeView() {
     return (
         <>
             <Container maxWidth={false}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 3, md: 5 } }}>
+                <Box 
+                    sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        justifyContent: 'space-between',
+                        alignItems: { xs: 'left', sm: 'center' },
+                        mb: { xs: 3, md: 5 },
+                        gap: 1,
+                    }}
+                >
                 <CustomBreadcrumbs
-                    heading={<Typography variant="h4">Discount Code List</Typography>}
+                    heading="Discount Codes"
                     links={[
                         { name: 'Dashboard', href: paths.dashboard.root },
-                        { name: 'Discount Code' },
+                        { name: 'Discount Codes' },
                         { name: 'List' },
                     ]}
                     />
