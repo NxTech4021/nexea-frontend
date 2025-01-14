@@ -1,20 +1,24 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { enqueueSnackbar } from 'notistack';
 
+import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import { Typography } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
+import { Stack, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -34,7 +38,9 @@ export const dataMapping = {
 
 export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
   const {
-    event: { name },
+    event: { name, id },
+    id: ticketTypeId,
+    ticketUrl,
     type,
     category,
     price,
@@ -44,6 +50,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
 
   const confirm = useBoolean();
   const popover = usePopover();
+  const loading = useBoolean();
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -62,6 +69,23 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
       return 'success';
     }
     return 'error';
+  };
+
+  const generateUrl = async () => {
+    try {
+      loading.onTrue();
+
+      await axiosInstance.post(endpoints.ticketType.generateUrl, {
+        eventId: id,
+        ticketTypeId,
+      });
+    } catch (error) {
+      enqueueSnackbar(error?.message, {
+        variant: 'error',
+      });
+    } finally {
+      loading.onFalse();
+    }
   };
 
   return (
@@ -105,7 +129,14 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
 
       <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)}>
         <DialogTitle>
-          <Typography variant="h4">Ticket Details</Typography>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h4">Ticket Details</Typography>
+            {!ticketUrl && (
+              <LoadingButton variant="outlined" onClick={generateUrl} loading={loading.value}>
+                Generate URL
+              </LoadingButton>
+            )}
+          </Stack>
         </DialogTitle>
         <DialogContent>
           <TextField
@@ -143,6 +174,15 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
             fullWidth
             margin="normal"
           />
+          {ticketUrl && (
+            <TextField
+              label="Link Url"
+              value={ticketUrl.url}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDetailsDialogOpen(false)} color="primary">

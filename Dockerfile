@@ -14,7 +14,7 @@
 
 # CMD [ "yarn", "dev" ]
 
-FROM node:18-alpine as development
+FROM node:20-alpine3.17 as development
 
 WORKDIR /app
 

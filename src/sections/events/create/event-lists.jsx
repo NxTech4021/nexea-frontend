@@ -55,6 +55,7 @@ import { useGetAllEvents } from 'src/api/event';
 import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
+import { TableNoData } from 'src/components/table';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 
 const EventStatus = {
@@ -93,6 +94,8 @@ const EventLists = ({ query }) => {
   const a = useAuthContext();
 
   const { data, isLoading, error: errorEvents } = useGetAllEvents();
+
+  const notFound = !data?.events?.length;
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -204,7 +207,7 @@ const EventLists = ({ query }) => {
     if (statusFilter) {
       return data?.events?.filter((event) => event.status === statusFilter);
     }
-    return data?.events;
+    return data?.events || [];
   }, [statusFilter, data]);
 
   // const handleCreateTicket = (values) => {
@@ -269,13 +272,8 @@ const EventLists = ({ query }) => {
     });
 
   return (
-    <>
-      {paginatedEvents && paginatedEvents.length === 0 ? (
-        <Stack alignItems="center" gap={5} my={10}>
-          <img src="/assets/empty.svg" alt="empty" width={300} />
-          <Typography>No events with name {query} to display.</Typography>
-        </Stack>
-      ) : (
+    !isLoading && (
+      <>
         <TableContainer component={Paper} sx={{ mt: 4 }}>
           <Table sx={{ minWidth: 650 }} aria-label="events table">
             <TableHead>
@@ -529,221 +527,222 @@ const EventLists = ({ query }) => {
                   </TableRow>
                 ))
               )}
+
+              <TableNoData notFound={notFound} />
             </TableBody>
           </Table>
         </TableContainer>
-      )}
 
-      {data.events.length > ITEMS_PER_PAGE && (
-        <Pagination
-          count={Math.ceil(data.events.length / ITEMS_PER_PAGE)}
-          page={currentPage}
-          onChange={handlePageChange}
-          sx={{
-            mt: 8,
-            justifyContent: 'center',
-          }}
-        />
-      )}
-
-      {/* Delete modal */}
-      <Dialog
-        open={openDelete}
-        onClose={() => setOpenDelete(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        maxWidth="xs"
-        fullWidth
-      >
-        <Box sx={{ mb: 1, mt: 3 }}>
-          <Box
+        {!!data && data.events.length > ITEMS_PER_PAGE && (
+          <Pagination
+            count={Math.ceil(data.events.length / ITEMS_PER_PAGE)}
+            page={currentPage}
+            onChange={handlePageChange}
             sx={{
-              backgroundColor: 'rgba(255, 0, 0, 0.2)',
-              borderRadius: '50%',
-              width: 60,
-              height: 60,
-              display: 'flex',
-              alignItems: 'center',
+              mt: 8,
               justifyContent: 'center',
-              margin: '0 auto',
             }}
-          >
-            <Iconify icon="mdi:alert" color="red" width={30} />
-          </Box>
-        </Box>
-        <DialogTitle
-          id="alert-dialog-title"
-          sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}
-        >
-          Delete Event
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" align="center" sx={{ fontSize: '1rem' }}>
-            Are you sure you want to delete this event? This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Button
-            onClick={() => setOpenDelete(false)}
-            sx={{
-              borderRadius: 6,
-              backgroundColor: '#f0f0f0',
-              color: '#555',
-              flex: 1,
-              height: '48px',
-              '&:hover': {
-                backgroundColor: '#d0d0d0',
-              },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              // handleDelete(currentEvent.id);
-              setOpenDelete(false);
-              handleClosee();
-            }}
-            autoFocus
-            sx={{
-              borderRadius: 6,
-              color: 'white',
-              backgroundColor: 'red',
-              flex: 1,
-              height: '48px',
-              '&:hover': {
-                backgroundColor: '#c62828',
-              },
-            }}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Edit Whatsapp */}
-      <Dialog
-        open={openWhatsapp}
-        onClose={() => setOpenWhatsapp(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Edit Whatsapp</DialogTitle>
-
-        <DialogContent>
-          <Formik
-            initialValues={{
-              name: currentEvent?.name,
-              description: currentEvent?.description,
-              date: currentEvent?.date,
-              personInCharge: currentEvent?.personInCharge?.id,
-              tickera_api: currentEvent?.tickera_api,
-              status: currentEvent?.status,
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              axiosInstance
-                .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
-                .then((response) => {
-                  setSubmitting(false);
-                  // fetchEvents();
-                  toast.success('Event updated successfully.');
-                })
-                .catch((error) => {
-                  console.error('Error updating event:', error);
-                  setSubmitting(false);
-                  toast.error('Update Failed, Try again!');
-                });
-              handleCloseEdit();
-            }}
-          >
-            {({ isSubmitting, setFieldValue, values }) => <Form />}
-          </Formik>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Information Modal */}
-      <Dialog
-        open={openEdit}
-        onClose={handleCloseEdit}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="alert-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
           />
-          <Box>
-            <Typography variant="h6">{currentEvent.name}</Typography>
-            <Typography variant="subtitle1">Edit Information</Typography>
-          </Box>
-        </DialogTitle>
-        <Divider sx={{ my: -1, mb: 2 }} />
-        <DialogContent>
-          <Formik
-            initialValues={{
-              name: currentEvent?.name,
-              description: currentEvent?.description,
-              date: currentEvent?.date,
-              personInCharge: currentEvent?.personInCharge?.id,
-              tickera_api: currentEvent?.tickera_api,
-              status: currentEvent?.status,
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              axiosInstance
-                .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
-                .then((response) => {
-                  setSubmitting(false);
-                  // fetchEvents();
-                  toast.success('Event updated successfully.');
-                })
-                .catch((error) => {
-                  console.error('Error updating event:', error);
-                  setSubmitting(false);
-                  toast.error('Update Failed, Try again!');
-                });
-              handleCloseEdit();
-            }}
-          >
-            {({ isSubmitting, setFieldValue, values }) => (
-              <Form style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <Field
-                      as={TextField}
-                      type="text"
-                      name="name"
-                      label="Event Name"
-                      fullWidth
-                      required
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="name"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
+        )}
 
-                  <Grid item xs={12} sm={6}>
-                    <Field
-                      as={Select}
-                      name="personInCharge"
-                      label="Person in Charge"
-                      fullWidth
-                      required
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    >
-                      {/* {!dataExists ? (
+        {/* Delete modal */}
+        <Dialog
+          open={openDelete}
+          onClose={() => setOpenDelete(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          maxWidth="xs"
+          fullWidth
+        >
+          <Box sx={{ mb: 1, mt: 3 }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                borderRadius: '50%',
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+              }}
+            >
+              <Iconify icon="mdi:alert" color="red" width={30} />
+            </Box>
+          </Box>
+          <DialogTitle
+            id="alert-dialog-title"
+            sx={{ textAlign: 'center', fontSize: '1.75rem', mb: -2, mt: -2 }}
+          >
+            Delete Event
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" align="center" sx={{ fontSize: '1rem' }}>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Button
+              onClick={() => setOpenDelete(false)}
+              sx={{
+                borderRadius: 6,
+                backgroundColor: '#f0f0f0',
+                color: '#555',
+                flex: 1,
+                height: '48px',
+                '&:hover': {
+                  backgroundColor: '#d0d0d0',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                // handleDelete(currentEvent.id);
+                setOpenDelete(false);
+                handleClosee();
+              }}
+              autoFocus
+              sx={{
+                borderRadius: 6,
+                color: 'white',
+                backgroundColor: 'red',
+                flex: 1,
+                height: '48px',
+                '&:hover': {
+                  backgroundColor: '#c62828',
+                },
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Edit Whatsapp */}
+        <Dialog
+          open={openWhatsapp}
+          onClose={() => setOpenWhatsapp(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Edit Whatsapp</DialogTitle>
+
+          <DialogContent>
+            <Formik
+              initialValues={{
+                name: currentEvent?.name,
+                description: currentEvent?.description,
+                date: currentEvent?.date,
+                personInCharge: currentEvent?.personInCharge?.id,
+                tickera_api: currentEvent?.tickera_api,
+                status: currentEvent?.status,
+              }}
+              onSubmit={(values, { setSubmitting }) => {
+                axiosInstance
+                  .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
+                  .then((response) => {
+                    setSubmitting(false);
+                    // fetchEvents();
+                    toast.success('Event updated successfully.');
+                  })
+                  .catch((error) => {
+                    console.error('Error updating event:', error);
+                    setSubmitting(false);
+                    toast.error('Update Failed, Try again!');
+                  });
+                handleCloseEdit();
+              }}
+            >
+              {({ isSubmitting, setFieldValue, values }) => <Form />}
+            </Formik>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Information Modal */}
+        <Dialog
+          open={openEdit}
+          onClose={handleCloseEdit}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle id="alert-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar
+              alt="Event"
+              src="/logo/nexea.png"
+              sx={{ width: 64, height: 64, marginRight: 2 }}
+            />
+            <Box>
+              <Typography variant="h6">{currentEvent.name}</Typography>
+              <Typography variant="subtitle1">Edit Information</Typography>
+            </Box>
+          </DialogTitle>
+          <Divider sx={{ my: -1, mb: 2 }} />
+          <DialogContent>
+            <Formik
+              initialValues={{
+                name: currentEvent?.name,
+                description: currentEvent?.description,
+                date: currentEvent?.date,
+                personInCharge: currentEvent?.personInCharge?.id,
+                tickera_api: currentEvent?.tickera_api,
+                status: currentEvent?.status,
+              }}
+              onSubmit={(values, { setSubmitting }) => {
+                axiosInstance
+                  .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
+                  .then((response) => {
+                    setSubmitting(false);
+                    // fetchEvents();
+                    toast.success('Event updated successfully.');
+                  })
+                  .catch((error) => {
+                    console.error('Error updating event:', error);
+                    setSubmitting(false);
+                    toast.error('Update Failed, Try again!');
+                  });
+                handleCloseEdit();
+              }}
+            >
+              {({ isSubmitting, setFieldValue, values }) => (
+                <Form style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        as={TextField}
+                        type="text"
+                        name="name"
+                        label="Event Name"
+                        fullWidth
+                        required
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        style={{ color: 'red', fontSize: '0.8rem' }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        as={Select}
+                        name="personInCharge"
+                        label="Person in Charge"
+                        fullWidth
+                        required
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      >
+                        {/* {!dataExists ? (
                         <MenuItem disabled>No data</MenuItem>
                       ) : (
                         users.map((user) => (
@@ -752,416 +751,416 @@ const EventLists = ({ query }) => {
                           </MenuItem>
                         ))
                       )} */}
-                    </Field>
-                    <ErrorMessage
-                      name="personInCharge"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      type="text"
-                      name="description"
-                      label="Event Description"
-                      fullWidth
-                      multiline
-                      rows={4}
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="description"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Event Date"
-                        minDate={dayjs()}
-                        value={dayjs(values.date)}
-                        onChange={(date) => setFieldValue('date', date.toISOString())}
-                        renderInput={(params) => (
-                          <TextField {...params} fullWidth variant="outlined" />
-                        )}
-                        required
+                      </Field>
+                      <ErrorMessage
+                        name="personInCharge"
+                        component="div"
+                        style={{ color: 'red', fontSize: '0.8rem' }}
                       />
-                    </LocalizationProvider>
-                    <ErrorMessage
-                      name="date"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
+                    </Grid>
 
-                  <Grid item xs={12} sm={6}>
-                    <Field
-                      as={TextField}
-                      type="text"
-                      name="api"
-                      label="Tickera API"
-                      fullWidth
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="api"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <FormControl fullWidth required variant="outlined">
-                      <InputLabel shrink htmlFor="status">
-                        Event Status
-                      </InputLabel>
+                    <Grid item xs={12}>
                       <Field
-                        as={Select}
-                        name="status"
-                        id="status"
-                        label="Event Status"
+                        as={TextField}
+                        type="text"
+                        name="description"
+                        label="Event Description"
+                        fullWidth
+                        multiline
+                        rows={4}
                         variant="outlined"
                         InputLabelProps={{
                           shrink: true,
                         }}
-                      >
-                        {Object.values(EventStatus).map((status) => (
-                          <MenuItem key={status} value={status}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </MenuItem>
-                        ))}
-                      </Field>
+                      />
                       <ErrorMessage
-                        name="status"
+                        name="description"
                         component="div"
                         style={{ color: 'red', fontSize: '0.8rem' }}
                       />
-                    </FormControl>
-                  </Grid>
+                    </Grid>
 
-                  <Grid item xs={12}>
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button
-                        onClick={handleCloseEdit}
-                        disabled={isSubmitting}
-                        variant="contained"
-                        sx={{
-                          borderRadius: 6,
-                          backgroundColor: '#f0f0f0',
-                          height: '36px',
-                          padding: '0 16px',
-                          color: '#555',
-                          '&:hover': {
-                            backgroundColor: '#d0d0d0',
-                          },
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        disabled={isSubmitting}
-                        sx={{
-                          borderRadius: 6,
-                          color: 'white',
-                          height: '36px',
-                          padding: '0 16px',
-                          backgroundColor: '#1976d2',
-                          '&:hover': {
-                            backgroundColor: '#115293',
-                          },
-                        }}
-                      >
-                        Update Event
-                      </Button>
-                    </Stack>
-                  </Grid>
-                </Grid>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+                    <Grid item xs={12} sm={6}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="Event Date"
+                          minDate={dayjs()}
+                          value={dayjs(values.date)}
+                          onChange={(date) => setFieldValue('date', date.toISOString())}
+                          renderInput={(params) => (
+                            <TextField {...params} fullWidth variant="outlined" />
+                          )}
+                          required
+                        />
+                      </LocalizationProvider>
+                      <ErrorMessage
+                        name="date"
+                        component="div"
+                        style={{ color: 'red', fontSize: '0.8rem' }}
+                      />
+                    </Grid>
 
-      {/* Upload CSV Modal */}
-      <Dialog
-        open={openCSV}
-        onClose={() => setOpenCSV(false)}
-        aria-labelledby="upload-dialog-title"
-        aria-describedby="upload-dialog-description"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="upload-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
-          />
-          <Box>
-            <Typography variant="h6">{currentEvent.name}</Typography>
-            <Typography variant="subtitle1">Upload Attendees</Typography>
-          </Box>
-        </DialogTitle>
-        <Divider sx={{ my: -1, mb: 3 }} />
-        <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2, textAlign: 'flex-start' }}>
-            Upload a CSV file of the attendees.
-          </Typography>
-          {file ? (
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              sx={{ mt: 2, border: '1px solid #ccc', padding: 1, borderRadius: 1 }}
-            >
-              <Iconify icon="mdi:file-csv" />
-              <Typography variant="body2">
-                {file.name} ({(file.size / 1024).toFixed(2)} KB)
-              </Typography>
-              <IconButton
-                onClick={() => {
-                  setFile(null);
-                }}
-                color="error"
-                size="small"
-                sx={{ marginLeft: 'auto' }}
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        as={TextField}
+                        type="text"
+                        name="api"
+                        label="Tickera API"
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                      <ErrorMessage
+                        name="api"
+                        component="div"
+                        style={{ color: 'red', fontSize: '0.8rem' }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <FormControl fullWidth required variant="outlined">
+                        <InputLabel shrink htmlFor="status">
+                          Event Status
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          name="status"
+                          id="status"
+                          label="Event Status"
+                          variant="outlined"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                        >
+                          {Object.values(EventStatus).map((status) => (
+                            <MenuItem key={status} value={status}>
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </MenuItem>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="status"
+                          component="div"
+                          style={{ color: 'red', fontSize: '0.8rem' }}
+                        />
+                      </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Button
+                          onClick={handleCloseEdit}
+                          disabled={isSubmitting}
+                          variant="contained"
+                          sx={{
+                            borderRadius: 6,
+                            backgroundColor: '#f0f0f0',
+                            height: '36px',
+                            padding: '0 16px',
+                            color: '#555',
+                            '&:hover': {
+                              backgroundColor: '#d0d0d0',
+                            },
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          disabled={isSubmitting}
+                          sx={{
+                            borderRadius: 6,
+                            color: 'white',
+                            height: '36px',
+                            padding: '0 16px',
+                            backgroundColor: '#1976d2',
+                            '&:hover': {
+                              backgroundColor: '#115293',
+                            },
+                          }}
+                        >
+                          Update Event
+                        </Button>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Form>
+              )}
+            </Formik>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload CSV Modal */}
+        <Dialog
+          open={openCSV}
+          onClose={() => setOpenCSV(false)}
+          aria-labelledby="upload-dialog-title"
+          aria-describedby="upload-dialog-description"
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle id="upload-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar
+              alt="Event"
+              src="/logo/nexea.png"
+              sx={{ width: 64, height: 64, marginRight: 2 }}
+            />
+            <Box>
+              <Typography variant="h6">{currentEvent.name}</Typography>
+              <Typography variant="subtitle1">Upload Attendees</Typography>
+            </Box>
+          </DialogTitle>
+          <Divider sx={{ my: -1, mb: 3 }} />
+          <DialogContent>
+            <Typography variant="body1" sx={{ mb: 2, textAlign: 'flex-start' }}>
+              Upload a CSV file of the attendees.
+            </Typography>
+            {file ? (
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{ mt: 2, border: '1px solid #ccc', padding: 1, borderRadius: 1 }}
               >
-                <Iconify icon="mdi:close-circle" />
-              </IconButton>
-            </Stack>
-          ) : (
+                <Iconify icon="mdi:file-csv" />
+                <Typography variant="body2">
+                  {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                </Typography>
+                <IconButton
+                  onClick={() => {
+                    setFile(null);
+                  }}
+                  color="error"
+                  size="small"
+                  sx={{ marginLeft: 'auto' }}
+                >
+                  <Iconify icon="mdi:close-circle" />
+                </IconButton>
+              </Stack>
+            ) : (
+              <Button
+                variant="contained"
+                component="label"
+                sx={{
+                  marginTop: 2,
+                  backgroundColor: '#3874cb',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: 1,
+                  height: '40px',
+                  '&:hover': {
+                    backgroundColor: '#2e5a9b',
+                  },
+                }}
+              >
+                <Iconify icon="material-symbols:upload" sx={{ marginRight: 1 }} />
+                Choose File (.csv)
+                <input
+                  type="file"
+                  accept=".csv"
+                  hidden
+                  onChange={(event) => {
+                    const selectedFile = event.target.files[0];
+                    if (selectedFile) {
+                      setFile(selectedFile);
+                    }
+                  }}
+                />
+              </Button>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'flex-end' }}>
             <Button
-              variant="contained"
-              component="label"
+              onClick={() => {
+                setOpenCSV(false);
+                setFile(null);
+                handleClosee();
+              }}
               sx={{
-                marginTop: 2,
-                backgroundColor: '#3874cb',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                borderRadius: 1,
-                height: '40px',
+                borderRadius: 6,
+                backgroundColor: '#f0f0f0',
+                height: '36px',
+                padding: '0 16px',
+                color: '#555',
                 '&:hover': {
-                  backgroundColor: '#2e5a9b',
+                  backgroundColor: '#d0d0d0',
                 },
               }}
             >
-              <Iconify icon="material-symbols:upload" sx={{ marginRight: 1 }} />
-              Choose File (.csv)
-              <input
-                type="file"
-                accept=".csv"
-                hidden
-                onChange={(event) => {
-                  const selectedFile = event.target.files[0];
-                  if (selectedFile) {
-                    setFile(selectedFile);
-                  }
-                }}
-              />
+              Cancel
             </Button>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'flex-end' }}>
-          <Button
-            onClick={() => {
-              setOpenCSV(false);
-              setFile(null);
-              handleClosee();
-            }}
-            sx={{
-              borderRadius: 6,
-              backgroundColor: '#f0f0f0',
-              height: '36px',
-              padding: '0 16px',
-              color: '#555',
-              '&:hover': {
-                backgroundColor: '#d0d0d0',
-              },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              handleFileUpload(file, currentEvent.id);
-              setOpenCSV(false);
-              handleClosee();
-            }}
-            variant="contained"
-            color="primary"
-            sx={{
-              borderRadius: 6,
-              color: 'white',
-              height: '36px',
-              padding: '0 16px',
-              backgroundColor: '#1976d2',
-              '&:hover': {
-                backgroundColor: '#115293',
-              },
-            }}
-            disabled={!file}
-          >
-            Upload
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Button
+              onClick={() => {
+                handleFileUpload(file, currentEvent.id);
+                setOpenCSV(false);
+                handleClosee();
+              }}
+              variant="contained"
+              color="primary"
+              sx={{
+                borderRadius: 6,
+                color: 'white',
+                height: '36px',
+                padding: '0 16px',
+                backgroundColor: '#1976d2',
+                '&:hover': {
+                  backgroundColor: '#115293',
+                },
+              }}
+              disabled={!file}
+            >
+              Upload
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      <EventTicketDialog
-        open={ticketDialog.value}
-        onClose={ticketDialog.onFalse}
-        tickets={selectedEvent?.ticketType}
-        event={selectedEvent}
-      />
+        <EventTicketDialog
+          open={ticketDialog.value}
+          onClose={ticketDialog.onFalse}
+          tickets={selectedEvent?.ticketType}
+          event={selectedEvent}
+        />
 
-      {/* Create New Ticket Modal */}
-      <Dialog
-        open={openCreateTicket}
-        onClose={() => setOpenCreateTicket(false)}
-        aria-labelledby="create-ticket-dialog-title"
-        aria-describedby="create-ticket-dialog-description"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="create-ticket-dialog-title">Create New Ticket</DialogTitle>
-        <Divider sx={{ my: -1, mb: 2 }} />
-        <DialogContent>
-          <Formik
-            initialValues={{
-              name: '',
-              type: '',
-              validity: '',
-              category: '',
-              price: '',
-              quantity: '',
-            }}
-            // onSubmit={handleCreateTicket}
-          >
-            {({ handleChange, handleSubmit, setFieldValue, values }) => (
-              <Form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sx={{ mt: 2 }}>
-                    <Field as={TextField} name="name" label="Ticket Name" fullWidth required />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormControl fullWidth required variant="outlined">
-                      <InputLabel id="ticket-type-label">Ticket Type</InputLabel>
+        {/* Create New Ticket Modal */}
+        <Dialog
+          open={openCreateTicket}
+          onClose={() => setOpenCreateTicket(false)}
+          aria-labelledby="create-ticket-dialog-title"
+          aria-describedby="create-ticket-dialog-description"
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle id="create-ticket-dialog-title">Create New Ticket</DialogTitle>
+          <Divider sx={{ my: -1, mb: 2 }} />
+          <DialogContent>
+            <Formik
+              initialValues={{
+                name: '',
+                type: '',
+                validity: '',
+                category: '',
+                price: '',
+                quantity: '',
+              }}
+              // onSubmit={handleCreateTicket}
+            >
+              {({ handleChange, handleSubmit, setFieldValue, values }) => (
+                <Form onSubmit={handleSubmit}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sx={{ mt: 2 }}>
+                      <Field as={TextField} name="name" label="Ticket Name" fullWidth required />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth required variant="outlined">
+                        <InputLabel id="ticket-type-label">Ticket Type</InputLabel>
+                        <Field
+                          as={Select}
+                          name="type"
+                          labelId="ticket-type-label"
+                          label="Ticket Type"
+                          onChange={(event) => setFieldValue('type', event.target.value)}
+                        >
+                          <MenuItem value="Early Bird">Early Bird</MenuItem>
+                          <MenuItem value="Standard">Standard</MenuItem>
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                       <Field
-                        as={Select}
-                        name="type"
-                        labelId="ticket-type-label"
-                        label="Ticket Type"
-                        onChange={(event) => setFieldValue('type', event.target.value)}
-                      >
-                        <MenuItem value="Early Bird">Early Bird</MenuItem>
-                        <MenuItem value="Standard">Standard</MenuItem>
-                      </Field>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      name="validity"
-                      label="Ticket Validity"
-                      type="date"
-                      fullWidth
-                      required
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormControl fullWidth required variant="outlined">
-                      <InputLabel id="ticket-category-label">Ticket Category</InputLabel>
+                        as={TextField}
+                        name="validity"
+                        label="Ticket Validity"
+                        type="date"
+                        fullWidth
+                        required
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth required variant="outlined">
+                        <InputLabel id="ticket-category-label">Ticket Category</InputLabel>
+                        <Field
+                          as={Select}
+                          name="category"
+                          labelId="ticket-category-label"
+                          label="Ticket Category"
+                          onChange={(event) => setFieldValue('category', event.target.value)}
+                        >
+                          <MenuItem value="Startup">Startup</MenuItem>
+                          <MenuItem value="General">General</MenuItem>
+                          <MenuItem value="Speaker">Speaker</MenuItem>
+                          <MenuItem value="VIP">VIP</MenuItem>
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                       <Field
-                        as={Select}
-                        name="category"
-                        labelId="ticket-category-label"
-                        label="Ticket Category"
-                        onChange={(event) => setFieldValue('category', event.target.value)}
-                      >
-                        <MenuItem value="Startup">Startup</MenuItem>
-                        <MenuItem value="General">General</MenuItem>
-                        <MenuItem value="Speaker">Speaker</MenuItem>
-                        <MenuItem value="VIP">VIP</MenuItem>
-                      </Field>
-                    </FormControl>
+                        as={TextField}
+                        name="price"
+                        label="Ticket Price"
+                        type="number"
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        name="quantity"
+                        label="Ticket Quantity"
+                        type="number"
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <DialogActions sx={{ justifyContent: 'flex-end', paddingRight: '-0px' }}>
+                        <Button
+                          onClick={() => setOpenCreateTicket(false)}
+                          sx={{
+                            borderRadius: 6,
+                            backgroundColor: '#f0f0f0',
+                            height: '36px',
+                            padding: '0 16px',
+                            color: '#555',
+                            '&:hover': {
+                              backgroundColor: '#d0d0d0',
+                            },
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          sx={{
+                            borderRadius: 6,
+                            color: 'white',
+                            height: '36px',
+                            padding: '0 16px',
+                            backgroundColor: '#1976d2',
+                            '&:hover': {
+                              backgroundColor: '#115293',
+                            },
+                          }}
+                        >
+                          Create Ticket
+                        </Button>
+                      </DialogActions>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      name="price"
-                      label="Ticket Price"
-                      type="number"
-                      fullWidth
-                      required
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      name="quantity"
-                      label="Ticket Quantity"
-                      type="number"
-                      fullWidth
-                      required
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <DialogActions sx={{ justifyContent: 'flex-end', paddingRight: '-0px' }}>
-                      <Button
-                        onClick={() => setOpenCreateTicket(false)}
-                        sx={{
-                          borderRadius: 6,
-                          backgroundColor: '#f0f0f0',
-                          height: '36px',
-                          padding: '0 16px',
-                          color: '#555',
-                          '&:hover': {
-                            backgroundColor: '#d0d0d0',
-                          },
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        sx={{
-                          borderRadius: 6,
-                          color: 'white',
-                          height: '36px',
-                          padding: '0 16px',
-                          backgroundColor: '#1976d2',
-                          '&:hover': {
-                            backgroundColor: '#115293',
-                          },
-                        }}
-                      >
-                        Create Ticket
-                      </Button>
-                    </DialogActions>
-                  </Grid>
-                </Grid>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+                </Form>
+              )}
+            </Formik>
+          </DialogContent>
+        </Dialog>
 
-      {/* Edit Ticket Modal */}
-      {/* <Dialog
+        {/* Edit Ticket Modal */}
+        {/* <Dialog
         open={openEditTicket}
         onClose={() => setOpenEditTicket(false)}
         aria-labelledby="edit-ticket-dialog-title"
@@ -1276,8 +1275,8 @@ const EventLists = ({ query }) => {
         </DialogContent>
       </Dialog> */}
 
-      {/* Delete Ticket Modal */}
-      {/* <Dialog
+        {/* Delete Ticket Modal */}
+        {/* <Dialog
         open={openDeleteTicket}
         onClose={() => setOpenDeleteTicket(false)}
         aria-labelledby="delete-ticket-dialog-title"
@@ -1349,7 +1348,8 @@ const EventLists = ({ query }) => {
           </Button>
         </DialogActions>
       </Dialog> */}
-    </>
+      </>
+    )
   );
 };
 

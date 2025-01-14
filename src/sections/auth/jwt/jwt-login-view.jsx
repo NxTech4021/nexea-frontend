@@ -1,12 +1,13 @@
 import * as Yup from 'yup';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { enqueueSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import { Card } from '@mui/material';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import { Card, Button } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -127,6 +128,18 @@ export default function JwtLoginView() {
     </Stack>
   );
 
+  const onClick = async () => {
+    try {
+      router.push(
+        '/ticket-cart/?eventId=aeebcbd8-ab45-4335-b5ee-f6dc27b172bc&ticketTypeId=86a08ce1-a411-40b9-ac89-c49fa09f8167'
+      );
+    } catch (error) {
+      enqueueSnackbar(error?.message, {
+        variant: 'error',
+      });
+    }
+  };
+
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Card sx={{ p: 3, borderRadius: 2, boxShadow: 20 }}>
@@ -137,6 +150,9 @@ export default function JwtLoginView() {
       </Alert> */}
 
         {renderForm}
+        <Button variant="outlined" sx={{ mt: 20 }} onClick={onClick}>
+          Buy now
+        </Button>
       </Card>
     </FormProvider>
   );
