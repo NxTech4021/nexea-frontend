@@ -15,13 +15,13 @@ const TicketPurchaseView = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axiosInstance.get(endpoints.events.list); // Make sure this is correct
-        console.log('Fetched events:', response); // Log the entire response to verify the structure
+        const response = await axiosInstance.get(endpoints.events.list); 
+       
         if (response.data && Array.isArray(response.data.events)) {
-          setEvents(response.data.events); // Correctly access the events array inside response.data
+          setEvents(response.data.events); 
         } else {
           console.error('Unexpected response format:', response);
-          setEvents([]); // Set empty array if format is unexpected
+          setEvents([]); 
         }
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -68,11 +68,6 @@ const TicketPurchaseView = () => {
                 <TicketInformationCard eventId={selectedEvent.id} />
               </Stack>
             )}
-          {/* <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-            <TicketSelectionCard />
-
-            <TicketInformationCard />
-          </Stack> */}
         </Grid>
         <Grid item xs={12} md={4}>
           <TicketPaymentCard />
@@ -82,24 +77,6 @@ const TicketPurchaseView = () => {
     </>
   );
 };
-// const TicketPurchaseView = () => (
-//   <>
-    // <TickerPurchaseHeader />
-    // <Box px={{ xs: 2, md: 15 }} bgcolor="#F4F4F4" minHeight="100vh" overflow="hidden" pt={12}>
-    //   <Grid container spacing={2}>
-    //     <Grid item xs={12} md={8}>
-    //       <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-    //         <TicketSelectionCard />
 
-    //         <TicketInformationCard />
-    //       </Stack>
-    //     </Grid>
-    //     <Grid item xs={12} md={4}>
-    //       <TicketPaymentCard />
-    //     </Grid>
-    //   </Grid>
-    // </Box>
-//   </>
-// );
 
 export default TicketPurchaseView;
