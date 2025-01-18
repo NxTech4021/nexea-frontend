@@ -65,41 +65,79 @@ const TicketSelectionCard = ({ eventData }) => {
   }, [tickets]); // This runs whenever `tickets` change
   
   // This effect applies the discount to the selected ticket type
+  // useEffect(() => {
+  //   console.log('Discount Object:', discount);
+  //   if (discount && discount.value && subTotal > 0) {
+  //     console.log('Discount Objectss:', discount);
+
+  //     let discountAppliedToTicketSubtotal = 0;
+  //     let fullPriceSubtotal = 0;
+  
+  //     tickets.forEach(ticket => {
+  //       if (ticket.id === discount.ticketId && discount) {
+  //         // Subtotal for this ticket type after discount
+  //         discountAppliedToTicketSubtotal = (ticket.price * ticket.quantity) - discount.value;
+  //       } else {
+  //         // For other tickets, keep the full price
+  //         fullPriceSubtotal += ticket.price * ticket.quantity;
+  //       }
+  //     });
+
+  
+  //     // Final subtotal after applying the discount to the selected ticket type
+  //     const finalSubtotal = fullPriceSubtotal + discountAppliedToTicketSubtotal;
+  
+  //     // Update the total price by adding the fixed SST
+  //     const discountedTotalPrice = finalSubtotal + sst;
+  
+  //     setDiscountedPrice(finalSubtotal); // Set the discounted subtotal
+  //     setTotalPrice(discountedTotalPrice); // Set the total price with SST
+  //   }
+  // }, [discount, subTotal, tickets]); 
+
   useEffect(() => {
     console.log('Discount Object:', discount);
     if (discount && discount.value && subTotal > 0) {
-      console.log('Discount Object:', discount);
-
+      console.log('Discount Objectss:', discount);
+  
       let discountAppliedToTicketSubtotal = 0;
       let fullPriceSubtotal = 0;
   
+      // Loop through tickets to calculate discount per ticket
       tickets.forEach(ticket => {
         if (ticket.id === discount.ticketId && discount) {
-          // Apply discount to the ticket with the discount code
           if (discount.type === 'percentage') {
-            discountAmount = (ticket.price * discount.value) / 100 * ticket.quantity;
+            // Percentage discount is already calculated in backend, use the result
+            discountAppliedToTicketSubtotal = (ticket.price * discount.value) / 100 * ticket.quantity;
           } else if (discount.type === 'fixed') {
-            discountAmount = discount.value * ticket.quantity;
+            // Fixed discount is already calculated in backend, use the result
+            discountAppliedToTicketSubtotal = discount.value * ticket.quantity;
           }
-          // Subtotal for this ticket type after discount
-          discountAppliedToTicketSubtotal = (ticket.price * ticket.quantity) - discount.value;
         } else {
           // For other tickets, keep the full price
           fullPriceSubtotal += ticket.price * ticket.quantity;
         }
       });
-
   
-      // Final subtotal after applying the discount to the selected ticket type
-      const finalSubtotal = fullPriceSubtotal + discountAppliedToTicketSubtotal;
+      // Handle fixed-order discount type, applied to the entire cart subtotal
+      let finalSubtotal = fullPriceSubtotal + discountAppliedToTicketSubtotal;
   
-      // Update the total price by adding the fixed SST
-      const discountedTotalPrice = finalSubtotal + sst;
+      if (discount.type === 'fixed-order') {
+        // If it's a fixed-order discount, apply it to the whole cart subtotal
+        const appliedDiscount = Math.min(discount.value, subTotal);
+        console.log("Applied discount", appliedDiscount)
+        finalSubtotal = subTotal - appliedDiscount;  // Apply the discount to the total cart amount
+      }
+  
+      // Final subtotal after applying the discount
+      const discountedTotalPrice = finalSubtotal + sst; // Add SST to the final price
   
       setDiscountedPrice(finalSubtotal); // Set the discounted subtotal
       setTotalPrice(discountedTotalPrice); // Set the total price with SST
     }
-  }, [discount, subTotal, tickets]); 
+  }, [discount, subTotal, tickets, sst]);
+  
+  
 
   const handleIncrement = (ticketId) => {
     setTickets((prevTickets) =>
@@ -135,6 +173,10 @@ const TicketSelectionCard = ({ eventData }) => {
       return;
     }
 
+    const cartSubtotal = tickets.reduce((total, ticket) => {
+      return total + (ticket.quantity * ticket.price);
+    }, 0);
+
     const selectedTicket = tickets.find((ticket) => ticket.quantity > 0);
     if (!selectedTicket) {
       enqueueSnackbar('Please select at least one ticket', { variant: 'error' });
@@ -143,22 +185,34 @@ const TicketSelectionCard = ({ eventData }) => {
 
     const payload = {
       code_name: discountCode,
-      ticketId: selectedTicket.id,
-      quantity: selectedTicket.quantity,
+      cartSubtotal,
+      ticketId: selectedTicket?.id || null,
+      quantity: selectedTicket?.quantity || 0,
     };
+
+    console.log("Received payload:", payload);
+    // console.log("Discount amount calculated:", discountAmount);
 
     try {
       const response = await axiosInstance.post(endpoints.discount.redeem, payload);
 
-      const { success, discountAmount, newPrice, message } = response.data;
+      const { success, discountAmount, discountValue, discountType, message } = response.data;
+
+      console.log("Backend response:", response.data);
 
       if (success) {
         setDiscount({
-          code: discountCode,
-          value: discountAmount,  
-          ticketId: selectedTicket.id,
+          code_name: discountCode,
+          value: discountValue,
+          type: discountType,
+          amount: discountAmount,  
+          ticketId: selectedTicket?.id || null,
+          quantity: selectedTicket?.quantity || 0,
+          cartSubtotal,
+
         });
         setDiscountedPrice(discountAmount); 
+        console.log("Discount", discount)
         enqueueSnackbar('Discount code redeemed successfully', { variant: 'success' });
       } else {
         enqueueSnackbar(message || 'Failed to apply discount', { variant: 'error' });
@@ -298,7 +352,7 @@ const TicketSelectionCard = ({ eventData }) => {
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="caption" fontSize={12}>
-                    {discount.code}
+                    {discount.code_name}
                   </Typography>
                   <Typography variant="caption" color="error" fontSize={12}>
                    - {discount.value} {discount.type === 'percentage' ? '%' : 'RM'}
@@ -325,9 +379,9 @@ const TicketSelectionCard = ({ eventData }) => {
             </Stack>
             <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
               <Typography>Discount:</Typography>
-              {discount && discount.value ? (
+              {discount && discount.amount ? (
                 <Typography>
-                  RM {discount.value}
+                  RM {discount.amount}
                 </Typography>
               ) : (
                 <Typography>RM 0.00</Typography>
