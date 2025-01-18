@@ -38,7 +38,7 @@ import {
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-
+import axiosInstance, { endpoints } from 'src/utils/axios';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { _EventNames } from 'src/_mock/_event';
@@ -67,7 +67,7 @@ import {
 import TicketTableRow from '../ticket-table-row';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
-import axiosInstance, { endpoints } from 'src/utils/axios';
+
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...TICKET_STATUS_OPTIONS];
 
@@ -98,43 +98,78 @@ const schema = yup.object().shape({
     .positive('Quantity must be a positive number'),
 });
 
-const RenderSelectField = ({ name, control, label, options, required }) => {
-  return (
-    <Stack width={1} spacing={1}>
-      <InputLabel required={required}>{label}</InputLabel>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field, fieldState }) => (
-          <FormControl fullWidth error={!!fieldState.error}>
-            <Select
-              {...field}
-              displayEmpty
-              MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
-              renderValue={(selected) => {
-                return (
-                  options.find((item) => item.id === selected)?.name ||
-                  selected ||
-                  'Select an option'
-                );
-              }}
-            >
-              <MenuItem disabled value="">
-                <em>Select an option</em>
+// const RenderSelectField = ({ name, control, label, options, required }) => {
+//   return (
+//     <Stack width={1} spacing={1}>
+//       <InputLabel required={required}>{label}</InputLabel>
+//       <Controller
+//         name={name}
+//         control={control}
+//         render={({ field, fieldState }) => (
+//           <FormControl fullWidth error={!!fieldState.error}>
+//             <Select
+//               {...field}
+//               displayEmpty
+//               MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+//               renderValue={(selected) => {
+//                 return (
+//                   options.find((item) => item.id === selected)?.name ||
+//                   selected ||
+//                   'Select an option'
+//                 );
+//               }}
+//             >
+//               <MenuItem disabled value="">
+//                 <em>Select an option</em>
+//               </MenuItem>
+//               {options.map((option) => (
+//                 <MenuItem key={option?.id || option} value={option?.id || option}>
+//                   {option.name || option}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//             {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+//           </FormControl>
+//         )}
+//       />
+//     </Stack>
+//   );
+// };
+
+const RenderSelectField = ({ name, control, label, options, required }) => (
+  <Stack width={1} spacing={1}>
+    <InputLabel required={required}>{label}</InputLabel>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <FormControl fullWidth error={!!fieldState.error}>
+          <Select
+            {...field}
+            displayEmpty
+            MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+            renderValue={(selected) =>
+              options.find((item) => item.id === selected)?.name ||
+              selected ||
+              'Select an option'
+            }
+          >
+            <MenuItem disabled value="">
+              <em>Select an option</em>
+            </MenuItem>
+            {options.map((option) => (
+              <MenuItem key={option?.id || option} value={option?.id || option}>
+                {option.name || option}
               </MenuItem>
-              {options.map((option) => (
-                <MenuItem key={option?.id || option} value={option?.id || option}>
-                  {option.name || option}
-                </MenuItem>
-              ))}
-            </Select>
-            {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
-          </FormControl>
-        )}
-      />
-    </Stack>
-  );
-};
+            ))}
+          </Select>
+          {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+        </FormControl>
+      )}
+    />
+  </Stack>
+);
+
 
 const ticketTypes = ['Early Bird', 'Standard'];
 const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
@@ -475,7 +510,7 @@ export default function TicketTypeView({ data }) {
 
           <DialogContent>
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
-              <Stack width={1} direction={'row'} spacing={1}>
+              <Stack width={1} direction='row' spacing={1}>
                 <RenderSelectField
                   name="eventId"
                   control={control}
@@ -514,7 +549,7 @@ export default function TicketTypeView({ data }) {
               />
 
               <Box
-                display={'grid'}
+                display='grid'
                 gridTemplateColumns={{ xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)' }}
                 width={1}
                 gap={1}
