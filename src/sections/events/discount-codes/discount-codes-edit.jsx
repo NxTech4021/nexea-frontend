@@ -19,7 +19,7 @@ import {
   Typography,
   DialogActions,
 } from '@mui/material';
-import { types, categories, availabilities } from 'src/_mock/_discountCodes'; 
+import { types, availabilities } from 'src/_mock/_discountCodes'; 
 import RHFDatePicker from 'src/components/hook-form/rhf-datePicker';
 import RHFAutocomplete from 'src/components/hook-form/rhf-autocomplete';
 import RHFTextField from 'src/components/hook-form/rhf-text-field';
@@ -30,7 +30,6 @@ const schema = yup.object().shape({
   type: yup.string().required('Type is required'),
   value: yup.string().required('Value is required'),
   availability: yup.array().of(yup.string()).required('Availability is required'),
-  category: yup.string().required('Category is required'),
   limit: yup.string().required('Limit is required'),
   startDate: yup
     .date()
@@ -57,7 +56,6 @@ const EditDiscountCode = ({ discountCode = {}, onSave, open, onClose }) => {
       type: discountCode?.codeType || '',
       value: discountCode?.codeValue || '',
       availability: discountCode?.codeAvailability || [],
-      category: discountCode?.codeCategory || '',
       limit: discountCode?.codeLimit || '',
       startDate: discountCode?.startDate ? dayjs(discountCode.startDate) : null,
       endDate: discountCode?.endDate ? dayjs(discountCode.endDate) : null,
@@ -175,21 +173,6 @@ const EditDiscountCode = ({ discountCode = {}, onSave, open, onClose }) => {
 
               {/* Category and Limit */}
               <Stack direction="row" spacing={2}>
-                <FormField label="Category">
-                  <Controller
-                    name="category"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Select {...field} fullWidth error={!!fieldState.error}>
-                        {categories.map((category) => (
-                          <MenuItem key={category.id} value={category.name}>
-                            {category.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </FormField>
                 <FormField label="Limit">
                   <Controller
                     name="limit"
@@ -260,7 +243,6 @@ EditDiscountCode.propTypes = {
     codeType: PropTypes.string,
     codeValue: PropTypes.string,
     codeAvailability: PropTypes.array,
-    codeCategory: PropTypes.string,
     codeLimit: PropTypes.string,
     startDate: PropTypes.string,
     endDate: PropTypes.string,
