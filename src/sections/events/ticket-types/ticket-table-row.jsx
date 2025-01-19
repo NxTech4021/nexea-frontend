@@ -48,8 +48,6 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
-  // const title = `${type} - ${category} (${name})`;
-
   const handleViewDetails = () => {
     setSelectedTicket(row);
     setDetailsDialogOpen(true);

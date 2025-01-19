@@ -279,7 +279,7 @@ const EventLists = ({ query }) => {
         <TableContainer component={Paper} sx={{ mt: 4 }}>
           <Table sx={{ minWidth: 650 }} aria-label="events table">
             <TableHead>
-              <TableRow sx={{ backgroundColor: theme.palette.grey[200] }}>
+              <TableRow>
                 <TableCell align="left" sx={{ fontWeight: 'bold', paddingLeft: 3 }}>
                   Event Name
                 </TableCell>
@@ -347,7 +347,10 @@ const EventLists = ({ query }) => {
                     key={event.id}
                     sx={{
                       '&:last-child td, &:last-child th': { border: 0 },
-                      '&:hover': { backgroundColor: grey[100], cursor: 'pointer' },
+                      '&:hover': {
+                        backgroundColor: theme.palette.mode === 'dark' ? grey[900] : grey[200],
+                        cursor: 'pointer',
+                      },
                     }}
                   >
                     <TableCell align="center">
@@ -378,11 +381,10 @@ const EventLists = ({ query }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell align="right" sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <TableCell align="end">
                       <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
                         <Button
                           variant="outlined"
-                          sx={{ color: 'black' }}
                           startIcon={<Iconify icon="bx:qr" />}
                           onClick={() => navigate(`${paths.dashboard.events.qr}/${event.id}`)}
                         >
@@ -390,7 +392,6 @@ const EventLists = ({ query }) => {
                         </Button>
                         <Button
                           variant="outlined"
-                          sx={{ color: 'black' }}
                           onClick={(e) => {
                             setAnchorEl2(e.currentTarget);
                             setCurrentEventId(event.id);

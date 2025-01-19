@@ -18,6 +18,7 @@ import {
   Dialog,
   Button,
   Select,
+  Switch,
   Tooltip,
   MenuItem,
   Container,
@@ -33,7 +34,6 @@ import {
   TableContainer,
   FormHelperText,
   CircularProgress,
-  Switch,
   FormControlLabel,
 } from '@mui/material';
 
@@ -41,10 +41,11 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { _EventNames } from 'src/_mock/_event';
+import axiosInstance, { endpoints } from 'src/utils/axios';
+
 import { useGetAllEvents } from 'src/api/event';
+import { TICKET_STATUS_OPTIONS } from 'src/_mock/_ticketTypes';
 import { createTicketType, useGetAllTicketTypes } from 'src/api/ticket-type';
-import { _TicketTypes, TICKET_STATUS_OPTIONS } from 'src/_mock/_ticketTypes';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -97,43 +98,37 @@ const schema = yup.object().shape({
     .positive('Quantity must be a positive number'),
 });
 
-const RenderSelectField = ({ name, control, label, options, required }) => {
-  return (
-    <Stack width={1} spacing={1}>
-      <InputLabel required={required}>{label}</InputLabel>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field, fieldState }) => (
-          <FormControl fullWidth error={!!fieldState.error}>
-            <Select
-              {...field}
-              displayEmpty
-              MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
-              renderValue={(selected) => {
-                return (
-                  options.find((item) => item.id === selected)?.name ||
-                  selected ||
-                  'Select an option'
-                );
-              }}
-            >
-              <MenuItem disabled value="">
-                <em>Select an option</em>
+const RenderSelectField = ({ name, control, label, options, required }) => (
+  <Stack width={1} spacing={1}>
+    <InputLabel required={required}>{label}</InputLabel>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <FormControl fullWidth error={!!fieldState.error}>
+          <Select
+            {...field}
+            displayEmpty
+            MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+            renderValue={(selected) =>
+              options.find((item) => item.id === selected)?.name || selected || 'Select an option'
+            }
+          >
+            <MenuItem disabled value="">
+              <em>Select an option</em>
+            </MenuItem>
+            {options.map((option) => (
+              <MenuItem key={option?.id || option} value={option?.id || option}>
+                {option.name || option}
               </MenuItem>
-              {options.map((option) => (
-                <MenuItem key={option?.id || option} value={option?.id || option}>
-                  {option.name || option}
-                </MenuItem>
-              ))}
-            </Select>
-            {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
-          </FormControl>
-        )}
-      />
-    </Stack>
-  );
-};
+            ))}
+          </Select>
+          {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+        </FormControl>
+      )}
+    />
+  </Stack>
+);
 
 const ticketTypes = ['Early Bird', 'Standard'];
 const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
@@ -226,8 +221,8 @@ export default function TicketTypeView({ data }) {
         validity: item.validity,
         price: parseFloat(item.price),
         quantity: item.quantity,
-        minimumTicketPerOrder: parseInt(item.requirement.minimumTicketPerOrder),
-        maximumTicketPerOrder: parseInt(item.requirement.maximumTicketPerOrder),
+        minimumTicketPerOrder: parseInt(item.requirement.minimumTicketPerOrder, 10),
+        maximumTicketPerOrder: parseInt(item.requirement.maximumTicketPerOrder, 10),
       };
 
       await createTicketType(newTicketType);
@@ -240,21 +235,15 @@ export default function TicketTypeView({ data }) {
     }
   });
 
-  // useEffect(() => {
-  //   if (data) {
-  //     setTableData((prevData) => [...prevData, data]);
-  //   }
-  // }, [data]);
-
   const handleDeleteRow = useCallback(
     async (id) => {
       try {
-        // await axiosInstance.delete(`${endpoints.admin.delete}/${id}`);
+        await axiosInstance.delete(endpoints.ticketType.delete(id));
         const deleteRows = tableData.filter((row) => row.id !== id);
         setTableData(deleteRows);
-        // enqueueSnackbar('Successfully deleted ticket type', { variant: 'success' });
+        enqueueSnackbar('Successfully deleted ticket type', { variant: 'success' });
       } catch (error) {
-        // enqueueSnackbar(error?.message || 'Failed to delete ticket type', { variant: 'error' });
+        enqueueSnackbar(error?.message || 'Failed to delete ticket type', { variant: 'error' });
       }
     },
     [tableData]
@@ -303,7 +292,7 @@ export default function TicketTypeView({ data }) {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+      <Container maxWidth="xl">
         <Box
           sx={{
             display: 'flex',
@@ -332,133 +321,130 @@ export default function TicketTypeView({ data }) {
           </Button>
         </Box>
 
-        {tableData?.length && (
-          <Card>
-            <Tabs
-              value={filters.status}
-              onChange={handleFilterStatus}
-              sx={{
-                px: 2.5,
-                boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-              }}
-            >
-              {STATUS_OPTIONS.map((tab) => (
-                <Tab
-                  key={tab.value}
-                  iconPosition="end"
-                  value={tab.value}
-                  label={tab.label}
-                  icon={
-                    <Label
-                      variant={
-                        ((tab.value === 'all' || tab.value === filters.status) && 'filled') ||
-                        'soft'
-                      }
-                      color={(tab.value && 'success') || (!tab.value && 'error') || 'default'}
-                    >
-                      {[true, false].includes(tab.value)
-                        ? tableData.filter((item) => item.isActive === tab.value).length
-                        : tableData.length}
-                    </Label>
-                  }
-                />
-              ))}
-            </Tabs>
+        <Card>
+          <Tabs
+            value={filters.status}
+            onChange={handleFilterStatus}
+            sx={{
+              px: 2.5,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            }}
+          >
+            {STATUS_OPTIONS.map((tab) => (
+              <Tab
+                key={tab.value}
+                iconPosition="end"
+                value={tab.value}
+                label={tab.label}
+                icon={
+                  <Label
+                    variant={
+                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
+                    }
+                    color={(tab.value && 'success') || (!tab.value && 'error') || 'default'}
+                  >
+                    {[true, false].includes(tab.value)
+                      ? tableData.filter((item) => item.isActive === tab.value).length
+                      : tableData.length}
+                  </Label>
+                }
+              />
+            ))}
+          </Tabs>
 
-            <TicketTableToolbar
+          <TicketTableToolbar
+            filters={filters}
+            onFilters={handleFilters}
+            eventNameOptions={eventNameOptions}
+          />
+
+          {canReset && (
+            <TicketTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
-              eventNameOptions={eventNameOptions}
-            />
-
-            {canReset && (
-              <TicketTableFiltersResult
-                filters={filters}
-                onFilters={handleFilters}
-                //
-                onResetFilters={handleResetFilters}
-                //
-                results={dataFiltered.length}
-                sx={{ p: 2.5, pt: 0 }}
-              />
-            )}
-
-            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-              <TableSelectedAction
-                dense={table.dense}
-                numSelected={table.selected.length}
-                rowCount={dataFiltered.length}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
-                action={
-                  <Tooltip title="Delete">
-                    <IconButton color="primary" onClick={confirm.onTrue}>
-                      <Iconify icon="solar:trash-bin-trash-bold" />
-                    </IconButton>
-                  </Tooltip>
-                }
-              />
-
-              <Scrollbar>
-                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                  <TableHeadCustom
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={dataFiltered.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                      table.onSelectAllRows(
-                        checked,
-                        dataFiltered.map((row) => row.id)
-                      )
-                    }
-                  />
-                  <TableBody>
-                    {dataFiltered
-                      ?.slice(
-                        table.page * table.rowsPerPage,
-                        table.page * table.rowsPerPage + table.rowsPerPage
-                      )
-                      .map((row) => (
-                        <TicketTableRow
-                          key={row.id}
-                          row={row}
-                          selected={table.selected.includes(row.id)}
-                          onSelectRow={() => table.onSelectRow(row.id)}
-                          onDeleteRow={() => handleDeleteRow(row.id)}
-                          onViewDetails={handleViewDetails}
-                        />
-                      ))}
-
-                    <TableEmptyRows
-                      height={denseHeight}
-                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                    />
-
-                    <TableNoData notFound={notFound} />
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            </TableContainer>
-
-            <TablePaginationCustom
-              count={dataFiltered.length}
-              page={table.page}
-              rowsPerPage={table.rowsPerPage}
-              onPageChange={table.onChangePage}
-              onRowsPerPageChange={table.onChangeRowsPerPage}
               //
-              dense={table.dense}
-              onChangeDense={table.onChangeDense}
+              onResetFilters={handleResetFilters}
+              //
+              results={dataFiltered.length}
+              sx={{ p: 2.5, pt: 0 }}
             />
-          </Card>
-        )}
+          )}
+
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            <TableSelectedAction
+              dense={table.dense}
+              numSelected={table.selected.length}
+              rowCount={dataFiltered.length}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  dataFiltered.map((row) => row.id)
+                )
+              }
+              action={
+                <Tooltip title="Delete">
+                  <IconButton color="primary" onClick={confirm.onTrue}>
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                  </IconButton>
+                </Tooltip>
+              }
+            />
+
+            <Scrollbar>
+              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                <TableHeadCustom
+                  order={table.order}
+                  orderBy={table.orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={dataFiltered.length}
+                  numSelected={table.selected.length}
+                  onSort={table.onSort}
+                  onSelectAllRows={(checked) =>
+                    table.onSelectAllRows(
+                      checked,
+                      dataFiltered.map((row) => row.id)
+                    )
+                  }
+                />
+                <TableBody>
+                  {dataFiltered
+                    ?.slice(
+                      table.page * table.rowsPerPage,
+                      table.page * table.rowsPerPage + table.rowsPerPage
+                    )
+                    .map((row) => (
+                      <TicketTableRow
+                        key={row.id}
+                        row={row}
+                        selected={table.selected.includes(row.id)}
+                        onSelectRow={() => table.onSelectRow(row.id)}
+                        onDeleteRow={() => handleDeleteRow(row.id)}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+
+                  <TableEmptyRows
+                    height={denseHeight}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                  />
+
+                  <TableNoData notFound={notFound} />
+                </TableBody>
+              </Table>
+            </Scrollbar>
+          </TableContainer>
+
+          <TablePaginationCustom
+            count={dataFiltered.length}
+            page={table.page}
+            rowsPerPage={table.rowsPerPage}
+            onPageChange={table.onChangePage}
+            onRowsPerPageChange={table.onChangeRowsPerPage}
+            //
+            dense={table.dense}
+            onChangeDense={table.onChangeDense}
+          />
+        </Card>
       </Container>
 
       <Dialog
@@ -483,7 +469,7 @@ export default function TicketTypeView({ data }) {
 
           <DialogContent>
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
-              <Stack width={1} direction={'row'} spacing={1}>
+              <Stack width={1} direction="row" spacing={1}>
                 <RenderSelectField
                   name="eventId"
                   control={control}
@@ -522,7 +508,7 @@ export default function TicketTypeView({ data }) {
               />
 
               <Box
-                display={'grid'}
+                display="grid"
                 gridTemplateColumns={{ xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)' }}
                 width={1}
                 gap={1}
