@@ -15,6 +15,7 @@ import {
   TableBody,
   IconButton,
   TableContainer,
+  CircularProgress,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -22,6 +23,8 @@ import { paths } from 'src/routes/paths';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import mockDiscountCodes from 'src/_mock/_discountCodes';
+import { useGetAllTicketTypes } from 'src/api/ticket-type';
+import { useGetAllDiscountCode } from 'src/api/discount-code';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -63,7 +66,9 @@ const defaultFilters = {
 
 export default function DiscountCodeView() {
   const table = useTable();
-  // const { enqueueSnackbar } = useSnackbar();
+  const { data, isLoading } = useGetAllTicketTypes();
+  const { discountCodes, discountCodesIsLoading } = useGetAllDiscountCode();
+
   const [tableData, setTableData] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingDiscountCode, setEditingDiscountCode] = useState(null);
@@ -75,7 +80,7 @@ export default function DiscountCodeView() {
   }, []);
 
   const dataFiltered = applyFilter({
-    inputData: tableData,
+    inputData: discountCodes,
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
@@ -169,6 +174,21 @@ export default function DiscountCodeView() {
     setIsCreating(false);
   };
 
+  if (discountCodesIsLoading || isLoading) {
+    return (
+      <Box sx={{ position: 'absolute', top: '50%', left: '50%' }}>
+        <CircularProgress
+          thickness={7}
+          size={25}
+          sx={{
+            color: (theme) => theme.palette.common.black,
+            strokeLinecap: 'round',
+          }}
+        />
+      </Box>
+    );
+  }
+
   return (
     <>
       <Container maxWidth="xl">
@@ -201,6 +221,7 @@ export default function DiscountCodeView() {
             onCreate={handleSaveDiscountCode}
             open={isCreating}
             onClose={handleCloseCreateForm}
+            ticketTypes={data?.ticketTypes}
           />
         )}
 
@@ -291,7 +312,7 @@ export default function DiscountCodeView() {
                         table.page * table.rowsPerPage,
                         table.page * table.rowsPerPage + table.rowsPerPage
                       )
-                      .map((row) => (
+                      ?.map((row) => (
                         <DiscountCodeTableRow
                           key={row.id}
                           row={row}

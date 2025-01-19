@@ -90,10 +90,11 @@ export const endpoints = {
     delete: (id) => `/api/ticket-type/${id}`,
   },
   discount: {
+    get: '/api/discount/',
+    create: '/api/discount/',
     redeem: '/api/discount/redeem',
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
-    create: '/api/discount/create',
     update: (id) => `/api/discount/update/${id}`,
     delete: (id) => `/api/discount/delete/${id}`,
   },
