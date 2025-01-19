@@ -171,7 +171,7 @@ export default function DiscountCodeView() {
 
   return (
     <>
-      <Container maxWidth={false}>
+      <Container maxWidth="xl">
         <Box
           sx={{
             display: 'flex',
