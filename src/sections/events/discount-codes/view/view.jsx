@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import isEqual from 'lodash/isEqual';
 import { enqueueSnackbar } from 'notistack';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -42,8 +43,8 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import CreateDiscountCode from '../create-discount-codes';
 import DiscountCodeTableRow from '../discount-codes-table-row';
+import CreateDiscountCode from '../modal/create-discount-codes';
 import DiscountCodeTableToolbar from '../discount-codes-table-toolbar';
 import DiscountCodeTableFiltersResult from '../discount-codes-table-filters-result';
 
@@ -320,6 +321,7 @@ export default function DiscountCodeView() {
                           onSelectRow={() => table.onSelectRow(row.id)}
                           onDeleteRow={() => handleDeleteRow(row.id)}
                           onSave={handleSave}
+                          ticketTypes={data?.ticketTypes}
                         />
                       ))}
                     <TableEmptyRows
@@ -383,6 +385,10 @@ function applyFilter({ inputData, comparator, filters }) {
     if (order !== 0) return order;
     return a[1] - b[1];
   });
+
+  stabilizedThis?.sort((a, b) =>
+    dayjs(a?.createdAt).isBefore(dayjs(b?.createdAt), 'date') ? 1 : -1
+  );
 
   inputData = stabilizedThis?.map((el) => el[0]);
 

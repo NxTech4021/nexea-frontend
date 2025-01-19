@@ -92,10 +92,10 @@ export const endpoints = {
   discount: {
     get: '/api/discount/',
     create: '/api/discount/',
+    update: `/api/discount/`,
     redeem: '/api/discount/redeem',
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
-    update: (id) => `/api/discount/update/${id}`,
     delete: (id) => `/api/discount/delete/${id}`,
   },
 };

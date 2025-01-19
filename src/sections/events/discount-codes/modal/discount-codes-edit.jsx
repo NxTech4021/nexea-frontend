@@ -1,64 +1,66 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { useForm, Controller, FormProvider } from 'react-hook-form';
-import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import * as yup from 'yup';
+import PropTypes from 'prop-types';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, Controller, FormProvider } from 'react-hook-form';
+
 import {
   Box,
+  Stack,
   Button,
-  Divider,
   Select,
+  Dialog,
+  Divider,
   MenuItem,
   TextField,
   InputLabel,
-  Stack,
-  Dialog,
+  Typography,
   DialogTitle,
   DialogContent,
-  Typography,
   DialogActions,
 } from '@mui/material';
-import { types, availabilities } from 'src/_mock/_discountCodes'; 
+
+import { types, availabilities } from 'src/_mock/_discountCodes';
+
+import RHFTextField from 'src/components/hook-form/rhf-text-field';
 import RHFDatePicker from 'src/components/hook-form/rhf-datePicker';
 import RHFAutocomplete from 'src/components/hook-form/rhf-autocomplete';
-import RHFTextField from 'src/components/hook-form/rhf-text-field';
+
+// Simplified FormField component
+const FormField = ({ label, children, required = false }) => (
+  <Stack spacing={0.3} sx={{ width: '100%' }}>
+    <InputLabel required={required}>{label}</InputLabel>
+    {children}
+  </Stack>
+);
+
+FormField.propTypes = {
+  label: PropTypes.string,
+  children: PropTypes.element,
+};
 
 // Validation schema
 const schema = yup.object().shape({
   name: yup.string().required('Discount code name is required'),
   type: yup.string().required('Type is required'),
-  value: yup.string().required('Value is required'),
-  availability: yup.array().of(yup.string()).required('Availability is required'),
-  limit: yup.string().required('Limit is required'),
-  startDate: yup
-    .date()
-    .nullable()
-    .test('start-before-end', 'Start date must be before end date', function (value) {
-      const { endDate } = this.parent;
-      return !endDate || !value || dayjs(value).isBefore(dayjs(endDate));
-    }),
-  endDate: yup
-    .date()
-    .nullable()
-    .test('end-after-start', 'End date must be after start date', function (value) {
-      const { startDate } = this.parent;
-      return !startDate || !value || dayjs(value).isAfter(dayjs(startDate));
-    }),
+  value: yup.number().required('Value is required'),
+  availability: yup.array().min(1, 'At least one availability is required.'),
+  limit: yup.number(),
 });
 
 const EditDiscountCode = ({ discountCode = {}, onSave, open, onClose }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      id: discountCode?.id || '', // Keep empty for new discount codes
+      id: discountCode?.id || '',
       name: discountCode?.codeName || '',
       type: discountCode?.codeType || '',
-      value: discountCode?.codeValue || '',
+      value: discountCode?.codeValue || null,
       availability: discountCode?.codeAvailability || [],
-      limit: discountCode?.codeLimit || '',
-      startDate: discountCode?.startDate ? dayjs(discountCode.startDate) : null,
-      endDate: discountCode?.endDate ? dayjs(discountCode.endDate) : null,
+      limit: discountCode?.codeLimit || 0,
+      expirationDate: discountCode?.startDate ? dayjs(discountCode.startDate) : null,
     },
     mode: 'onBlur',
   });
@@ -76,16 +78,14 @@ const EditDiscountCode = ({ discountCode = {}, onSave, open, onClose }) => {
     onClose(); // Close the dialog
   };
 
-  // Simplified FormField component
-  const FormField = ({ label, children }) => (
-    <Stack spacing={0.3} sx={{ width: '100%' }}>
-      <InputLabel>{label}</InputLabel>
-      {children}
-    </Stack>
-  );
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 1 } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: 1 } }}
+    >
       <DialogTitle>
         <Typography variant="h4">{discountCode.id ? 'Edit' : 'Create'} Discount Code</Typography>
         <Typography variant="body2" color="textSecondary">

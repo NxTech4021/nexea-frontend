@@ -22,12 +22,18 @@ import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover from 'src/components/custom-popover/custom-popover';
 
-import EditDiscountCode from './discount-codes-edit';
+import CreateDiscountCode from './modal/create-discount-codes';
 
 // ----------------------------------------------------------------------
 
-export default function DiscountCodeTableRow({ row, selected, onSelectRow, onDeleteRow, onSave }) {
-  const { codeName, codeType, codeValue, codeAvailability, codeLimit, endDate } = row;
+export default function DiscountCodeTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onDeleteRow,
+  onSave,
+  ticketTypes,
+}) {
   const { code, created_at, expirationDate, id, limit, ticketType, type, value } = row;
 
   const confirm = useBoolean();
@@ -108,8 +114,9 @@ export default function DiscountCodeTableRow({ row, selected, onSelectRow, onDel
           <Iconify icon="solar:pen-bold" />
           Edit
         </MenuItem>
+
         {isEditing && (
-          <EditDiscountCode
+          <CreateDiscountCode
             discountCode={selectedDiscountCode}
             open={isEditing}
             onSave={handleSave}
@@ -118,6 +125,7 @@ export default function DiscountCodeTableRow({ row, selected, onSelectRow, onDel
               popover.onClose();
             }}
             setEditedData={setEditedData}
+            ticketTypes={ticketTypes}
           />
         )}
 
@@ -138,7 +146,7 @@ export default function DiscountCodeTableRow({ row, selected, onSelectRow, onDel
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
-        content={`Are you sure want to delete ${codeName}?`}
+        content={`Are you sure want to delete ${code}?`}
         action={
           <Button
             variant="contained"
@@ -162,4 +170,5 @@ DiscountCodeTableRow.propTypes = {
   onSave: PropTypes.func,
   row: PropTypes.object,
   selected: PropTypes.bool,
+  ticketTypes: PropTypes.array,
 };

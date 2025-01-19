@@ -8,6 +8,7 @@ import { enqueueSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 
+import { LoadingButton } from '@mui/lab';
 import {
   Stack,
   Button,
@@ -85,26 +86,29 @@ const schema = yup.object().shape({
   limit: yup.number(),
 });
 
-const CreateDiscountCode = ({ discountCode = {}, onCreate, open, onClose, ticketTypes }) => {
+const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       id: discountCode?.id || '',
-      name: discountCode?.codeName || '',
-      type: discountCode?.codeType || '',
-      value: discountCode?.codeValue || null,
-      availability: discountCode?.codeAvailability || [],
-      limit: discountCode?.codeLimit || 0,
-      expirationDate: discountCode?.startDate ? dayjs(discountCode.startDate) : null,
+      name: discountCode?.code || '',
+      type: discountCode?.type || '',
+      value: discountCode?.value || null,
+      availability: discountCode?.ticketType || [],
+      limit: discountCode?.limit || 0,
+      expirationDate: dayjs(discountCode?.expirationDate) || null,
     },
     mode: 'onBlur',
   });
 
-  const { control, handleSubmit, reset } = methods;
+  const { control, handleSubmit, reset, isSubmitting } = methods;
 
   const onSubmit = handleSubmit(async (value) => {
     try {
-      const res = await axiosInstance.post(endpoints.discount.create, value);
+      const res = await (!discountCode.id
+        ? axiosInstance.post(endpoints.discount.create, value)
+        : axiosInstance.patch(endpoints.discount.update, value));
+
       enqueueSnackbar(res?.data?.message);
       mutate(endpoints.discount.get);
       onClose();
@@ -126,9 +130,11 @@ const CreateDiscountCode = ({ discountCode = {}, onCreate, open, onClose, ticket
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogTitle>
-          <Typography variant="h4">Create Discount Code</Typography>
+          <Typography variant="h4">{discountCode.id ? 'Edit' : 'Create'} Discount Code</Typography>
           <Typography variant="body2" color="textSecondary">
-            Fill out the details to create a new discount code.
+            {discountCode.id
+              ? 'Update the details of your discount code.'
+              : 'Fill out the details to create a new discount code.'}
           </Typography>
         </DialogTitle>
 
@@ -197,9 +203,9 @@ const CreateDiscountCode = ({ discountCode = {}, onCreate, open, onClose, ticket
             Cancel
           </Button>
 
-          <Button variant="contained" type="submit">
-            Create
-          </Button>
+          <LoadingButton variant="contained" type="submit" loading={isSubmitting}>
+            {discountCode.id ? 'Save' : 'Create'}
+          </LoadingButton>
         </DialogActions>
       </FormProvider>
     </Dialog>
