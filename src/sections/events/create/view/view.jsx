@@ -51,9 +51,9 @@ export default function Events() {
   );
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+    <Container maxWidth="xl">
       <CustomBreadcrumbs
-        heading="List"
+        heading="Event"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           {
