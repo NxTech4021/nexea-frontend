@@ -38,7 +38,7 @@ import {
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-
+import axiosInstance, { endpoints } from 'src/utils/axios';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
@@ -111,7 +111,9 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
             displayEmpty
             MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
             renderValue={(selected) =>
-              options.find((item) => item.id === selected)?.name || selected || 'Select an option'
+              options.find((item) => item.id === selected)?.name ||
+              selected ||
+              'Select an option'
             }
           >
             <MenuItem disabled value="">
@@ -469,7 +471,7 @@ export default function TicketTypeView({ data }) {
 
           <DialogContent>
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
-              <Stack width={1} direction="row" spacing={1}>
+              <Stack width={1} direction='row' spacing={1}>
                 <RenderSelectField
                   name="eventId"
                   control={control}
@@ -508,7 +510,7 @@ export default function TicketTypeView({ data }) {
               />
 
               <Box
-                display="grid"
+                display='grid'
                 gridTemplateColumns={{ xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)' }}
                 width={1}
                 gap={1}
