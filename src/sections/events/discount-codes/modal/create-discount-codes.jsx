@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
 import dayjs from 'dayjs';
+import React from 'react';
 import * as yup from 'yup';
 import { mutate } from 'swr';
 import PropTypes from 'prop-types';
@@ -78,15 +78,28 @@ FormField.propTypes = {
 };
 
 // Validation schema
-const schema = yup.object().shape({
-  name: yup.string().required('Discount code name is required'),
-  type: yup.string().required('Type is required'),
-  value: yup.number().required('Value is required'),
-  availability: yup.array().min(1, 'At least one availability is required.'),
-  limit: yup.number(),
-});
 
 const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) => {
+  const schema = yup.object().shape({
+    name: yup.string().required('Discount code name is required'),
+    type: yup.string().required('Type is required'),
+    value: yup
+      .number()
+      .required('Value is required')
+      .when('type', {
+        is: (val) => val === 'percentage',
+        then: (s) =>
+          s
+            .required('Value is required')
+            .max(100, 'Percentage discount cannot exceed 100')
+            .min(0, 'Percentage discount cannot be negative'),
+        otherwise: (s) =>
+          s.required('Value is required').min(0, 'Discount value cannot be negative'),
+      }),
+    availability: yup.array().min(1, 'At least one availability is required.'),
+    limit: yup.number().min(0, 'Limit cannot be negative'),
+  });
+
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -98,10 +111,23 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
       limit: discountCode?.limit || 0,
       expirationDate: dayjs(discountCode?.expirationDate) || null,
     },
-    mode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, isSubmitting } = methods;
+  const { control, handleSubmit, reset, isSubmitting, watch } = methods;
+
+  const discountType = watch('type');
+
+  // const testDiscountValue = useCallback(
+  //   (val) => {
+  //     if (discountType === 'percentage' && val > 100) {
+  //       return false;
+  //     }
+  //     return true;
+  //   },
+  //   [discountType]
+  // );
 
   const onSubmit = handleSubmit(async (value) => {
     try {
