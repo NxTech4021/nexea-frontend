@@ -31,11 +31,14 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
 import {
   useTable,
   emptyRows,
   TableNoData,
+  TableEmptyRows,
+  TableHeadCustom,
   getComparator,
   TableEmptyRows,
   TableHeadCustom,
@@ -47,6 +50,7 @@ import DiscountCodeTableRow from '../discount-codes-table-row';
 import CreateDiscountCode from '../modal/create-discount-codes';
 import DiscountCodeTableToolbar from '../discount-codes-table-toolbar';
 import DiscountCodeTableFiltersResult from '../discount-codes-table-filters-result';
+
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }];
 
@@ -67,18 +71,26 @@ const defaultFilters = {
 
 export default function DiscountCodeView() {
   const table = useTable();
-  const { data, isLoading } = useGetAllTicketTypes();
-  const { discountCodes, discountCodesIsLoading } = useGetAllDiscountCode();
-
+  const { enqueueSnackbar } = useSnackbar();
   const [tableData, setTableData] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingDiscountCode, setEditingDiscountCode] = useState(null);
+  const denseHeight = table.dense ? 56 : 76;
+  const { data, isLoading } = useGetAllTicketTypes();
+  const { discountCodes, discountCodesIsLoading } = useGetAllDiscountCode();
+
+//   const [tableData, setTableData] = useState([]);
+//   const [isCreating, setIsCreating] = useState(false);
+//   const [editingDiscountCode, setEditingDiscountCode] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
   const confirm = useBoolean();
 
   useEffect(() => {
     setTableData(mockDiscountCodes);
   }, []);
+
+
+  const notFound = tableData.length === 0;
 
   const dataFiltered = applyFilter({
     inputData: discountCodes,

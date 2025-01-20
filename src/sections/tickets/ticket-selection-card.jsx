@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { enqueueSnackbar } from 'notistack';
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosInstance, {endpoints} from 'src/utils/axios';
@@ -8,46 +9,210 @@ import {
   Stack,
   Table,
   Button,
+  Select,
   Divider,
   TableRow,
+  MenuItem,
   TableHead,
   TableCell,
   TableBody,
   TextField,
-  IconButton,
   Typography,
+  IconButton,
+  InputLabel,
+  FormControl,
   ListItemText,
   TableContainer,
+  CircularProgress,
 } from '@mui/material';
+
+import { useRouter } from 'src/routes/hooks';
+
+import { useResponsive } from 'src/hooks/use-responsive';
+
+import { debounce } from 'src/utils/debounce';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 
+import useGetCartData from './hooks/use-get-cart';
 
+const fakeInfo = [
+  {
+    id: 1,
+    type: 'Standard - Startups',
+    price: 199,
+    quantity: 1,
+    subTotal: 0,
+  },
+  {
+    id: 2,
+    type: 'Standard - General',
+    price: 499,
+    quantity: 1,
+    subTotal: 0,
+  },
+];
 
+const fakeDiscountCode = [
+  {
+    code: 'AFIQXNEXEA',
+    type: 'percentage',
+    value: '67%',
+  },
+  {
+    code: 'JAMESXNEXEA',
+    type: 'percentage',
+    value: '78%',
+  },
+];
 
-const TicketSelectionCard = ({ eventData }) => {
-  const [tickets, setTickets] = useState([]);
+const TicketSelectionCard = () => {
+  const smDown = useResponsive('down', 'sm');
+
+  const { cartSessionId, data, isLoading, mutate } = useGetCartData();
+
+  // const { data, isLoading, mutate } = useGetCart(cartSessionId);
+
+  const [timeRemaining, setTimeRemaining] = useState('');
+
+  const router = useRouter();
+
+  const [cartItems, setCartItems] = useState(data?.cartItem || []);
+
+  const [tickets, setTickets] = useState(fakeInfo);
+
+  const [totalPrice, setTotalPrice] = useState(null);
+
+  const [subTotal, setSubtotal] = useState(0);
+
   const [discountCode, setDiscountCode] = useState('');
+
+  const [discountedPrice, setDiscountedPrice] = useState(0);
+
+
+
+
+// const TicketSelectionCard = ({ eventData }) => {
+//   const [tickets, setTickets] = useState([]);
+//   const [discountCode, setDiscountCode] = useState('');
   const [discount, setDiscount] = useState(null);
   const [subTotal, setSubtotal] = useState(0); // The subtotal without discount
   const [discountedPrice, setDiscountedPrice] = useState(0); 
   const [sst, setSST] = useState(11.94);
   const [totalPrice, setTotalPrice] = useState(null); 
 
-  const handleTicketSelect = (ticketId) => {
-    setSelectedTicketId(ticketId);
+  const updateDatabase = useCallback(
+    async (id, quantity) => {
+      try {
+        await axiosInstance.post('/api/cart/changeQuantityCartItem', {
+          cartItemId: id,
+          quantity,
+        });
+
+        mutate();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [mutate]
+  );
+
+  const debouncedUpdate = debounce(updateDatabase, 4000);
+
+  // User click
+  const handleIncrement = useCallback(
+    (id) => {
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, quantity: item.quantity + 1 >= 16 ? 15 : item.quantity + 1 }
+            : item
+        )
+      );
+      setCartItems((items) => [
+        ...items.map((item) => ({ ...item, subTotal: item.ticketType.price * item.quantity })),
+      ]);
+
+      const { quantity } = cartItems.find((item) => item.id === id);
+      if (quantity < 15) {
+        updateDatabase(id, quantity + 1);
+      }
+    },
+    [cartItems, updateDatabase]
+  );
+
+  // User click
+  const handleDecrement = useCallback(
+    (id) => {
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                quantity: item.quantity > 0 && item.quantity - 1,
+              }
+            : item
+        )
+      );
+      setCartItems((items) => [
+        ...items.map((item) => ({ ...item, subTotal: item.ticketType.price * item.quantity })),
+      ]);
+
+      const { quantity } = cartItems.find((item) => item.id === id);
+
+      updateDatabase(id, quantity - 1);
+
+      // debouncedUpdate(id, quantity - 1);
+    },
+    [updateDatabase, cartItems]
+  );
+
+  // User input manually
+  const onChangeTicketQuantity = useCallback((val, id) => {
+    if (parseInt(val, 10) >= 16) return;
+    if (Number.isNaN(val)) return;
+    setTickets((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: parseInt(val, 10),
+            }
+          : item
+      )
+    );
+    setTickets((items) => [
+      ...items.map((item) => ({ ...item, subTotal: item.price * item.quantity })),
+    ]);
+  }, []);
+
+  // Delete if quantity is 0
+  const handleDelete = (id) => {
+    setTickets((items) => items.filter((ticket) => ticket.id !== id));
   };
 
-  useEffect(() => {
-    if (eventData?.ticketType?.length > 0) {
-      const initializedTickets = eventData.ticketType.map((ticket) => ({
-        id: ticket.id,
-        type: ticket.type,
-        price: ticket.price,
-        quantity: 0, 
-      }));
-      setTickets(initializedTickets);
+  // User apply discount code
+  const applyDiscountCode = () => {
+    if (!tickets.length) {
+      enqueueSnackbar('Please select a ticket first', {
+        variant: 'error',
+      });
+      return;
+//   const handleTicketSelect = (ticketId) => {
+//     setSelectedTicketId(ticketId);
+//   };
+
+//   useEffect(() => {
+//     if (eventData?.ticketType?.length > 0) {
+//       const initializedTickets = eventData.ticketType.map((ticket) => ({
+//         id: ticket.id,
+//         type: ticket.type,
+//         price: ticket.price,
+//         quantity: 0, 
+//       }));
+//       setTickets(initializedTickets);
     }
   }, [eventData]);
 
@@ -159,13 +324,21 @@ const TicketSelectionCard = ({ eventData }) => {
     );
   };
 
-  const handleDelete = (ticketId) => {
-    setTickets((prevTickets) =>
-      prevTickets.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, quantity: 0 } : ticket
-      )
-    );
-  };
+  // Calculate discount price and display
+  const calculateDiscountedPrice = useCallback(() => {
+    console.log('calling');
+    let discountPrice = 0;
+    
+    setTotalPrice(price - discountPrice + 11.94);
+    setDiscountedPrice(discountPrice);
+  }, [discount, subTotal, tickets]);
+//   const handleDelete = (ticketId) => {
+//     setTickets((prevTickets) =>
+//       prevTickets.map((ticket) =>
+//         ticket.id === ticketId ? { ...ticket, quantity: 0 } : ticket
+//       )
+//     );
+//   };
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -191,7 +364,6 @@ const TicketSelectionCard = ({ eventData }) => {
     };
 
     console.log("Received payload:", payload);
-    // console.log("Discount amount calculated:", discountAmount);
 
     try {
       const response = await axiosInstance.post(endpoints.discount.redeem, payload);
@@ -209,7 +381,7 @@ const TicketSelectionCard = ({ eventData }) => {
           ticketId: selectedTicket?.id || null,
           quantity: selectedTicket?.quantity || 0,
           cartSubtotal,
-
+          
         });
         setDiscountedPrice(discountAmount); 
         console.log("Discount", discount)
@@ -223,38 +395,98 @@ const TicketSelectionCard = ({ eventData }) => {
   };
   
   
+  useEffect(() => {
+    if (!isLoading) {
+      if (!data) {
+        // router.push(paths.auth.jwt.login);
+      } else {
+        setCartItems(
+          data.cartItem.map((cart) => ({
+            ...cart,
+            quantity: cart.quantity === 1 ? 1 : cart.quantity,
+            subTotal: cart.ticketType.price * cart.quantity,
+          }))
+        );
+      }
+    }
+  }, [data, router, isLoading]);
+
+  const addTicket = useCallback(
+    async (ticketTypeId) => {
+      try {
+        await axiosInstance.post(endpoints.cart.addTicket, {
+          cartSessionId,
+          ticketTypeId,
+        });
+        mutate();
+      } catch (error) {
+        enqueueSnackbar('Error adding new ticket', {
+          variant: 'error',
+        });
+      }
+    },
+    [cartSessionId, mutate]
+  );
+
+  if (isLoading) {
+    return (
+      <Box sx={{ mx: 'auto' }}>
+        <CircularProgress
+          thickness={7}
+          size={25}
+          sx={{
+            color: (theme) => theme.palette.common.black,
+            strokeLinecap: 'round',
+          }}
+        />
+      </Box>
+    );
+  }
+
   return (
-    <Stack
-      sx={{
-        borderRadius: 2,
-        overflow: 'hidden',
-        bgcolor: 'white',
-      }}
-    >
-      <Box
+    !isLoading && (
+      <Stack
         sx={{
-          bgcolor: 'black',
-          p: 2,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          color: 'whitesmoke',
+          borderRadius: 2,
+          overflow: 'hidden',
+          bgcolor: 'white',
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Image src="/assets/tickets/ticket-1.svg" width={25} />
-          <ListItemText
-            primary="Event Ticket"
-            secondary= {eventData.name}
-            primaryTypographyProps={{ variant: 'subtitle1' }}
-            secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
-          />
-        </Stack>
-        <Typography>{`{{ event logo }}`}</Typography>
-      </Box>
+        <Box
+          sx={{
+            bgcolor: 'black',
+            p: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            color: 'whitesmoke',
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Image src="/assets/tickets/ticket-1.svg" width={25} />
+            <ListItemText
+              primary="Event Ticket"
+              secondary="{{ event name  }}"
+              primaryTypographyProps={{ variant: 'subtitle1' }}
+              secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
+            />
+          </Stack>
+          <Typography>{`{{ event logo }}`}</Typography>
+        </Box>
 
-      <Box sx={{ px: 2 }}>
-        <Box>
+//         <Stack direction="row" alignItems="center" spacing={2}>
+//           <Image src="/assets/tickets/ticket-1.svg" width={25} />
+//           <ListItemText
+//             primary="Event Ticket"
+//             secondary= {eventData.name}
+//             primaryTypographyProps={{ variant: 'subtitle1' }}
+//             secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
+//           />
+//         </Stack>
+//         <Typography>{`{{ event logo }}`}</Typography>
+//       </Box>
+
+        <Box sx={{ px: 2 }}>
           <TableContainer>
             <Table>
               <TableHead
@@ -266,11 +498,12 @@ const TicketSelectionCard = ({ eventData }) => {
                   borderBottomColor: '#EBEBEB',
                 }}
               >
+                {}
                 <TableRow>
                   <TableCell>Ticket Type</TableCell>
-                  <TableCell align="center">Ticket Price</TableCell>
+                  {!smDown && <TableCell align="center">Ticket Price</TableCell>}
                   <TableCell align="center">Quantity</TableCell>
-                  <TableCell align="right">Subtotal</TableCell>
+                  {!smDown && <TableCell align="right">Subtotal</TableCell>}
                 </TableRow>
               </TableHead>
 
@@ -283,128 +516,360 @@ const TicketSelectionCard = ({ eventData }) => {
                   borderBottomColor: '#EBEBEB',
                 }}
               >
-             {tickets.length > 0 &&
-                tickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell>{ticket.type}</TableCell>
-                    <TableCell align="center">{`RM ${ticket.price}`}</TableCell>
-                    <TableCell align="center">
-                    <Stack direction="row" alignItems="center" justifyContent="center">
-                      <IconButton onClick={() => handleDecrement(ticket.id)}>
-                        <Iconify icon="ic:round-minus" width={15} color="red" />
-                      </IconButton>
-                      <TextField
-                        value={ticket.quantity} 
-                        type="number"
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          width: 50,
-                          '& input': {
-                            textAlign: 'center', 
-                          },
-                        }}
-                        inputProps={{ readOnly: true }}
-                      />
-                      <IconButton onClick={() => handleIncrement(ticket.id)}>
-                        <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-
-                    <TableCell align="right">
-                      RM {parseFloat((ticket.quantity * ticket.price).toFixed(2))}
+                <TableRow>
+                  {!cartItems.length && (
+                    <TableCell colSpan={4}>
+                      <Typography textAlign="center" variant="subtitle2" color="text.secondary">
+                        Cart is empty
+                      </Typography>
                     </TableCell>
-                  </TableRow>
-                ))}
+                  )}
+                </TableRow>
 
+                {cartItems
+                  .sort((a, b) => (dayjs(a.createdAt).isAfter(dayjs(b.createdAt)) ? 1 : -1))
+                  .map((cart) => (
+                    <TableRow key={cart.id} sx={{ textWrap: 'nowrap' }}>
+                      <TableCell>
+                        <ListItemText
+                          primary={cart.ticketType.title}
+                          secondary={`RM ${cart.ticketType.price}`}
+                          secondaryTypographyProps={{
+                            display: !smDown && 'none',
+                          }}
+                        />
+                      </TableCell>
+                      {!smDown && (
+                        <TableCell align="center">{`RM ${cart.ticketType.price}`}</TableCell>
+                      )}
+                      <TableCell align="center">
+                        {cart.quantity === 0 ? (
+                          <Stack direction="row" alignItems="center" justifyContent="center">
+                            <IconButton color="error" onClick={() => handleDelete(cart.id)}>
+                              <Iconify width={15} icon="mdi-light:delete" />
+                            </IconButton>
+                            <IconButton onClick={() => handleIncrement(cart.id)}>
+                              <Iconify
+                                icon="material-symbols:add-rounded"
+                                width={15}
+                                color="green"
+                              />
+                            </IconButton>
+                          </Stack>
+                        ) : (
+                          <Stack direction="row" alignItems="center" justifyContent="center">
+                            <IconButton onClick={() => handleDecrement(cart.id)}>
+                              <Iconify icon="ic:round-minus" width={15} color="red" />
+                            </IconButton>
+                            <TextField
+                              value={cart.quantity}
+                              type="number"
+                              variant="outlined"
+                              size="small"
+                              sx={{
+                                width: 50,
+                                '& input': {
+                                  textAlign: 'center', // Center-align the text
+                                },
+                              }}
+                              onChange={(e) => onChangeTicketQuantity(e.target.value, cart.id)}
+                            />
+                            <IconButton onClick={() => handleIncrement(cart.id)}>
+                              <Iconify
+                                icon="material-symbols:add-rounded"
+                                width={15}
+                                color="green"
+                              />
+                            </IconButton>
+                          </Stack>
+                        )}
+                      </TableCell>
+                      {!smDown && (
+                        <TableCell align="right" sx={{ width: 1 / 8 }}>
+                          RM {parseFloat(cart.subTotal).toFixed(2)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                <TableRow>
+                  <TableCell>
+                    <FormControl sx={{ minWidth: 150 }} size="small">
+                      <InputLabel id="demo-select-small-label">Ticket Type</InputLabel>
+                      <Select
+                        labelId="demo-select-small-label"
+                        id="demo-select-small"
+                        label="Ticket Type"
+                        onChange={(e) => addTicket(e.target.value)}
+                      >
+                        <MenuItem value="">
+                          <em>Select Ticket</em>
+                        </MenuItem>
+                        {!!data.event.ticketType &&
+                          data.event.ticketType
+                            .filter((ticket) =>
+                              cartItems.every((item) => item.ticketTypeId !== ticket.id)
+                            )
+                            .map((ticket) => (
+                              <MenuItem key={ticket.id} value={ticket.id}>
+                                {ticket.title}
+                              </MenuItem>
+                            ))}
+                      </Select>
+                    </FormControl>
+                    {/* <Button size="small" variant="outlined" sx={{ fontSize: 12 }}>
+                      Add more ticket
+                    </Button> */}
+                  </TableCell>
+                </TableRow>
+
+                {/* {tickets.map((ticket) => (
+                  <TableRow key={ticket.id} sx={{ textWrap: 'nowrap' }}>
+                    <TableCell>
+                      <ListItemText
+                        primary={ticket.type}
+                        secondary={`RM ${ticket.price}`}
+                        secondaryTypographyProps={{
+                          display: !smDown && 'none',
+                        }}
+                      />
+                    </TableCell>
+                    {!smDown && <TableCell align="center">{`RM ${ticket.price}`}</TableCell>}
+                    <TableCell align="center">
+                      {ticket.quantity === 0 ? (
+                        <Stack direction="row" alignItems="center" justifyContent="center">
+                          <IconButton color="error" onClick={() => handleDelete(ticket.id)}>
+                            <Iconify width={15} icon="mdi-light:delete" />
+                          </IconButton>
+                          <IconButton onClick={() => handleIncrement(ticket.id)}>
+                            <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
+                          </IconButton>
+                        </Stack>
+                      ) : (
+                        <Stack direction="row" alignItems="center" justifyContent="center">
+                          <IconButton onClick={() => handleDecrement(ticket.id)}>
+                            <Iconify icon="ic:round-minus" width={15} color="red" />
+                          </IconButton>
+                          <TextField
+                            value={ticket.quantity}
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                              width: 50,
+                              '& input': {
+                                textAlign: 'center', // Center-align the text
+                              },
+                            }}
+                            onChange={(e) => onChangeTicketQuantity(e.target.value, ticket.id)}
+                          />
+                          <IconButton onClick={() => handleIncrement(ticket.id)}>
+                            <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
+                          </IconButton>
+                        </Stack>
+                      )}
+                    </TableCell>
+                    {!smDown && (
+                      <TableCell align="right" sx={{ width: 1 / 8 }}>
+                        RM {parseFloat(ticket.subTotal).toFixed(2)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))} */}
               </TableBody>
             </Table>
           </TableContainer>
-        </Box>
+//              {tickets.length > 0 &&
+//                 tickets.map((ticket) => (
+//                   <TableRow key={ticket.id}>
+//                     <TableCell>{ticket.type}</TableCell>
+//                     <TableCell align="center">{`RM ${ticket.price}`}</TableCell>
+//                     <TableCell align="center">
+//                     <Stack direction="row" alignItems="center" justifyContent="center">
+//                       <IconButton onClick={() => handleDecrement(ticket.id)}>
+//                         <Iconify icon="ic:round-minus" width={15} color="red" />
+//                       </IconButton>
+//                       <TextField
+//                         value={ticket.quantity} 
+//                         type="number"
+//                         variant="outlined"
+//                         size="small"
+//                         sx={{
+//                           width: 50,
+//                           '& input': {
+//                             textAlign: 'center', 
+//                           },
+//                         }}
+//                         inputProps={{ readOnly: true }}
+//                       />
+//                       <IconButton onClick={() => handleIncrement(ticket.id)}>
+//                         <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
+//                       </IconButton>
+//                     </Stack>
+//                   </TableCell>
 
-        <Stack
-          my={2}
-          direction={{ md: 'row' }}
-          justifyContent="space-between"
-          alignItems="start"
-          gap={3}
-        >
-          <Stack width={1} spacing={1}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <TextField
-                size="small"
-                placeholder="Enter Discount Code"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))}
-              />
-              <Button variant="contained" size="small" onClick={handleRedeemDiscount}>
-                Apply
-              </Button>
-            </Stack>
-            {!!discount && (
-              <Stack maxWidth={200} spacing={1}>
-                <Stack direction="row" spacing={0.5} alignItems="center">
-                  <Iconify icon="lets-icons:check-fill" color="success.main" width={13} />
-                  <Typography variant="caption" fontSize={12} color="success">
-                    Discount code applied
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography variant="caption" fontSize={12}>
-                    {discount.code_name}
-                  </Typography>
-                  <Typography variant="caption" color="error" fontSize={12}>
-                   - {discount.value} {discount.type === 'percentage' ? '%' : 'RM'}
-                  </Typography>
-                </Stack>
-              </Stack>
-            )}
-          </Stack>
+//                     <TableCell align="right">
+//                       RM {parseFloat((ticket.quantity * ticket.price).toFixed(2))}
+//                     </TableCell>
+//                   </TableRow>
+//                 ))}
+
+//               </TableBody>
+//             </Table>
+//           </TableContainer>
+//         </Box>
+
+//         <Stack
+//           my={2}
+//           direction={{ md: 'row' }}
+//           justifyContent="space-between"
+//           alignItems="start"
+//           gap={3}
+//         >
+//           <Stack width={1} spacing={1}>
+//             <Stack direction="row" alignItems="center" spacing={1}>
+//               <TextField
+//                 size="small"
+//                 placeholder="Enter Discount Code"
+//                 value={discountCode}
+//                 onChange={(e) => setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))}
+//               />
+//               <Button variant="contained" size="small" onClick={handleRedeemDiscount}>
+//                 Apply
+//               </Button>
+//             </Stack>
+//             {!!discount && (
+//               <Stack maxWidth={200} spacing={1}>
+//                 <Stack direction="row" spacing={0.5} alignItems="center">
+//                   <Iconify icon="lets-icons:check-fill" color="success.main" width={13} />
+//                   <Typography variant="caption" fontSize={12} color="success">
+//                     Discount code applied
+//                   </Typography>
+//                 </Stack>
+//                 <Stack direction="row" justifyContent="space-between">
+//                   <Typography variant="caption" fontSize={12}>
+//                     {discount.code_name}
+//                   </Typography>
+//                   <Typography variant="caption" color="error" fontSize={12}>
+//                    - {discount.value} {discount.type === 'percentage' ? '%' : 'RM'}
+//                   </Typography>
+//                 </Stack>
+//               </Stack>
+//             )}
+//           </Stack>
 
           <Stack
-            sx={{
-              '& .MuiTypography-root': {
-                fontSize: 14,
-                fontWeight: 500,
-              },
-            }}
-            width={1}
-            spacing={1}
-            flexShrink={2}
+            my={2}
+            direction={{ md: 'row' }}
+            justifyContent="space-between"
+            alignItems="start"
+            gap={3}
           >
-            <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-              <Typography>Subtotal:</Typography>
-              <Typography>RM {parseFloat(subTotal).toFixed(2)}</Typography> 
-            </Stack>
-            <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-              <Typography>Discount:</Typography>
-              {discount && discount.amount ? (
-                <Typography>
-                  RM {discount.amount}
-                </Typography>
-              ) : (
-                <Typography>RM 0.00</Typography>
+            <Stack width={1} spacing={1}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <TextField
+                  size="small"
+                  placeholder="Enter Discount Code"
+                  value={discountCode}
+                  onChange={(e) =>
+                    setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                  }
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={applyDiscountCode}
+                  sx={{ height: 36 }}
+                >
+                  Apply
+                </Button>
+              </Stack>
+
+              {!!discount && (
+                <Stack maxWidth={200} spacing={1}>
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Iconify icon="lets-icons:check-fill" color="success.main" width={13} />
+                    <Typography variant="caption" fontSize={12} color="success">
+                      Discount code applied
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="caption" fontSize={12}>
+                      {discount.code}
+                    </Typography>
+                    <Typography variant="caption" color="error" fontSize={12}>
+                      - {discount.value}
+                    </Typography>
+                  </Stack>
+                </Stack>
               )}
             </Stack>
-            <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-              <Typography>SST:</Typography>
-              <Typography>{sst}</Typography> 
-            </Stack>
-            <Divider />
-            <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-              <Typography sx={{ fontWeight: 800 }}>Total:</Typography>
-              <Typography>
-                RM{' '}
-                {subTotal > 0
-                  ? parseFloat(totalPrice).toFixed(2)
-                  : parseFloat(subTotal).toFixed(2)} {/* Display Total Price */}
-              </Typography>
+
+            <Stack
+              sx={{
+                '& .MuiTypography-root': {
+                  fontSize: 14,
+                  fontWeight: 500,
+                },
+                textWrap: 'nowrap',
+              }}
+              width={1}
+              spacing={1}
+              flexShrink={2}
+            >
+              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                <Typography>Subtotal:</Typography>
+                <Typography>RM {subTotal}.00</Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                <Typography>Discount</Typography>
+                <Typography>RM {parseFloat(discountedPrice).toFixed(2)}</Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                <Typography>SST:</Typography>
+                <Typography>RM 11.94</Typography>
+              </Stack>
+              <Divider />
+              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                <Typography sx={{ fontWeight: 800 }}>Total:</Typography>
+                <Typography>
+                  RM{' '}
+                  {subTotal > 0
+                    ? parseFloat(totalPrice).toFixed(2)
+                    : parseFloat(subTotal).toFixed(2)}
+                </Typography>
+              </Stack>
+//             <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+//               <Typography>Subtotal:</Typography>
+//               <Typography>RM {parseFloat(subTotal).toFixed(2)}</Typography> 
+//             </Stack>
+//             <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+//               <Typography>Discount:</Typography>
+//               {discount && discount.amount ? (
+//                 <Typography>
+//                   RM {discount.amount}
+//                 </Typography>
+//               ) : (
+//                 <Typography>RM 0.00</Typography>
+//               )}
+//             </Stack>
+//             <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+//               <Typography>SST:</Typography>
+//               <Typography>{sst}</Typography> 
+//             </Stack>
+//             <Divider />
+//             <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+//               <Typography sx={{ fontWeight: 800 }}>Total:</Typography>
+//               <Typography>
+//                 RM{' '}
+//                 {subTotal > 0
+//                   ? parseFloat(totalPrice).toFixed(2)
+//                   : parseFloat(subTotal).toFixed(2)} {/* Display Total Price */}
+//               </Typography>
             </Stack>
           </Stack>
-        </Stack>
-      </Box>
-    </Stack>
+        </Box>
+      </Stack>
+    )
   );
 };
 

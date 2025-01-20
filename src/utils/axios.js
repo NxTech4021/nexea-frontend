@@ -88,6 +88,13 @@ export const endpoints = {
     create: '/api/ticket-type/',
     edit: (id) => `/api/ticket-type/${id}`,
     delete: (id) => `/api/ticket-type/${id}`,
+    generateUrl: '/api/ticket-type/generateUrl',
+  },
+  cart: {
+    get: (id, eventId, ticketTypeId) =>
+      `/api/cart/${id}?eventId=${eventId}&ticketTypeId=${ticketTypeId}`,
+    createSession: '/api/cart',
+    addTicket: `/api/cart/addTicket`,
   },
   discount: {
     get: '/api/discount/',
