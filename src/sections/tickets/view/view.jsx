@@ -27,8 +27,6 @@ const TicketPurchaseView = () => {
 
   const { data, isLoading, mutate, error } = useGetCart(cartSessionId, eventId, ticketTypeId);
 
-  console.log(data);
-
   const loading = useBoolean();
 
   const createNewSession = useCallback(async () => {
