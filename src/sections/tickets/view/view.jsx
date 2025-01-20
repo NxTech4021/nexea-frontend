@@ -10,14 +10,9 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { useGetCart } from 'src/api/cart/cart';
 
-
-import { Box, Grid, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText } from '@mui/material';
-
-
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
 import TicketSelectionCard from '../ticket-selection-card';
-
 
 const TicketPurchaseView = () => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -133,13 +128,13 @@ const TicketPurchaseView = () => {
 //   useEffect(() => {
 //     const fetchEvents = async () => {
 //       try {
-//         const response = await axiosInstance.get(endpoints.events.list); 
-       
+//         const response = await axiosInstance.get(endpoints.events.list);
+
 //         if (response.data && Array.isArray(response.data.events)) {
-//           setEvents(response.data.events); 
+//           setEvents(response.data.events);
 //         } else {
 //           console.error('Unexpected response format:', response);
-//           setEvents([]); 
+//           setEvents([]);
 //         }
 //       } catch (error) {
 //         console.error('Error fetching events:', error);
@@ -160,7 +155,6 @@ const TicketPurchaseView = () => {
 //     }
 //   };
 
-  
 //   console.log("selected", selectedEvent)
 //   return (
 //     <>
@@ -195,6 +189,5 @@ const TicketPurchaseView = () => {
 //     </>
 //   );
 // };
-
 
 export default TicketPurchaseView;
