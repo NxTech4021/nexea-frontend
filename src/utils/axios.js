@@ -96,4 +96,13 @@ export const endpoints = {
     createSession: '/api/cart',
     addTicket: `/api/cart/addTicket`,
   },
+  discount: {
+    get: '/api/discount/',
+    create: '/api/discount/',
+    update: `/api/discount/`,
+    redeem: '/api/discount/redeem',
+    track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
+    add: '/api/discount/addDiscountCode',
+    delete: (id) => `/api/discount/delete/${id}`,
+  },
 };

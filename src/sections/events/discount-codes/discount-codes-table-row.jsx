@@ -2,28 +2,39 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Button from '@mui/material/Button';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
+import TableRow from '@mui/material/TableRow';
+import CheckBox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
-import { ListItemText } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import IconButton from '@mui/material/IconButton';
+import { Stack, ListItemText } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { fDate, fTime } from 'src/utils/format-time';
+import { fDate } from 'src/utils/format-time';
 
+import { types } from 'src/_mock/_discountCodes';
+
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover from 'src/components/custom-popover/custom-popover';
 
-import EditDiscountCode from './discount-codes-edit';
+import CreateDiscountCode from './modal/create-discount-codes';
 
 // ----------------------------------------------------------------------
 
-export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSave }) {
-  const { codeName, codeType, codeValue, codeAvailability, codeCategory, codeLimit, endDate } = row;
+export default function DiscountCodeTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onDeleteRow,
+  onSave,
+  ticketTypes,
+}) {
+  const { code, created_at, expirationDate, id, limit, ticketType, type, value } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -40,7 +51,6 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
       codeType: row.codeType,
       codeValue: row.codeValue,
       codeAvailability: row.codeAvailability,
-      codeCategory: row.codeCategory,
       codeLimit: row.codeLimit,
       endDate: row.endDate,
     });
@@ -55,21 +65,26 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
   return (
     <>
       <TableRow hover selected={selected}>
-
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeName}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeType}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeValue}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {codeAvailability.map((availability, index) => (
-            <div key={index}>{availability}</div>
-          ))}
+        <TableCell padding="checkbox">
+          <CheckBox checked={selected} onClick={onSelectRow} />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeCategory}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{codeLimit}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{code}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {types.find((val) => val.id === type).name}
+        </TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{value}</TableCell>
+        <TableCell>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {ticketType.map((item) => (
+              <Label key={item.id} color="success">{`${item.title} ( ${item.event.name} )`}</Label>
+            ))}
+          </Stack>
+        </TableCell>
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{limit || 'Unlimited'}</TableCell>
         <TableCell>
           <ListItemText
-            primary={fDate(endDate)}
-            secondary={fTime(endDate)}
+            primary={fDate(expirationDate)}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -83,7 +98,6 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
-  
       </TableRow>
 
       <CustomPopover
@@ -91,47 +105,48 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
         onClose={popover.onClose}
         arrow="right-top"
         sx={{ width: 160 }}
-      >    
+      >
         <MenuItem
-            onClick={() => {
+          onClick={() => {
             handleEditClick(row);
-            }}
-            >
-            <Iconify icon="solar:pen-bold" />
-              Edit
+          }}
+        >
+          <Iconify icon="solar:pen-bold" />
+          Edit
         </MenuItem>
+
         {isEditing && (
-          <EditDiscountCode
+          <CreateDiscountCode
             discountCode={selectedDiscountCode}
             open={isEditing}
-            onSave={handleSave} 
+            onSave={handleSave}
             onClose={() => {
               setIsEditing(false);
               popover.onClose();
             }}
-            setEditedData={setEditedData} 
+            setEditedData={setEditedData}
+            ticketTypes={ticketTypes}
           />
         )}
-        
+
         <Divider sx={{ borderStyle: 'dashed' }} />
         <MenuItem
           onClick={() => {
-          confirm.onTrue();
-          popover.onClose();
+            confirm.onTrue();
+            popover.onClose();
           }}
           sx={{ color: 'error.main' }}
         >
-        <Iconify icon="solar:trash-bin-trash-bold" />
+          <Iconify icon="solar:trash-bin-trash-bold" />
           Delete
         </MenuItem>
-       
       </CustomPopover>
-      
+
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
-        content={`Are you sure want to delete ${codeName}?`}
+        content={`Are you sure want to delete ${code}?`}
         action={
           <Button
             variant="contained"
@@ -151,7 +166,9 @@ export default function DiscountCodeTableRow({ row, selected, onDeleteRow, onSav
 
 DiscountCodeTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
-  onSave: PropTypes.func,  
+  onSelectRow: PropTypes.func,
+  onSave: PropTypes.func,
   row: PropTypes.object,
   selected: PropTypes.bool,
+  ticketTypes: PropTypes.array,
 };
