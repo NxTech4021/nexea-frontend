@@ -31,7 +31,7 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
             error={!!error}
             helperText={error ? error?.message : helperText}
             placeholder={other?.placeholder}
-            // {...other}
+            {...other}
           />
         )}
       />

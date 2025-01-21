@@ -806,27 +806,21 @@
 // //     )
 
 // export default TicketSelectionCard;
-import dayjs from 'dayjs';
 import { enqueueSnackbar } from 'notistack';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import {
   Box,
   Stack,
   Table,
   Button,
-  Select,
-  Divider,
   TableRow,
-  MenuItem,
   TableHead,
   TableCell,
   TableBody,
   TextField,
   Typography,
   IconButton,
-  InputLabel,
-  FormControl,
   ListItemText,
   TableContainer,
   CircularProgress,
@@ -837,6 +831,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { debounce } from 'src/utils/debounce';
+import { useCartStore } from 'src/utils/store';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Image from 'src/components/image';
@@ -877,11 +872,10 @@ const fakeDiscountCode = [
 const TicketSelectionCard = () => {
   const smDown = useResponsive('down', 'sm');
 
-  const { cartSessionId, data, isLoading, mutate } = useGetCartData();
+  const { cartSessionId, data, isLoading, mutate, eventData } = useGetCartData();
 
-  // const { data, isLoading, mutate } = useGetCart(cartSessionId);
-
-  const [timeRemaining, setTimeRemaining] = useState('');
+  const tixs = useCartStore((state) => state.tickets);
+  const updateTics = useCartStore((state) => state.updateTickets);
 
   const router = useRouter();
 
@@ -918,26 +912,40 @@ const TicketSelectionCard = () => {
   const debouncedUpdate = debounce(updateDatabase, 4000);
 
   // User click
-  const handleIncrement = useCallback(
-    (id) => {
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity + 1 >= 16 ? 15 : item.quantity + 1 }
-            : item
-        )
-      );
-      setCartItems((items) => [
-        ...items.map((item) => ({ ...item, subTotal: item.ticketType.price * item.quantity })),
-      ]);
+  // const handleIncrement = useCallback(
+  //   (id) => {
+  //     setTicx((prev) =>
+  //       prev.map((item) =>
+  //         item.id === id
+  //           ? { ...item, quantity: item.quantity + 1 >= 16 ? 15 : item.quantity + 1 }
+  //           : item
+  //       )
+  //     );
 
-      const { quantity } = cartItems.find((item) => item.id === id);
-      if (quantity < 15) {
-        updateDatabase(id, quantity + 1);
-      }
-    },
-    [cartItems, updateDatabase]
-  );
+  //     setTicx((items) => [
+  //       ...items.map((item) => ({ ...item, subTotal: item.ticketType.price * item.quantity })),
+  //     ]);
+
+  //     // setCartItems((prev) =>
+  //     //   prev.map((item) =>
+  //     //     item.id === id
+  //     //       ? { ...item, quantity: item.quantity + 1 >= 16 ? 15 : item.quantity + 1 }
+  //     //       : item
+  //     //   )
+  //     // );
+
+  //     // setCartItems((items) => [
+  //     //   ...items.map((item) => ({ ...item, subTotal: item.ticketType.price * item.quantity })),
+  //     // ]);
+
+  //     // const { quantity } = cartItems.find((item) => item.id === id);
+
+  //     // if (quantity < 15) {
+  //     //   updateDatabase(id, quantity + 1);
+  //     // }
+  //   },
+  //   [setTicx]
+  // );
 
   // User click
   const handleDecrement = useCallback(
@@ -1028,7 +1036,6 @@ const TicketSelectionCard = () => {
 
   // Calculate discount price and display
   const calculateDiscountedPrice = useCallback(() => {
-    console.log('calling');
     let discountPrice = 0;
 
     if (!!discount && subTotal) {
@@ -1047,39 +1054,39 @@ const TicketSelectionCard = () => {
   }, [discount, subTotal, tickets]);
 
   // Calculate price for total tickets
-  useEffect(() => {
-    const price = tickets.reduce((acc, val) => acc + val.subTotal, 0);
-    setSubtotal(price);
+  // useEffect(() => {
+  //   const price = tickets.reduce((acc, val) => acc + val.subTotal, 0);
+  //   setSubtotal(price);
 
-    setTotalPrice(price + 11.94);
-  }, [tickets, subTotal]);
+  //   setTotalPrice(price + 11.94);
+  // }, [tickets, subTotal]);
 
   // Calculate subtotal for each ticket
-  useEffect(() => {
-    setTickets((items) => [
-      ...items.map((item) => ({ ...item, subTotal: item.price * item.quantity })),
-    ]);
-  }, []);
+  // useEffect(() => {
+  //   setTickets((items) => [
+  //     ...items.map((item) => ({ ...item, subTotal: item.price * item.quantity })),
+  //   ]);
+  // }, []);
 
-  useEffect(() => {
-    calculateDiscountedPrice();
-  }, [calculateDiscountedPrice]);
+  // useEffect(() => {
+  //   calculateDiscountedPrice();
+  // }, [calculateDiscountedPrice]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!data) {
-        // router.push(paths.auth.jwt.login);
-      } else {
-        setCartItems(
-          data.cartItem.map((cart) => ({
-            ...cart,
-            quantity: cart.quantity === 1 ? 1 : cart.quantity,
-            subTotal: cart.ticketType.price * cart.quantity,
-          }))
-        );
-      }
-    }
-  }, [data, router, isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!data) {
+  //       // router.push(paths.auth.jwt.login);
+  //     } else {
+  //       setCartItems(
+  //         data.cartItem.map((cart) => ({
+  //           ...cart,
+  //           quantity: cart.quantity === 1 ? 1 : cart.quantity,
+  //           subTotal: cart.ticketType.price * cart.quantity,
+  //         }))
+  //       );
+  //     }
+  //   }
+  // }, [data, router, isLoading]);
 
   const addTicket = useCallback(
     async (ticketTypeId) => {
@@ -1128,8 +1135,6 @@ const TicketSelectionCard = () => {
 
       const { success, discountAmount, discountValue, discountType, message } = response.data;
 
-      console.log('Backend response:', response.data);
-
       if (success) {
         setDiscount({
           code_name: discountCode,
@@ -1141,7 +1146,6 @@ const TicketSelectionCard = () => {
           cartSubtotal,
         });
         setDiscountedPrice(discountAmount);
-        console.log('Discount', discount);
         enqueueSnackbar('Discount code redeemed successfully', { variant: 'success' });
       } else {
         enqueueSnackbar(message || 'Failed to apply discount', { variant: 'error' });
@@ -1189,14 +1193,13 @@ const TicketSelectionCard = () => {
             <Image src="/assets/tickets/ticket-1.svg" width={25} />
             <ListItemText
               primary="Event Ticket"
-              secondary="{{ event name  }}"
+              secondary={eventData.name}
               primaryTypographyProps={{ variant: 'subtitle1' }}
               secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
             />
           </Stack>
           <Typography>{`{{ event logo }}`}</Typography>
         </Box>
-
         <Box sx={{ px: 2 }}>
           <TableContainer>
             <Table>
@@ -1209,7 +1212,6 @@ const TicketSelectionCard = () => {
                   borderBottomColor: '#EBEBEB',
                 }}
               >
-                {}
                 <TableRow>
                   <TableCell>Ticket Type</TableCell>
                   {!smDown && <TableCell align="center">Ticket Price</TableCell>}
@@ -1227,7 +1229,78 @@ const TicketSelectionCard = () => {
                   borderBottomColor: '#EBEBEB',
                 }}
               >
-                <TableRow>
+                {tixs.map((ticket) => (
+                  <TableRow key={ticket.id} sx={{ textWrap: 'nowrap' }}>
+                    <TableCell width={300}>
+                      <Stack spacing={0.5}>
+                        <ListItemText
+                          primary={ticket.title}
+                          secondary={`RM ${ticket.price}`}
+                          slotProps={{
+                            secondary: {
+                              display: !smDown && 'none',
+                              variant: 'subtitle2',
+                              fontSize: 12,
+                            },
+                          }}
+                        />
+                        <Typography variant="caption" whiteSpace="normal" color="text.secondary">
+                          {ticket.description}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+
+                    {!smDown && <TableCell align="center">{`RM ${ticket.price}`}</TableCell>}
+
+                    <TableCell align="center">
+                      <Stack direction="row" alignItems="center" justifyContent="center">
+                        <IconButton
+                          onClick={() =>
+                            updateTics(ticket.id, {
+                              quantity: ticket.quantity < 1 ? 0 : ticket.quantity - 1,
+                              subTotal: ticket.quantity * ticket.price,
+                            })
+                          }
+                        >
+                          <Iconify icon="ic:round-minus" width={15} color="red" />
+                        </IconButton>
+                        <TextField
+                          value={ticket.quantity}
+                          type="number"
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            width: 50,
+                            '& input': {
+                              textAlign: 'center', // Center-align the text
+                            },
+                          }}
+                          onChange={(e) => onChangeTicketQuantity(e.target.value, ticket.id)}
+                        />
+                        <IconButton
+                          onClick={() =>
+                            updateTics(ticket.id, {
+                              quantity: ticket.quantity < 15 ? ticket.quantity + 1 : 15,
+                              subTotal: ticket.quantity * ticket.price,
+                            })
+                          }
+                        >
+                          <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+
+                    {!smDown && (
+                      <TableCell align="right" sx={{ width: 1 / 8 }}>
+                        {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                          ticket.subTotal
+                        )}
+                        {/* RM {parseFloat(ticket.subTotal).toFixed(2)} */}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+                {/* <TableRow>
                   {!cartItems.length && (
                     <TableCell colSpan={4}>
                       <Typography textAlign="center" variant="subtitle2" color="text.secondary">
@@ -1302,6 +1375,7 @@ const TicketSelectionCard = () => {
                       )}
                     </TableRow>
                   ))}
+
                 <TableRow>
                   <TableCell>
                     <FormControl sx={{ minWidth: 150 }} size="small">
@@ -1327,77 +1401,14 @@ const TicketSelectionCard = () => {
                             ))}
                       </Select>
                     </FormControl>
-                    {/* <Button size="small" variant="outlined" sx={{ fontSize: 12 }}>
-                      Add more ticket
-                    </Button> */}
                   </TableCell>
-                </TableRow>
-
-                {/* {tickets.map((ticket) => (
-                  <TableRow key={ticket.id} sx={{ textWrap: 'nowrap' }}>
-                    <TableCell>
-                      <ListItemText
-                        primary={ticket.type}
-                        secondary={`RM ${ticket.price}`}
-                        secondaryTypographyProps={{
-                          display: !smDown && 'none',
-                        }}
-                      />
-                    </TableCell>
-                    {!smDown && <TableCell align="center">{`RM ${ticket.price}`}</TableCell>}
-                    <TableCell align="center">
-                      {ticket.quantity === 0 ? (
-                        <Stack direction="row" alignItems="center" justifyContent="center">
-                          <IconButton color="error" onClick={() => handleDelete(ticket.id)}>
-                            <Iconify width={15} icon="mdi-light:delete" />
-                          </IconButton>
-                          <IconButton onClick={() => handleIncrement(ticket.id)}>
-                            <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
-                          </IconButton>
-                        </Stack>
-                      ) : (
-                        <Stack direction="row" alignItems="center" justifyContent="center">
-                          <IconButton onClick={() => handleDecrement(ticket.id)}>
-                            <Iconify icon="ic:round-minus" width={15} color="red" />
-                          </IconButton>
-                          <TextField
-                            value={ticket.quantity}
-                            type="number"
-                            variant="outlined"
-                            size="small"
-                            sx={{
-                              width: 50,
-                              '& input': {
-                                textAlign: 'center', // Center-align the text
-                              },
-                            }}
-                            onChange={(e) => onChangeTicketQuantity(e.target.value, ticket.id)}
-                          />
-                          <IconButton onClick={() => handleIncrement(ticket.id)}>
-                            <Iconify icon="material-symbols:add-rounded" width={15} color="green" />
-                          </IconButton>
-                        </Stack>
-                      )}
-                    </TableCell>
-                    {!smDown && (
-                      <TableCell align="right" sx={{ width: 1 / 8 }}>
-                        RM {parseFloat(ticket.subTotal).toFixed(2)}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))} */}
+                </TableRow> */}
               </TableBody>
             </Table>
           </TableContainer>
 
-          <Stack
-            my={2}
-            direction={{ md: 'row' }}
-            justifyContent="space-between"
-            alignItems="start"
-            gap={3}
-          >
-            <Stack width={1} spacing={1}>
+          <Stack my={2} direction={{ md: 'row' }} justifyContent="end" alignItems="start" gap={3}>
+            <Stack spacing={1}>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <TextField
                   size="small"
@@ -1410,7 +1421,7 @@ const TicketSelectionCard = () => {
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={applyDiscountCode}
+                  onClick={handleRedeemDiscount}
                   sx={{ height: 36 }}
                 >
                   Apply
@@ -1437,7 +1448,7 @@ const TicketSelectionCard = () => {
               )}
             </Stack>
 
-            <Stack
+            {/* <Stack
               sx={{
                 '& .MuiTypography-root': {
                   fontSize: 14,
@@ -1471,7 +1482,7 @@ const TicketSelectionCard = () => {
                     : parseFloat(subTotal).toFixed(2)}
                 </Typography>
               </Stack>
-            </Stack>
+            </Stack> */}
           </Stack>
         </Box>
       </Stack>

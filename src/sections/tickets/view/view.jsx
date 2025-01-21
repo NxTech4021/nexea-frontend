@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { enqueueSnackbar } from 'notistack';
 import React, { useMemo, useEffect, useCallback } from 'react';
 
@@ -5,29 +6,55 @@ import { Box, Grid, Stack, Typography, CircularProgress } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { useCartStore } from 'src/utils/store';
 import { getCookie } from 'src/utils/get-cookie';
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 import { useGetCart } from 'src/api/cart/cart';
 
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
+import TicketPaymentCard from '../ticket-payment-card';
 import TicketSelectionCard from '../ticket-selection-card';
+import TicketInformationCard from '../ticket-information-card';
 
 const TicketPurchaseView = () => {
   const searchParams = new URLSearchParams(window.location.search);
+
+  const setTickets = useCartStore((state) => state.setTickets);
+
+  const loading = useBoolean();
+
   localStorage.setItem('eventId', searchParams.get('eventId'));
   localStorage.setItem('ticketTypeId', searchParams.get('ticketTypeId'));
+
+  const ticketStorage = JSON.parse(localStorage.getItem('testing'));
 
   const ticketTypeId = localStorage.getItem('ticketTypeId');
   const eventId = localStorage.getItem('eventId');
 
-  // get cartSessionId from browser cookie set by the server
   const cartSessionId = getCookie();
 
   const { data, isLoading, mutate, error } = useGetCart(cartSessionId, eventId, ticketTypeId);
 
-  const loading = useBoolean();
+  const { data: eventData, isLoading: isEventLoading } = useSWR(
+    endpoints.cart.event(eventId),
+    fetcher
+  );
+
+  useEffect(() => {
+    if (ticketStorage) {
+      setTickets([...ticketStorage.state.tickets]);
+    } else if (eventData) {
+      setTickets(
+        eventData.ticketType.map((item) => ({
+          ...item,
+          quantity: 0,
+          subTotal: 0,
+        }))
+      );
+    }
+  }, [eventData, setTickets, ticketStorage]);
 
   const createNewSession = useCallback(async () => {
     loading.onTrue();
@@ -54,16 +81,17 @@ const TicketPurchaseView = () => {
 
   const memoizedValue = useMemo(
     () => ({
-      ticketTypeId,
+      // ticketTypeId,
+      eventData,
       eventId,
       cartSessionId,
       data,
       mutate,
     }),
-    [ticketTypeId, eventId, cartSessionId, data, mutate]
+    [eventId, cartSessionId, data, mutate, eventData]
   );
 
-  if (loading.value || isLoading) {
+  if (loading.value || isLoading || isEventLoading) {
     return (
       <Box
         sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
@@ -107,11 +135,11 @@ const TicketPurchaseView = () => {
             <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
               <TicketSelectionCard />
 
-              {/* <TicketInformationCard /> */}
+              <TicketInformationCard />
             </Stack>
           </Grid>
           <Grid item xs={12} md={4}>
-            {/* <TicketPaymentCard /> */}
+            <TicketPaymentCard />
           </Grid>
         </Grid>
       </Box>

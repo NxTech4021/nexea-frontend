@@ -2,6 +2,7 @@
 import * as yup from 'yup';
 import isEqual from 'lodash/isEqual';
 import { enqueueSnackbar } from 'notistack';
+// import { Color } from '@tiptap/extension-color';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { useState, useEffect, useCallback } from 'react';
@@ -50,7 +51,7 @@ import { createTicketType, useGetAllTicketTypes } from 'src/api/ticket-type';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSettingsContext } from 'src/components/settings';
+import { RHFTextField } from 'src/components/hook-form';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import FormProvider from 'src/components/hook-form/form-provider';
@@ -135,7 +136,7 @@ const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
 
 export default function TicketTypeView({ data }) {
   const table = useTable();
-  const settings = useSettingsContext();
+
   const confirm = useBoolean();
   const { data: ticketTypesData, isLoading, mutate } = useGetAllTicketTypes();
 
@@ -198,6 +199,7 @@ export default function TicketTypeView({ data }) {
       eventId: '',
       type: '',
       category: '',
+      description: '',
       price: '',
       quantity: '',
       validity: '',
@@ -218,6 +220,7 @@ export default function TicketTypeView({ data }) {
         type: item.type,
         eventId: item.eventId,
         category: item.category,
+        description: item.description,
         validity: item.validity,
         price: parseFloat(item.price),
         quantity: item.quantity,
@@ -320,7 +323,6 @@ export default function TicketTypeView({ data }) {
             Create Ticket Type
           </Button>
         </Box>
-
         <Card>
           <Tabs
             value={filters.status}
@@ -490,7 +492,6 @@ export default function TicketTypeView({ data }) {
                   />
                 </Stack>
               </Stack>
-
               <RenderSelectField
                 name="type"
                 control={control}
@@ -498,7 +499,6 @@ export default function TicketTypeView({ data }) {
                 options={ticketTypes}
                 required
               />
-
               <RenderSelectField
                 name="category"
                 control={control}
@@ -506,7 +506,6 @@ export default function TicketTypeView({ data }) {
                 options={ticketCategories}
                 required
               />
-
               <Box
                 display="grid"
                 gridTemplateColumns={{ xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)' }}
@@ -594,6 +593,17 @@ export default function TicketTypeView({ data }) {
                   />
                 </Stack>
               </Box>
+
+              <Stack spacing={1} width={1}>
+                <InputLabel required>Description</InputLabel>
+
+                <RHFTextField
+                  name="description"
+                  placeholder="Ticket Description"
+                  multiline
+                  rows={4}
+                />
+              </Stack>
             </Box>
           </DialogContent>
           <DialogActions>
