@@ -89,7 +89,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
             height: '95vh',
             top: '50%',
             transform: 'translateY(-50%)',
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'black' : 'whitesmoke'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1A1A1A' : 'whitesmoke'),
           }}
         >
           {renderContent}

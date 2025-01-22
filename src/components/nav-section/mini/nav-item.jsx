@@ -207,11 +207,18 @@ const StyledNavItem = styled(ListItemButton, {
       },
       ...(active && {
         fontWeight: theme.typography.fontWeightBold,
-        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-        color: lightMode ? theme.palette.primary.main : theme.palette.primary.light,
+        color: theme.palette.mode === 'light' ? 'white' : 'black',
+        backgroundColor: theme.palette.mode === 'light' ? '#1F1F1F' : 'white',
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.16),
+          // backgroundColor: alpha(theme.palette.primary.main, 0.16),
+          backgroundColor:
+            theme.palette.mode === 'light' ? alpha('#1F1F1F', 0.9) : alpha('#FFFFFF', 0.9),
         },
+        // backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        // color: lightMode ? theme.palette.primary.main : theme.palette.primary.light,
+        // '&:hover': {
+        //   backgroundColor: alpha(theme.palette.primary.main, 0.16),
+        // },
       }),
       ...(opened && {
         color: theme.palette.text.primary,

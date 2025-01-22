@@ -454,7 +454,10 @@ export default function TicketTypeView({ data }) {
           sx: {
             width: '-webkit-fill-available',
             borderRadius: 1,
-            bgcolor: (theme) => theme.palette.background.default,
+            bgcolor: (theme) => theme.palette.background.paper,
+            scrollbarWidth: 'thin',
+            scrollBehavior: 'smooth',
+            scrollbarColor: (theme) => theme.palette.mode === 'dark' && 'white #1f1f1f',
           },
         }}
       >

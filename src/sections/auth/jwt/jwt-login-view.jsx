@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form';
 import { enqueueSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { Card } from '@mui/material';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import { Card, Button } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -152,9 +152,9 @@ export default function JwtLoginView() {
       </Alert> */}
 
         {renderForm}
-        <Button variant="outlined" sx={{ mt: 20 }} onClick={onClick}>
+        {/* <Button variant="outlined" sx={{ mt: 20 }} onClick={onClick}>
           Buy now
-        </Button>
+        </Button> */}
       </Card>
     </FormProvider>
   );

@@ -1,7 +1,7 @@
 import { enqueueSnackbar } from 'notistack';
 import React, { useMemo, useEffect, useCallback } from 'react';
 
-import { Box, Grid, Stack, Typography, CircularProgress } from '@mui/material';
+import { Box, Grid, Stack, Container, Typography, CircularProgress } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -18,6 +18,8 @@ const TicketPurchaseView = () => {
   const searchParams = new URLSearchParams(window.location.search);
   localStorage.setItem('eventId', searchParams.get('eventId'));
   localStorage.setItem('ticketTypeId', searchParams.get('ticketTypeId'));
+
+  const ticketStorage = JSON.parse(localStorage.getItem('cart'));
 
   const ticketTypeId = localStorage.getItem('ticketTypeId');
   const eventId = localStorage.getItem('eventId');
@@ -97,97 +99,60 @@ const TicketPurchaseView = () => {
     );
   }
 
+  if (!isLoading && !data) {
+    return <Typography sx={{ textAlign: 'center' }}>No data found.</Typography>;
+  }
+
   return (
     <Cart.Provider value={memoizedValue}>
       <TickerPurchaseHeader />
-      {!isLoading && !data && <Typography sx={{ textAlign: 'center' }}>No data found.</Typography>}
-      <Box px={{ xs: 2, md: 15 }} bgcolor="#F4F4F4" minHeight="100vh" overflow="hidden" pt={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
-            <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-              <TicketSelectionCard />
 
-              {/* <TicketInformationCard /> */}
-            </Stack>
+      <Container sx={{ bgcolor: '#F4F4F4' }} maxWidth="xl">
+        <Box
+          // px={{ xs: 2, lg: 15 }}
+          mx={{ xs: 2, lg: 15 }}
+          sx={{
+            overflow: 'hidden',
+            py: 12,
+            bgcolor: 'red',
+          }}
+        >
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={8}>
+              <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
+                <TicketSelectionCard />
+
+                <TicketInformationCard />
+              </Stack>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TicketPaymentCard />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={4}>
-            {/* <TicketPaymentCard /> */}
-          </Grid>
-        </Grid>
-      </Box>
+        </Box>
+      </Container>
+
+      {/* <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          bgcolor: 'white',
+          width: 1,
+          p: 2,
+        }}
+      >
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{
+            borderRadius: 0.5,
+          }}
+        >
+          Proceed to payment
+        </Button>
+      </Box> */}
     </Cart.Provider>
   );
 };
-// =======
-// import TicketInformationCard from '../ticket-information-card';
-
-// const TicketPurchaseView = () => {
-//   const [events, setEvents] = useState([]);
-//   const [selectedEvent, setSelectedEvent] = useState(null);
-
-//   useEffect(() => {
-//     const fetchEvents = async () => {
-//       try {
-//         const response = await axiosInstance.get(endpoints.events.list);
-
-//         if (response.data && Array.isArray(response.data.events)) {
-//           setEvents(response.data.events);
-//         } else {
-//           console.error('Unexpected response format:', response);
-//           setEvents([]);
-//         }
-//       } catch (error) {
-//         console.error('Error fetching events:', error);
-//       }
-//     };
-
-//     fetchEvents();
-//   }, []);
-
-//   const handleEventSelection = async (eventId) => {
-//     try {
-//       const response = await axiosInstance.get(endpoints.events.detail(eventId));
-//       const eventData = response.data;
-//       console.log("data", eventData)
-//       setSelectedEvent(eventData);
-//     } catch (error) {
-//       console.error('Error fetching event details:', error);
-//     }
-//   };
-
-//   console.log("selected", selectedEvent)
-//   return (
-//     <>
-//       <TickerPurchaseHeader />
-//     <Box px={{ xs: 2, md: 15 }} bgcolor="#F4F4F4" minHeight="100vh" overflow="hidden" pt={12}>
-//       <Grid container spacing={2}>
-//         <Grid item xs={12} md={8}>
-//         <h2>Select an Event</h2>
-//             {events.map((event) => (
-//               <Button
-//                 key={event.id}
-//                 variant="contained"
-//                 color="primary"
-//                 onClick={() => handleEventSelection(event.id)}
-//                 sx={{ mb: 2 }}
-//               >
-//                 {event.name}
-//               </Button>
-//             ))}
-//             {selectedEvent && (
-//               <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-//                 <TicketSelectionCard  eventData={selectedEvent}/>
-//                 <TicketInformationCard eventId={selectedEvent.id} />
-//               </Stack>
-//             )}
-//         </Grid>
-//         <Grid item xs={12} md={4}>
-//           <TicketPaymentCard />
-//         </Grid>
-//       </Grid>
-//     </Box>
-//     </>
-//   );
-// };
 
 export default TicketPurchaseView;
