@@ -826,8 +826,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { debounce } from 'src/utils/debounce';
@@ -876,8 +874,6 @@ const TicketSelectionCard = () => {
 
   const tixs = useCartStore((state) => state.tickets);
   const updateTics = useCartStore((state) => state.updateTickets);
-
-  const router = useRouter();
 
   const [cartItems, setCartItems] = useState(data?.cartItem || []);
 
@@ -1406,7 +1402,6 @@ const TicketSelectionCard = () => {
               </TableBody>
             </Table>
           </TableContainer>
-
           <Stack my={2} direction={{ md: 'row' }} justifyContent="end" alignItems="start" gap={3}>
             <Stack spacing={1}>
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -1447,43 +1442,12 @@ const TicketSelectionCard = () => {
                 </Stack>
               )}
             </Stack>
-
-            {/* <Stack
-              sx={{
-                '& .MuiTypography-root': {
-                  fontSize: 14,
-                  fontWeight: 500,
-                },
-                textWrap: 'nowrap',
-              }}
-              width={1}
-              spacing={1}
-              flexShrink={2}
-            >
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>Subtotal:</Typography>
-                <Typography>RM {subTotal}.00</Typography>
-              </Stack>
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>Discount</Typography>
-                <Typography>RM {parseFloat(discountedPrice).toFixed(2)}</Typography>
-              </Stack>
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>SST:</Typography>
-                <Typography>RM 11.94</Typography>
-              </Stack>
-              <Divider />
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography sx={{ fontWeight: 800 }}>Total:</Typography>
-                <Typography>
-                  RM{' '}
-                  {subTotal > 0
-                    ? parseFloat(totalPrice).toFixed(2)
-                    : parseFloat(subTotal).toFixed(2)}
-                </Typography>
-              </Stack>
-            </Stack> */}
           </Stack>
+        </Box>
+        <Box p={1}>
+          <Button variant="outlined" fullWidth>
+            Confirm and Continue
+          </Button>
         </Box>
       </Stack>
     )

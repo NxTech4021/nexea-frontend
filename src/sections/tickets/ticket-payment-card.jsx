@@ -18,7 +18,7 @@ const TicketPaymentCard = () => {
       <Stack
         sx={{
           borderRadius: 2,
-          height: 1,
+          minHeight: 1,
           overflow: 'hidden',
           color: 'whitesmoke',
           bgcolor: 'white',
@@ -35,8 +35,16 @@ const TicketPaymentCard = () => {
             />
           </Stack>
         </Box>
+
         {subTotal ? (
-          <Box sx={{ color: 'black', p: 2, px: 3 }}>
+          <Stack
+            sx={{
+              color: 'black',
+              p: 2,
+              px: 3,
+              flex: 1,
+            }}
+          >
             <Typography variant="body2" fontWeight={600}>
               Order Summary
             </Typography>
@@ -54,72 +62,82 @@ const TicketPaymentCard = () => {
               spacing={2}
               flexShrink={2}
               color={grey[800]}
+              flex={1}
+              justifyContent="space-between"
             >
+              <Box>
+                <Stack spacing={2}>
+                  {tickets
+                    .filter((ticket) => ticket.quantity > 0)
+                    .map((ticket) => (
+                      <Stack
+                        key={ticket.id}
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Typography>{`${ticket.quantity} x ${ticket.title}`}</Typography>
+                        <Typography>
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(ticket.subTotal)}
+                        </Typography>
+                      </Stack>
+                    ))}
+                </Stack>
+              </Box>
+
               <Stack spacing={2}>
-                {tickets
-                  .filter((ticket) => ticket.quantity > 0)
-                  .map((ticket) => (
-                    <Stack
-                      key={ticket.id}
-                      direction="row"
-                      alignItems="center"
-                      gap={10}
-                      justifyContent="space-between"
-                    >
-                      <Typography>{`${ticket.quantity} x ${ticket.title}`}</Typography>
-                      <Typography>
-                        {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                          ticket.subTotal
-                        )}
-                      </Typography>
-                    </Stack>
-                  ))}
-              </Stack>
+                <Divider />
 
-              <Divider />
+                {/* <Box sx={{ flexGrow: 1 }} /> */}
 
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>Subtotal:</Typography>
-                <Typography>
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    subTotal
-                  )}
-                </Typography>
-              </Stack>
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>Discount</Typography>
-                <Typography>
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0)}
-                </Typography>
-                {/* <Typography>RM {parseFloat(discountedPrice).toFixed(2)}</Typography> */}
-              </Stack>
-              <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                <Typography>SST:</Typography>
-                <Typography>
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(11.94)}
-                </Typography>
-              </Stack>
-              <Divider />
-              <Stack
-                direction="row"
-                alignItems="center"
-                gap={10}
-                justifyContent="space-between"
-                sx={{
-                  '& .MuiTypography-root': {
-                    fontSize: 20,
-                    fontWeight: 600,
-                  },
-                }}
-              >
-                <Typography>Total:</Typography>
-                <Typography>
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(200)}
-                  {/* {subTotal > 0 ? parseFloat(totalPrice).toFixed(2) : parseFloat(subTotal).toFixed(2)} */}
-                </Typography>
+                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                  <Typography>Subtotal:</Typography>
+                  <Typography>
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                      subTotal
+                    )}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                  <Typography>Discount</Typography>
+                  <Typography>
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0)}
+                  </Typography>
+                  {/* <Typography>RM {parseFloat(discountedPrice).toFixed(2)}</Typography> */}
+                </Stack>
+                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
+                  <Typography>SST:</Typography>
+                  <Typography>
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                      11.94
+                    )}
+                  </Typography>
+                </Stack>
+                <Divider />
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  gap={10}
+                  justifyContent="space-between"
+                  sx={{
+                    '& .MuiTypography-root': {
+                      fontSize: 20,
+                      fontWeight: 600,
+                    },
+                  }}
+                >
+                  <Typography>Total:</Typography>
+                  <Typography>
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(200)}
+                    {/* {subTotal > 0 ? parseFloat(totalPrice).toFixed(2) : parseFloat(subTotal).toFixed(2)} */}
+                  </Typography>
+                </Stack>
               </Stack>
             </Stack>
-          </Box>
+          </Stack>
         ) : (
           <Box position="absolute" top="50%" left="50%" sx={{ transform: 'translate(-50%, -50%)' }}>
             <Iconify icon="mdi:cart-outline" width={40} color={grey[300]} />

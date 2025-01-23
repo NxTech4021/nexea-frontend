@@ -1,8 +1,9 @@
 import useSWR from 'swr';
+import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 import React, { useMemo, useEffect, useCallback } from 'react';
 
-import { Box, Grid, Stack, Typography, CircularProgress } from '@mui/material';
+import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -16,31 +17,24 @@ import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
 import TicketPaymentCard from '../ticket-payment-card';
 import TicketSelectionCard from '../ticket-selection-card';
-import TicketInformationCard from '../ticket-information-card';
 
-const TicketPurchaseView = () => {
-  const searchParams = new URLSearchParams(window.location.search);
-
+const TicketPurchaseView = ({ eventIdParams }) => {
   const setTickets = useCartStore((state) => state.setTickets);
-
   const loading = useBoolean();
-
-  localStorage.setItem('eventId', searchParams.get('eventId'));
-  localStorage.setItem('ticketTypeId', searchParams.get('ticketTypeId'));
-
-  const ticketStorage = JSON.parse(localStorage.getItem('testing'));
-
-  const ticketTypeId = localStorage.getItem('ticketTypeId');
+  localStorage.setItem('eventId', eventIdParams);
+  const ticketStorage = JSON.parse(localStorage.getItem('cart'));
   const eventId = localStorage.getItem('eventId');
 
-  const cartSessionId = getCookie();
-
-  const { data, isLoading, mutate, error } = useGetCart(cartSessionId, eventId, ticketTypeId);
-
+  // This function is used to get all event data based on eventId
   const { data: eventData, isLoading: isEventLoading } = useSWR(
     endpoints.cart.event(eventId),
     fetcher
   );
+
+  // This function is used to get cart session id stored in the cookie browser
+  const cartSessionId = getCookie();
+
+  const { data, isLoading, mutate, error } = useGetCart(cartSessionId, eventId);
 
   useEffect(() => {
     if (ticketStorage) {
@@ -59,18 +53,17 @@ const TicketPurchaseView = () => {
   const createNewSession = useCallback(async () => {
     loading.onTrue();
     try {
-      return await axiosInstance.post(endpoints.cart.createSession, {
-        ticketTypeId,
+      await axiosInstance.post(endpoints.cart.createSession, {
         eventId,
       });
     } catch (err) {
-      return enqueueSnackbar('Error creating session', {
+      enqueueSnackbar('Error creating session', {
         variant: 'error',
       });
     } finally {
       loading.onFalse();
     }
-  }, [ticketTypeId, eventId, loading]);
+  }, [eventId, loading]);
 
   useEffect(() => {
     if (!cartSessionId) {
@@ -125,12 +118,47 @@ const TicketPurchaseView = () => {
     );
   }
 
+  if (eventData?.status !== 'live') {
+    return (
+      <Stack
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+        alignItems="center"
+        spacing={1}
+      >
+        <Typography variant="subtitle1" color="text.secondary">
+          Event is temporarily closed
+        </Typography>
+        <Button variant="outlined">Go back</Button>
+      </Stack>
+    );
+  }
+
   return (
     <Cart.Provider value={memoizedValue}>
       <TickerPurchaseHeader />
       {!isLoading && !data && <Typography sx={{ textAlign: 'center' }}>No data found.</Typography>}
-      <Box px={{ xs: 2, md: 15 }} bgcolor="#F4F4F4" minHeight="100vh" overflow="hidden" pt={12}>
-        <Grid container spacing={2}>
+      <Box minHeight={64} />
+      <Box
+        px={{ lg: 15 }}
+        bgcolor="#F4F4F4"
+        overflow="scroll"
+        sx={{ height: `calc(100vh - ${64}px)` }}
+      >
+        <Grid container spacing={2} minHeight={1} p={2}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <TicketSelectionCard />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <TicketPaymentCard />
+          </Grid>
+        </Grid>
+
+        {/* <Grid container spacing={2}>
           <Grid item xs={12} md={8}>
             <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
               <TicketSelectionCard />
@@ -141,81 +169,14 @@ const TicketPurchaseView = () => {
           <Grid item xs={12} md={4}>
             <TicketPaymentCard />
           </Grid>
-        </Grid>
+        </Grid> */}
       </Box>
     </Cart.Provider>
   );
 };
-// =======
-// import TicketInformationCard from '../ticket-information-card';
-
-// const TicketPurchaseView = () => {
-//   const [events, setEvents] = useState([]);
-//   const [selectedEvent, setSelectedEvent] = useState(null);
-
-//   useEffect(() => {
-//     const fetchEvents = async () => {
-//       try {
-//         const response = await axiosInstance.get(endpoints.events.list);
-
-//         if (response.data && Array.isArray(response.data.events)) {
-//           setEvents(response.data.events);
-//         } else {
-//           console.error('Unexpected response format:', response);
-//           setEvents([]);
-//         }
-//       } catch (error) {
-//         console.error('Error fetching events:', error);
-//       }
-//     };
-
-//     fetchEvents();
-//   }, []);
-
-//   const handleEventSelection = async (eventId) => {
-//     try {
-//       const response = await axiosInstance.get(endpoints.events.detail(eventId));
-//       const eventData = response.data;
-//       console.log("data", eventData)
-//       setSelectedEvent(eventData);
-//     } catch (error) {
-//       console.error('Error fetching event details:', error);
-//     }
-//   };
-
-//   console.log("selected", selectedEvent)
-//   return (
-//     <>
-//       <TickerPurchaseHeader />
-//     <Box px={{ xs: 2, md: 15 }} bgcolor="#F4F4F4" minHeight="100vh" overflow="hidden" pt={12}>
-//       <Grid container spacing={2}>
-//         <Grid item xs={12} md={8}>
-//         <h2>Select an Event</h2>
-//             {events.map((event) => (
-//               <Button
-//                 key={event.id}
-//                 variant="contained"
-//                 color="primary"
-//                 onClick={() => handleEventSelection(event.id)}
-//                 sx={{ mb: 2 }}
-//               >
-//                 {event.name}
-//               </Button>
-//             ))}
-//             {selectedEvent && (
-//               <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-//                 <TicketSelectionCard  eventData={selectedEvent}/>
-//                 <TicketInformationCard eventId={selectedEvent.id} />
-//               </Stack>
-//             )}
-//         </Grid>
-//         <Grid item xs={12} md={4}>
-//           <TicketPaymentCard />
-//         </Grid>
-//       </Grid>
-//     </Box>
-//     </>
-//   );
-// };
 
 export default TicketPurchaseView;
+
+TicketPurchaseView.propTypes = {
+  eventIdParams: PropTypes.string,
+};

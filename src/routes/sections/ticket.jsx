@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 
-const TicketPurchaseView = lazy(() => import('src/sections/tickets/view/view'));
+const TicketPurchaseView = lazy(() => import('src/pages/tickets/ticket-purchase-view'));
 
 export const ticketRoutes = [
   {

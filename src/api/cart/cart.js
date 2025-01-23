@@ -5,7 +5,7 @@ import { fetcher, endpoints } from 'src/utils/axios';
 
 export const useGetCart = (id, eventId, ticketTypeId) => {
   const { data, isLoading, mutate, error } = useSWR(
-    endpoints.cart.get(id, eventId, ticketTypeId),
+    id ? endpoints.cart.get(id, eventId, ticketTypeId) : null,
     fetcher
   );
 
