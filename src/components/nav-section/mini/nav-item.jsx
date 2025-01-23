@@ -51,19 +51,16 @@ const NavItem = forwardRef(
             {icon}
           </Box>
         )}
-
         {title && (
           <Box component="span" className="label">
             {title}
           </Box>
         )}
-
         {caption && (
           <Tooltip title={caption} arrow placement="right">
             <Iconify width={16} icon="eva:info-outline" className="caption" />
           </Tooltip>
         )}
-
         {info && subItem && (
           <Box component="span" className="info">
             {info}
@@ -171,12 +168,17 @@ const StyledNavItem = styled(ListItemButton, {
     caption: {
       color: theme.palette.text.disabled,
     },
+    container: {
+      width: 65,
+      height: 50,
+    },
   };
 
   return {
     // Root item
     ...(!subItem && {
       ...baseStyles.item,
+      ...baseStyles.container,
       fontSize: 10,
       minHeight: 56,
       lineHeight: '16px',

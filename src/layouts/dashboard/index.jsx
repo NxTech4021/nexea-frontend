@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -17,6 +18,8 @@ import NavHorizontal from './nav-horizontal';
 
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
+
+  const testRef = useRef(null);
 
   const lgUp = useResponsive('up', 'lg');
 
