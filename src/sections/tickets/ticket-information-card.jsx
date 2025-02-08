@@ -59,12 +59,12 @@ const defaultAttendee = {
   email: '',
   phoneNumber: '',
   company: '',
-  isCollapse: false,
+  isForbuyer: false,
 };
 
 const TicketInformationCard = () => {
-  // const { data } = useGetCartData();
   const collapse = useBoolean();
+  const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
 
   const isOverflow = useBoolean();
@@ -90,7 +90,7 @@ const TicketInformationCard = () => {
         isAnAttendee: false,
         ticket: '',
       },
-      attendees: [],
+      attendees: null,
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -98,51 +98,88 @@ const TicketInformationCard = () => {
 
   const { watch, control, setValue, getValues } = methods;
 
-  const buyer = watch('buyer');
-  const attendees = watch('attendees');
+  const buyer = watch('buyer.isAnAttendee');
 
   const toggleCollapse = (index) => {
-    setValue(`attendees.${index}.isCollapse`, !attendees[index].isCollapse);
+    setCollapseAttendees((prev) =>
+      prev.includes(index) ? prev.filter((val) => val !== index) : [...prev, index]
+    );
   };
 
-  const { fields } = useFieldArray({
+  const { fields, update } = useFieldArray({
     control,
     name: 'attendees',
   });
 
   const handleChangeTicket = (value) => {
     setValue('buyer.ticket', value);
+    const buyerInfo = getValues('buyer');
 
-    const newAttendees = [...attendees]; // Copy the existing attendees
+    const attendees = getValues('attendees');
 
-    if (buyer.isAnAttendee) {
-      // Restore previously removed attendee if it exists
-      if (lastRemoved) {
-        newAttendees.push(lastRemoved);
+    const newAttendees = [...attendees];
+
+    if (buyer) {
+      const existingTagIndex = newAttendees.findIndex((item) => item.isForbuyer);
+      const existingValue = newAttendees[existingTagIndex];
+
+      if (existingTagIndex !== -1) {
+        update(existingTagIndex, { ...defaultAttendee, ticket: existingValue.ticket });
         setLastRemoved(null); // Reset last removed after restoring
       }
 
-      // Find the attendee with the given ticket ID
       const index = newAttendees.findIndex((attendee) => attendee.ticket.id === value);
 
-      if (index !== -1) {
-        setLastRemoved(newAttendees.splice(index, 1)[0]); // Remove and store it
-      }
+      const val = {
+        firstName: buyerInfo.firstName || '',
+        lastName: buyerInfo.lastName || '',
+        email: buyerInfo.email || '',
+        phoneNumber: buyerInfo.phoneNumber || '',
+        company: buyerInfo.company || '',
+        ticket: newAttendees[index].ticket,
+      };
 
-      setValue('attendees', newAttendees, { shouldValidate: true });
+      if (index !== -1) {
+        update(index, { ...val, isForbuyer: true });
+      }
     }
   };
 
   const handleBuyerCheckbox = (val) => {
     setValue('buyer.isAnAttendee', val);
+    const attendees = getValues('attendees');
 
     if (!val) {
       setValue('buyer.ticket', '');
-      const newAttendees = [...attendees, lastRemoved];
+      const latestAttendeeesInfo = attendees.map((item) =>
+        item.isForbuyer
+          ? { ...defaultAttendee, ticket: item.ticket }
+          : { ...item, isForbuyer: false }
+      );
 
-      setLastRemoved(null);
-      setValue('attendees', newAttendees);
+      setValue('attendees', latestAttendeeesInfo);
     }
+  };
+
+  const onChangeInputBuyer = (e) => {
+    const { name, value } = e.target;
+
+    const attendees = getValues('attendees');
+    const index = attendees.findIndex((i) => i.isForbuyer);
+
+    if (index !== -1) {
+      const updatedAttendee = { ...attendees[index] };
+
+      if (name === 'buyer.firstName') updatedAttendee.firstName = value;
+      if (name === 'buyer.lastName') updatedAttendee.lastName = value;
+      if (name === 'buyer.email') updatedAttendee.email = value;
+      if (name === 'buyer.phoneNumber') updatedAttendee.phoneNumber = value;
+      if (name === 'buyer.company') updatedAttendee.company = value;
+
+      update(index, { ...updatedAttendee, ticket: updatedAttendee.ticket });
+    }
+
+    setValue(name, value, { shouldValidate: true });
   };
 
   const helperText = (
@@ -206,12 +243,21 @@ const TicketInformationCard = () => {
           gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
           gap={2}
         >
-          <TextFieldCustom name="buyer.firstName" label="First Name" />
-          <TextFieldCustom name="buyer.lastName" label="Last Name" />
-          <TextFieldCustom name="buyer.email" label="Email" />
-          <TextFieldCustom name="buyer.phoneNumber" label="Phone Number" inputMode="decimal" />
-          <TextFieldCustom name="buyer.company" label="Company" />
-          {buyer.isAnAttendee && (
+          <TextFieldCustom
+            name="buyer.firstName"
+            label="First Name"
+            onChange={onChangeInputBuyer}
+          />
+          <TextFieldCustom name="buyer.lastName" label="Last Name" onChange={onChangeInputBuyer} />
+          <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
+          <TextFieldCustom
+            name="buyer.phoneNumber"
+            label="Phone Number"
+            inputMode="decimal"
+            onChange={onChangeInputBuyer}
+          />
+          <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
+          {buyer && (
             <RHFSelect
               name="buyer.ticket"
               label="For which ticket?"
@@ -300,10 +346,11 @@ const TicketInformationCard = () => {
                   <Iconify icon="mingcute:ticket-line" width={20} mr={1} />
                   {field.ticket.title}
                 </Label>
+                {field.isForbuyer && <Label color="success">Buyer&apos;s ticket</Label>}
               </Stack>
 
               <IconButton>
-                {getValues(`attendees.${index}.isCollapse`) ? (
+                {collapseAttendees.includes(index) ? (
                   <Iconify icon="ep:arrow-down-bold" width={20} />
                 ) : (
                   <Iconify icon="ep:arrow-right-bold" width={20} />
@@ -311,21 +358,68 @@ const TicketInformationCard = () => {
               </IconButton>
             </Stack>
 
-            <Collapse in={getValues(`attendees.${index}.isCollapse`)} timeout="auto" unmountOnExit>
+            <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
               <Box
                 display="grid"
                 gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
                 gap={2}
               >
-                <TextFieldCustom name={`attendees.${index}.firstName`} label="First Name" />
-                <TextFieldCustom name={`attendees.${index}.lastName`} label="Last Name" />
-                <TextFieldCustom name={`attendees.${index}.email`} label="Email" />
+                <TextFieldCustom
+                  name={`attendees.${index}.firstName`}
+                  label="First Name"
+                  slotProps={
+                    getValues(`attendees.${index}.isForbuyer`) && {
+                      input: {
+                        readOnly: true,
+                      },
+                    }
+                  }
+                />
+                <TextFieldCustom
+                  name={`attendees.${index}.lastName`}
+                  label="Last Name"
+                  slotProps={
+                    getValues(`attendees.${index}.isForbuyer`) && {
+                      input: {
+                        readOnly: true,
+                      },
+                    }
+                  }
+                />
+                <TextFieldCustom
+                  name={`attendees.${index}.email`}
+                  label="Email"
+                  slotProps={
+                    getValues(`attendees.${index}.isForbuyer`) && {
+                      input: {
+                        readOnly: true,
+                      },
+                    }
+                  }
+                />
                 <TextFieldCustom
                   name={`attendees.${index}.phoneNumber`}
                   label="Phone Number"
                   inputMode="decimal"
+                  slotProps={
+                    getValues(`attendees.${index}.isForbuyer`) && {
+                      input: {
+                        readOnly: true,
+                      },
+                    }
+                  }
                 />
-                <TextFieldCustom name={`attendees.${index}.company`} label="Company" />
+                <TextFieldCustom
+                  name={`attendees.${index}.company`}
+                  label="Company"
+                  slotProps={
+                    getValues(`attendees.${index}.isForbuyer`) && {
+                      input: {
+                        readOnly: true,
+                      },
+                    }
+                  }
+                />
               </Box>
             </Collapse>
 
@@ -343,6 +437,12 @@ const TicketInformationCard = () => {
     </Stack>
   );
 
+  const scrollToTop = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTop = 0;
+  };
+
   useEffect(() => {
     if (!data?.cartItem?.length) return;
 
@@ -354,8 +454,8 @@ const TicketInformationCard = () => {
       }))
     );
 
-    setValue('attendees', result, { shouldValidate: true });
-  }, [data, setValue, buyer]);
+    setValue('attendees', result);
+  }, [data, setValue]);
 
   useEffect(() => {
     const el = ref?.current;
@@ -383,30 +483,6 @@ const TicketInformationCard = () => {
       }
     };
   }, [isOverflow]);
-
-  // useEffect(() => {
-  //   // ✅ Detect Active Section
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       entries.forEach((entry) => {
-  //         if (entry.isIntersecting) {
-  //           setActiveFieldId(entry.target.id);
-  //         }
-  //       });
-  //     },
-  //     { threshold: 0.6 } // 60% visibility to be marked as active
-  //   );
-
-  //   fields.forEach((field) => {
-  //     const element = document.getElementById(field.id);
-  //     if (element) observer.observe(element);
-  //   });
-
-  //   // eslint-disable-next-line consistent-return
-  //   return () => {
-  //     observer.disconnect();
-  //   };
-  // }, [fields, isOverflow]);
 
   useEffect(() => {
     const parent = ref.current;
@@ -439,11 +515,10 @@ const TicketInformationCard = () => {
     };
   }, [fields]);
 
-  const scrollToTop = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollTop = 0;
-  };
+  useEffect(() => {
+    window.onbeforeunload = () =>
+      'Any string value here forces a dialog box to \n appear before closing the window.';
+  }, []);
 
   if (cartLoading) {
     <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
@@ -520,7 +595,7 @@ const TicketInformationCard = () => {
         </IconButton>
       </Box>
 
-      {attendees?.length && (
+      {fields?.length && (
         <Stack sx={{ color: 'black', position: 'absolute', top: 100, left: -100 }}>
           {fields.map((field, index) => (
             <Typography
@@ -529,10 +604,9 @@ const TicketInformationCard = () => {
               color="text.secondary"
               sx={{
                 cursor: 'pointer',
-                // color: activeFieldId === field.id ? 'black' : 'text.secondary',
                 ...(activeFieldId === field.id && {
                   position: 'relative',
-                  left: 3,
+                  left: 4,
                   color: 'black',
                   fontWeight: 600,
                 }),
@@ -548,7 +622,9 @@ const TicketInformationCard = () => {
                   setActiveFieldId(field.id);
                 }
               }}
-            >{`Attendee ${index + 1}`}</Typography>
+            >
+              {field.isForbuyer ? "Buyer's Ticket" : `Attendee ${index + 1}`}
+            </Typography>
           ))}
         </Stack>
       )}

@@ -25,6 +25,7 @@ export const TextFieldCustom = ({ name, type, helperText, ...other }) => {
       render={({ field, fieldState: { error } }) => (
         <CustomTextField
           {...field}
+          aria-readonly
           fullWidth
           type={type}
           value={type === 'number' && field.value === 0 ? '' : field.value}

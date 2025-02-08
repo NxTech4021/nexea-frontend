@@ -275,7 +275,7 @@ const TicketSelectionCard = () => {
     handleScroll();
 
     el.addEventListener('scroll', handleScroll);
-
+  
     // eslint-disable-next-line consistent-return
     return () => {
       if (el) {
