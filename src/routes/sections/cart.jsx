@@ -7,8 +7,4 @@ export const ticketRoutes = [
     path: 'cart',
     element: <TicketPurchaseView />,
   },
-  // {
-  //   path: 'ticket-check/:eventId/:ticketId',
-  //   element: <CheckSession />,
-  // },
 ];

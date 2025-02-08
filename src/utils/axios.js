@@ -92,6 +92,7 @@ export const endpoints = {
     generateUrl: '/api/ticket-type/generateUrl',
   },
   cart: {
+    root: '/api/cart/',
     get: (id, eventId, ticketTypeId) =>
       `/api/cart/${id}?eventId=${eventId}&ticketTypeId=${ticketTypeId}`,
     event: (id) => `/api/cart/tickets/${id}`,

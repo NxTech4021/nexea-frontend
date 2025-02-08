@@ -1,9 +1,28 @@
-const testBind = (a) => {
-  console.log(a);
+const attendees = [
+  {
+    email: '',
+    name: '',
+    ticketTypeId: 2,
+  },
+  {
+    email: '',
+    name: '',
+    ticketTypeId: 1,
+  },
+  {
+    email: '',
+    name: '',
+    ticketTypeId: 2,
+  },
+];
+
+const handleTicketHolder = () => {
+  const groupedAttendees = attendees.reduce((acc, { ticketTypeId }) => {
+    acc[ticketTypeId] = (acc[ticketTypeId] || 0) + 1;
+    return acc;
+  }, {});
+
+  console.log(groupedAttendees);
 };
 
-const b = testBind.bind(this, 30);
-
-const z = b.bind(this, 10);
-
-z();
+handleTicketHolder('2');

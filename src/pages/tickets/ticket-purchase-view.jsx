@@ -3,17 +3,20 @@ import { Helmet } from 'react-helmet-async';
 
 import { Box, Stack, Button, Typography } from '@mui/material';
 
-import { useSearchParams } from 'src/routes/hooks';
+import { useParams } from 'src/routes/hooks';
 
 import Image from 'src/components/image';
 
 import TicketPurchaseView from 'src/sections/tickets/view/view';
 
 const Page = () => {
-  const searchParams = useSearchParams();
-  const eventIdParams = searchParams.get('eventId');
+  const { event } = useParams();
+  const eventArray = event.split('@');
+  let eventId = eventArray[eventArray.length - 1];
 
-  if (!eventIdParams) {
+  if (localStorage.getItem('eventId')) eventId = localStorage.getItem('eventId');
+
+  if (!eventId) {
     return (
       <Box
         sx={{
@@ -45,10 +48,10 @@ const Page = () => {
   return (
     <>
       <Helmet>
-        <title>Ticket Purchase</title>
+        <title>Event</title>
       </Helmet>
 
-      <TicketPurchaseView eventIdParams={eventIdParams} />
+      <TicketPurchaseView eventIdParams={eventId} />
     </>
   );
 };
