@@ -342,11 +342,13 @@ const TicketInformationCard = () => {
                 <Typography variant="subtitle2" color="text.secondary">
                   Attendee {index + 1}
                 </Typography>
-                <Label color="info">
-                  <Iconify icon="mingcute:ticket-line" width={20} mr={1} />
-                  {field.ticket.title}
-                </Label>
-                {field.isForbuyer && <Label color="success">Buyer&apos;s ticket</Label>}
+                <Stack direction="row" alignItems="center" flexWrap="wrap" spacing={1}>
+                  <Label color="info">
+                    <Iconify icon="mingcute:ticket-line" width={20} mr={1} />
+                    {field.ticket.title}
+                  </Label>
+                  {field.isForbuyer && <Label color="success">Buyer&apos;s ticket</Label>}
+                </Stack>
               </Stack>
 
               <IconButton>
