@@ -182,6 +182,8 @@ const TicketInformationCard = () => {
     setValue(name, value, { shouldValidate: true });
   };
 
+  const copyCompanyName = () => {};
+
   const helperText = (
     <Stack spacing={0.5} color="text.secondary" my={2}>
       <Stack direction="row" alignItems="center" spacing={1}>
@@ -517,10 +519,11 @@ const TicketInformationCard = () => {
     };
   }, [fields]);
 
-  useEffect(() => {
-    window.onbeforeunload = () =>
-      'Any string value here forces a dialog box to \n appear before closing the window.';
-  }, []);
+  // useEffect(() => {
+  //   if (!data) return;
+  //   window.onbeforeunload = () =>
+  //     'Any string value here forces a dialog box to \n appear before closing the window.';
+  // }, [data]);
 
   if (cartLoading) {
     <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>

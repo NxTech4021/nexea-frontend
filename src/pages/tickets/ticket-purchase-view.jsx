@@ -11,6 +11,7 @@ import TicketPurchaseView from 'src/sections/tickets/view/view';
 
 const Page = () => {
   const { event } = useParams();
+
   const eventArray = event.split('@');
   let eventId = eventArray[eventArray.length - 1];
 

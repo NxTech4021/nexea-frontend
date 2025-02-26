@@ -152,9 +152,6 @@ export default function JwtLoginView() {
       </Alert> */}
 
         {renderForm}
-        <Button variant="outlined" sx={{ mt: 20 }} onClick={onClick}>
-          Buy now
-        </Button>
       </Card>
     </FormProvider>
   );

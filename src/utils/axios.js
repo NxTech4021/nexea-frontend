@@ -98,6 +98,7 @@ export const endpoints = {
     event: (id) => `/api/cart/tickets/${id}`,
     createSession: '/api/cart',
     addTicket: `/api/cart/addTicket`,
+    extendSession: '/api/cart/extendSession',
   },
   discount: {
     get: '/api/discount/',

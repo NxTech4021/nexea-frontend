@@ -1,27 +1,26 @@
 import { toast } from 'sonner';
+import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 
 import { grey } from '@mui/material/colors';
-import { Box, Stack, Divider, Typography, ListItemText } from '@mui/material';
+import { Box, Stack, Divider, Typography, ListItemText, TextField, Button } from '@mui/material';
 
 import { useCartStore } from 'src/utils/store';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
+import { LoadingButton } from '@mui/lab';
 
-const TicketPaymentCard = () => {
+const TicketPaymentCard = ({ cartData, mutate }) => {
   const { tickets } = useCartStore();
+  const [discountCode, setDiscountCode] = useState(null);
 
-  const totalTicketsQuantitySelected = useMemo(() => {
-    const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.quantity, 0);
-    return ticketsTotal;
-  }, [tickets]);
-
-  const [discountCode, setDiscountCode] = useState('');
-  const [discount, setDiscount] = useState(null);
-
-  const subTotal = useMemo(() => tickets.reduce((acc, cur) => acc + cur.subTotal, 0), [tickets]);
+  const subTotal = useMemo(
+    () =>
+      tickets.reduce((acc, cur) => acc + cur.subTotal, 0) ||
+      cartData?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
+    [tickets, cartData]
+  );
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -29,48 +28,12 @@ const TicketPaymentCard = () => {
       return;
     }
 
-    const cartSubtotal = tickets.reduce(
-      (total, ticket) => total + ticket.quantity * ticket.price,
-      0
-    );
-
-    const selectedTicket = tickets.find((ticket) => ticket.quantity > 0);
-
-    if (!totalTicketsQuantitySelected) {
-      toast.error('Please select at least one ticket');
-      return;
-    }
-
-    const payload = {
-      code_name: discountCode,
-      cartSubtotal,
-      ticketId: selectedTicket?.id || null,
-      quantity: selectedTicket?.quantity || 0,
-    };
-
     try {
-      const response = await axiosInstance.post(endpoints.discount.redeem, payload);
-
-      const { success, discountAmount, discountValue, discountType, message } = response.data;
-
-      if (success) {
-        setDiscount({
-          code_name: discountCode,
-          value: discountValue,
-          type: discountType,
-          amount: discountAmount,
-          ticketId: selectedTicket?.id || null,
-          quantity: selectedTicket?.quantity || 0,
-          cartSubtotal,
-        });
-
-        toast('Discount code redeemed successfully');
-      } else {
-        toast.error(message || 'Failed to apply discount');
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.message || 'Invalid Discount code');
+      const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
+      toast.success(res?.data?.message);
+      mutate();
+    } catch (error) {
+      toast.error(error);
     }
   };
 
@@ -86,18 +49,19 @@ const TicketPaymentCard = () => {
         }}
       >
         <Box sx={{ bgcolor: 'black', p: 2 }}>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Image src="/assets/tickets/ticket-3.svg" width={25} />
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Iconify icon="lets-icons:order-fill" width={30} />
+
             <ListItemText
-              primary="Payment"
-              secondary="All transactions are secure and encrypted."
+              primary="Order Summary"
+              secondary="Review Your Order."
               primaryTypographyProps={{ variant: 'subtitle1' }}
               secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
             />
           </Stack>
         </Box>
 
-        {subTotal ? (
+        {subTotal || cartData ? (
           <Stack
             sx={{
               color: 'black',
@@ -106,10 +70,6 @@ const TicketPaymentCard = () => {
               flex: 1,
             }}
           >
-            <Typography variant="body2" fontWeight={600}>
-              Order Summary
-            </Typography>
-
             <Stack
               sx={{
                 '& .MuiTypography-root': {
@@ -118,7 +78,7 @@ const TicketPaymentCard = () => {
                 },
                 textWrap: 'nowrap',
               }}
-              mt={3}
+              mt={2}
               width={1}
               spacing={2}
               flexShrink={2}
@@ -128,73 +88,92 @@ const TicketPaymentCard = () => {
             >
               <Box>
                 <Stack spacing={2}>
-                  {tickets
-                    .filter((ticket) => ticket.selectedQuantity > 0)
-                    .map((ticket) => (
-                      <Stack
-                        key={ticket.id}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
-                        <Typography>
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(ticket.subTotal)}
-                        </Typography>
-                      </Stack>
-                    ))}
+                  {cartData
+                    ? cartData.cartItem.map((item) => (
+                        <Stack
+                          key={item.id}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography>{`${item.quantity} x ${item.ticketType.title}`}</Typography>
+                          <Typography>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(item.quantity * item.ticketType.price)}
+                          </Typography>
+                        </Stack>
+                      ))
+                    : tickets
+                        .filter((ticket) => ticket.selectedQuantity > 0)
+                        .map((ticket) => (
+                          <Stack
+                            key={ticket.id}
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
+                            <Typography>
+                              {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(ticket.subTotal)}
+                            </Typography>
+                          </Stack>
+                        ))}
                 </Stack>
               </Box>
 
               <Stack spacing={2}>
-                {/* <Stack spacing={1}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    spacing={1}
-                  >
-                    <TextField
-                      size="small"
-                      fullWidth
-                      placeholder="Enter Discount Code"
-                      value={discountCode}
-                      onChange={(e) =>
-                        setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
-                      }
-                    />
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={handleRedeemDiscount}
-                      sx={{ height: 36 }}
+                {cartData && (
+                  <Stack spacing={1}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      spacing={1}
                     >
-                      Apply
-                    </Button>
-                  </Stack>
-
-                  {!!discount && (
-                    <Stack maxWidth={200} spacing={1}>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Iconify icon="lets-icons:check-fill" color="success.main" width={13} />
-                        <Typography variant="caption" fontSize={12} color="success">
-                          Discount code applied
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="caption" fontSize={12}>
-                          {discount.code}
-                        </Typography>
-                        <Typography variant="caption" color="error" fontSize={12}>
-                          - {discount.value}
-                        </Typography>
-                      </Stack>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Enter Discount Code"
+                        value={discountCode}
+                        onChange={(e) =>
+                          setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                        }
+                      />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={handleRedeemDiscount}
+                        sx={{ height: 36 }}
+                      >
+                        Apply
+                      </Button>
                     </Stack>
-                  )}
-                </Stack> */}
+
+                    {!!cartData.discount && (
+                      <Stack maxWidth={200} spacing={1}>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Iconify icon="lets-icons:check-fill" color="success.main" width={13} />
+                          <Typography variant="caption" fontSize={12} color="success">
+                            Discount code applied
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography variant="caption" fontSize={12}>
+                            {cartData.discount.code}
+                          </Typography>
+                          <Typography variant="caption" color="error" fontSize={12}>
+                            - {cartData.discount.value}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    )}
+                  </Stack>
+                )}
 
                 <Divider />
 
@@ -206,12 +185,24 @@ const TicketPaymentCard = () => {
                     )}
                   </Typography>
                 </Stack>
-                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                  <Typography>Discount</Typography>
-                  <Typography>
-                    - {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0)}
-                  </Typography>
-                </Stack>
+
+                {cartData && (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    gap={10}
+                    justifyContent="space-between"
+                  >
+                    <Typography>Discount</Typography>
+                    <Typography>
+                      -{' '}
+                      {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                        cartData?.orderSummary?.discount
+                      )}
+                    </Typography>
+                  </Stack>
+                )}
+
                 <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
                   <Typography>SST:</Typography>
                   <Typography>
@@ -227,7 +218,7 @@ const TicketPaymentCard = () => {
                   gap={10}
                   justifyContent="space-between"
                   sx={{
-                    '& .MuiTypography-root': {
+                    '&  .MuiTypography-root': {
                       fontSize: 20,
                       fontWeight: 600,
                     },
@@ -235,10 +226,31 @@ const TicketPaymentCard = () => {
                 >
                   <Typography>Total:</Typography>
                   <Typography>
-                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(200)}
-                    {/* {subTotal > 0 ? parseFloat(totalPrice).toFixed(2) : parseFloat(subTotal).toFixed(2)} */}
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                      cartData?.orderSummary?.totalPrice
+                        ? cartData.orderSummary.totalPrice + 11.94
+                        : subTotal + 11.94
+                    )}
                   </Typography>
                 </Stack>
+                {cartData && (
+                  <LoadingButton
+                    variant="contained"
+                    startIcon={
+                      <Iconify icon="fluent:payment-16-filled" width={20} sx={{ mr: 1 }} />
+                    }
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
+                      // a.target = '_blank';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                  >
+                    Proceed to payment
+                  </LoadingButton>
+                )}
               </Stack>
             </Stack>
           </Stack>
@@ -253,3 +265,8 @@ const TicketPaymentCard = () => {
 };
 
 export default TicketPaymentCard;
+
+TicketPaymentCard.propTypes = {
+  cartData: PropTypes.object,
+  mutate: PropTypes.func,
+};
