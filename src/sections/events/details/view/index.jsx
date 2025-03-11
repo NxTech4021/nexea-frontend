@@ -31,6 +31,7 @@ const EventDetails = ({ id }) => {
   const router = useRouter();
 
   if (error) return router.back();
+
   if (isLoading)
     return (
       <Box

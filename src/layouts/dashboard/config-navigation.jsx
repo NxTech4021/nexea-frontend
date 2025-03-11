@@ -53,23 +53,55 @@ export function useNavData() {
       // OVERVIEW
       // ----------------------------------------------------------------------
       {
+        subheader: 'Overview',
+        items: [{ title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard }],
+      },
+      {
+        subheader: 'Event Management',
         items: [
           {
             title: 'Events',
             path: paths.dashboard.events.root,
-            icon: <Iconify icon="material-symbols:campaign" width={25} />,
+            icon: <Iconify icon="material-symbols:campaign" width={22} />,
             children: [
               {
                 title: 'Overview',
                 path: paths.dashboard.events.root,
               },
-              // { title: 'Create', path: paths.dashboard.events.create },
-              { title: 'Ticket Types', path: paths.dashboard.events.ticketType },
-              { title: 'Discount Codes', path: paths.dashboard.events.discountCode },
-              { title: 'Orders', path: paths.dashboard.events.order },
             ],
           },
-          { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
+          {
+            title: 'Ticket Types',
+            path: paths.dashboard.ticketType.root,
+            icon: <Iconify icon="f7:tickets-fill" width={22} />,
+            children: [
+              {
+                title: 'List',
+                path: paths.dashboard.ticketType.root,
+              },
+              {
+                title: 'Add Ons',
+                path: paths.dashboard.events.root,
+                children: [
+                  {
+                    title: 'List',
+                    path: paths.dashboard.discountCode.root,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title: 'Discount Codes',
+            path: paths.dashboard.discountCode.root,
+            icon: <Iconify icon="tabler:discount-filled" width={22} />,
+          },
+          {
+            title: 'Orders',
+            path: paths.dashboard.order.root,
+            icon: <Iconify icon="lets-icons:order-fill" width={22} />,
+          },
+
           // {
           //   title: 'Attendees',
           //   path: paths.dashboard.attendees,

@@ -91,69 +91,7 @@ const EventTicketCreateDialog = ({ open, onClose, event }) => {
             primaryTypographyProps={{ variant: 'h5' }}
           />
         </DialogTitle>
-        {/* <DialogContent>
-          <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
-            <RenderSelectField name="eventName" control={control} label="Event Name" required />
 
-            <RenderSelectField
-              name="type"
-              control={control}
-              label="Type"
-              // options={ticketTypes}
-              required
-            />
-
-            <RenderSelectField
-              name="category"
-              control={control}
-              label="Category"
-              // options={ticketCategories}
-              required
-            />
-
-            <Stack spacing={1} width={1}>
-              <InputLabel required>Price</InputLabel>
-
-              <Controller
-                name="price"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    placeholder="Price (RM)"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={!!fieldState.error}
-                    helperText={fieldState.error ? fieldState.error.message : ''}
-                  />
-                )}
-              />
-            </Stack>
-
-            <Stack spacing={1} width={1}>
-              <InputLabel required>Quantity</InputLabel>
-
-              <Controller
-                name="quantity"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    placeholder="Quantity"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={!!fieldState.error}
-                    helperText={fieldState.error ? fieldState.error.message : ''}
-                  />
-                )}
-              />
-            </Stack>
-          </Box>
-        </DialogContent> */}
         <DialogActions>
           <Button variant="outlined" sx={{ fontWeight: 400 }}>
             Cancel

@@ -10,6 +10,7 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
+import { Stack, Typography } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
@@ -42,6 +43,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
     price,
     title,
     isActive,
+    description,
   } = row;
 
   const confirm = useBoolean();
@@ -91,10 +93,17 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
+
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>RM {price.toFixed(2)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {new Intl.NumberFormat('en-MY', {
+            minimumFractionDigits: 2,
+            style: 'currency',
+            currency: 'MYR',
+          }).format(price)}
+        </TableCell>
 
         <TableCell>
           <Label variant="soft" color={getStatusColor(isActive)}>
@@ -159,6 +168,13 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
           <TextField
             label="Status"
             value={selectedTicket?.isActive ? 'Active' : 'Inactive'}
+            InputProps={{ readOnly: true }}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Description"
+            value={selectedTicket?.description}
             InputProps={{ readOnly: true }}
             fullWidth
             margin="normal"

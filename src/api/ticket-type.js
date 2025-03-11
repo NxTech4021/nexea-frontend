@@ -22,6 +22,7 @@ export const createTicketType = async ({
   eventId,
   category,
   validity,
+  description,
   price,
   quantity,
   minimumTicketPerOrder,
@@ -46,6 +47,7 @@ export const createTicketType = async ({
       isDraft,
       minimumTicketPerOrder,
       maximumTicketPerOrder,
+      description,
     });
 
     return data;

@@ -85,16 +85,20 @@ export const endpoints = {
   },
   ticketType: {
     get: '/api/ticket-type/',
+    getByEventId: (id) => `/api/ticket-type/getTicketsByEvent/${id}`,
     create: '/api/ticket-type/',
     edit: (id) => `/api/ticket-type/${id}`,
     delete: (id) => `/api/ticket-type/${id}`,
     generateUrl: '/api/ticket-type/generateUrl',
   },
   cart: {
+    root: '/api/cart/',
     get: (id, eventId, ticketTypeId) =>
       `/api/cart/${id}?eventId=${eventId}&ticketTypeId=${ticketTypeId}`,
+    event: (id) => `/api/cart/tickets/${id}`,
     createSession: '/api/cart',
     addTicket: `/api/cart/addTicket`,
+    extendSession: '/api/cart/extendSession',
   },
   discount: {
     get: '/api/discount/',
