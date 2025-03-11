@@ -153,3 +153,4 @@ export default TicketPurchaseView;
 TicketPurchaseView.propTypes = {
   eventIdParams: PropTypes.string,
 };
+

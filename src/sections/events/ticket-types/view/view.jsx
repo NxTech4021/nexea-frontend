@@ -468,3 +468,4 @@ function applyFilter({ inputData, comparator, filters }) {
 
   return inputData;
 }
+

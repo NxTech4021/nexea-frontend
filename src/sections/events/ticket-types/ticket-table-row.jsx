@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { enqueueSnackbar } from 'notistack';
 
-import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import { Typography } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -17,8 +16,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-
-import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -51,7 +48,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
 
   const confirm = useBoolean();
   const popover = usePopover();
-  const loading = useBoolean();
+  // const loading = useBoolean();
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -72,22 +69,22 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
     return 'error';
   };
 
-  const generateUrl = async () => {
-    try {
-      loading.onTrue();
+  // const generateUrl = async () => {
+  //   try {
+  //     loading.onTrue();
 
-      await axiosInstance.post(endpoints.ticketType.generateUrl, {
-        eventId: id,
-        ticketTypeId,
-      });
-    } catch (error) {
-      enqueueSnackbar(error?.message, {
-        variant: 'error',
-      });
-    } finally {
-      loading.onFalse();
-    }
-  };
+  //     await axiosInstance.post(endpoints.ticketType.generateUrl, {
+  //       eventId: id,
+  //       ticketTypeId,
+  //     });
+  //   } catch (error) {
+  //     enqueueSnackbar(error?.message, {
+  //       variant: 'error',
+  //     });
+  //   } finally {
+  //     loading.onFalse();
+  //   }
+  // };
 
   return (
     <>
@@ -137,14 +134,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
 
       <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)}>
         <DialogTitle>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h4">Ticket Details</Typography>
-            {!ticketUrl && (
-              <LoadingButton variant="outlined" onClick={generateUrl} loading={loading.value}>
-                Generate URL
-              </LoadingButton>
-            )}
-          </Stack>
+          <Typography variant="h4">Ticket Details</Typography>
         </DialogTitle>
         <DialogContent>
           <TextField
