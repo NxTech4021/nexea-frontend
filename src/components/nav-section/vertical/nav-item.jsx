@@ -253,26 +253,26 @@ const StyledNavItem = styled(ListItemButton, {
       '& .icon': {
         ...baseStyles.icon,
       },
-      '& .sub-icon': {
-        ...baseStyles.icon,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        '&:before': {
-          content: '""',
-          width: 4,
-          height: 4,
-          borderRadius: '50%',
-          backgroundColor: theme.palette.text.disabled,
-          transition: theme.transitions.create(['transform'], {
-            duration: theme.transitions.duration.shorter,
-          }),
-          ...(active && {
-            transform: 'scale(2)',
-            backgroundColor: theme.palette.primary.main,
-          }),
-        },
-      },
+      // '& .sub-icon': {
+      //   ...baseStyles.icon,
+      //   display: 'flex',
+      //   alignItems: 'center',
+      //   justifyContent: 'center',
+      //   // '&:before': {
+      //   //   content: '""',
+      //   //   width: 4,
+      //   //   height: 4,
+      //   //   borderRadius: '50%',
+      //   //   backgroundColor: theme.palette.text.disabled,
+      //   //   transition: theme.transitions.create(['transform'], {
+      //   //     duration: theme.transitions.duration.shorter,
+      //   //   }),
+      //   //   ...(active && {
+      //   //     transform: 'scale(2)',
+      //   //     backgroundColor: theme.palette.primary.main,
+      //   //   }),
+      //   // },
+      // },
       '& .label': {
         ...baseStyles.label,
       },
@@ -287,6 +287,7 @@ const StyledNavItem = styled(ListItemButton, {
       },
       ...(active && {
         color: theme.palette.text.primary,
+        backgroundColor: theme.palette.action.hover,
       }),
     }),
 

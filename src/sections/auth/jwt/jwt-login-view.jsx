@@ -67,8 +67,6 @@ export default function JwtLoginView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 3 }}>
-      <Typography variant="h4">Welcome back!</Typography>
-
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">New user?</Typography>
 
@@ -76,7 +74,7 @@ export default function JwtLoginView() {
           component={RouterLink}
           href={paths.auth.jwt.register}
           variant="subtitle2"
-          color="black"
+          sx={{ color: (theme) => theme.palette.text.secondary }}
         >
           Create an account
         </Link>
@@ -88,12 +86,12 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="email" label="Email address" placeholder="Enter your emaill address" />
+      <RHFTextField name="email" placeholder="Email address" outerLabel="Email" />
 
       <RHFTextField
         name="password"
-        label="Password"
-        placeholder="Enter your password"
+        outerLabel="Password"
+        placeholder="Password"
         type={password.value ? 'text' : 'password'}
         InputProps={{
           endAdornment: (
@@ -111,7 +109,7 @@ export default function JwtLoginView() {
         component={RouterLink}
         color="inherit"
         underline="always"
-        sx={{ alignSelf: 'flex-start' }}
+        sx={{ alignSelf: 'flex-start', color: (theme) => theme.palette.text.secondary }}
         href={paths.auth.jwt.forgotPassword}
       >
         Forgot password?
@@ -130,21 +128,9 @@ export default function JwtLoginView() {
     </Stack>
   );
 
-  const onClick = async () => {
-    try {
-      router.push(
-        '/ticket-cart/?eventId=aeebcbd8-ab45-4335-b5ee-f6dc27b172bc&ticketTypeId=86a08ce1-a411-40b9-ac89-c49fa09f8167'
-      );
-    } catch (error) {
-      enqueueSnackbar(error?.message, {
-        variant: 'error',
-      });
-    }
-  };
-
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Card sx={{ p: 3, borderRadius: 2, boxShadow: 20 }}>
+      <Card sx={{ p: 3, borderRadius: 1 }}>
         {renderHead}
 
         {/* <Alert severity="info" sx={{ mb: 3 }}>

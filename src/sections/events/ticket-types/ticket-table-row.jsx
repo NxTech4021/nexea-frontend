@@ -100,7 +100,13 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>RM {price.toFixed(2)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {new Intl.NumberFormat('en-MY', {
+            minimumFractionDigits: 2,
+            style: 'currency',
+            currency: 'MYR',
+          }).format(price)}
+        </TableCell>
 
         <TableCell>
           <Label variant="soft" color={getStatusColor(isActive)}>

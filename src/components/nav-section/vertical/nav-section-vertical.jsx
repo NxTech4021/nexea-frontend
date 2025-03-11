@@ -45,7 +45,7 @@ function Group({ subheader, items, slotProps }) {
   ));
 
   return (
-    <Stack sx={{ px: 2 }}>
+    <Stack px={2}>
       {subheader ? (
         <>
           <ListSubheader

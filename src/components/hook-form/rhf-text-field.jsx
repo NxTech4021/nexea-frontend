@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import TextField from '@mui/material/TextField';
-import { Stack, InputLabel } from '@mui/material';
+import { Stack, InputLabel, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -11,7 +11,9 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
 
   return (
     <Stack width={1} spacing={1} alignItems="start">
-      <InputLabel required={other?.required}>{other?.label}</InputLabel>
+      <InputLabel required={other?.required}>
+        <Typography variant="subtitle2">{other?.outerLabel}</Typography>
+      </InputLabel>
       <Controller
         name={name}
         control={control}

@@ -1,13 +1,12 @@
 /* eslint-disable react/prop-types */
 import * as yup from 'yup';
 import isEqual from 'lodash/isEqual';
+import { useForm } from 'react-hook-form';
 import { enqueueSnackbar } from 'notistack';
 // import { Color } from '@tiptap/extension-color';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller } from 'react-hook-form';
 import { useState, useEffect, useCallback } from 'react';
 
-import { LoadingButton } from '@mui/lab';
 import {
   Tab,
   Box,
@@ -15,27 +14,13 @@ import {
   Card,
   Table,
   alpha,
-  Stack,
-  Dialog,
   Button,
-  Select,
-  Switch,
   Tooltip,
-  MenuItem,
   Container,
   TableBody,
-  TextField,
   IconButton,
-  InputLabel,
-  DialogTitle,
-  FormControl,
-  ListItemText,
-  DialogContent,
-  DialogActions,
   TableContainer,
-  FormHelperText,
   CircularProgress,
-  FormControlLabel,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -51,7 +36,6 @@ import { createTicketType, useGetAllTicketTypes } from 'src/api/ticket-type';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { RHFTextField } from 'src/components/hook-form';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import FormProvider from 'src/components/hook-form/form-provider';
@@ -67,6 +51,7 @@ import {
 } from 'src/components/table';
 
 import TicketTableRow from '../ticket-table-row';
+import CreateTicketTypeDialog from '../dialog/create';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
 
@@ -92,52 +77,19 @@ const schema = yup.object().shape({
   eventId: yup.string().required('Event is required'),
   type: yup.string().required('Type is required'),
   category: yup.string().required('Category is required'),
-  price: yup.number().required('Price is required').positive('Price must be a positive number'),
+  price: yup.string().required('Price is required'),
+  title: yup.string().required('Ticket title is required'),
   quantity: yup
     .number()
     .required('Quantity is required')
     .positive('Quantity must be a positive number'),
 });
 
-const RenderSelectField = ({ name, control, label, options, required }) => (
-  <Stack width={1} spacing={1}>
-    <InputLabel required={required}>{label}</InputLabel>
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <FormControl fullWidth error={!!fieldState.error}>
-          <Select
-            {...field}
-            displayEmpty
-            MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
-            renderValue={(selected) =>
-              options.find((item) => item.id === selected)?.name || selected || 'Select an option'
-            }
-          >
-            <MenuItem disabled value="">
-              <em>Select an option</em>
-            </MenuItem>
-            {options.map((option) => (
-              <MenuItem key={option?.id || option} value={option?.id || option}>
-                {option.name || option}
-              </MenuItem>
-            ))}
-          </Select>
-          {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
-        </FormControl>
-      )}
-    />
-  </Stack>
-);
-
-const ticketTypes = ['Early Bird', 'Standard'];
-const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
-
 export default function TicketTypeView({ data }) {
   const table = useTable();
 
   const confirm = useBoolean();
+
   const { data: ticketTypesData, isLoading, mutate } = useGetAllTicketTypes();
 
   const [tableData, setTableData] = useState([]);
@@ -200,8 +152,9 @@ export default function TicketTypeView({ data }) {
       type: '',
       category: '',
       description: '',
+      title: '',
       price: '',
-      quantity: '',
+      quantity: null,
       validity: '',
       requirement: {
         minimumTicketPerOrder: '',
@@ -211,12 +164,12 @@ export default function TicketTypeView({ data }) {
     },
   });
 
-  const { handleSubmit, control } = methods;
+  const { handleSubmit } = methods;
 
   const onSubmit = handleSubmit(async (item) => {
     try {
       const newTicketType = {
-        title: `${item.category} - ${item.type}`,
+        title: item.title,
         type: item.type,
         eventId: item.eventId,
         category: item.category,
@@ -230,7 +183,6 @@ export default function TicketTypeView({ data }) {
 
       await createTicketType(newTicketType);
       mutate();
-      // setTableData((prevData) => [...prevData, newTicketType]);
       setOpenDialog(false);
       enqueueSnackbar('Ticket type created successfully!', { variant: 'success' });
     } catch (error) {
@@ -318,11 +270,12 @@ export default function TicketTypeView({ data }) {
           <Button
             variant="contained"
             onClick={handleCreateTicketType}
-            startIcon={<Iconify icon="si:add-fill" />}
+            startIcon={<Iconify icon="f7:tickets-fill" />}
           >
-            Create Ticket Type
+            Create New Ticket Type
           </Button>
         </Box>
+
         <Card>
           <Tabs
             value={filters.status}
@@ -449,173 +402,14 @@ export default function TicketTypeView({ data }) {
         </Card>
       </Container>
 
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        PaperProps={{
-          sx: {
-            width: '-webkit-fill-available',
-            borderRadius: 1,
-            bgcolor: (theme) => theme.palette.background.default,
-          },
-        }}
-      >
-        <FormProvider methods={methods} onSubmit={onSubmit}>
-          <DialogTitle>
-            <ListItemText
-              primary="Create Ticket Type"
-              secondary="Easily set up your ticket type now!"
-              primaryTypographyProps={{ variant: 'h5' }}
-            />
-          </DialogTitle>
-
-          <DialogContent>
-            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
-              <Stack width={1} direction="row" spacing={1}>
-                <RenderSelectField
-                  name="eventId"
-                  control={control}
-                  label="Event Name"
-                  options={eventsData.events.map((event) => ({ id: event.id, name: event.name }))}
-                  required
-                />
-                <Stack spacing={1} width={1}>
-                  <Controller
-                    name="isActive"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={<Switch {...field} checked={field.value} />}
-                        label={`Ticket is ${field.value ? 'Active' : 'Inactive'}`}
-                      />
-                    )}
-                  />
-                </Stack>
-              </Stack>
-              <RenderSelectField
-                name="type"
-                control={control}
-                label="Type"
-                options={ticketTypes}
-                required
-              />
-              <RenderSelectField
-                name="category"
-                control={control}
-                label="Category"
-                options={ticketCategories}
-                required
-              />
-              <Box
-                display="grid"
-                gridTemplateColumns={{ xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)' }}
-                width={1}
-                gap={1}
-              >
-                <Stack spacing={1} width={1}>
-                  <InputLabel required>Price</InputLabel>
-
-                  <Controller
-                    name="price"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        placeholder="Price (RM)"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!fieldState.error}
-                        helperText={fieldState.error ? fieldState.error.message : ''}
-                      />
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={1} width={1}>
-                  <InputLabel required>Quantity</InputLabel>
-
-                  <Controller
-                    name="quantity"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        placeholder="Quantity"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!fieldState.error}
-                        helperText={fieldState.error ? fieldState.error.message : ''}
-                      />
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={1} width={1}>
-                  <InputLabel required={false}>Minimum tickets per order</InputLabel>
-
-                  <Controller
-                    name="requirement.minimumTicketPerOrder"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        placeholder="No minimum"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!fieldState.error}
-                        helperText={fieldState.error ? fieldState.error.message : ''}
-                      />
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={1} width={1}>
-                  <InputLabel required={false}>Maximum tickets per order</InputLabel>
-
-                  <Controller
-                    name="requirement.maximumTicketPerOrder"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        placeholder="No maximum"
-                        variant="outlined"
-                        fullWidth
-                        required
-                        error={!!fieldState.error}
-                        helperText={fieldState.error ? fieldState.error.message : ''}
-                      />
-                    )}
-                  />
-                </Stack>
-              </Box>
-
-              <Stack spacing={1} width={1}>
-                <InputLabel required>Description</InputLabel>
-
-                <RHFTextField
-                  name="description"
-                  placeholder="Ticket Description"
-                  multiline
-                  rows={4}
-                />
-              </Stack>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button variant="outlined" onClick={handleCloseDialog} sx={{ fontWeight: 400 }}>
-              Cancel
-            </Button>
-            <LoadingButton onClick={onSubmit} variant="contained" sx={{ fontWeight: 400 }}>
-              Submit
-            </LoadingButton>
-          </DialogActions>
-        </FormProvider>
-      </Dialog>
+      <FormProvider methods={methods} onSubmit={onSubmit}>
+        <CreateTicketTypeDialog
+          eventsData={eventsData}
+          onClose={handleCloseDialog}
+          openDialog={openDialog}
+          onSubmit={onSubmit}
+        />
+      </FormProvider>
 
       <ConfirmDialog
         open={confirm.value}

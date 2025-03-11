@@ -58,6 +58,7 @@
     "react-hook-form": "^7.47.0",
     "react-hot-toast": "^2.4.1",
     "react-lazy-load-image-component": "^1.6.3",
+    "react-number-format": "^5.4.3",
     "react-router": "^6.16.0",
     "react-router-dom": "^6.16.0",
     "react-toastify": "^10.0.5",

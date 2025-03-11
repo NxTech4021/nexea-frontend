@@ -34,29 +34,19 @@ export default function NavMini() {
       />
 
       <Stack
-        // sx={{
-        //   pb: 2,
-        //   height: 1,
-        //   position: 'fixed',
-        //   width: NAV.W_MINI,
-        //   borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
-        //   ...hideScroll.x,
-        // }}
         sx={{
-          // height: 1,
-          // zIndex: 10000,
           zIndex: 2,
           position: 'fixed',
           left: 10,
           width: NAV.W_MINI,
-          // borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
+
           border: 1,
           borderRadius: 2,
           borderColor: (theme) => theme.palette.divider,
           height: '95vh',
           top: '50%',
           transform: 'translateY(-50%)',
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'black' : 'whitesmoke'),
+
           ...hideScroll.x,
         }}
       >

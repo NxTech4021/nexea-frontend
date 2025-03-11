@@ -1,28 +1,7 @@
-const attendees = [
-  {
-    email: '',
-    name: '',
-    ticketTypeId: 2,
-  },
-  {
-    email: '',
-    name: '',
-    ticketTypeId: 1,
-  },
-  {
-    email: '',
-    name: '',
-    ticketTypeId: 2,
-  },
-];
+const price = 'RM 20,000.00';
 
-const handleTicketHolder = () => {
-  const groupedAttendees = attendees.reduce((acc, { ticketTypeId }) => {
-    acc[ticketTypeId] = (acc[ticketTypeId] || 0) + 1;
-    return acc;
-  }, {});
-
-  console.log(groupedAttendees);
+const formatPrice = (price) => {
+  return price.split(' ')[1];
 };
 
-handleTicketHolder('2');
+console.log(parseFloat(formatPrice(price)));

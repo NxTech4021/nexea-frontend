@@ -1,9 +1,11 @@
 /* eslint-disable react/prop-types */
 import useSWR from 'swr';
 import React from 'react';
+import * as yup from 'yup';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -60,6 +62,12 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
+const schema = yup.object().shape({
+  eventName: yup.string().required('Event name is required'),
+  personInCharge: yup.string().required('Person in charge si required'),
+  eventDate: yup.date().required('Date is required'),
+});
+
 const EventCreateDialog = ({ open, onClose }) => {
   const { data, isLoading } = useSWR(endpoints.users.list, fetcher, {
     revalidateOnMount: true,
@@ -70,6 +78,7 @@ const EventCreateDialog = ({ open, onClose }) => {
   const { mutate } = useGetAllEvents();
 
   const methods = useForm({
+    resolver: yupResolver(schema),
     defaultValues: {
       eventName: '',
       personInCharge: '',
