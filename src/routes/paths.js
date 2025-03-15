@@ -38,6 +38,7 @@ export const paths = {
     },
     ticketType: {
       root: `${ROOTS.DASHBOARD}/ticket-type`,
+      addOn: `${ROOTS.DASHBOARD}/ticket-type/addOn`,
     },
     discountCode: {
       root: `${ROOTS.DASHBOARD}/discount-code`,

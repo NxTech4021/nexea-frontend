@@ -115,4 +115,3 @@ NavVertical.propTypes = {
   openNav: PropTypes.bool,
   onCloseNav: PropTypes.func,
 };
-
