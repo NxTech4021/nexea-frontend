@@ -8,6 +8,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 
 import Profile from 'src/sections/profile/view';
 import EventAttendee from 'src/sections/events/create/event-attendee';
+import { element } from 'prop-types';
 
 // ----------------------------------------------------------------------
 
@@ -25,6 +26,8 @@ const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifica
 const DiscountCodeView = lazy(() => import('src/pages/dashboard/event/discount-code/view'));
 const OrderView = lazy(() => import('src/pages/dashboard/event/orders/view'));
 const TicketTypeView = lazy(() => import('src/pages/dashboard/event/ticket-types/view'));
+
+const AddOnView = lazy(() => import('src/pages/dashboard/event/ticket-types/add-on/view'));
 
 const EventDetail = lazy(() => import('src/pages/dashboard/event/details/view'));
 
@@ -57,9 +60,6 @@ export const dashboardRoutes = [
           { element: <Event />, index: true },
           { path: ':id', element: <EventDetail /> },
           { path: 'create', element: <CreateEvent /> },
-          { path: 'discount-code', element: <DiscountCodeView /> },
-          { path: 'ticket-type', element: <TicketTypeView /> },
-          { path: 'order', element: <OrderView /> },
           {
             path: 'qr/:eventId',
             element: <QrReader />,
@@ -68,6 +68,15 @@ export const dashboardRoutes = [
           { path: 'notifcationStatus/:id', element: <NotificationStatus /> },
         ],
       },
+      {
+        path: 'ticket-type',
+        children: [
+          { element: <TicketTypeView />, index: true },
+          { path: 'addOn', element: <AddOnView /> },
+        ],
+      },
+      { path: 'discount-code', element: <DiscountCodeView /> },
+      { path: 'order', element: <OrderView /> },
       {
         path: 'templates',
         children: [{ element: <WhatsappTemplate />, index: true }],

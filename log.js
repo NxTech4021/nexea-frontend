@@ -1,9 +1,7 @@
-const testBind = (a) => {
-  console.log(a);
+const price = 'RM 20,000.00';
+
+const formatPrice = (price) => {
+  return price.split(' ')[1];
 };
 
-const b = testBind.bind(this, 30);
-
-const z = b.bind(this, 10);
-
-z();
+console.log(parseFloat(formatPrice(price)));

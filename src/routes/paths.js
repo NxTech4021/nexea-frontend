@@ -30,12 +30,21 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/events`,
       create: `${ROOTS.DASHBOARD}/events/create`,
       discountCode: `${ROOTS.DASHBOARD}/events/discount-code`,
-      ticketType: `${ROOTS.DASHBOARD}/events/ticket-type`,
       order: `${ROOTS.DASHBOARD}/events/order`,
       qr: `${ROOTS.DASHBOARD}/events/qr`,
       attendees: `${ROOTS.DASHBOARD}/events/attendees`,
       notification: (id) => `${ROOTS.DASHBOARD}/events/notifcationStatus/${id}`,
       details: (id) => `${ROOTS.DASHBOARD}/events/${id}`,
+    },
+    ticketType: {
+      root: `${ROOTS.DASHBOARD}/ticket-type`,
+      addOn: `${ROOTS.DASHBOARD}/ticket-type/addOn`,
+    },
+    discountCode: {
+      root: `${ROOTS.DASHBOARD}/discount-code`,
+    },
+    order: {
+      root: `${ROOTS.DASHBOARD}/order`,
     },
     whatsappTemplate: {
       root: `${ROOTS.DASHBOARD}/templates`,

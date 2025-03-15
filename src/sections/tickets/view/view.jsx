@@ -1,71 +1,63 @@
-import { enqueueSnackbar } from 'notistack';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import React, { useMemo, useEffect } from 'react';
 
-import { Box, Grid, Stack, Container, Typography, CircularProgress } from '@mui/material';
+import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
-import { getCookie } from 'src/utils/get-cookie';
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { useCartStore } from 'src/utils/store';
 
 import { useGetCart } from 'src/api/cart/cart';
 
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
+import { useGetEvent } from '../hooks/use-get-event';
+import TicketPaymentCard from '../ticket-payment-card';
 import TicketSelectionCard from '../ticket-selection-card';
+import TicketInformationCard from '../ticket-information-card';
 
-const TicketPurchaseView = () => {
-  const searchParams = new URLSearchParams(window.location.search);
-  localStorage.setItem('eventId', searchParams.get('eventId'));
-  localStorage.setItem('ticketTypeId', searchParams.get('ticketTypeId'));
+const TicketPurchaseView = ({ eventIdParams }) => {
+  localStorage.setItem('eventId', eventIdParams);
+  const mdDown = useResponsive('down', 'md');
 
-  const ticketStorage = JSON.parse(localStorage.getItem('cart'));
+  const {
+    eventData,
+    eventLoading: isEventLoading,
+    eventMutate: mutate,
+  } = useGetEvent(eventIdParams);
 
-  const ticketTypeId = localStorage.getItem('ticketTypeId');
-  const eventId = localStorage.getItem('eventId');
-
-  // get cartSessionId from browser cookie set by the server
-  const cartSessionId = getCookie();
-
-  const { data, isLoading, mutate, error } = useGetCart(cartSessionId, eventId, ticketTypeId);
+  const { data: cartData, isLoading: cartLoading, mutate: cartMutate } = useGetCart();
 
   const loading = useBoolean();
 
-  const createNewSession = useCallback(async () => {
-    loading.onTrue();
-    try {
-      return await axiosInstance.post(endpoints.cart.createSession, {
-        ticketTypeId,
-        eventId,
-      });
-    } catch (err) {
-      return enqueueSnackbar('Error creating session', {
-        variant: 'error',
-      });
-    } finally {
-      loading.onFalse();
-    }
-  }, [ticketTypeId, eventId, loading]);
+  const setTickets = useCartStore((state) => state.setTickets);
 
   useEffect(() => {
-    if (!cartSessionId) {
-      createNewSession();
+    if (eventData && eventData.ticketType.length) {
+      setTickets(
+        eventData.ticketType.map((item) => ({
+          ...item,
+          selectedQuantity: 0,
+          subTotal: 0,
+        }))
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartSessionId]);
+  }, [eventData, setTickets]);
 
   const memoizedValue = useMemo(
     () => ({
-      ticketTypeId,
-      eventId,
-      cartSessionId,
-      data,
+      eventData,
+      eventId: eventIdParams,
+      data: cartData,
       mutate,
+      cartMutate,
+      cartLoading,
     }),
-    [ticketTypeId, eventId, cartSessionId, data, mutate]
+    [eventIdParams, eventData, cartData, mutate, cartMutate, cartLoading]
   );
 
-  if (loading.value || isLoading) {
+  if (loading.value || isEventLoading || cartLoading) {
     return (
       <Box
         sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
@@ -82,77 +74,83 @@ const TicketPurchaseView = () => {
     );
   }
 
-  if (!isLoading && error) {
+  if (!eventData) {
     return (
-      <Typography
-        variant="subtitle1"
-        color="text.secondary"
+      <Stack
         sx={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
         }}
+        alignItems="center"
+        spacing={1}
       >
-        Session ID not found in database.
-      </Typography>
+        <Typography variant="h1" color="text.secondary">
+          Whoops, the page or event you are looking for was not found.
+        </Typography>
+        <Button variant="outlined">Go back</Button>
+      </Stack>
     );
   }
 
-  if (!isLoading && !data) {
-    return <Typography sx={{ textAlign: 'center' }}>No data found.</Typography>;
+  if (eventData?.status !== 'live') {
+    return (
+      <Stack
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+        alignItems="center"
+        spacing={1}
+      >
+        <Typography variant="subtitle1" color="text.secondary">
+          Event is temporarily closed
+        </Typography>
+        <Button variant="outlined">Go back</Button>
+      </Stack>
+    );
   }
 
   return (
     <Cart.Provider value={memoizedValue}>
       <TickerPurchaseHeader />
-
-      <Container sx={{ bgcolor: '#F4F4F4' }} maxWidth="xl">
-        <Box
-          // px={{ xs: 2, lg: 15 }}
-          mx={{ xs: 2, lg: 15 }}
-          sx={{
-            overflow: 'hidden',
-            py: 12,
-            bgcolor: 'red',
-          }}
-        >
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={8}>
-              <Stack spacing={5} sx={{ gridColumn: { md: 'span 2' } }}>
-                <TicketSelectionCard />
-
-                <TicketInformationCard />
-              </Stack>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TicketPaymentCard />
-            </Grid>
-          </Grid>
-        </Box>
-      </Container>
-
-      {/* <Box
+      <Box minHeight={76} />
+      <Box
+        px={{ lg: 15 }}
+        bgcolor="#F4F4F4"
+        overflow="auto"
         sx={{
-          position: 'fixed',
-          bottom: 0,
-          bgcolor: 'white',
-          width: 1,
-          p: 2,
+          height: `calc(100vh - ${76}px)`,
+          scrollbarWidth: 'thin',
+          scrollBehavior: 'smooth',
+          scrollbarColor: '#000000 white',
         }}
       >
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{
-            borderRadius: 0.5,
-          }}
-        >
-          Proceed to payment
-        </Button>
-      </Box> */}
+        {!mdDown ? (
+          <Grid container spacing={2} minHeight={1} p={2}>
+            <Grid size={{ xs: 12, md: 8 }} position="relative">
+              {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TicketPaymentCard cartData={cartData} mutate={cartMutate} />
+            </Grid>
+          </Grid>
+        ) : (
+          <Box height={`calc(100vh - ${76}px)`} p={1}>
+            {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+          </Box>
+        )}
+      </Box>
     </Cart.Provider>
   );
 };
 
 export default TicketPurchaseView;
+
+TicketPurchaseView.propTypes = {
+  eventIdParams: PropTypes.string,
+};
+

@@ -32,7 +32,7 @@ export const dataMapping = {
   speaker: 'Speaker',
 };
 
-export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
+export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
   const {
     event: { name, id },
     id: ticketTypeId,
@@ -217,7 +217,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
   );
 }
 
-TicketTableRow.propTypes = {
+AddOnTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onSelectRow: PropTypes.func,
   row: PropTypes.object,
