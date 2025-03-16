@@ -1,17 +1,22 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
 import * as yup from 'yup';
+import { toast } from 'sonner';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, useFieldArray } from 'react-hook-form';
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Card,
   Stack,
   alpha,
+  Button,
   Divider,
   MenuItem,
   Collapse,
+  TextField,
   Typography,
   IconButton,
   ListItemText,
@@ -19,8 +24,9 @@ import {
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
-import { fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher } from 'src/utils/axios';
 
 import Image from 'src/components/image';
 import Label from 'src/components/label';
@@ -64,19 +70,42 @@ const defaultAttendee = {
 
 const TicketInformationCard = () => {
   const collapse = useBoolean();
+  const anotherCollapse = useBoolean();
   const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
+  const mdDown = useResponsive('down', 'md');
+  const [discountCode, setDiscountCode] = useState(null);
 
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
-  const { data, isLoading: cartLoading } = useSWR('/api/cart/', fetcher);
+  const { data, isLoading: cartLoading, mutate } = useSWR('/api/cart/', fetcher);
 
   const isCartExpired = useMemo(() => dayjs(data.expiryDate).isBefore(dayjs(), 'date'), [data]);
 
   const ticketTypes = useMemo(() => data?.cartItem, [data]);
+
+  const handleRedeemDiscount = async () => {
+    if (!discountCode) {
+      toast.error('Please enter a discount code');
+      return;
+    }
+
+    try {
+      const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
+      toast.success(res?.data?.message);
+      mutate();
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+
+  const subTotal = useMemo(
+    () => data?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
+    [data]
+  );
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -540,12 +569,13 @@ const TicketInformationCard = () => {
 
   return (
     <Stack
+      component={Card}
       sx={{
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
-        color: 'whitesmoke',
-        bgcolor: 'white',
+        // color: 'whitesmoke',
+        // bgcolor: 'white',
       }}
     >
       <Box sx={{ bgcolor: 'black', p: 2 }}>
@@ -570,7 +600,6 @@ const TicketInformationCard = () => {
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
           scrollBehavior: 'smooth',
-          color: 'black',
         }}
       >
         {isCartExpired && 'Expired already'}
@@ -632,6 +661,227 @@ const TicketInformationCard = () => {
             </Typography>
           ))}
         </Stack>
+      )}
+
+      {mdDown && (
+        <Box
+          p={1}
+          mt="auto"
+          boxShadow={10}
+          sx={{
+            borderTop: 1.5,
+            borderColor: (theme) => theme.palette.divider,
+          }}
+        >
+          <>
+            <Collapse in={anotherCollapse.value} timeout="auto">
+              <Box sx={{ height: '55vh', p: 1 }} position="relative">
+                <Stack
+                  sx={{
+                    '& .MuiTypography-root': {
+                      fontSize: 14,
+                      fontWeight: 400,
+                    },
+                    textWrap: 'nowrap',
+                  }}
+                  mt={2}
+                  width={1}
+                  spacing={2}
+                  flexShrink={2}
+                  // color={grey[800]}
+                  flex={1}
+                  justifyContent="space-between"
+                >
+                  <Box>
+                    <Stack spacing={2}>
+                      {data?.cartItem.map((item) => (
+                        <Stack
+                          key={item.id}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography>{`${item.quantity} x ${item.ticketType.title}`}</Typography>
+                          <Typography>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(item.quantity * item.ticketType.price)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  <Stack spacing={2}>
+                    {data && (
+                      <Stack spacing={1}>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          spacing={1}
+                        >
+                          <TextField
+                            size="small"
+                            fullWidth
+                            placeholder="Enter Discount Code"
+                            value={discountCode}
+                            onChange={(e) =>
+                              setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                            }
+                          />
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleRedeemDiscount}
+                            sx={{ height: 36 }}
+                          >
+                            Apply
+                          </Button>
+                        </Stack>
+
+                        {!!data.discount && (
+                          <Stack maxWidth={200} spacing={1}>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <Iconify
+                                icon="lets-icons:check-fill"
+                                color="success.main"
+                                width={13}
+                              />
+                              <Typography variant="caption" fontSize={12} color="success">
+                                Discount code applied
+                              </Typography>
+                            </Stack>
+                            <Stack direction="row" justifyContent="space-between">
+                              <Typography variant="caption" fontSize={12}>
+                                {data.discount.code}
+                              </Typography>
+                              <Typography variant="caption" color="error" fontSize={12}>
+                                - {data.discount.value}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        )}
+                      </Stack>
+                    )}
+
+                    <Divider />
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>Subtotal:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(subTotal)}
+                      </Typography>
+                    </Stack>
+
+                    {data && (
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        gap={10}
+                        justifyContent="space-between"
+                      >
+                        <Typography>Discount</Typography>
+                        <Typography>
+                          -{' '}
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(data?.orderSummary?.discount)}
+                        </Typography>
+                      </Stack>
+                    )}
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>SST:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(11.94)}
+                      </Typography>
+                    </Stack>
+
+                    <Divider />
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                      sx={{
+                        '&  .MuiTypography-root': {
+                          fontSize: 20,
+                          fontWeight: 600,
+                        },
+                      }}
+                    >
+                      <Typography>Total:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(
+                          data?.orderSummary?.totalPrice
+                            ? data.orderSummary.totalPrice + 11.94
+                            : subTotal + 11.94
+                        )}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Collapse>
+
+            <Box my={1} onClick={() => anotherCollapse.onToggle()}>
+              <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
+                {anotherCollapse.value ? (
+                  <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
+                ) : (
+                  <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+                )}
+                <Typography
+                  variant="subtitle1"
+                  textAlign="end"
+                  fontSize={18}
+                  fontWeight={600}
+                  letterSpacing={-0.7}
+                >
+                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                    data?.orderSummary?.totalPrice && data.orderSummary.totalPrice + 11.94
+                  )}
+                </Typography>
+              </Stack>
+            </Box>
+          </>
+
+          <LoadingButton
+            variant="contained"
+            fullWidth
+            // loading={loading.value}
+            // onClick={handleCheckout}
+            // disabled={!totalTicketsQuantitySelected}
+            startIcon={
+              <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+            }
+          >
+            Proceed to payment
+          </LoadingButton>
+        </Box>
       )}
     </Stack>
   );

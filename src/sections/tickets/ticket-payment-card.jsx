@@ -1,19 +1,37 @@
 import { toast } from 'sonner';
-import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
-import { Box, Stack, Divider, Typography, ListItemText, TextField, Button } from '@mui/material';
+import {
+  Box,
+  Card,
+  Stack,
+  Button,
+  Divider,
+  Collapse,
+  TextField,
+  Typography,
+  ListItemText,
+} from '@mui/material';
 
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
+
+import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
-import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
-import { LoadingButton } from '@mui/lab';
 
-const TicketPaymentCard = ({ cartData, mutate }) => {
+import useGetCartData from './hooks/use-get-cart';
+
+const TicketPaymentCard = () => {
   const { tickets } = useCartStore();
   const [discountCode, setDiscountCode] = useState(null);
+  const mdDown = useResponsive('down', 'md');
+  const { data: cartData, cartMutate, handleCheckout } = useGetCartData();
+  const tixs = useCartStore((state) => state.tickets);
+  const collapse = useBoolean();
 
   const subTotal = useMemo(
     () =>
@@ -21,6 +39,11 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
       cartData?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
     [tickets, cartData]
   );
+
+  const totalTicketsQuantitySelected = useMemo(() => {
+    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
+    return ticketsTotal;
+  }, [tixs]);
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -31,32 +54,197 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
     try {
       const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
       toast.success(res?.data?.message);
-      mutate();
+      cartMutate();
     } catch (error) {
       toast.error(error);
     }
   };
 
+  if (mdDown) {
+    return (
+      <Box
+        component={Card}
+        p={1}
+        boxShadow={10}
+        minHeight={100}
+        sx={{
+          ...(mdDown && {
+            borderTop: 1.5,
+            boxShadow: 2,
+            borderColor: (theme) => theme.palette.divider,
+            borderRadius: '10px 10px 0 0',
+          }),
+        }}
+      >
+        <Collapse in={collapse.value} timeout="auto">
+          <Box sx={{ height: '30vh', p: 1 }} position="relative">
+            {!totalTicketsQuantitySelected ? (
+              <Typography
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }}
+                color="text.secondary"
+              >
+                No tickets selected
+              </Typography>
+            ) : (
+              <Stack height={1}>
+                <Typography mb={2} variant="subtitle2">
+                  Order Summary
+                </Typography>
+                <Stack
+                  spacing={1}
+                  flexGrow={1}
+                  sx={{
+                    '& .MuiTypography-root': {
+                      fontSize: 16,
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  {tixs
+                    .filter((ticket) => ticket.selectedQuantity > 0)
+                    .map((ticket) => (
+                      <Stack
+                        key={ticket.id}
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        // "&"
+                      >
+                        <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
+                        <Typography>
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(ticket.subTotal)}
+                        </Typography>
+                      </Stack>
+                    ))}
+                </Stack>
+                <Stack spacing={2}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    gap={10}
+                    justifyContent="space-between"
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: 16,
+                        fontWeight: 500,
+                      },
+                    }}
+                  >
+                    <Typography>SST:</Typography>
+                    <Typography>
+                      {Intl.NumberFormat('en-MY', {
+                        style: 'currency',
+                        currency: 'MYR',
+                      }).format(11.94)}
+                    </Typography>
+                  </Stack>
+                  <Divider />
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    gap={10}
+                    justifyContent="space-between"
+                    sx={{
+                      '&  .MuiTypography-root': {
+                        fontSize: 20,
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
+                    <Typography>Total:</Typography>
+                    <Typography>
+                      {Intl.NumberFormat('en-MY', {
+                        style: 'currency',
+                        currency: 'MYR',
+                      }).format(subTotal && subTotal + 11.94)}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Stack>
+            )}
+          </Box>
+        </Collapse>
+
+        <Box my={1} onClick={() => collapse.onToggle()}>
+          <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
+            {collapse.value ? (
+              <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
+            ) : (
+              <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+            )}
+            <Typography
+              variant="subtitle1"
+              textAlign="end"
+              fontSize={18}
+              fontWeight={600}
+              letterSpacing={-0.7}
+            >
+              {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                (subTotal && subTotal + 11.94) || 0
+              )}
+            </Typography>
+          </Stack>
+        </Box>
+
+        {cartData ? (
+          <LoadingButton
+            variant="contained"
+            startIcon={<Iconify icon="fluent:payment-16-filled" width={20} sx={{ mr: 1 }} />}
+            onClick={() => {
+              const a = document.createElement('a');
+              a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
+              // a.target = '_blank';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }}
+          >
+            Proceed to payment
+          </LoadingButton>
+        ) : (
+          <LoadingButton
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={handleCheckout}
+            startIcon={
+              <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+            }
+          >
+            Check out
+          </LoadingButton>
+        )}
+      </Box>
+    );
+  }
+
   return (
     <Box height={1} position="relative">
       <Stack
+        component={Card}
         sx={{
           borderRadius: 2,
           minHeight: 1,
           overflow: 'hidden',
-          color: 'whitesmoke',
-          bgcolor: 'white',
         }}
       >
         <Box sx={{ bgcolor: 'black', p: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Iconify icon="lets-icons:order-fill" width={30} />
+            <Iconify icon="lets-icons:order-fill" width={30} color="white" />
 
             <ListItemText
               primary="Order Summary"
               secondary="Review Your Order."
-              primaryTypographyProps={{ variant: 'subtitle1' }}
-              secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
+              primaryTypographyProps={{ variant: 'subtitle1', color: 'white' }}
+              secondaryTypographyProps={{ variant: 'caption', color: 'white' }}
             />
           </Stack>
         </Box>
@@ -64,7 +252,7 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
         {subTotal || cartData ? (
           <Stack
             sx={{
-              color: 'black',
+              // color: 'black',
               p: 2,
               px: 3,
               flex: 1,
@@ -82,7 +270,7 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
               width={1}
               spacing={2}
               flexShrink={2}
-              color={grey[800]}
+              // color={grey[800]}
               flex={1}
               justifyContent="space-between"
             >
@@ -233,7 +421,8 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
                     )}
                   </Typography>
                 </Stack>
-                {cartData && (
+
+                {cartData ? (
                   <LoadingButton
                     variant="contained"
                     startIcon={
@@ -250,6 +439,21 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
                   >
                     Proceed to payment
                   </LoadingButton>
+                ) : (
+                  <LoadingButton
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    onClick={handleCheckout}
+                    startIcon={
+                      <Iconify
+                        icon="material-symbols-light:shopping-cart-checkout-rounded"
+                        width={22}
+                      />
+                    }
+                  >
+                    Check out
+                  </LoadingButton>
                 )}
               </Stack>
             </Stack>
@@ -265,8 +469,3 @@ const TicketPaymentCard = ({ cartData, mutate }) => {
 };
 
 export default TicketPaymentCard;
-
-TicketPaymentCard.propTypes = {
-  cartData: PropTypes.object,
-  mutate: PropTypes.func,
-};

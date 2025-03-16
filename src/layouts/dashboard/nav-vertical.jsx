@@ -59,6 +59,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
         data={navData}
         slotProps={{
           currentRole: user?.role,
+          gap: 7,
         }}
       />
 

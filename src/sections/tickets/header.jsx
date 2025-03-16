@@ -33,6 +33,7 @@ const TickerPurchaseHeader = () => {
   const [expiryTime, setExpiryTime] = useState(null);
 
   const smUp = useResponsive('up', 'sm');
+  const mdDown = useResponsive('down', 'md');
   const timeOut = useBoolean();
   const extend = useBoolean();
 
@@ -106,15 +107,22 @@ const TickerPurchaseHeader = () => {
   return (
     <>
       <AppBar sx={{ bgcolor: '#000000', color: 'whitesmoke', p: 2 }} position="fixed">
-        <Stack direction="row" alignItems="center" px={{ sm: 5, md: 15 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          px={{ sm: 5, md: 15 }}
+          justifyContent={mdDown && 'space-between'}
+        >
           <Image src="/assets/nexea.png" width={120} />
-          <Stack flexGrow={1}>
-            <ListItemText
-              primary={eventData?.name}
-              secondary={dayjs(eventData?.date).format('LLL')}
-              sx={{ textAlign: 'center' }}
-            />
-          </Stack>
+          {!mdDown && (
+            <Stack flexGrow={1}>
+              <ListItemText
+                primary={eventData?.name}
+                secondary={dayjs(eventData?.date).format('LLL')}
+                sx={{ textAlign: 'center' }}
+              />
+            </Stack>
+          )}
 
           {cartData && (
             <Typography

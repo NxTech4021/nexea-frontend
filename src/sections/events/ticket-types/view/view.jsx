@@ -54,6 +54,7 @@ import TicketTableRow from '../ticket-table-row';
 import CreateTicketTypeDialog from '../dialog/create';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
+import { useAddOnsStore } from '../hooks/use-add-on';
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...TICKET_STATUS_OPTIONS];
 
@@ -89,6 +90,8 @@ export default function TicketTypeView({ data }) {
   const table = useTable();
 
   const confirm = useBoolean();
+
+  const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
   const { data: ticketTypesData, isLoading, mutate } = useGetAllTicketTypes();
 
@@ -179,6 +182,7 @@ export default function TicketTypeView({ data }) {
         quantity: item.quantity,
         minimumTicketPerOrder: parseInt(item.requirement.minimumTicketPerOrder, 10),
         maximumTicketPerOrder: parseInt(item.requirement.maximumTicketPerOrder, 10),
+        selectedAddOns: selectedAddOns?.length ? selectedAddOns : null,
       };
 
       await createTicketType(newTicketType);
@@ -468,4 +472,3 @@ function applyFilter({ inputData, comparator, filters }) {
 
   return inputData;
 }
-

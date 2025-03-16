@@ -90,6 +90,9 @@ export const endpoints = {
     edit: (id) => `/api/ticket-type/${id}`,
     delete: (id) => `/api/ticket-type/${id}`,
     generateUrl: '/api/ticket-type/generateUrl',
+    addOn: {
+      root: `/api/add-on`,
+    },
   },
   cart: {
     root: '/api/cart/',

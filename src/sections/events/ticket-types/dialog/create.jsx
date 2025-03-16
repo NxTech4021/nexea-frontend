@@ -183,7 +183,6 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                   control={control}
                   render={({ field, fieldState: { error } }) => (
                     <NumericFormat
-                      // {...field}
                       customInput={TextField}
                       thousandSeparator
                       prefix="RM "

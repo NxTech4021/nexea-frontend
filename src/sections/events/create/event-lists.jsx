@@ -94,8 +94,6 @@ const EventLists = ({ query }) => {
 
   const { data, isLoading, error: errorEvents } = useGetAllEvents();
 
-  console.log(data);
-
   const notFound = !data?.events?.length;
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -245,6 +243,7 @@ const EventLists = ({ query }) => {
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>
                 Actions
               </TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -435,6 +434,20 @@ const EventLists = ({ query }) => {
                         </MenuItem>
                       </Menu>
                     </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => {
+                        const b = document.createElement('a');
+                        b.href = `http://localhost:81/event/${event.id}`;
+                        b.target = '_blank';
+                        document.body.appendChild(b);
+                        b.click();
+                        document.body.removeChild(b);
+                      }}
+                    >
+                      Cart View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

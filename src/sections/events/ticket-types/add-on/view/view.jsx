@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { isEqual } from 'lodash';
 import React, { useState, useCallback } from 'react';
 
@@ -17,6 +18,8 @@ import {
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+
+import { fetcher, endpoints } from 'src/utils/axios';
 
 import { TICKET_STATUS_OPTIONS } from 'src/_mock/_ticketTypes';
 
@@ -60,10 +63,13 @@ const AddOnView = () => {
 
   const [filters, setFilters] = useState([]);
   const [tableData, setTableData] = useState([]);
+
+  useSWR(endpoints.ticketType.addOn.root, fetcher, { onSuccess: (data) => setTableData(data) });
+
   const create = useBoolean();
 
   const dataFiltered = applyFilter({
-    inputData: [],
+    inputData: tableData || [],
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });

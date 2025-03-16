@@ -72,7 +72,6 @@ function Group({ subheader, items, slotProps }) {
           >
             {subheader}
           </ListSubheader>
-
           <Collapse in={open}>{renderContent}</Collapse>
         </>
       ) : (

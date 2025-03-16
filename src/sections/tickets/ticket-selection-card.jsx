@@ -6,12 +6,14 @@ import {
   Box,
   Stack,
   alpha,
+  Grid2,
+  Divider,
+  Collapse,
   Typography,
   IconButton,
   ListItemText,
   CircularProgress,
-  Collapse,
-  Divider,
+  Card,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -37,47 +39,16 @@ const TicketSelectionCard = () => {
 
   const tixs = useCartStore((state) => state.tickets);
 
-  const { eventData, mutate: eventMutate, cartMutate } = useGetCartData();
+  const { eventData, mutate: eventMutate, cartMutate, handleCheckout } = useGetCartData();
 
   const subTotal = useMemo(
     () => tixs.reduce((acc, tix) => acc + tix.selectedQuantity * tix.price, 0),
     [tixs]
   );
 
-  const totalTicketsQuantitySelected = useMemo(() => {
-    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
-    return ticketsTotal;
-  }, [tixs]);
-
   const updateTics = useCartStore((state) => state.updateTickets);
 
   const loading = useBoolean();
-
-  const handleCheckout = async () => {
-    try {
-      loading.onTrue();
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Filter only selected tickets
-      const tickets = tixs.filter((tix) => tix.selectedQuantity !== 0);
-
-      await axiosInstance.post('/api/cart/checkout', {
-        tickets,
-        eventId: eventData.id,
-      });
-      toast.info('Your cart is ready!');
-      cartMutate();
-    } catch (error) {
-      if (error?.ticketId) {
-        setUnavailableTicket(error?.ticketId);
-      }
-      toast.error(error?.message);
-    } finally {
-      loading.onFalse();
-      eventMutate();
-    }
-  };
 
   const tickets = tixs.map((ticket) => {
     if (!ticket) return null;
@@ -272,170 +243,223 @@ const TicketSelectionCard = () => {
       //   </Box>
       // </Box>
 
-      <Box
+      <Grid2
         sx={{
-          bgcolor: '#EEEEEE',
+          // bgcolor: '#EEEEEE',
           minHeight: 67,
           borderRadius: 1.5,
-          p: 5,
+          border: 1,
+          borderColor: 'divider',
+          p: 2,
+          px: 5,
           position: 'relative',
-          ':before': {
-            content: "''",
-            position: 'absolute',
-            bgcolor: 'white',
-            width: 40,
-            height: 40,
-            left: -28,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            borderRadius: '50%',
-          },
-          ':after': {
-            content: "''",
-            position: 'absolute',
-            bgcolor: 'white',
-            width: 40,
-            height: 40,
-            right: -28,
-            borderRadius: '50%',
-            top: '50%',
-            transform: 'translateY(-50%)',
-          },
+          overflow: 'hidden',
+
+          // ':before': {
+          //   content: "''",
+          //   position: 'absolute',
+          //   // bgcolor: 'white',
+          //   border: 1,
+          //   borderColor: 'divider',
+          //   width: 40,
+          //   height: 40,
+          //   left: -28,
+          //   top: '50%',
+          //   transform: 'translateY(-50%)',
+          //   borderRadius: '50%',
+          //   clipPath: 'circle(50%)',
+          // },
+          // ':after': {
+          //   content: "''",
+          //   position: 'absolute',
+          //   border: 1,
+          //   borderColor: 'divider',
+          //   // bgcolor: 'white',
+          //   width: 40,
+          //   height: 40,
+          //   right: -28,
+          //   borderRadius: '50%',
+          //   top: '50%',
+          //   transform: 'translateY(-50%)',
+          // },
         }}
+        size={{ xs: 12, md: 6 }}
       >
-        <Stack
+        {/* <Stack
           direction="row"
           alignItems={!smDown ? 'center' : 'end'}
           justifyContent="space-between"
-        >
-          <Stack spacing={2.5}>
-            <ListItemText
-              primary={ticket.title}
-              secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
-              slotProps={{
-                primary: {
-                  fontWeight: 600,
-                  letterSpacing: -0.9,
-                  fontSize: 20,
-                  color: '#00000',
-                },
-                secondary: {
-                  variant: 'caption',
-                  fontWeight: 500,
-                  fontSize: 14,
-                  letterSpacing: -0.9,
-                  color: '#606060',
-                  maxWidth: 300,
-                  whiteSpace: 'pretty',
-                },
-              }}
-            />
-            <ListItemText
-              primary="Price"
-              secondary={Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                ticket.price
-              )}
-              slotProps={{
-                primary: {
-                  fontWeight: 600,
-                  letterSpacing: -0.9,
-                  fontSize: 18,
-                  color: '#00000',
-                },
-                secondary: {
-                  mt: -0.5,
-                  fontWeight: 600,
-                  letterSpacing: -0.9,
-                  fontSize: 17,
-                  color: '#00000',
-                },
-              }}
-            />
-          </Stack>
-
-          <Stack direction="row" alignItems="center" spacing={2} mr={!smDown && 5}>
-            <IconButton
-              sx={{
-                bgcolor: '#00564B',
-                '&:hover': { bgcolor: '#00564B99' },
-                borderRadius: 1,
-                ...(isMinusDisabled && {
-                  pointerEvents: 'none',
-                  bgcolor: '#D9D9D9',
-                }),
-              }}
-              onClick={() =>
-                updateTics(ticket.id, {
-                  selectedQuantity: ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
-                  subTotal: ticket.selectedQuantity * ticket.price,
-                })
-              }
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(1px)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <Iconify
-                icon="ic:round-minus"
-                width={15}
-                color={isMinusDisabled ? '#676767' : 'white'}
+        > */}
+        <Grid2 container spacing={2}>
+          <Grid2 size={12}>
+            <Stack spacing={2.5}>
+              <ListItemText
+                primary={ticket.title}
+                secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
+                slotProps={{
+                  primary: {
+                    fontWeight: 600,
+                    letterSpacing: -0.9,
+                    fontSize: 20,
+                    color: '#00000',
+                  },
+                  secondary: {
+                    variant: 'caption',
+                    fontWeight: 500,
+                    fontSize: 14,
+                    letterSpacing: -0.9,
+                    color: '#606060',
+                    maxWidth: 300,
+                    whiteSpace: 'pretty',
+                  },
+                }}
               />
-            </IconButton>
-            <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
-            <IconButton
-              sx={{
-                bgcolor: '#00564B',
-                borderRadius: 1,
-                '&:hover': { bgcolor: '#00564B99' },
-                ...(isPlusDisabled && {
-                  pointerEvents: 'none',
-                  bgcolor: '#D9D9D9',
-                }),
-              }}
-              onClick={(e) =>
-                updateTics(
-                  ticket.id,
-                  ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                    ? {
-                        selectedQuantity:
-                          ticket.selectedQuantity <
-                          ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                            ? ticket.selectedQuantity + 1
-                            : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
-                        subTotal: ticket.selectedQuantity * ticket.price,
-                      }
-                    : {
-                        selectedQuantity: ticket.selectedQuantity + 1,
-                        subTotal: ticket.selectedQuantity * ticket.price,
-                      }
-                )
-              }
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(1px)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <Iconify
-                icon="material-symbols:add-rounded"
-                width={15}
-                color={isPlusDisabled ? '#676767' : 'white'}
+              {/* <ListItemText
+                primary="Price"
+                secondary={Intl.NumberFormat('en-MY', {
+                  style: 'currency',
+                  currency: 'MYR',
+                }).format(ticket.price)}
+                slotProps={{
+                  primary: {
+                    fontWeight: 600,
+                    letterSpacing: -0.9,
+                    fontSize: 18,
+                    color: '#00000',
+                  },
+                  secondary: {
+                    mt: -0.5,
+                    fontWeight: 600,
+                    letterSpacing: -0.9,
+                    fontSize: 17,
+                    color: '#00000',
+                  },
+                }}
+              /> */}
+            </Stack>
+          </Grid2>
+          <Grid2 size={12}>
+            <Stack direction="row">
+              <ListItemText
+                primary="Price"
+                secondary={Intl.NumberFormat('en-MY', {
+                  style: 'currency',
+                  currency: 'MYR',
+                }).format(ticket.price)}
+                slotProps={{
+                  primary: {
+                    fontWeight: 600,
+                    letterSpacing: -0.9,
+                    fontSize: 18,
+                    color: '#00000',
+                  },
+                  secondary: {
+                    mt: -0.5,
+                    fontWeight: 600,
+                    letterSpacing: -0.9,
+                    fontSize: 17,
+                    color: '#00000',
+                  },
+                }}
               />
-            </IconButton>
-          </Stack>
-        </Stack>
-      </Box>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={2}
+                // mr={!smDown && 5}
+                justifyContent="end"
+              >
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    '&:hover': { bgcolor: '#00564B99' },
+                    borderRadius: 1,
+                    ...(isMinusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={() =>
+                    updateTics(ticket.id, {
+                      selectedQuantity:
+                        ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
+                      subTotal: ticket.selectedQuantity * ticket.price,
+                    })
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="ic:round-minus"
+                    width={15}
+                    color={isMinusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+                <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    borderRadius: 1,
+                    '&:hover': { bgcolor: '#00564B99' },
+                    ...(isPlusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={(e) =>
+                    updateTics(
+                      ticket.id,
+                      ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                        ? {
+                            selectedQuantity:
+                              ticket.selectedQuantity <
+                              ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                                ? ticket.selectedQuantity + 1
+                                : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                        : {
+                            selectedQuantity: ticket.selectedQuantity + 1,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                    )
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="material-symbols:add-rounded"
+                    width={15}
+                    color={isPlusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+              </Stack>
+            </Stack>
+          </Grid2>
+        </Grid2>
+        {/* </Stack> */}
+      </Grid2>
     );
   });
+
+  const totalTicketsQuantitySelected = useMemo(() => {
+    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
+    return ticketsTotal;
+  }, [tixs]);
 
   useEffect(() => {
     const el = ref?.current;
@@ -484,12 +508,13 @@ const TicketSelectionCard = () => {
 
   return (
     <Stack
-      component={Box}
+      component={Card}
+      boxShadow={10}
       sx={{
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
-        bgcolor: 'white',
+        // bgcolor: 'white',
       }}
     >
       <Box
@@ -513,6 +538,7 @@ const TicketSelectionCard = () => {
         </Stack>
         <Typography>{`{{ event logo }}`}</Typography>
       </Box>
+
       <Box
         ref={ref}
         flexGrow={1}
@@ -546,16 +572,18 @@ const TicketSelectionCard = () => {
             />
           </Box>
         ) : (
-          <Stack spacing={1} my={2} component={Box} ref={testRef}>
+          <Grid2 container my={2} spacing={1.5} ref={testRef}>
+            {/* <Stack spacing={1} my={2} component={Box} ref={testRef}> */}
             {tickets}
-          </Stack>
+            {/* </Stack> */}
+          </Grid2>
         )}
 
         <IconButton
           size="small"
           sx={{
             position: 'absolute',
-            bottom: 70,
+            bottom: 20,
             display: (!isTicketsOverflow.value || isOverflow.value) && 'none',
             right: 10,
             bgcolor: 'black',
@@ -571,6 +599,7 @@ const TicketSelectionCard = () => {
           <Iconify icon="raphael:arrowup" width={22} />
         </IconButton>
       </Box>
+
       <Box
         p={1}
         mt="auto"
@@ -703,6 +732,7 @@ const TicketSelectionCard = () => {
             </Box>
           </>
         )}
+
         <LoadingButton
           variant="contained"
           fullWidth
@@ -721,13 +751,3 @@ const TicketSelectionCard = () => {
 };
 
 export default TicketSelectionCard;
-
-// [
-//   {
-//     "amount": "1000",
-//     "currency": "MYR",
-//     "customer_name": "Afiq",
-//     "callback_url": "http://localhost:81/",
-//     "return_url": "http://localhost:81/event/c1429516-3832-49b4-9cd0-5039a12dbc77"
-//   }
-// ]

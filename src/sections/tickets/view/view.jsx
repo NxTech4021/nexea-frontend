@@ -1,14 +1,19 @@
+import { toast } from 'sonner';
 import PropTypes from 'prop-types';
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 
 import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
+import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
 
 import { useGetCart } from 'src/api/cart/cart';
+import { MaterialUISwitch } from 'src/layouts/dashboard/header';
+
+import { useSettingsContext } from 'src/components/settings';
 
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
@@ -20,6 +25,8 @@ import TicketInformationCard from '../ticket-information-card';
 const TicketPurchaseView = ({ eventIdParams }) => {
   localStorage.setItem('eventId', eventIdParams);
   const mdDown = useResponsive('down', 'md');
+  const settings = useSettingsContext();
+  const tixs = useCartStore((state) => state.tickets);
 
   const {
     eventData,
@@ -30,6 +37,32 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const { data: cartData, isLoading: cartLoading, mutate: cartMutate } = useGetCart();
 
   const loading = useBoolean();
+
+  const handleCheckout = useCallback(async () => {
+    try {
+      loading.onTrue();
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Filter only selected tickets
+      const tickets = tixs.filter((tix) => tix.selectedQuantity !== 0);
+
+      await axiosInstance.post('/api/cart/checkout', {
+        tickets,
+        eventId: eventData.id,
+      });
+      toast.info('Your cart is ready!');
+      cartMutate();
+    } catch (error) {
+      // if (error?.ticketId) {
+      //   setUnavailableTicket(error?.ticketId);
+      // }
+      toast.error(error?.message);
+    } finally {
+      loading.onFalse();
+      mutate();
+    }
+  }, [cartMutate, eventData, loading, mutate, tixs]);
 
   const setTickets = useCartStore((state) => state.setTickets);
 
@@ -53,8 +86,9 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       mutate,
       cartMutate,
       cartLoading,
+      handleCheckout,
     }),
-    [eventIdParams, eventData, cartData, mutate, cartMutate, cartLoading]
+    [eventIdParams, eventData, cartData, mutate, cartMutate, cartLoading, handleCheckout]
   );
 
   if (loading.value || isEventLoading || cartLoading) {
@@ -94,7 +128,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     );
   }
 
-  if (eventData?.status !== 'live') {
+  if (eventData?.status !== 'ACTIVE') {
     return (
       <Stack
         sx={{
@@ -117,10 +151,22 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   return (
     <Cart.Provider value={memoizedValue}>
       <TickerPurchaseHeader />
+
       <Box minHeight={76} />
+
+      <Box position="absolute">
+        <MaterialUISwitch
+          sx={{ m: 1 }}
+          checked={settings.themeMode !== 'light'}
+          onChange={() =>
+            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
+          }
+        />
+      </Box>
+
       <Box
         px={{ lg: 15 }}
-        bgcolor="#F4F4F4"
+        bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
         overflow="auto"
         sx={{
           height: `calc(100vh - ${76}px)`,
@@ -135,12 +181,15 @@ const TicketPurchaseView = ({ eventIdParams }) => {
               {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <TicketPaymentCard cartData={cartData} mutate={cartMutate} />
+              <TicketPaymentCard />
             </Grid>
           </Grid>
         ) : (
           <Box height={`calc(100vh - ${76}px)`} p={1}>
             {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+            {/* <Box position="fixed" bottom={0} left={0} width={1}>
+              <TicketPaymentCard />
+            </Box> */}
           </Box>
         )}
       </Box>
@@ -153,4 +202,3 @@ export default TicketPurchaseView;
 TicketPurchaseView.propTypes = {
   eventIdParams: PropTypes.string,
 };
-

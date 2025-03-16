@@ -23,7 +23,7 @@ import AccountPopover from '../common/account-popover';
 
 // ----------------------------------------------------------------------
 
-const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+export const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 62,
   height: 34,
   padding: 7,
