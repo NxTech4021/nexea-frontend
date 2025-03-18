@@ -3,8 +3,8 @@ import dayjs from 'dayjs';
 import * as yup from 'yup';
 import { toast } from 'sonner';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import { useForm, useFieldArray, useFormContext } from 'react-hook-form';
+import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -35,29 +35,29 @@ import FormProvider, { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
 import { TextFieldCustom } from './components/text-field';
 
-const schema = yup.object().shape({
-  buyer: yup.object().shape({
-    firstName: yup.string().required('First name is required'),
-    lastName: yup.string().required('Last name is required'),
-    email: yup.string().email('Must be a valid email').required('Email is required'),
-    phoneNumber: yup.string().required('Phone number is required'),
-    company: yup.string().required('Company name is required'),
-    isAnAttendee: yup.boolean(),
-    ticket: yup.string().when('isAnAttendee', {
-      is: (y) => y.val,
-      then: (y) => y.string().required('Ticket type is required'),
-    }),
-  }),
-  attendees: yup.array().of(
-    yup.object().shape({
-      firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('Last name is required'),
-      email: yup.string().required('Email is required'),
-      phoneNumber: yup.string().required('Phone number is required'),
-      company: yup.string().required('Company name is required'),
-    })
-  ),
-});
+// const schema = yup.object().shape({
+//   buyer: yup.object().shape({
+//     firstName: yup.string().required('First name is required'),
+//     lastName: yup.string().required('Last name is required'),
+//     email: yup.string().email('Must be a valid email').required('Email is required'),
+//     phoneNumber: yup.string().required('Phone number is required'),
+//     company: yup.string().required('Company name is required'),
+//     isAnAttendee: yup.boolean(),
+//     ticket: yup.string().when('isAnAttendee', {
+//       is: (y) => y.val,
+//       then: (y) => y.string().required('Ticket type is required'),
+//     }),
+//   }),
+//   attendees: yup.array().of(
+//     yup.object().shape({
+//       firstName: yup.string().required('First name is required'),
+//       lastName: yup.string().required('Last name is required'),
+//       email: yup.string().required('Email is required'),
+//       phoneNumber: yup.string().required('Phone number is required'),
+//       company: yup.string().required('Company name is required'),
+//     })
+//   ),
+// });
 
 const defaultAttendee = {
   firstName: '',
@@ -75,6 +75,7 @@ const TicketInformationCard = () => {
   const ref = useRef();
   const mdDown = useResponsive('down', 'md');
   const [discountCode, setDiscountCode] = useState(null);
+  const boxRef = useRef();
 
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
@@ -107,25 +108,25 @@ const TicketInformationCard = () => {
     [data]
   );
 
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      buyer: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        company: '',
-        isAnAttendee: false,
-        ticket: '',
-      },
-      attendees: null,
-    },
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-  });
+  // const methods = useForm({
+  //   resolver: yupResolver(schema),
+  //   defaultValues: {
+  //     buyer: {
+  //       firstName: '',
+  //       lastName: '',
+  //       email: '',
+  //       phoneNumber: '',
+  //       company: '',
+  //       isAnAttendee: false,
+  //       ticket: '',
+  //     },
+  //     attendees: null,
+  //   },
+  //   mode: 'onChange',
+  //   reValidateMode: 'onChange',
+  // });
 
-  const { watch, control, setValue, getValues } = methods;
+  const { watch, control, setValue, getValues } = useFormContext();
 
   const buyer = watch('buyer.isAnAttendee');
 
@@ -211,7 +212,12 @@ const TicketInformationCard = () => {
     setValue(name, value, { shouldValidate: true });
   };
 
-  const copyCompanyName = () => {};
+  const copyCompanyName = () => {
+    const companyName = getValues('buyer.company');
+    fields.forEach((field, index) => {
+      setValue(`attendees.${index}.company`, companyName, { shouldValidate: true });
+    });
+  };
 
   const helperText = (
     <Stack spacing={0.5} color="text.secondary" my={2}>
@@ -287,7 +293,12 @@ const TicketInformationCard = () => {
             inputMode="decimal"
             onChange={onChangeInputBuyer}
           />
-          <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
+            <Button variant="text" size="small" onClick={copyCompanyName}>
+              Copy
+            </Button>
+          </Stack>
           {buyer && (
             <RHFSelect
               name="buyer.ticket"
@@ -369,7 +380,7 @@ const TicketInformationCard = () => {
                 },
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
                 <Typography variant="subtitle2" color="text.secondary">
                   Attendee {index + 1}
                 </Typography>
@@ -548,6 +559,24 @@ const TicketInformationCard = () => {
     };
   }, [fields]);
 
+  useLayoutEffect(() => {
+    if (!boxRef.current) return;
+    const overviewBox = boxRef.current;
+
+    const handleClick = (event) => {
+      if (!overviewBox.contains(event.target)) {
+        anotherCollapse.onFalse();
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [anotherCollapse]);
+
   // useEffect(() => {
   //   if (!data) return;
   //   window.onbeforeunload = () =>
@@ -574,8 +603,6 @@ const TicketInformationCard = () => {
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
-        // color: 'whitesmoke',
-        // bgcolor: 'white',
       }}
     >
       <Box sx={{ bgcolor: 'black', p: 2 }}>
@@ -584,7 +611,7 @@ const TicketInformationCard = () => {
           <ListItemText
             primary="Billing Information"
             secondary="Personal and contact information of the buyer."
-            primaryTypographyProps={{ variant: 'subtitle1' }}
+            primaryTypographyProps={{ variant: 'subtitle1', color: 'white' }}
             secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
           />
         </Stack>
@@ -603,11 +630,13 @@ const TicketInformationCard = () => {
         }}
       >
         {isCartExpired && 'Expired already'}
-        <FormProvider methods={methods}>
-          {buyerInfo}
-          <Divider sx={{ my: 2 }} />
-          {attendeeinfo}
-        </FormProvider>
+
+        {/* <FormProvider methods={methods}> */}
+        {buyerInfo}
+        <Divider sx={{ my: 2 }} />
+        {attendeeinfo}
+        {/* </FormProvider> */}
+
         <IconButton
           size="small"
           sx={{
@@ -665,6 +694,7 @@ const TicketInformationCard = () => {
 
       {mdDown && (
         <Box
+          ref={boxRef}
           p={1}
           mt="auto"
           boxShadow={10}
@@ -688,7 +718,6 @@ const TicketInformationCard = () => {
                   width={1}
                   spacing={2}
                   flexShrink={2}
-                  // color={grey[800]}
                   flex={1}
                   justifyContent="space-between"
                 >
@@ -870,6 +899,7 @@ const TicketInformationCard = () => {
           </>
 
           <LoadingButton
+            size="large"
             variant="contained"
             fullWidth
             // loading={loading.value}

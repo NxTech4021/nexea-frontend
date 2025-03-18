@@ -1,5 +1,8 @@
+import * as yup from 'yup';
 import { toast } from 'sonner';
 import PropTypes from 'prop-types';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useMemo, useEffect, useCallback } from 'react';
 
 import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
@@ -13,20 +16,46 @@ import { useCartStore } from 'src/utils/store';
 import { useGetCart } from 'src/api/cart/cart';
 import { MaterialUISwitch } from 'src/layouts/dashboard/header';
 
+import FormProvider from 'src/components/hook-form';
 import { useSettingsContext } from 'src/components/settings';
 
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
 import { useGetEvent } from '../hooks/use-get-event';
-import TicketPaymentCard from '../ticket-payment-card';
+import TicketOverviewCard from '../ticket-overview-card';
 import TicketSelectionCard from '../ticket-selection-card';
 import TicketInformationCard from '../ticket-information-card';
+
+const schema = yup.object().shape({
+  buyer: yup.object().shape({
+    firstName: yup.string().required('First name is required'),
+    lastName: yup.string().required('Last name is required'),
+    email: yup.string().email('Must be a valid email').required('Email is required'),
+    phoneNumber: yup.string().required('Phone number is required'),
+    company: yup.string().required('Company name is required'),
+    isAnAttendee: yup.boolean(),
+    ticket: yup.string().when('isAnAttendee', {
+      is: (y) => y.val,
+      then: (y) => y.string().required('Ticket type is required'),
+    }),
+  }),
+  attendees: yup.array().of(
+    yup.object().shape({
+      firstName: yup.string().required('First name is required'),
+      lastName: yup.string().required('Last name is required'),
+      email: yup.string().email('Must be a valid email').required('Email is required'),
+      phoneNumber: yup.string().required('Phone number is required'),
+      company: yup.string().required('Company name is required'),
+    })
+  ),
+});
 
 const TicketPurchaseView = ({ eventIdParams }) => {
   localStorage.setItem('eventId', eventIdParams);
   const mdDown = useResponsive('down', 'md');
   const settings = useSettingsContext();
   const tixs = useCartStore((state) => state.tickets);
+  const loading = useBoolean();
 
   const {
     eventData,
@@ -36,7 +65,23 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
   const { data: cartData, isLoading: cartLoading, mutate: cartMutate } = useGetCart();
 
-  const loading = useBoolean();
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      buyer: {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        company: '',
+        isAnAttendee: false,
+        ticket: '',
+      },
+      attendees: null,
+    },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
 
   const handleCheckout = useCallback(async () => {
     try {
@@ -164,35 +209,34 @@ const TicketPurchaseView = ({ eventIdParams }) => {
         />
       </Box>
 
-      <Box
-        px={{ lg: 15 }}
-        bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
-        overflow="auto"
-        sx={{
-          height: `calc(100vh - ${76}px)`,
-          scrollbarWidth: 'thin',
-          scrollBehavior: 'smooth',
-          scrollbarColor: '#000000 white',
-        }}
-      >
-        {!mdDown ? (
-          <Grid container spacing={2} minHeight={1} p={2}>
-            <Grid size={{ xs: 12, md: 8 }} position="relative">
+      <FormProvider methods={methods}>
+        <Box
+          px={{ lg: 15 }}
+          bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
+          overflow="auto"
+          sx={{
+            height: `calc(100vh - ${76}px)`,
+            scrollbarWidth: 'thin',
+            scrollBehavior: 'smooth',
+            scrollbarColor: '#000000 white',
+          }}
+        >
+          {!mdDown ? (
+            <Grid container spacing={2} minHeight={1} p={2}>
+              <Grid size={{ xs: 12, md: 8 }} position="relative">
+                {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TicketOverviewCard />
+              </Grid>
+            </Grid>
+          ) : (
+            <Box height={`calc(100vh - ${76}px)`} px={1}>
               {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TicketPaymentCard />
-            </Grid>
-          </Grid>
-        ) : (
-          <Box height={`calc(100vh - ${76}px)`} p={1}>
-            {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
-            {/* <Box position="fixed" bottom={0} left={0} width={1}>
-              <TicketPaymentCard />
-            </Box> */}
-          </Box>
-        )}
-      </Box>
+            </Box>
+          )}
+        </Box>
+      </FormProvider>
     </Cart.Provider>
   );
 };

@@ -25,7 +25,14 @@ import Iconify from 'src/components/iconify';
 
 import useGetCartData from './hooks/use-get-cart';
 
-const TicketPaymentCard = () => {
+const shortenString = (text, length) => {
+  if (text.length > length) {
+    return `${text.slice(0, length)}...`;
+  }
+  return text;
+};
+
+const TicketOverviewCard = () => {
   const { tickets } = useCartStore();
   const [discountCode, setDiscountCode] = useState(null);
   const mdDown = useResponsive('down', 'md');
@@ -284,7 +291,11 @@ const TicketPaymentCard = () => {
                           alignItems="center"
                           justifyContent="space-between"
                         >
-                          <Typography>{`${item.quantity} x ${item.ticketType.title}`}</Typography>
+                          <Typography noWrap>
+                            {/* {shortenString(`${item.quantity} x ${item.ticketType.title}`, 30)} */}
+                            {`${item.quantity} x ${item.ticketType.title}`}
+                          </Typography>
+
                           <Typography>
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
@@ -302,7 +313,10 @@ const TicketPaymentCard = () => {
                             alignItems="center"
                             justifyContent="space-between"
                           >
-                            <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
+                            <Typography noWrap>
+                              {/* {shortenString(`${ticket.selectedQuantity} x ${ticket.title}`, 30)} */}
+                              {`${ticket.selectedQuantity} x ${ticket.title}`}
+                            </Typography>
                             <Typography>
                               {Intl.NumberFormat('en-MY', {
                                 style: 'currency',
@@ -425,17 +439,18 @@ const TicketPaymentCard = () => {
                 {cartData ? (
                   <LoadingButton
                     variant="contained"
+                    size="large"
                     startIcon={
                       <Iconify icon="fluent:payment-16-filled" width={20} sx={{ mr: 1 }} />
                     }
-                    onClick={() => {
-                      const a = document.createElement('a');
-                      a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
-                      // a.target = '_blank';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                    }}
+                    type="submit"
+                    // onClick={() => {
+                    //   const a = document.createElement('a');
+                    //   a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
+                    //   document.body.appendChild(a);
+                    //   a.click();
+                    //   document.body.removeChild(a);
+                    // }}
                   >
                     Proceed to payment
                   </LoadingButton>
@@ -468,4 +483,4 @@ const TicketPaymentCard = () => {
   );
 };
 
-export default TicketPaymentCard;
+export default TicketOverviewCard;

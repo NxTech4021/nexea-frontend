@@ -1,9 +1,9 @@
-import { toast } from 'sonner';
 import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Card,
   Stack,
   alpha,
   Grid2,
@@ -13,13 +13,11 @@ import {
   IconButton,
   ListItemText,
   CircularProgress,
-  Card,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
 
 import Image from 'src/components/image';
@@ -28,18 +26,24 @@ import Iconify from 'src/components/iconify';
 import useGetCartData from './hooks/use-get-cart';
 
 const TicketSelectionCard = () => {
-  const smDown = useResponsive('down', 'sm');
   const mdDown = useResponsive('down', 'md');
   const ref = useRef();
+  const boxRef = useRef();
   const testRef = useRef();
   const isOverflow = useBoolean();
   const isTicketsOverflow = useBoolean();
   const [unavailableTickets, setUnavailableTicket] = useState(null);
   const collapse = useBoolean();
+  const loading = useBoolean();
 
   const tixs = useCartStore((state) => state.tickets);
 
   const { eventData, mutate: eventMutate, cartMutate, handleCheckout } = useGetCartData();
+
+  const totalTicketsQuantitySelected = useMemo(() => {
+    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
+    return ticketsTotal;
+  }, [tixs]);
 
   const subTotal = useMemo(
     () => tixs.reduce((acc, tix) => acc + tix.selectedQuantity * tix.price, 0),
@@ -47,8 +51,6 @@ const TicketSelectionCard = () => {
   );
 
   const updateTics = useCartStore((state) => state.updateTickets);
-
-  const loading = useBoolean();
 
   const tickets = tixs.map((ticket) => {
     if (!ticket) return null;
@@ -285,12 +287,7 @@ const TicketSelectionCard = () => {
         }}
         size={{ xs: 12, md: 6 }}
       >
-        {/* <Stack
-          direction="row"
-          alignItems={!smDown ? 'center' : 'end'}
-          justifyContent="space-between"
-        > */}
-        <Grid2 container spacing={2}>
+        <Grid2 container spacing={2} height={1}>
           <Grid2 size={12}>
             <Stack spacing={2.5}>
               <ListItemText
@@ -338,7 +335,7 @@ const TicketSelectionCard = () => {
               /> */}
             </Stack>
           </Grid2>
-          <Grid2 size={12}>
+          <Grid2 size={12} alignContent="flex-end">
             <Stack direction="row">
               <ListItemText
                 primary="Price"
@@ -451,15 +448,9 @@ const TicketSelectionCard = () => {
             </Stack>
           </Grid2>
         </Grid2>
-        {/* </Stack> */}
       </Grid2>
     );
   });
-
-  const totalTicketsQuantitySelected = useMemo(() => {
-    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
-    return ticketsTotal;
-  }, [tixs]);
 
   useEffect(() => {
     const el = ref?.current;
@@ -506,6 +497,24 @@ const TicketSelectionCard = () => {
     }
   }, [isTicketsOverflow]);
 
+  useLayoutEffect(() => {
+    if (!boxRef.current) return;
+    const overviewBox = boxRef.current;
+
+    const handleClick = (event) => {
+      if (!overviewBox.contains(event.target)) {
+        collapse.onFalse();
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [collapse]);
+
   return (
     <Stack
       component={Card}
@@ -514,7 +523,6 @@ const TicketSelectionCard = () => {
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
-        // bgcolor: 'white',
       }}
     >
       <Box
@@ -573,9 +581,7 @@ const TicketSelectionCard = () => {
           </Box>
         ) : (
           <Grid2 container my={2} spacing={1.5} ref={testRef}>
-            {/* <Stack spacing={1} my={2} component={Box} ref={testRef}> */}
             {tickets}
-            {/* </Stack> */}
           </Grid2>
         )}
 
@@ -600,41 +606,74 @@ const TicketSelectionCard = () => {
         </IconButton>
       </Box>
 
-      <Box
-        p={1}
-        mt="auto"
-        boxShadow={10}
-        sx={{
-          ...(mdDown && {
-            borderTop: 1.5,
-            borderColor: (theme) => theme.palette.divider,
-          }),
-        }}
-      >
-        {mdDown && (
-          <>
-            <Collapse in={collapse.value} timeout="auto">
-              <Box sx={{ height: '30vh', p: 1 }} position="relative">
-                {!totalTicketsQuantitySelected ? (
-                  <Typography
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                    color="text.secondary"
-                  >
-                    No tickets selected
+      {mdDown && (
+        <Box
+          ref={boxRef}
+          p={1}
+          mt="auto"
+          boxShadow={10}
+          sx={{
+            ...(mdDown && {
+              borderTop: 1.5,
+              borderColor: (theme) => theme.palette.divider,
+            }),
+          }}
+        >
+          <Collapse in={collapse.value} timeout="auto">
+            <Box sx={{ height: '30vh', p: 1 }} position="relative">
+              {!totalTicketsQuantitySelected ? (
+                <Typography
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                  color="text.secondary"
+                >
+                  No tickets selected
+                </Typography>
+              ) : (
+                <Stack height={1}>
+                  <Typography mb={2} variant="subtitle2">
+                    Order Summary
                   </Typography>
-                ) : (
-                  <Stack height={1}>
-                    <Typography mb={2} variant="subtitle2">
-                      Order Summary
-                    </Typography>
+                  <Stack
+                    spacing={1}
+                    flexGrow={1}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: 16,
+                        fontWeight: 500,
+                      },
+                    }}
+                  >
+                    {tixs
+                      .filter((ticket) => ticket.selectedQuantity > 0)
+                      .map((ticket) => (
+                        <Stack
+                          key={ticket.id}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          // "&"
+                        >
+                          <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
+                          <Typography>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(ticket.subTotal)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                  </Stack>
+                  <Stack spacing={2}>
                     <Stack
-                      spacing={1}
-                      flexGrow={1}
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
                       sx={{
                         '& .MuiTypography-root': {
                           fontSize: 16,
@@ -642,110 +681,77 @@ const TicketSelectionCard = () => {
                         },
                       }}
                     >
-                      {tixs
-                        .filter((ticket) => ticket.selectedQuantity > 0)
-                        .map((ticket) => (
-                          <Stack
-                            key={ticket.id}
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            // "&"
-                          >
-                            <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
-                            <Typography>
-                              {Intl.NumberFormat('en-MY', {
-                                style: 'currency',
-                                currency: 'MYR',
-                              }).format(ticket.subTotal)}
-                            </Typography>
-                          </Stack>
-                        ))}
+                      <Typography>SST:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(11.94)}
+                      </Typography>
                     </Stack>
-                    <Stack spacing={2}>
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        gap={10}
-                        justifyContent="space-between"
-                        sx={{
-                          '& .MuiTypography-root': {
-                            fontSize: 16,
-                            fontWeight: 500,
-                          },
-                        }}
-                      >
-                        <Typography>SST:</Typography>
-                        <Typography>
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(11.94)}
-                        </Typography>
-                      </Stack>
-                      <Divider />
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        gap={10}
-                        justifyContent="space-between"
-                        sx={{
-                          '&  .MuiTypography-root': {
-                            fontSize: 20,
-                            fontWeight: 600,
-                          },
-                        }}
-                      >
-                        <Typography>Total:</Typography>
-                        <Typography>
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(subTotal && subTotal + 11.94)}
-                        </Typography>
-                      </Stack>
+                    <Divider />
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                      sx={{
+                        '&  .MuiTypography-root': {
+                          fontSize: 20,
+                          fontWeight: 600,
+                        },
+                      }}
+                    >
+                      <Typography>Total:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(subTotal && subTotal + 11.94)}
+                      </Typography>
                     </Stack>
                   </Stack>
-                )}
-              </Box>
-            </Collapse>
-
-            <Box my={1} onClick={() => collapse.onToggle()}>
-              <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
-                {collapse.value ? (
-                  <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
-                ) : (
-                  <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
-                )}
-                <Typography
-                  variant="subtitle1"
-                  textAlign="end"
-                  fontSize={18}
-                  fontWeight={600}
-                  letterSpacing={-0.7}
-                >
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    subTotal && subTotal + 11.94
-                  )}
-                </Typography>
-              </Stack>
+                </Stack>
+              )}
             </Box>
-          </>
-        )}
+          </Collapse>
 
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          loading={loading.value}
-          onClick={handleCheckout}
-          disabled={!totalTicketsQuantitySelected}
-          startIcon={
-            <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
-          }
-        >
-          Check out
-        </LoadingButton>
-      </Box>
+          <Box my={1} onClick={() => collapse.onToggle()}>
+            <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
+              {collapse.value ? (
+                <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
+              ) : (
+                <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+              )}
+              <Typography
+                variant="subtitle1"
+                textAlign="end"
+                fontSize={18}
+                fontWeight={600}
+                letterSpacing={-0.7}
+              >
+                {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                  subTotal && subTotal + 11.94
+                )}
+              </Typography>
+            </Stack>
+          </Box>
+
+          <LoadingButton
+            size="large"
+            variant="contained"
+            fullWidth
+            loading={loading.value}
+            onClick={handleCheckout}
+            disabled={!totalTicketsQuantitySelected}
+            startIcon={
+              <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+            }
+          >
+            Check out
+          </LoadingButton>
+        </Box>
+      )}
     </Stack>
   );
 };
