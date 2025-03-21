@@ -264,6 +264,7 @@ export default function TicketTypeView({ data }) {
               { name: 'Dashboard', href: paths.dashboard.root },
               { name: 'Ticket Types' },
               { name: 'List' },
+              { name: 'Settings' },
             ]}
           />
 

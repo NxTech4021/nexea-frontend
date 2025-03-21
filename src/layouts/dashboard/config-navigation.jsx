@@ -80,6 +80,10 @@ export function useNavData() {
                 path: paths.dashboard.ticketType.root,
               },
               {
+                title: 'Settings',
+                path: paths.dashboard.ticketType.settings,
+              },
+              {
                 title: 'Add Ons',
                 path: paths.dashboard.events.root,
                 children: [
