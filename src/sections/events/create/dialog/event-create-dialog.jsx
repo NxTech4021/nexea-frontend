@@ -108,17 +108,7 @@ const EventCreateDialog = ({ open, onClose }) => {
   });
 
   return (
-    <Dialog
-      open={open}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 1,
-          bgcolor: (theme) => theme.palette.background.default,
-        },
-      }}
-    >
+    <Dialog open={open} maxWidth="md" fullWidth>
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogTitle>
           <ListItemText

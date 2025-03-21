@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import React, { useMemo, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
@@ -39,6 +40,10 @@ const TicketOverviewCard = () => {
   const { data: cartData, cartMutate, handleCheckout } = useGetCartData();
   const tixs = useCartStore((state) => state.tickets);
   const collapse = useBoolean();
+
+  const {
+    formState: { isSubmitting },
+  } = useFormContext();
 
   const subTotal = useMemo(
     () =>
@@ -205,14 +210,6 @@ const TicketOverviewCard = () => {
           <LoadingButton
             variant="contained"
             startIcon={<Iconify icon="fluent:payment-16-filled" width={20} sx={{ mr: 1 }} />}
-            onClick={() => {
-              const a = document.createElement('a');
-              a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
-              // a.target = '_blank';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-            }}
           >
             Proceed to payment
           </LoadingButton>
@@ -444,6 +441,7 @@ const TicketOverviewCard = () => {
                       <Iconify icon="fluent:payment-16-filled" width={20} sx={{ mr: 1 }} />
                     }
                     type="submit"
+                    loading={isSubmitting}
                     // onClick={() => {
                     //   const a = document.createElement('a');
                     //   a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';

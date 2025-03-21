@@ -76,7 +76,7 @@ export default function DiscountCodeTableRow({
         <TableCell>
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {ticketType.map((item) => (
-              <Label key={item.id} color="success">{`${item.title} ( ${item.event.name} )`}</Label>
+              <Label key={item.id}>{`${item.title} ( ${item.event.name} )`}</Label>
             ))}
           </Stack>
         </TableCell>

@@ -494,7 +494,6 @@ const TicketInformationCard = () => {
       Array.from({ length: item.quantity }, () => ({
         ticket: item.ticketType,
         ...defaultAttendee,
-        isCollapse: true,
       }))
     );
 
@@ -902,6 +901,7 @@ const TicketInformationCard = () => {
             size="large"
             variant="contained"
             fullWidth
+            type="submit"
             // loading={loading.value}
             // onClick={handleCheckout}
             // disabled={!totalTicketsQuantitySelected}

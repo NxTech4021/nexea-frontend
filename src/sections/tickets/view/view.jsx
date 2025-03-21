@@ -83,6 +83,23 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     reValidateMode: 'onChange',
   });
 
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      // const newData = {
+      //   ...data,
+      //   ...(cartData.discount && { discount: cartData.discount }), // Only add discount if it exists
+      // };
+      await axiosInstance.post('/api/cart/continuePayment', data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   const handleCheckout = useCallback(async () => {
     try {
       loading.onTrue();
@@ -123,6 +140,12 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     }
   }, [eventData, setTickets]);
 
+  // useEffect(() => {
+  //   if (cartData && errors) {
+  //     toast.error('Please complete all information');
+  //   }
+  // }, [errors, cartData]);
+
   const memoizedValue = useMemo(
     () => ({
       eventData,
@@ -145,7 +168,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
           thickness={7}
           size={25}
           sx={{
-            color: (theme) => theme.palette.common.black,
+            // color: (theme) => theme.palette.common.black,
             strokeLinecap: 'round',
           }}
         />
@@ -209,10 +232,10 @@ const TicketPurchaseView = ({ eventIdParams }) => {
         />
       </Box>
 
-      <FormProvider methods={methods}>
+      <FormProvider methods={methods} onSubmit={onSubmit}>
         <Box
           px={{ lg: 15 }}
-          bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
+          // bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
           overflow="auto"
           sx={{
             height: `calc(100vh - ${76}px)`,

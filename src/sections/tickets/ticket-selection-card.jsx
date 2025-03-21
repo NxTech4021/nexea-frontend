@@ -52,6 +52,8 @@ const TicketSelectionCard = () => {
 
   const updateTics = useCartStore((state) => state.updateTickets);
 
+  console.log(tixs);
+
   const tickets = tixs.map((ticket) => {
     if (!ticket) return null;
 
@@ -69,185 +71,8 @@ const TicketSelectionCard = () => {
     const unavailable = unavailableTickets && ticket.id === unavailableTickets;
 
     return (
-      // <Box key={ticket.id} overflow="hidden">
-      //   <Box
-      //     sx={{
-      //       position: 'relative',
-      //       border: 2,
-      //       py: 6,
-      //       px: 2,
-      //       borderRadius: 2,
-      //       borderStyle: !ticket?.selectedQuantity && 'dashed',
-      //       borderColor: (theme) =>
-      //         // eslint-disable-next-line no-nested-ternary
-      //         ticket?.selectedQuantity
-      //           ? theme.palette.info.main
-      //           : unavailable
-      //             ? theme.palette.error.light
-      //             : theme.palette.divider,
-      //       display: 'grid',
-      //       gridTemplateColumns: !smDown ? 'repeat(4,1fr)' : 'repeat(2,1fr)',
-      //       alignItems: 'center',
-      //       justifyItems: 'center',
-      //       bgcolor: '#f9f9f9',
-      //       opacity: !ticket.quantity && 0.5,
-      // ':before': {
-      //   content: "''",
-      //   position: 'absolute',
-      //   bgcolor: 'white',
-      //   width: 40,
-      //   height: 40,
-      //   left: -28,
-      //   border: 2,
-      //   borderColor: (theme) =>
-      //     ticket?.selectedQuantity ? theme.palette.info.main : theme.palette.divider,
-      //   borderRadius: '50%',
-      //   borderStyle: !ticket?.selectedQuantity && 'dashed',
-      // },
-      // ':after': {
-      //   content: "''",
-      //   position: 'absolute',
-      //   bgcolor: 'white',
-      //   width: 40,
-      //   height: 40,
-      //   right: -28,
-      //   border: 2,
-      //   borderColor: (theme) =>
-      //     ticket?.selectedQuantity ? theme.palette.info.main : theme.palette.divider,
-      //   borderRadius: '50%',
-      //   borderStyle: !ticket?.selectedQuantity && 'dashed',
-      // },
-      //     }}
-      //   >
-      //     <Stack spacing={0.5} justifySelf="start">
-      //       <ListItemText
-      //         primary={ticket.title}
-      //         secondary={`RM ${ticket.price}`}
-      //         slotProps={{
-      //           secondary: {
-      //             display: !smDown && 'none',
-      //             variant: 'subtitle2',
-      //             fontSize: 12,
-      //           },
-      //         }}
-      //       />
-
-      //       <Typography variant="caption" whiteSpace="normal" color="text.secondary">
-      //         {ticket.description}
-      //       </Typography>
-      //     </Stack>
-
-      //     {!smDown && (
-      //       <ListItemText
-      //         primary="Price"
-      //         secondary={Intl.NumberFormat('en-MY', {
-      //           style: 'currency',
-      //           currency: 'MYR',
-      //         }).format(ticket.price)}
-      //       />
-      //     )}
-
-      //     {ticket.quantity === 0 ? (
-      //       <Box sx={{ gridColumn: 'span 2' }}>
-      //         <Typography variant="subtitle2" color="text.secondary">
-      //           Sold out
-      //         </Typography>
-      //       </Box>
-      //     ) : (
-      //       <>
-      //         <Stack direction="row" alignItems="center" justifyContent="center">
-      //           <IconButton
-      // disabled={isMinusDisabled}
-      // onClick={() =>
-      //   updateTics(ticket.id, {
-      //     selectedQuantity:
-      //       ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
-      //     subTotal: ticket.selectedQuantity * ticket.price,
-      //   })
-      // }
-      // onMouseDown={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(1px)';
-      // }}
-      // onMouseUp={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(0)';
-      // }}
-      // onMouseLeave={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(0)';
-      // }}
-      //           >
-      // <Iconify
-      //   icon="ic:round-minus"
-      //   width={15}
-      //   color={isMinusDisabled ? 'grey' : 'red'}
-      // />
-      //           </IconButton>
-      //           <TextField
-      //             value={ticket.selectedQuantity}
-      //             type="number"
-      //             variant="outlined"
-      //             size="small"
-      //             sx={{
-      //               width: 50,
-      //               '& input': {
-      //                 textAlign: 'center', // Center-align the text
-      //               },
-      //               pointerEvents: 'none',
-      //             }}
-      //           />
-      //           <IconButton
-      // onClick={(e) =>
-      //   updateTics(
-      //     ticket.id,
-      //     ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-      //       ? {
-      //           selectedQuantity:
-      //             ticket.selectedQuantity <
-      //             ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-      //               ? ticket.selectedQuantity + 1
-      //               : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
-      //           subTotal: ticket.selectedQuantity * ticket.price,
-      //         }
-      //       : {
-      //           selectedQuantity: ticket.selectedQuantity + 1,
-      //           subTotal: ticket.selectedQuantity * ticket.price,
-      //         }
-      //   )
-      // }
-      // disabled={isPlusDisabled}
-      // onMouseDown={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(1px)';
-      // }}
-      // onMouseUp={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(0)';
-      // }}
-      // onMouseLeave={(e) => {
-      //   e.currentTarget.style.transform = 'translateY(0)';
-      // }}
-      //           >
-      // <Iconify
-      //   icon="material-symbols:add-rounded"
-      //   width={15}
-      //   color={isPlusDisabled ? 'grey' : 'green'}
-      // />
-      //           </IconButton>
-      //         </Stack>
-      //         {!smDown && (
-      //           <ListItemText
-      //             primary="Subtotal"
-      //             secondary={Intl.NumberFormat('en-MY', {
-      //               style: 'currency',
-      //               currency: 'MYR',
-      //             }).format(ticket.subTotal)}
-      //           />
-      //         )}
-      //       </>
-      //     )}
-      //   </Box>
-      // </Box>
-
       <Grid2
         sx={{
-          // bgcolor: '#EEEEEE',
           minHeight: 67,
           borderRadius: 1.5,
           border: 1,
@@ -256,34 +81,6 @@ const TicketSelectionCard = () => {
           px: 5,
           position: 'relative',
           overflow: 'hidden',
-
-          // ':before': {
-          //   content: "''",
-          //   position: 'absolute',
-          //   // bgcolor: 'white',
-          //   border: 1,
-          //   borderColor: 'divider',
-          //   width: 40,
-          //   height: 40,
-          //   left: -28,
-          //   top: '50%',
-          //   transform: 'translateY(-50%)',
-          //   borderRadius: '50%',
-          //   clipPath: 'circle(50%)',
-          // },
-          // ':after': {
-          //   content: "''",
-          //   position: 'absolute',
-          //   border: 1,
-          //   borderColor: 'divider',
-          //   // bgcolor: 'white',
-          //   width: 40,
-          //   height: 40,
-          //   right: -28,
-          //   borderRadius: '50%',
-          //   top: '50%',
-          //   transform: 'translateY(-50%)',
-          // },
         }}
         size={{ xs: 12, md: 6 }}
       >
