@@ -22,6 +22,9 @@ import {
   DialogContent,
   DialogActions,
   FormHelperText,
+  Divider,
+  Avatar,
+  Typography,
 } from '@mui/material';
 
 import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
@@ -113,32 +116,87 @@ const EventCreateDialog = ({ open, onClose }) => {
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: {
-          borderRadius: 1,
-          bgcolor: (theme) => theme.palette.background.default,
-        },
+        elevation: 0,
+        sx: { 
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          background: (theme) => 
+            theme.palette.mode === 'light' 
+              ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
+              : 'linear-gradient(to bottom, #1a202c, #2d3748)'
+        }
       }}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <DialogTitle>
-          <ListItemText
-            primary="Create Event"
-            secondary="Start creating your event tickets effortlessly!"
-            primaryTypographyProps={{ variant: 'h5' }}
+        <DialogTitle 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            py: 3,
+            px: 4,
+            backgroundColor: (theme) => 
+              theme.palette.mode === 'light'
+                ? 'rgba(245, 247, 250, 0.85)'
+                : 'rgba(26, 32, 44, 0.85)'
+          }}
+        >
+          <Avatar
+            alt="Event"
+            src="/logo/nexea.png"
+            sx={{ 
+              width: 58, 
+              height: 58, 
+              marginRight: 2.5,
+              border: (theme) => `3px solid ${theme.palette.background.paper}`,
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'light' ? '#f0f4f8' : '#2d3748'
+            }}
           />
+          <Box>
+            <Typography 
+              variant="h5" 
+              fontWeight="700" 
+              sx={{ 
+                color: (theme) => theme.palette.text.primary,
+                letterSpacing: '-0.3px',
+                mb: 0.5
+              }}
+            >
+              Create Event
+            </Typography>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                fontSize: '0.85rem'
+              }}
+            >
+              Start creating an event ticket!
+            </Typography>
+          </Box>
         </DialogTitle>
-        <DialogContent>
-          <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2}>
+        <Divider />
+        <DialogContent 
+          sx={{ 
+            p: 4, 
+            backgroundColor: (theme) => theme.palette.background.paper 
+          }}
+        >
+          <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
             <RHFTextField
               name="eventName"
               label="Event Name"
               placeholder="Enter the name of your event"
+              fullWidth
             />
 
             <RenderSelectField
               name="personInCharge"
               control={control}
-              label="Event Name"
+              label="Person in Charge"
               options={!isLoading && data}
               required
             />
@@ -146,15 +204,64 @@ const EventCreateDialog = ({ open, onClose }) => {
             <RHFDatePicker name="eventDate" label="Event Date" />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" sx={{ fontWeight: 400 }} onClick={onClose}>
+        <DialogActions 
+          sx={{ 
+            p: 3, 
+            backgroundColor: (theme) => 
+              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
+            borderTop: '1px solid',
+            borderColor: (theme) => theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748',
+          }}
+        >
+          <Button 
+            variant="outlined" 
+            onClick={onClose}
+            sx={{
+              borderRadius: 4,
+              height: '46px',
+              padding: '0 24px',
+              fontWeight: 600,
+              borderColor: (theme) => theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568',
+              color: (theme) => theme.palette.mode === 'light' ? '#64748b' : '#a0aec0',
+              borderWidth: '1.5px',
+              letterSpacing: '0.3px',
+              textTransform: 'none',
+              fontSize: '0.95rem',
+              '&:hover': {
+                backgroundColor: (theme) => theme.palette.mode === 'light' 
+                  ? '#f8fafc' 
+                  : 'rgba(74, 85, 104, 0.2)',
+                borderColor: (theme) => theme.palette.mode === 'light' 
+                  ? '#cbd5e1' 
+                  : '#718096',
+              },
+            }}
+          >
             Cancel
           </Button>
           <LoadingButton
             variant="contained"
             type="submit"
-            sx={{ fontWeight: 400 }}
             loading={isSubmitting}
+            sx={{
+              borderRadius: 4,
+              height: '46px',
+              padding: '0 28px',
+              fontWeight: 600,
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'light' ? '#38bdf8' : '#3182ce',
+              color: 'white',
+              textTransform: 'none',
+              fontSize: '0.95rem',
+              letterSpacing: '0.3px',
+              boxShadow: 'none',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: (theme) => 
+                  theme.palette.mode === 'light' ? '#0ea5e9' : '#2b6cb0',
+                boxShadow: 'none',
+              },
+            }}
           >
             Create
           </LoadingButton>

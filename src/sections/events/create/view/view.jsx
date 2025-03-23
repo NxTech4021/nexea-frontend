@@ -53,7 +53,7 @@ export default function Events() {
   return (
     <Container maxWidth="xl">
       <CustomBreadcrumbs
-        heading="Event"
+        heading="Events"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           {
@@ -63,10 +63,10 @@ export default function Events() {
           { name: 'List' },
         ]}
         sx={{
-          mb: 3,
+          mb: 5,
         }}
       />
-
+{/* 
       <Card
         sx={{
           p: 1.5,
@@ -102,7 +102,7 @@ export default function Events() {
             </Button>
           )}
         </Stack>
-      </Card>
+      </Card> */}
 
       {/* <EventSearch
         query={search.query}
