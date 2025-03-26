@@ -75,8 +75,8 @@ const defaultFilters = {
 
 const schema = yup.object().shape({
   eventId: yup.string().required('Event is required'),
-  type: yup.string().required('Type is required'),
-  category: yup.string().required('Category is required'),
+  typeId: yup.string().required('Type is required'),
+  categoryId: yup.string().required('Category is required'),
   price: yup.string().required('Price is required'),
   title: yup.string().required('Ticket title is required'),
   quantity: yup
@@ -146,11 +146,11 @@ export default function TicketTypeView({ data }) {
   };
 
   const methods = useForm({
-    resolver: yupResolver(schema),
+    //resolver: yupResolver(schema),
     defaultValues: {
       eventId: '',
-      type: '',
-      category: '',
+      typeId: '',
+      categoryId: '',
       description: '',
       title: '',
       price: '',
@@ -164,31 +164,45 @@ export default function TicketTypeView({ data }) {
     },
   });
 
-  const { handleSubmit } = methods;
+  const { handleSubmit,formState:{errors},watch } = methods;
+  console.log(watch());
 
   const onSubmit = handleSubmit(async (item) => {
+    console.log("Form submitted with:", item);  // <-- Check if this logs
+    console.log(errors);
+    
+
     try {
       const newTicketType = {
         title: item.title,
-        type: item.type,
+        typeId: item.typeId.trim(),
         eventId: item.eventId,
-        category: item.category,
+        categoryId: item.categoryId,
         description: item.description,
-        validity: item.validity,
+        validity: item.validity || new Date().toISOString(),
         price: parseFloat(item.price),
         quantity: item.quantity,
         minimumTicketPerOrder: parseInt(item.requirement.minimumTicketPerOrder, 10),
         maximumTicketPerOrder: parseInt(item.requirement.maximumTicketPerOrder, 10),
+        isActive: true, // or set based on form data
+        isDraft: false,
       };
+      console.log('Submitting data:', newTicketType); // Add debugging
+      //const response = await createTicketType(newTicketType);
+      console.log('Response:', response); // Add debugging
 
-      await createTicketType(newTicketType);
+      //await createTicketType(newTicketType);
       mutate();
       setOpenDialog(false);
       enqueueSnackbar('Ticket type created successfully!', { variant: 'success' });
     } catch (error) {
+      console.error("Error details:", error); // Better error logging
       enqueueSnackbar(error.message || 'Failed to create ticket type', { variant: 'error' });
     }
   });
+  useEffect(() => {
+    console.log(errors)
+   }, [errors]);
 
   const handleDeleteRow = useCallback(
     async (id) => {

@@ -188,10 +188,10 @@ const EventLists = ({ query }) => {
       </Stack>
     );
 
-  if (errorEvents)
-    enqueueSnackbar(errorEvents?.message, {
-      variant: 'error',
-    });
+  // if (errorEvents)
+  //   enqueueSnackbar(errorEvents?.message, {
+  //     variant: 'error',
+  //   });
 
   return (
     <>
@@ -953,9 +953,9 @@ const EventLists = ({ query }) => {
           <Formik
             initialValues={{
               name: '',
-              type: '',
+              typeId: '',
               validity: '',
-              category: '',
+              categoryId: '',
               price: '',
               quantity: '',
             }}

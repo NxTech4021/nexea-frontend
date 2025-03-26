@@ -26,6 +26,7 @@ const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifica
 const DiscountCodeView = lazy(() => import('src/pages/dashboard/event/discount-code/view'));
 const OrderView = lazy(() => import('src/pages/dashboard/event/orders/view'));
 const TicketTypeView = lazy(() => import('src/pages/dashboard/event/ticket-types/view'));
+const TicketTypesPage = lazy(() => import('src/pages/dashboard/event/settings/view'));
 
 const EventDetail = lazy(() => import('src/pages/dashboard/event/details/view'));
 
@@ -66,7 +67,13 @@ export const dashboardRoutes = [
           { path: 'notifcationStatus/:id', element: <NotificationStatus /> },
         ],
       },
-      { path: 'ticket-type', element: <TicketTypeView /> },
+      { 
+        path: 'ticket-type',
+        children: [
+          {element: <TicketTypeView />, index: true },
+          {path: ':settings', element: <TicketTypesPage />},
+        ],
+      },
       { path: 'discount-code', element: <DiscountCodeView /> },
       { path: 'order', element: <OrderView /> },
       {

@@ -1,7 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 import useSWR from 'swr';
 import { useMemo } from 'react';
-
 import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 export const useGetAllTicketTypes = () => {
@@ -18,9 +17,9 @@ export const useGetAllTicketTypes = () => {
 
 export const createTicketType = async ({
   title,
-  type,
+  typeId,
   eventId,
-  category,
+  categoryId,
   validity,
   description,
   price,
@@ -31,28 +30,46 @@ export const createTicketType = async ({
   isDraft = false,
 }) => {
   try {
-    if (!isDraft && (!title || !type || !eventId || !category || !price || !quantity)) {
-      throw new Error('Arguments not enough');
-    }
-
-    const data = await axiosInstance.post(endpoints.ticketType.create, {
+    //  Debugging Logs: Check API URL & Payload before making request
+    console.log(" API Endpoint:", endpoints.ticketType.create);
+    console.log("Request Payload:", {
       title,
-      type,
+      typeId,
       eventId,
-      category,
+      categoryId,
       validity,
+      description,
       price,
       quantity,
-      isActive,
-      isDraft,
       minimumTicketPerOrder,
       maximumTicketPerOrder,
-      description,
+      isActive,
+      isDraft,
     });
 
-    return data;
+  
+    const response = await axiosInstance.post(endpoints.ticketType.create, {
+      title,
+      typeId,
+      eventId,
+      categoryId,
+      validity,
+      description,
+      price,
+      quantity,
+      minimumTicketPerOrder,
+      maximumTicketPerOrder,
+      isActive,
+      isDraft,
+    });
+
+    // ✅ Debugging Logs: Check API Response
+    console.log("✅ API Response:", response.data);
+    
+    return response;
   } catch (error) {
-    throw new Error(error);
+    console.error(" API Error:", error.response ? error.response.data : error.message);
+    throw new Error(error.response?.data?.message || "Failed to create ticket type");
   }
 };
 

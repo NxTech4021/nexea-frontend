@@ -2,6 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
+import axiosInstance from 'src/utils/axios';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { LoadingButton } from '@mui/lab';
@@ -37,6 +38,7 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
     <Controller
       name={name}
       control={control}
+      defaultValue={options.length > 0 ? options[0]?.id || options[0] : ''}
       render={({ field, fieldState }) => (
         <FormControl fullWidth error={!!fieldState.error}>
           <Select
@@ -63,8 +65,8 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
-const ticketTypes = ['Early Bird', 'Standard'];
-const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
+//const ticketTypes = ['Early Bird', 'Standard'];
+//const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
 
 const stepper = [
   { label: 'Ticket information', icon: <Iconify icon="f7:tickets-fill" width={25} /> },
@@ -78,8 +80,59 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
 
   const { control, watch, setValue } = methods;
 
-  const type = watch('type');
-  const category = watch('category');
+  const typeId = watch('typeId') ?? '';
+  const categoryId = watch('categoryId') ?? '';
+  // Add state for dynamic options
+  const [ticketTypes, setTicketTypes] = useState([
+    { id: 'early_bird', name: 'Early Bird' },
+    { id: 'standard', name: 'Standard' },
+  ]);
+  
+  const [ticketCategories, setTicketCategories] = useState([
+    { id: 'startup', name: 'Startup' },
+    { id: 'general', name: 'General' },
+    { id: 'speaker', name: 'Speaker' },
+    { id: 'vip', name: 'VIP' },
+  ]);
+  
+
+  // Fetch ticket types and categories when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch ticket types
+        const typesResponse = await axiosInstance.get('/api/custom-ticket-types');
+        if (typesResponse.data && typesResponse.data.length > 0) {
+          // Extract names from the response
+          const typeNames = typesResponse.data.map((type) => type.name);
+          setTicketTypes((prevTypes) => {
+            // Combine existing hardcoded types with types from API
+            // Using Set to remove duplicates
+            const combinedTypes = [...new Set([...prevTypes, ...typeNames])];
+            return combinedTypes;
+          });
+        }
+
+        // Fetch ticket categories
+        const categoriesResponse = await axiosInstance.get('/api/ticket-categories');
+        if (categoriesResponse.data && categoriesResponse.data.length > 0) {
+          // Extract names from the response
+          const categoryNames = categoriesResponse.data.map((category) => category.name);
+          setTicketCategories((prevCategories) => {
+            // Combine existing hardcoded categories with categories from API
+            // Using Set to remove duplicates
+            const combinedCategories = [...new Set([...prevCategories, ...categoryNames])];
+            return combinedCategories;
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching ticket types or categories:', error);
+        // Keep using default values if fetch fails
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleNext = () => {
     setActiveStep((prev) => prev + 1);
@@ -90,10 +143,10 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
   };
 
   useEffect(() => {
-    if (type && category) {
-      setValue('title', `${category} - ${type}`, { shouldValidate: true });
+    if (typeId && categoryId) {
+      setValue('title', `${categoryId} - ${typeId}`, { shouldValidate: true });
     }
-  }, [type, category, setValue]);
+  }, [typeId, categoryId, setValue]);
 
   return (
     <Dialog
@@ -148,14 +201,14 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             </Stack>
             <Stack direction="row" justifyContent="stretch" gap={1} width={1}>
               <RenderSelectField
-                name="type"
+                name="typeId"
                 control={control}
                 label="Type"
                 options={ticketTypes}
                 required
               />
               <RenderSelectField
-                name="category"
+                name="categoryId"
                 control={control}
                 label="Category"
                 options={ticketCategories}
@@ -293,7 +346,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             <Button variant="outlined" onClick={handlePrev} sx={{ fontWeight: 400 }}>
               Back
             </Button>
-            <LoadingButton onClick={onSubmit} variant="contained" sx={{ fontWeight: 400 }}>
+            <LoadingButton variant="contained" sx={{ fontWeight: 400 }} type="submit">
               Submit
             </LoadingButton>
           </>
