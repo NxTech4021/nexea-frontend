@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+import { HOST_API } from 'src/config-global';
+
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: 'http://localhost' });
+const axiosInstance = axios.create({ baseURL: HOST_API });
 
 // axiosInstance.defaults.withCredentials = true
 
