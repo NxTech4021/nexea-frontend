@@ -1,27 +1,28 @@
+import useSWR from 'swr';
 import React from 'react';
+import dayjs from 'dayjs';
 
 import {
   Box,
   Stack,
+  Table,
+  TableRow,
   Container,
+  TableHead,
+  TableCell,
+  TableBody,
   Typography,
   ListItemText,
   TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
   CircularProgress,
-  TableBody,
 } from '@mui/material';
 
 import { useSearchParams } from 'src/routes/hooks';
 
-import Iconify from 'src/components/iconify';
-import useSWR from 'swr';
-import dayjs from 'dayjs';
-import Label from 'src/components/label';
 import { fetcher } from 'src/utils/axios';
+
+import Label from 'src/components/label';
+import Iconify from 'src/components/iconify';
 
 const SuccessPayment = () => {
   const searchParams = useSearchParams();

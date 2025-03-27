@@ -50,7 +50,7 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
             renderValue={(option) =>
               options?.find((item) => item.id === option)?.fullName || 'Select an option'
             }
-            onBlur={() => field.onBlur()} 
+            onBlur={() => field.onBlur()}
           >
             <MenuItem disabled value="">
               <em>Select an option</em>
@@ -58,7 +58,6 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
             {options.map((option) => (
               <MenuItem key={option.id} value={option.id}>
                 {`${option.fullName} - ${option?.department}`}
-
               </MenuItem>
             ))}
           </Select>
@@ -97,18 +96,24 @@ const EventCreateDialog = ({ open, onClose }) => {
       sst: '',
       logo: null,
     },
-    mode: 'onChange', 
+    mode: 'onChange',
   });
 
-  const { control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = methods;
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = methods;
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
 
   const handleCancel = () => {
-    reset(); 
-    setActiveStep(0); 
-    onClose(); 
+    reset();
+    setActiveStep(0);
+    onClose();
   };
 
   const onSubmit = handleSubmit(async (eventData) => {
@@ -140,61 +145,60 @@ const EventCreateDialog = ({ open, onClose }) => {
       fullWidth
       PaperProps={{
         elevation: 0,
-        sx: { 
+        sx: {
           borderRadius: 3,
           border: '1px solid',
           borderColor: 'divider',
-          background: (theme) => 
-            theme.palette.mode === 'light' 
+          background: (theme) =>
+            theme.palette.mode === 'light'
               ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
-              : 'linear-gradient(to bottom, #1a202c, #2d3748)'
-        }
+              : 'linear-gradient(to bottom, #1a202c, #2d3748)',
+        },
       }}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <DialogTitle 
-          sx={{ 
-            display: 'flex', 
+        <DialogTitle
+          sx={{
+            display: 'flex',
             alignItems: 'center',
             py: 3,
             px: 4,
-            backgroundColor: (theme) => 
+            backgroundColor: (theme) =>
               theme.palette.mode === 'light'
                 ? 'rgba(245, 247, 250, 0.85)'
-                : 'rgba(26, 32, 44, 0.85)'
+                : 'rgba(26, 32, 44, 0.85)',
           }}
         >
           <Avatar
             alt="Event"
             src="/logo/nexea.png"
-            sx={{ 
-              width: 58, 
-              height: 58, 
+            sx={{
+              width: 58,
+              height: 58,
               marginRight: 2.5,
               border: (theme) => `3px solid ${theme.palette.background.paper}`,
-              backgroundColor: (theme) => 
-                theme.palette.mode === 'light' ? '#f0f4f8' : '#2d3748'
+              backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#f0f4f8' : '#2d3748'),
             }}
           />
           <Box>
-            <Typography 
-              variant="h5" 
-              fontWeight="700" 
-              sx={{ 
+            <Typography
+              variant="h5"
+              fontWeight="700"
+              sx={{
                 color: (theme) => theme.palette.text.primary,
                 letterSpacing: '-0.3px',
-                mb: 0.5
+                mb: 0.5,
               }}
             >
               Create Event
             </Typography>
-            <Typography 
-              variant="body2" 
+            <Typography
+              variant="body2"
               color="text.secondary"
-              sx={{ 
-                display: 'flex', 
+              sx={{
+                display: 'flex',
                 alignItems: 'center',
-                fontSize: '0.85rem'
+                fontSize: '0.85rem',
               }}
             >
               Start creating an event ticket!
@@ -202,10 +206,10 @@ const EventCreateDialog = ({ open, onClose }) => {
           </Box>
         </DialogTitle>
         <Divider />
-        <DialogContent 
-          sx={{ 
-            p: 4, 
-            backgroundColor: (theme) => theme.palette.background.paper 
+        <DialogContent
+          sx={{
+            p: 4,
+            backgroundColor: (theme) => theme.palette.background.paper,
           }}
         >
           <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
@@ -227,36 +231,33 @@ const EventCreateDialog = ({ open, onClose }) => {
             <RHFDatePicker name="eventDate" label="Event Date" />
           </Box>
         </DialogContent>
-        <DialogActions 
-          sx={{ 
-            p: 3, 
-            backgroundColor: (theme) => 
+        <DialogActions
+          sx={{
+            p: 3,
+            backgroundColor: (theme) =>
               theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
             borderTop: '1px solid',
-            borderColor: (theme) => theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748',
+            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
           }}
         >
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             onClick={onClose}
             sx={{
               borderRadius: 4,
               height: '46px',
               padding: '0 24px',
               fontWeight: 600,
-              borderColor: (theme) => theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568',
-              color: (theme) => theme.palette.mode === 'light' ? '#64748b' : '#a0aec0',
+              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
+              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
               borderWidth: '1.5px',
               letterSpacing: '0.3px',
               textTransform: 'none',
               fontSize: '0.95rem',
               '&:hover': {
-                backgroundColor: (theme) => theme.palette.mode === 'light' 
-                  ? '#f8fafc' 
-                  : 'rgba(74, 85, 104, 0.2)',
-                borderColor: (theme) => theme.palette.mode === 'light' 
-                  ? '#cbd5e1' 
-                  : '#718096',
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
+                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
               },
             }}
           >
@@ -271,8 +272,7 @@ const EventCreateDialog = ({ open, onClose }) => {
               height: '46px',
               padding: '0 28px',
               fontWeight: 600,
-              backgroundColor: (theme) => 
-                theme.palette.mode === 'light' ? '#38bdf8' : '#3182ce',
+              backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#38bdf8' : '#3182ce'),
               color: 'white',
               textTransform: 'none',
               fontSize: '0.95rem',
@@ -280,7 +280,7 @@ const EventCreateDialog = ({ open, onClose }) => {
               boxShadow: 'none',
               transition: 'all 0.2s',
               '&:hover': {
-                backgroundColor: (theme) => 
+                backgroundColor: (theme) =>
                   theme.palette.mode === 'light' ? '#0ea5e9' : '#2b6cb0',
                 boxShadow: 'none',
               },
@@ -288,66 +288,6 @@ const EventCreateDialog = ({ open, onClose }) => {
           >
             Create
           </LoadingButton>
-
-//     <Dialog open={open} maxWidth="md" fullWidth>
-
-//       <FormProvider methods={methods} onSubmit={onSubmit}>
-//         <DialogTitle>Create Event</DialogTitle>
-//         <DialogContent>
-//           <Stepper activeStep={activeStep} alternativeLabel>
-//             <Step><StepLabel>Event Details</StepLabel></Step>
-//             <Step><StepLabel>Event Settings</StepLabel></Step>
-//           </Stepper>
-//           {activeStep === 0 && (
-//             <Box display="flex" flexDirection="column" gap={2}>
-//               <RHFTextField 
-//                 name="eventName" 
-//                 label="Event Name"
-//                 onBlur={() => methods.trigger('eventName')}
-//               />
-//               <RenderSelectField 
-//                 name="personInCharge" 
-//                 control={control} 
-//                 label="Person In Charge" 
-//                 options={!isLoading && data} 
-//                 required 
-//               />
-//               <RHFDatePicker 
-//                 name="eventDate" 
-//                 label="Event Date"
-//                 onBlur={() => methods.trigger('eventDate')}
-//               />
-//             </Box>
-//           )}
-//           {activeStep === 1 && (
-//             <Box display="flex" flexDirection="column" gap={2}>
-//               <TextField
-//                 type="file"
-//                 onChange={(e) => setValue('logo', e.target.files[0])}
-//                 helperText="Upload event logo (PNG, JPG)"
-//               />
-//               <RHFTextField 
-//                 name="themeColor" 
-//                 label="Theme Color"
-//                 onBlur={() => methods.trigger('themeColor')}
-//               />
-//               <RHFTextField 
-//                 name="sst" 
-//                 label="SST (%)" 
-//                 type="number"
-//                 onBlur={() => methods.trigger('sst')}
-//               />
-//             </Box>
-//           )}
-//         </DialogContent>
-//         <DialogActions>
-//           <Button onClick={handleCancel} sx={{ color: 'purple' }}>Cancel</Button>
-//           {activeStep > 0 && <Button onClick={handleBack}>Back</Button>}
-//           {activeStep < 1 ? (
-//             <Button variant="contained" onClick={handleNext}>Next</Button>
-//           ) : (
-//             <LoadingButton variant="contained" type="submit" loading={isSubmitting}>Create</LoadingButton>
-//           )}
         </DialogActions>
       </FormProvider>
     </Dialog>

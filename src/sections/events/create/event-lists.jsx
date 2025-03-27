@@ -51,7 +51,6 @@ import { fDate, fDateTime } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import useSWR from 'swr';
-import { toast } from 'react-toastify';
 
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
@@ -71,7 +70,6 @@ import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
 
-
 const EventStatus = {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
@@ -83,19 +81,19 @@ const getStatusColor = (status) => {
       return {
         color: '#229A16',
         bgColor: '#E9FCD4',
-        icon: 'eva:checkmark-circle-2-fill'
+        icon: 'eva:checkmark-circle-2-fill',
       };
     case 'INACTIVE':
       return {
         color: '#B72136',
         bgColor: '#FFE7D9',
-        icon: 'ic:outline-block'
+        icon: 'ic:outline-block',
       };
     default:
       return {
         color: '#637381',
         bgColor: '#F4F6F8',
-        icon: 'mdi:help-circle'
+        icon: 'mdi:help-circle',
       };
   }
 };
@@ -172,7 +170,7 @@ const EventLists = ({ query }) => {
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
-    direction: null
+    direction: null,
   });
 
   const handleSort = (key) => {
@@ -200,7 +198,7 @@ const EventLists = ({ query }) => {
     let filtered = data?.events || [];
 
     if (searchQuery) {
-      filtered = filtered.filter((event) => 
+      filtered = filtered.filter((event) =>
         event.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
@@ -222,14 +220,14 @@ const EventLists = ({ query }) => {
             live: 1,
             scheduled: 2,
             postponed: 3,
-            completed: 4
+            completed: 4,
           };
           if (sortConfig.direction === 'asc') {
             return statusOrder[eventA.status] - statusOrder[eventB.status];
           }
           return statusOrder[eventB.status] - statusOrder[eventA.status];
         }
-        
+
         if (sortConfig.key === 'date') {
           const dateA = new Date(eventA.date);
           const dateB = new Date(eventB.date);
@@ -238,7 +236,7 @@ const EventLists = ({ query }) => {
           }
           return dateB - dateA;
         }
-        
+
         return 0;
       });
     }
@@ -283,11 +281,7 @@ const EventLists = ({ query }) => {
               {/* Left side - Avatar and Event Info */}
               <Grid item xs={12} sm={8}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar
-                    alt={event.name}
-                    src="/logo/nexea.png"
-                    sx={{ width: 48, height: 48 }}
-                  />
+                  <Avatar alt={event.name} src="/logo/nexea.png" sx={{ width: 48, height: 48 }} />
                   <Stack spacing={0.75}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       {event.name}
@@ -319,23 +313,18 @@ const EventLists = ({ query }) => {
 
               {/* Right side - Stats and Actions */}
               <Grid item xs={12} sm={4}>
-                <Stack 
-                  direction="row" 
-                  spacing={2} 
-                  justifyContent="flex-end" 
-                  alignItems="center"
-                >
+                <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
                   {/* Attendees & Event Manager */}
                   <Stack direction="row" spacing={2} alignItems="center">
                     {/* Attendees Count */}
                     <Tooltip title="Total Attendees">
                       <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Iconify 
-                          icon="mdi:account-group" 
-                          sx={{ 
+                        <Iconify
+                          icon="mdi:account-group"
+                          sx={{
                             color: 'text.secondary',
                             width: 20,
-                            height: 20 
+                            height: 20,
                           }}
                         />
                         <Typography variant="body2" color="text.secondary">
@@ -350,10 +339,10 @@ const EventLists = ({ query }) => {
                         <Avatar
                           alt={event.personInCharge.fullName}
                           src={event.personInCharge.avatar || ''}
-                          sx={{ 
-                            width: 24, 
+                          sx={{
+                            width: 24,
                             height: 24,
-                            fontSize: '0.75rem'
+                            fontSize: '0.75rem',
                           }}
                         >
                           {event.personInCharge.fullName.charAt(0)}
@@ -406,113 +395,143 @@ const EventLists = ({ query }) => {
           minWidth: { xs: 800, sm: '100%' },
         }}
       >
-        <Stack 
-          direction="row" 
-          alignItems="center" 
-          sx={{ 
+        <Stack
+          direction="row"
+          alignItems="center"
+          sx={{
             width: '100%',
             '& > *:not(:last-child)': {
               borderRight: `1px solid ${theme.palette.mode === 'light' ? '#dedfe2' : 'rgba(255, 255, 255, 0.12)'}`,
               pr: 2,
               mr: 2,
-            }
+            },
           }}
         >
-          <Typography variant="subtitle2" sx={{ 
-            width: '35%', 
-            color: theme.palette.mode === 'light' ? '#151517' : 'common.white', 
-            fontWeight: 550 
-          }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              width: '35%',
+              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
+              fontWeight: 550,
+            }}
+          >
             Event Name
           </Typography>
-          
+
           {/* Status Column Header */}
-          <Box 
-            sx={{ 
-              width: '15%', 
-              display: 'flex', 
+          <Box
+            sx={{
+              width: '15%',
+              display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
             }}
             onClick={() => handleSort('status')}
           >
-            <Typography variant="subtitle2" sx={{ 
-              color: theme.palette.mode === 'light' ? '#151517' : 'common.white', 
-              fontWeight: 550 
-            }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
+                fontWeight: 550,
+              }}
+            >
               Status
             </Typography>
             <Stack sx={{ ml: 0.5 }}>
-              <Iconify 
-                icon="eva:arrow-up-fill" 
+              <Iconify
+                icon="eva:arrow-up-fill"
                 width={14}
-                sx={{ 
-                  color: sortConfig.key === 'status' && sortConfig.direction === 'asc' 
-                    ? 'grey.500' 
-                    : 'text.disabled'
+                sx={{
+                  color:
+                    sortConfig.key === 'status' && sortConfig.direction === 'asc'
+                      ? 'grey.500'
+                      : 'text.disabled',
                 }}
               />
-              <Iconify 
+              <Iconify
                 icon="eva:arrow-down-fill"
                 width={14}
-                sx={{ 
-                  color: sortConfig.key === 'status' && sortConfig.direction === 'desc' 
-                    ? 'grey.500' 
-                    : 'text.disabled',
-                  mt: '-8px'
+                sx={{
+                  color:
+                    sortConfig.key === 'status' && sortConfig.direction === 'desc'
+                      ? 'grey.500'
+                      : 'text.disabled',
+                  mt: '-8px',
                 }}
               />
             </Stack>
           </Box>
 
           {/* Date & Time Column Header */}
-          <Box 
-            sx={{ 
-              width: '20%', 
-              display: 'flex', 
+          <Box
+            sx={{
+              width: '20%',
+              display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
             }}
             onClick={() => handleSort('date')}
           >
-            <Typography variant="subtitle2" sx={{ color: theme.palette.mode === 'light' ? '#151517' : 'common.white', fontWeight: 550 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
+                fontWeight: 550,
+              }}
+            >
               Date & Time
             </Typography>
             <Stack sx={{ ml: 0.5 }}>
-              <Iconify 
-                icon="eva:arrow-up-fill" 
+              <Iconify
+                icon="eva:arrow-up-fill"
                 width={14}
-                sx={{ 
-                  color: sortConfig.key === 'date' && sortConfig.direction === 'asc' 
-                    ? 'grey.500' 
-                    : 'text.disabled'
+                sx={{
+                  color:
+                    sortConfig.key === 'date' && sortConfig.direction === 'asc'
+                      ? 'grey.500'
+                      : 'text.disabled',
                 }}
               />
-              <Iconify 
+              <Iconify
                 icon="eva:arrow-down-fill"
                 width={14}
-                sx={{ 
-                  color: sortConfig.key === 'date' && sortConfig.direction === 'desc' 
-                    ? 'grey.500' 
-                    : 'text.disabled',
-                  mt: '-8px'
+                sx={{
+                  color:
+                    sortConfig.key === 'date' && sortConfig.direction === 'desc'
+                      ? 'grey.500'
+                      : 'text.disabled',
+                  mt: '-8px',
                 }}
               />
             </Stack>
           </Box>
 
-          <Typography variant="subtitle2" sx={{ width: '25%', color: theme.palette.mode === 'light' ? '#151517' : 'common.white', fontWeight: 550 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              width: '25%',
+              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
+              fontWeight: 550,
+            }}
+          >
             Event Manager
           </Typography>
-          <Typography variant="subtitle2" sx={{ width: '5%', color: theme.palette.mode === 'light' ? '#151517' : 'common.white', fontWeight: 550 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              width: '5%',
+              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
+              fontWeight: 550,
+            }}
+          >
             Actions
           </Typography>
         </Stack>
       </Stack>
 
-      <Stack 
-        sx={{ 
-          maxHeight: '70vh', 
+      <Stack
+        sx={{
+          maxHeight: '70vh',
           overflow: 'auto',
           minWidth: { xs: 800, sm: '100%' },
         }}
@@ -549,8 +568,8 @@ const EventLists = ({ query }) => {
                     color: getIconColor(isExpanded, theme.palette.mode),
                   },
                   '& .event-secondary-text': {
-                    color: getEventSecondaryTextColor(isExpanded, theme.palette.mode)
-                  }
+                    color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
+                  },
                 }}
                 onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
               >
@@ -573,21 +592,21 @@ const EventLists = ({ query }) => {
                     />
                   </Box>
                   <Stack spacing={0.25}>
-                    <Typography 
-                      variant="subtitle2" 
-                      noWrap 
-                      sx={{ 
+                    <Typography
+                      variant="subtitle2"
+                      noWrap
+                      sx={{
                         fontWeight: '500',
                         '&:hover': {
                           textDecoration: 'underline',
-                        }
+                        },
                       }}
                     >
                       {event.name}
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={1}>
-                      <Iconify 
-                        icon="mdi:account-group" 
+                      <Iconify
+                        icon="mdi:account-group"
                         sx={{ width: 14, height: 14 }}
                         className="event-secondary-text"
                       />
@@ -612,19 +631,19 @@ const EventLists = ({ query }) => {
                       bgcolor: statusConfig.bgColor,
                     }}
                   >
-                    <Iconify 
-                      icon={statusConfig.icon} 
+                    <Iconify
+                      icon={statusConfig.icon}
                       className="status-icon"
-                      sx={{ 
-                        width: 16, 
-                        height: 16, 
-                        color: statusConfig.color 
-                      }} 
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        color: statusConfig.color,
+                      }}
                     />
-                    <Typography 
-                      variant="caption" 
+                    <Typography
+                      variant="caption"
                       className="status-text"
-                      sx={{ 
+                      sx={{
                         color: statusConfig.color,
                         fontWeight: 600,
                         textTransform: 'capitalize',
@@ -638,9 +657,7 @@ const EventLists = ({ query }) => {
                 {/* Date & Time */}
                 <Stack spacing={0.5} sx={{ width: '20%' }}>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="body2">
-                      {fDate(event.date)}
-                    </Typography>
+                    <Typography variant="body2">{fDate(event.date)}</Typography>
                   </Stack>
                   <Typography variant="caption" className="event-secondary-text">
                     {dayjs(event.date).format('HH:mm')}
@@ -652,11 +669,11 @@ const EventLists = ({ query }) => {
                   <Avatar
                     alt={event.personInCharge.fullName}
                     src={event.personInCharge.avatar || ''}
-                    sx={{ 
-                      width: 24, 
+                    sx={{
+                      width: 24,
                       height: 24,
                       fontSize: '0.75rem',
-                      bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode)
+                      bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
                     }}
                   >
                     {event.personInCharge.fullName.charAt(0)}
@@ -679,7 +696,7 @@ const EventLists = ({ query }) => {
                       color: getExpandedIconColor(isExpanded, theme.palette.mode),
                     }}
                   >
-                    <Iconify icon={isExpanded ? "eva:close-fill" : "eva:more-vertical-fill"} />
+                    <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
                   </IconButton>
                 </Box>
               </Stack>
@@ -721,19 +738,24 @@ const EventLists = ({ query }) => {
                         px: 1.5,
                         color: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.light',
                         '&:hover': {
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(71, 130, 218, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                          bgcolor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(71, 130, 218, 0.08)'
+                              : 'rgba(255, 255, 255, 0.08)',
                         },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="eva:edit-fill" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>Edit Event</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          Edit Event
+                        </Typography>
                       </Stack>
                     </Box>
-                    
+
                     <Divider orientation="vertical" flexItem />
-                    
+
                     <Box
                       onClick={() => {
                         ticketDialog.onTrue();
@@ -750,19 +772,24 @@ const EventLists = ({ query }) => {
                         px: 1.5,
                         color: theme.palette.mode === 'dark' ? 'info.dark' : 'info.light',
                         '&:hover': {
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(24, 144, 255, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                          bgcolor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(24, 144, 255, 0.08)'
+                              : 'rgba(255, 255, 255, 0.08)',
                         },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="mdi:ticket" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>Manage Tickets</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          Manage Tickets
+                        </Typography>
                       </Stack>
                     </Box>
-                    
+
                     <Divider orientation="vertical" flexItem />
-                    
+
                     <Box
                       onClick={() => {
                         setOpenCSV(true);
@@ -779,23 +806,29 @@ const EventLists = ({ query }) => {
                         px: 1.5,
                         color: theme.palette.mode === 'dark' ? 'success.dark' : 'success.light',
                         '&:hover': {
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(84, 214, 44, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                          bgcolor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(84, 214, 44, 0.08)'
+                              : 'rgba(255, 255, 255, 0.08)',
                         },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="mdi:file-upload" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>Upload CSV</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          Upload CSV
+                        </Typography>
                       </Stack>
                     </Box>
-                    
+
                     <Divider orientation="vertical" flexItem />
-                    
+
                     <Box
                       onClick={() => {
                         const eventLink = `http://localhost:81/event/${event.id}`;
-                        navigator.clipboard.writeText(eventLink)
+                        navigator.clipboard
+                          .writeText(eventLink)
                           .then(() => {
                             enqueueSnackbar('Link copied!', {
                               variant: 'success',
@@ -819,19 +852,24 @@ const EventLists = ({ query }) => {
                         px: 1.5,
                         color: theme.palette.mode === 'dark' ? 'warning.dark' : 'warning.light',
                         '&:hover': {
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 171, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                          bgcolor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(255, 171, 0, 0.08)'
+                              : 'rgba(255, 255, 255, 0.08)',
                         },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="mdi:content-copy" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>Copy Cart Link</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          Copy Cart Link
+                        </Typography>
                       </Stack>
                     </Box>
-                    
+
                     <Divider orientation="vertical" flexItem />
-                    
+
                     <Box
                       onClick={() => {
                         setOpenDelete(true);
@@ -848,14 +886,19 @@ const EventLists = ({ query }) => {
                         px: 1.5,
                         color: theme.palette.mode === 'dark' ? 'error.dark' : 'error.light',
                         '&:hover': {
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 86, 48, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+                          bgcolor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(255, 86, 48, 0.08)'
+                              : 'rgba(255, 255, 255, 0.08)',
                         },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="eva:trash-2-outline" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>Delete</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                          Delete
+                        </Typography>
                       </Stack>
                     </Box>
                   </Box>
@@ -883,10 +926,10 @@ const EventLists = ({ query }) => {
 
   const handleEventUpdated = (updatedEvent) => {
     if (data && data.events) {
-      const updatedEvents = data.events.map(event => 
+      const updatedEvents = data.events.map((event) =>
         event.id === updatedEvent.id ? updatedEvent : event
       );
-      
+
       mutate({ ...data, events: updatedEvents }, false);
 
       if (selectedEvent && selectedEvent.id === updatedEvent.id) {
@@ -986,10 +1029,10 @@ const EventLists = ({ query }) => {
     <Box sx={{ mt: 4 }}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Stack 
-            direction="row" 
-            spacing={2} 
-            sx={{ 
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
               mb: 2,
               width: '100%',
             }}
@@ -1001,24 +1044,24 @@ const EventLists = ({ query }) => {
               placeholder="Search Events"
               InputProps={{
                 startAdornment: (
-                  <Iconify 
-                    icon="eva:search-fill" 
-                    sx={{ 
+                  <Iconify
+                    icon="eva:search-fill"
+                    sx={{
                       color: 'text.disabled',
                       width: 20,
                       height: 20,
-                      mr: 1
-                    }} 
+                      mr: 1,
+                    }}
                   />
                 ),
               }}
-              sx={{ 
+              sx={{
                 '& .MuiOutlinedInput-root': {
                   height: 40,
-                }
+                },
               }}
             />
-            
+
             {isSmallScreen ? (
               <IconButton
                 sx={{
@@ -1034,7 +1077,7 @@ const EventLists = ({ query }) => {
               <Button
                 onClick={createDialog.onTrue}
                 variant="contained"
-                sx={{ 
+                sx={{
                   minWidth: 'fit-content',
                   height: 40,
                   fontWeight: 550,
@@ -1045,9 +1088,9 @@ const EventLists = ({ query }) => {
             )}
           </Stack>
 
-          <Stack 
-            direction={isSmallScreen ? 'column' : 'row'} 
-            spacing={2} 
+          <Stack
+            direction={isSmallScreen ? 'column' : 'row'}
+            spacing={2}
             alignItems={isSmallScreen ? 'stretch' : 'center'}
             justifyContent="space-between"
             mb={3}
@@ -1059,7 +1102,7 @@ const EventLists = ({ query }) => {
                   color="inherit"
                   onClick={handleOpenFilter}
                   endIcon={<Iconify icon="eva:chevron-down-fill" />}
-                  sx={{ 
+                  sx={{
                     width: '100%',
                     justifyContent: 'space-between',
                     padding: 1,
@@ -1071,9 +1114,9 @@ const EventLists = ({ query }) => {
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Iconify icon="ic:round-filter-list" />
                     <Typography variant="body2">
-                      {statusFilter ? 
-                        `Filter: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : 
-                        'All Events'}
+                      {statusFilter
+                        ? `Filter: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`
+                        : 'All Events'}
                     </Typography>
                   </Stack>
                 </Button>
@@ -1099,12 +1142,12 @@ const EventLists = ({ query }) => {
                     }}
                   >
                     <ListItemIcon>
-                      <Iconify 
-                        icon="mdi:check-circle" 
-                        sx={{ 
+                      <Iconify
+                        icon="mdi:check-circle"
+                        sx={{
                           color: statusFilter === '' ? 'primary.main' : 'text.disabled',
                           visibility: statusFilter === '' ? 'visible' : 'hidden',
-                        }} 
+                        }}
                       />
                     </ListItemIcon>
                     All Events
@@ -1124,23 +1167,23 @@ const EventLists = ({ query }) => {
                         }}
                       >
                         <ListItemIcon>
-                          <Iconify 
-                            icon={statusConfig.icon} 
-                            sx={{ 
+                          <Iconify
+                            icon={statusConfig.icon}
+                            sx={{
                               color: statusFilter === status ? 'primary.main' : statusConfig.color,
-                            }} 
+                            }}
                           />
                         </ListItemIcon>
                         {status}
                       </MenuItem>
-                    )
+                    );
                   })}
                 </Menu>
               </>
             ) : (
               // Desktop view - Filter chips in tray design
-              <Stack 
-                direction="row" 
+              <Stack
+                direction="row"
                 sx={{
                   minWidth: 'min-content',
                   position: 'relative',
@@ -1181,43 +1224,28 @@ const EventLists = ({ query }) => {
                       key={status}
                       onClick={() => handleStatusFilterChange(status)}
                       disableRipple
-                      startIcon={<Iconify icon={statusConfig.icon} sx={{ width: 18, height: 18 }} />}
-                      sx={{ 
+                      startIcon={
+                        <Iconify icon={statusConfig.icon} sx={{ width: 18, height: 18 }} />
+                      }
+                      sx={{
                         minWidth: 'max-content',
                         height: '32px',
                         px: 1.5,
                         color: getButtonColor(statusFilter === status, theme.palette.mode),
                         bgcolor: getButtonBgColor(statusFilter === status, theme.palette.mode),
-                        borderRight: index !== Object.values(EventStatus).length - 1 ? '1px solid' : 'none',
+                        borderRight:
+                          index !== Object.values(EventStatus).length - 1 ? '1px solid' : 'none',
                         borderColor: 'divider',
                         borderRadius: 0,
                         '&:hover': {
-                          bgcolor: getHoverBackgroundColor(statusFilter === status, theme.palette.mode),
+                          bgcolor: getHoverBackgroundColor(
+                            statusFilter === status,
+                            theme.palette.mode
+                          ),
                         },
                       }}
                     >
                       {status}
-
-//                       size="small"
-//                       onClick={() => {
-//                         const link = `http://localhost:81/event/${event.id}`;
-//                         navigator.clipboard.writeText(link);
-//                         toast.success('Link Copied');
-
-//                         // const b = document.createElement('a');
-//                         // b.href = `http://localhost:81/event/${event.id}`;
-//                         // b.target = '_blank';
-//                         // document.body.appendChild(b);
-//                         // b.click();
-//                         // document.body.removeChild(b);
-//                       }}
-//                       sx={{
-//                         fontSize: 14,
-//                         px: 2,
-//                       }}
-//                     >
-//                       Copy Link
-
                     </Button>
                   );
                 })}
@@ -1409,7 +1437,7 @@ const EventLists = ({ query }) => {
       </Dialog> */}
 
       {/* Edit Event Modal */}
-      <EditEventModal 
+      <EditEventModal
         open={openEdit}
         onClose={handleCloseEdit}
         selectedEvent={selectedEvent}

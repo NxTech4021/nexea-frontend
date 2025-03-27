@@ -4,7 +4,7 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: 'http://localhost:3001', withCredentials: true });
+const axiosInstance = axios.create({ baseURL: 'http://localhost:81' });
 
 // axiosInstance.defaults.withCredentials = true
 
@@ -114,5 +114,5 @@ export const endpoints = {
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
     delete: (id) => `/api/discount/delete/${id}`,
-  },
+  },
 };
