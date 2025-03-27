@@ -53,6 +53,7 @@ const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...TICKET_STATUS_OPTIONS
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', width: 180 },
   { id: 'price', label: 'Price', width: 220 },
+  { id: 'quantity', label: 'Quantity', width: 180 },
   { id: 'description', label: 'Description', width: 180 },
   { id: 'createdAt', label: 'Created At', width: 180 },
   { id: '', width: 88 },

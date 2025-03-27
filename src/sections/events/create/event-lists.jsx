@@ -2,7 +2,9 @@
 /* eslint-disable import/no-unresolved */
 
 import dayjs from 'dayjs';
+
 import 'react-toastify/dist/ReactToastify.css';
+
 import React, { useMemo, useState } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -47,8 +49,10 @@ import {
 import Iconify from 'src/components/iconify';
 import { fDate, fDateTime } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
+
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
 import useUploadCSV from 'src/hooks/use-upload-csv';
@@ -59,6 +63,9 @@ import { useGetAllEvents } from 'src/api/event';
 import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
+
+import { TableNoData } from 'src/components/table';
+import { toast } from 'sonner';
 
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
@@ -1190,6 +1197,27 @@ const EventLists = ({ query }) => {
                       }}
                     >
                       {status}
+
+//                       size="small"
+//                       onClick={() => {
+//                         const link = `http://localhost:81/event/${event.id}`;
+//                         navigator.clipboard.writeText(link);
+//                         toast.success('Link Copied');
+
+//                         // const b = document.createElement('a');
+//                         // b.href = `http://localhost:81/event/${event.id}`;
+//                         // b.target = '_blank';
+//                         // document.body.appendChild(b);
+//                         // b.click();
+//                         // document.body.removeChild(b);
+//                       }}
+//                       sx={{
+//                         fontSize: 14,
+//                         px: 2,
+//                       }}
+//                     >
+//                       Copy Link
+
                     </Button>
                   );
                 })}

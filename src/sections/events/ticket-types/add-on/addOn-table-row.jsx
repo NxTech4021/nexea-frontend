@@ -34,7 +34,7 @@ export const dataMapping = {
 };
 
 export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
-  const { name, price, description, createdAt } = row;
+  const { name, price, description, createdAt, quantity } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -90,6 +90,7 @@ export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow,
             currency: 'MYR',
           }).format(price)}
         </TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{quantity}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{description || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {dayjs(createdAt).format('LL') || 'N/A'}

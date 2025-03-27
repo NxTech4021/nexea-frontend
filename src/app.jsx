@@ -39,7 +39,7 @@ export default function App() {
       <SettingsProvider
         defaultSettings={{
           themeMode: 'light', // 'light' | 'dark'
-          themeDirection: 'ltr', //  'rtl' | 'ltr'
+          themeDirection: 'ltr', // 'rtl' | 'ltr'
           themeContrast: 'default', // 'default' | 'bold'
           themeLayout: 'vertical', // 'vertical' | 'horizontal' | 'mini'
           themeColorPresets: 'default', // 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red'
@@ -50,8 +50,6 @@ export default function App() {
           <SnackbarProvider>
             <Toaster richColors />
             <MotionLazy>
-              {/* <ToastContainer position="bottom-right" /> */}
-              {/* <ToastContainer position="top-center" /> */}
               <SettingsDrawer />
               <ProgressBar />
               <Router />

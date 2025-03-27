@@ -1,5 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
+import { mutate } from 'swr';
 import { toast } from 'sonner';
 import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
@@ -20,19 +21,21 @@ import {
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import axiosInstance, { endpoints } from 'src/utils/axios';
-import { mutate } from 'swr';
+
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 const defaultValues = {
   name: '',
   price: null,
   description: '',
+  quantity: null,
 };
 
 const schema = yup.object().shape({
   name: yup.string().required('Title is required'),
   price: yup.string().required('Price is required'),
+  quantity: yup.number().required('Quantity is required'),
 });
 
 const CreateAddOnDialog = ({ open, onClose }) => {
@@ -84,6 +87,19 @@ const CreateAddOnDialog = ({ open, onClose }) => {
             <Stack width={1}>
               <InputLabel required>Title</InputLabel>
               <RHFTextField name="name" placeholder="Title" />
+            </Stack>
+            <Stack width={1}>
+              <InputLabel required>Quantity</InputLabel>
+              <RHFTextField
+                name="quantity"
+                type="number"
+                placeholder="Quantity"
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                  }
+                }}
+              />
             </Stack>
             <Stack width={1} spacing={1}>
               <InputLabel required>Price</InputLabel>

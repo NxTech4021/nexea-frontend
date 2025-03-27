@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useLocation } from 'react-router';
 import { useMemo, useEffect, useReducer, useCallback } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
@@ -69,6 +70,8 @@ const reducer = (state, action) => {
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const location = useLocation();
+  const shouldFetch = !/^\/event(\/|$)/.test(location.pathname);
 
   const initialize = useCallback(async () => {
     try {
@@ -104,8 +107,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    if (shouldFetch) {
+      initialize();
+    }
+  }, [initialize, shouldFetch]);
 
   // LOGIN
   const login = useCallback(async (email, password) => {

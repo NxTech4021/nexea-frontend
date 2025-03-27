@@ -1,19 +1,17 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import * as yup from 'yup';
 import { toast } from 'sonner';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
-  Card,
   Stack,
   alpha,
   Button,
   Divider,
+  Tooltip,
   MenuItem,
   Collapse,
   TextField,
@@ -26,38 +24,13 @@ import {
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance, { fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
-import Image from 'src/components/image';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
+import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
 import { TextFieldCustom } from './components/text-field';
-
-// const schema = yup.object().shape({
-//   buyer: yup.object().shape({
-//     firstName: yup.string().required('First name is required'),
-//     lastName: yup.string().required('Last name is required'),
-//     email: yup.string().email('Must be a valid email').required('Email is required'),
-//     phoneNumber: yup.string().required('Phone number is required'),
-//     company: yup.string().required('Company name is required'),
-//     isAnAttendee: yup.boolean(),
-//     ticket: yup.string().when('isAnAttendee', {
-//       is: (y) => y.val,
-//       then: (y) => y.string().required('Ticket type is required'),
-//     }),
-//   }),
-//   attendees: yup.array().of(
-//     yup.object().shape({
-//       firstName: yup.string().required('First name is required'),
-//       lastName: yup.string().required('Last name is required'),
-//       email: yup.string().required('Email is required'),
-//       phoneNumber: yup.string().required('Phone number is required'),
-//       company: yup.string().required('Company name is required'),
-//     })
-//   ),
-// });
 
 const defaultAttendee = {
   firstName: '',
@@ -76,15 +49,16 @@ const TicketInformationCard = () => {
   const mdDown = useResponsive('down', 'md');
   const [discountCode, setDiscountCode] = useState(null);
   const boxRef = useRef();
+  const cartSessionId = localStorage.getItem('cartSessionId');
 
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
-  const { data, isLoading: cartLoading, mutate } = useSWR('/api/cart/', fetcher);
+  const { data, isLoading: cartLoading, mutate } = useSWR(`/api/cart/${cartSessionId}`, fetcher);
 
-  const isCartExpired = useMemo(() => dayjs(data.expiryDate).isBefore(dayjs(), 'date'), [data]);
+  const isCartExpired = useMemo(() => dayjs(data?.expiryDate).isBefore(dayjs(), 'date'), [data]);
 
   const ticketTypes = useMemo(() => data?.cartItem, [data]);
 
@@ -107,24 +81,6 @@ const TicketInformationCard = () => {
     () => data?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
     [data]
   );
-
-  // const methods = useForm({
-  //   resolver: yupResolver(schema),
-  //   defaultValues: {
-  //     buyer: {
-  //       firstName: '',
-  //       lastName: '',
-  //       email: '',
-  //       phoneNumber: '',
-  //       company: '',
-  //       isAnAttendee: false,
-  //       ticket: '',
-  //     },
-  //     attendees: null,
-  //   },
-  //   mode: 'onChange',
-  //   reValidateMode: 'onChange',
-  // });
 
   const { watch, control, setValue, getValues } = useFormContext();
 
@@ -217,6 +173,17 @@ const TicketInformationCard = () => {
     fields.forEach((field, index) => {
       setValue(`attendees.${index}.company`, companyName, { shouldValidate: true });
     });
+  };
+
+  const removeTicket = async (item) => {
+    try {
+      const ticket = data.cartItem.find((a) => a.ticketType.id === item);
+      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
+      mutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error('Failed to remove');
+    }
   };
 
   const helperText = (
@@ -393,13 +360,27 @@ const TicketInformationCard = () => {
                 </Stack>
               </Stack>
 
-              <IconButton>
-                {collapseAttendees.includes(index) ? (
-                  <Iconify icon="ep:arrow-down-bold" width={20} />
-                ) : (
-                  <Iconify icon="ep:arrow-right-bold" width={20} />
-                )}
-              </IconButton>
+              <Stack direction="row" spacing={1}>
+                <Tooltip title="Remove ticket">
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeTicket(field.ticket.id);
+                    }}
+                  >
+                    <Iconify icon="mdi:trash" width={20} />
+                  </IconButton>
+                </Tooltip>
+
+                <IconButton>
+                  {collapseAttendees.includes(index) ? (
+                    <Iconify icon="ep:arrow-down-bold" width={20} />
+                  ) : (
+                    <Iconify icon="ep:arrow-right-bold" width={20} />
+                  )}
+                </IconButton>
+              </Stack>
             </Stack>
 
             <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
@@ -494,7 +475,6 @@ const TicketInformationCard = () => {
       Array.from({ length: item.quantity }, () => ({
         ticket: item.ticketType,
         ...defaultAttendee,
-        isCollapse: true,
       }))
     );
 
@@ -577,12 +557,6 @@ const TicketInformationCard = () => {
     };
   }, [anotherCollapse]);
 
-  // useEffect(() => {
-  //   if (!data) return;
-  //   window.onbeforeunload = () =>
-  //     'Any string value here forces a dialog box to \n appear before closing the window.';
-  // }, [data]);
-
   if (cartLoading) {
     <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
       <CircularProgress
@@ -597,25 +571,20 @@ const TicketInformationCard = () => {
   }
 
   return (
-    <Stack
-      component={Card}
+    <Box
       sx={{
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
+        p: 2,
       }}
     >
-      <Box sx={{ bgcolor: 'black', p: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Image src="/assets/tickets/ticket-2.svg" width={20} />
-          <ListItemText
-            primary="Billing Information"
-            secondary="Personal and contact information of the buyer."
-            primaryTypographyProps={{ variant: 'subtitle1', color: 'white' }}
-            secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
-          />
-        </Stack>
-      </Box>
+      <ListItemText
+        primary="Billing Information"
+        secondary="Personal and contact information of the buyer."
+        primaryTypographyProps={{ variant: 'subtitle1' }}
+        secondaryTypographyProps={{ variant: 'caption' }}
+      />
       <Box
         ref={ref}
         flexGrow={1}
@@ -631,11 +600,9 @@ const TicketInformationCard = () => {
       >
         {isCartExpired && 'Expired already'}
 
-        {/* <FormProvider methods={methods}> */}
         {buyerInfo}
         <Divider sx={{ my: 2 }} />
         {attendeeinfo}
-        {/* </FormProvider> */}
 
         <IconButton
           size="small"
@@ -902,6 +869,7 @@ const TicketInformationCard = () => {
             size="large"
             variant="contained"
             fullWidth
+            type="submit"
             // loading={loading.value}
             // onClick={handleCheckout}
             // disabled={!totalTicketsQuantitySelected}
@@ -913,7 +881,7 @@ const TicketInformationCard = () => {
           </LoadingButton>
         </Box>
       )}
-    </Stack>
+    </Box>
   );
 };
 

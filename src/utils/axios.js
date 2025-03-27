@@ -4,7 +4,9 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({ baseURL: 'http://localhost:3001', withCredentials: true });
+
+// axiosInstance.defaults.withCredentials = true
 
 axiosInstance.interceptors.response.use(
   (res) => res,
@@ -102,6 +104,7 @@ export const endpoints = {
     createSession: '/api/cart',
     addTicket: `/api/cart/addTicket`,
     extendSession: '/api/cart/extendSession',
+    removeTicket: '/api/cart/removeCartItem',
   },
   discount: {
     get: '/api/discount/',
@@ -111,5 +114,5 @@ export const endpoints = {
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
     delete: (id) => `/api/discount/delete/${id}`,
-  },
+  },
 };

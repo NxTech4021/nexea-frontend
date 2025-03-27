@@ -73,6 +73,27 @@ export function useNavData() {
             title: 'Add Ons',
             path: paths.dashboard.ticketType.addOn,
             icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
+            children: [
+              {
+                title: 'List',
+                path: paths.dashboard.ticketType.root,
+              },
+              {
+                title: 'Settings',
+                path: paths.dashboard.ticketType.settings,
+              },
+              {
+                title: 'Add Ons',
+                path: paths.dashboard.ticketType.addOn,
+                children: [
+                  {
+                    title: 'List',
+                    path: paths.dashboard.ticketType.addOn,
+                  },
+                ],
+              },
+            ],
+
           },
           {
             title: 'Discount Codes',
