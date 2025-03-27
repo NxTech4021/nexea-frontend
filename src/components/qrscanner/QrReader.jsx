@@ -1,6 +1,6 @@
 /* eslint-disable no-unneeded-ternary */
+import { toast } from 'sonner';
 import QrScanner from 'qr-scanner';
-import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
 import { useTheme } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
@@ -55,10 +55,10 @@ const QrReader = () => {
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${eventId}`);
+      const response = await axiosInstance.get(`${endpoints.attendee.root}?eventId=${eventId}`);
 
-      const ticketCode = response.data.attendee.map((obj) => obj.ticketCode);
-      setAttendeesData(response.data.attendee);
+      const ticketCode = response.data.map((obj) => obj.ticket.ticketCode);
+      setAttendeesData(response.data);
       return { ticketCode };
     } catch (error) {
       console.error('Error fetching attendees:', error);
@@ -67,29 +67,26 @@ const QrReader = () => {
   }, [eventId]);
 
   // eslint-disable-next-line consistent-return
-  const isCheckIn = async (id) => {
-    try {
-      // const { data } = await axiosInstance.get(`${endpoints.attendee.checkedIn}/${id}`);
+  // const isCheckIn = async (id) => {
+  //   try {
+  //     // const { data } = await axiosInstance.get(`${endpoints.attendee.checkedIn}/${id}`);
 
-      const { data } = await axiosInstance.get(`/api/attendee/${id}`);
+  //     const { data } = await axiosInstance.get(`/api/attendee/${id}`);
 
-      if (data?.checkedIn) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      return error;
-    }
-  };
+  //     if (data?.checkedIn) {
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (error) {
+  //     return error;
+  //   }
+  // };
 
   const updateAttendees = useCallback(
     async (id) => {
       try {
-        await axiosInstance.patch(
-          `${endpoints.attendee.update}/${id}`,
-          { checkedIn: AttendanceStatus.present },
-          { headers: { 'content-type': 'application/json' } }
-        );
+        await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
+        toast.success('Successfully checked in');
         await fetchTicketDatabase();
       } catch (error) {
         console.error('Error updating attendance:', error);
@@ -164,31 +161,33 @@ const QrReader = () => {
         setTicketMatch(false);
         if (scannedResult) {
           const attendeeData = attendeesData.find(
-            (attendee) => attendee.ticketCode === scannedResult
+            (attendee) => attendee.ticket.ticketCode === scannedResult
           );
 
+          console.log(attendeeData);
+
           if (attendeeData) {
-            if (await isCheckIn(attendeeData.id)) {
-              return toast.warn(`${attendeeData.attendeeFullName} is already checked in.`);
+            if (attendeeData?.status === 'checkedIn') {
+              return toast.warning(`${attendeeData.firstName} is already checked in.`);
             }
-            setScannedAttendee((prev) => ({
-              ...prev,
-              email: attendeeData.attendeeEmail,
-              name: attendeeData.attendeeFullName,
-              companyName: attendeeData.companyName,
-              phoneNumber: attendeeData.phoneNumber,
-              ticketType: attendeeData.ticketType,
-            }));
-            // setScannedName(attendeeData.attendeeFullName);
-            // setScannedEmail(attendeeData.attendeeEmail);
-            if (attendeesData.find((attendee) => attendee.buyerEmail === attendeeData.buyerEmail)) {
-              setOpenModalEmail(true);
-            } else {
-              // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
-              // setOpenModalConfirm(true);
-              setOpenModalEmail(true);
-              // await updateAttendees(scannedAttendee.id);
-            }
+            updateAttendees(attendeeData.id);
+            // setScannedAttendee((prev) => ({
+            //   ...prev,
+            //   email: attendeeData.attendeeEmail,
+            //   name: attendeeData.attendeeFullName,
+            //   companyName: attendeeData.companyName,
+            //   phoneNumber: attendeeData.phoneNumber,
+            //   ticketType: attendeeData.ticketType,
+            // }));
+
+            // if (attendeesData.find((attendee) => attendee.buyerEmail === attendeeData.buyerEmail)) {
+            //   setOpenModalEmail(true);
+            // } else {
+            //   // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
+            //   // setOpenModalConfirm(true);
+            //   setOpenModalEmail(true);
+            //   // await updateAttendees(scannedAttendee.id);
+            // }
           } else {
             return toast.error('Attendee not found for scanned ticket ID:', scannedResult);
           }
@@ -199,10 +198,11 @@ const QrReader = () => {
         return toast.error('QR does not match any ticket in the database');
       }
     } catch (error) {
+      console.log(error);
       return toast.error('Error updating attendance:');
       // console.error('Error updating attendance:', error);
     }
-  }, [ticketMatch, scannedResult, attendeesData]);
+  }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
   const handleCloseModalEmail = () => {
     setOpenModalEmail(false);
@@ -222,10 +222,11 @@ const QrReader = () => {
   useEffect(() => {
     const handleScanSuccess = async (result) => {
       const scannedData = result?.data.trim();
+
       setScannedResult(scannedData);
-      console.log(scannedData);
       try {
         const { ticketCode } = await fetchTicketDatabase();
+
         if (ticketCode.includes(scannedData)) {
           return setTicketMatch(true);
         }

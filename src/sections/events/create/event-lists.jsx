@@ -826,7 +826,7 @@ const EventLists = ({ query }) => {
 
                     <Box
                       onClick={() => {
-                        const eventLink = `http://localhost:81/event/${event.id}`;
+                        const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
                         navigator.clipboard
                           .writeText(eventLink)
                           .then(() => {
@@ -840,7 +840,6 @@ const EventLists = ({ query }) => {
                               variant: 'error',
                             });
                           });
-                        // setExpandedRow(null);
                       }}
                       sx={{
                         minWidth: { xs: '90px', sm: '110px' },
