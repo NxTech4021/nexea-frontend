@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+import { toast } from 'sonner';
 import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
@@ -7,11 +9,15 @@ import {
   Stack,
   alpha,
   Grid2,
+  Dialog,
   Divider,
   Collapse,
   Typography,
   IconButton,
+  DialogTitle,
   ListItemText,
+  DialogContent,
+  DialogActions,
   CircularProgress,
 } from '@mui/material';
 
@@ -20,7 +26,6 @@ import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useCartStore } from 'src/utils/store';
 
-import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 
 import useGetCartData from './hooks/use-get-cart';
@@ -33,12 +38,18 @@ const TicketSelectionCard = () => {
   const isOverflow = useBoolean();
   const isTicketsOverflow = useBoolean();
   const [unavailableTickets, setUnavailableTicket] = useState(null);
+  const [addOnInfo, setAddOnInfo] = useState(null);
   const collapse = useBoolean();
   const loading = useBoolean();
+  const addOnDialog = useBoolean();
 
   const tixs = useCartStore((state) => state.tickets);
 
-  const { eventData, mutate: eventMutate, cartMutate, handleCheckout } = useGetCartData();
+  const updateTics = useCartStore((state) => state.updateTickets);
+
+  const updateAddOnQuantity = useCartStore((state) => state.updateAddOnQuantity);
+
+  const { handleCheckout } = useGetCartData();
 
   const totalTicketsQuantitySelected = useMemo(() => {
     const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
@@ -50,9 +61,20 @@ const TicketSelectionCard = () => {
     [tixs]
   );
 
-  const updateTics = useCartStore((state) => state.updateTickets);
+  const handleOpenAddOn = (ticketId, info) => {
+    const existingTicket = tixs.find((item) => item.id === ticketId);
+    if (existingTicket.selectedQuantity === 0) {
+      toast.warning('Please select at least one ticket to proceed');
+      return;
+    }
+    setAddOnInfo({ ...info, selectedQuantity: existingTicket.selectedQuantity, ticketId });
+    addOnDialog.onTrue();
+  };
 
-  console.log(tixs);
+  const handleCloseAddOn = () => {
+    setAddOnInfo(null);
+    addOnDialog.onFalse();
+  };
 
   const tickets = tixs.map((ticket) => {
     if (!ticket) return null;
@@ -72,179 +94,231 @@ const TicketSelectionCard = () => {
 
     return (
       <Grid2
+        container
+        key={ticket.id}
         sx={{
           minHeight: 67,
           borderRadius: 1.5,
           border: 1,
           borderColor: 'divider',
           p: 2,
-          px: 5,
           position: 'relative',
           overflow: 'hidden',
+          '&:hover': {
+            borderColor: 'black',
+            transition: 'linear .3s',
+          },
+          userSelect: 'none',
         }}
-        size={{ xs: 12, md: 6 }}
+        size={{ xs: 12, md: 4 }}
       >
-        <Grid2 container spacing={2} height={1}>
-          <Grid2 size={12}>
-            <Stack spacing={2.5}>
-              <ListItemText
-                primary={ticket.title}
-                secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
-                slotProps={{
-                  primary: {
-                    fontWeight: 600,
-                    letterSpacing: -0.9,
-                    fontSize: 20,
-                    color: '#00000',
-                  },
-                  secondary: {
-                    variant: 'caption',
-                    fontWeight: 500,
-                    fontSize: 14,
-                    letterSpacing: -0.9,
-                    color: '#606060',
-                    maxWidth: 300,
-                    whiteSpace: 'pretty',
-                  },
-                }}
-              />
-              {/* <ListItemText
-                primary="Price"
-                secondary={Intl.NumberFormat('en-MY', {
-                  style: 'currency',
-                  currency: 'MYR',
-                }).format(ticket.price)}
-                slotProps={{
-                  primary: {
-                    fontWeight: 600,
-                    letterSpacing: -0.9,
-                    fontSize: 18,
-                    color: '#00000',
-                  },
-                  secondary: {
-                    mt: -0.5,
-                    fontWeight: 600,
-                    letterSpacing: -0.9,
-                    fontSize: 17,
-                    color: '#00000',
-                  },
-                }}
-              /> */}
-            </Stack>
-          </Grid2>
-          <Grid2 size={12} alignContent="flex-end">
-            <Stack direction="row">
-              <ListItemText
-                primary="Price"
-                secondary={Intl.NumberFormat('en-MY', {
-                  style: 'currency',
-                  currency: 'MYR',
-                }).format(ticket.price)}
-                slotProps={{
-                  primary: {
-                    fontWeight: 600,
-                    letterSpacing: -0.9,
-                    fontSize: 18,
-                    color: '#00000',
-                  },
-                  secondary: {
-                    mt: -0.5,
-                    fontWeight: 600,
-                    letterSpacing: -0.9,
-                    fontSize: 17,
-                    color: '#00000',
-                  },
-                }}
-              />
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={2}
-                // mr={!smDown && 5}
-                justifyContent="end"
-              >
-                <IconButton
-                  sx={{
-                    bgcolor: '#00564B',
-                    '&:hover': { bgcolor: '#00564B99' },
-                    borderRadius: 1,
-                    ...(isMinusDisabled && {
-                      pointerEvents: 'none',
-                      bgcolor: '#D9D9D9',
-                    }),
-                  }}
-                  onClick={() =>
-                    updateTics(ticket.id, {
-                      selectedQuantity:
-                        ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
-                      subTotal: ticket.selectedQuantity * ticket.price,
-                    })
-                  }
-                  onMouseDown={(e) => {
-                    e.currentTarget.style.transform = 'translateY(1px)';
-                  }}
-                  onMouseUp={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <Iconify
-                    icon="ic:round-minus"
-                    width={15}
-                    color={isMinusDisabled ? '#676767' : 'white'}
-                  />
-                </IconButton>
-                <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
-                <IconButton
-                  sx={{
-                    bgcolor: '#00564B',
-                    borderRadius: 1,
-                    '&:hover': { bgcolor: '#00564B99' },
-                    ...(isPlusDisabled && {
-                      pointerEvents: 'none',
-                      bgcolor: '#D9D9D9',
-                    }),
-                  }}
-                  onClick={(e) =>
-                    updateTics(
-                      ticket.id,
-                      ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                        ? {
-                            selectedQuantity:
-                              ticket.selectedQuantity <
-                              ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                                ? ticket.selectedQuantity + 1
-                                : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
-                            subTotal: ticket.selectedQuantity * ticket.price,
-                          }
-                        : {
-                            selectedQuantity: ticket.selectedQuantity + 1,
-                            subTotal: ticket.selectedQuantity * ticket.price,
-                          }
-                    )
-                  }
-                  onMouseDown={(e) => {
-                    e.currentTarget.style.transform = 'translateY(1px)';
-                  }}
-                  onMouseUp={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <Iconify
-                    icon="material-symbols:add-rounded"
-                    width={15}
-                    color={isPlusDisabled ? '#676767' : 'white'}
-                  />
-                </IconButton>
-              </Stack>
-            </Stack>
-          </Grid2>
+        <Grid2 size={12}>
+          <Stack spacing={2.5}>
+            <ListItemText
+              primary={ticket.title}
+              secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
+              slotProps={{
+                primary: {
+                  fontWeight: 600,
+                  letterSpacing: -0.9,
+                  fontSize: 20,
+                  color: '#00000',
+                },
+                secondary: {
+                  variant: 'caption',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  letterSpacing: -0.9,
+                  color: '#606060',
+                  maxWidth: 300,
+                  whiteSpace: 'pretty',
+                },
+              }}
+            />
+          </Stack>
         </Grid2>
+        <Grid2 size={12} alignContent="flex-end">
+          <Stack direction="row" flexWrap="wrap" spacing={1}>
+            <ListItemText
+              primary="Price"
+              secondary={Intl.NumberFormat('en-MY', {
+                style: 'currency',
+                currency: 'MYR',
+              }).format(ticket.price)}
+              slotProps={{
+                primary: {
+                  fontWeight: 600,
+                  letterSpacing: -0.9,
+                  fontSize: 18,
+                  color: '#00000',
+                },
+                secondary: {
+                  mt: -0.5,
+                  fontWeight: 600,
+                  letterSpacing: -0.9,
+                  fontSize: 17,
+                  color: '#00000',
+                },
+              }}
+            />
+            <Stack direction="row" alignItems="center" spacing={2} justifyContent="end">
+              <IconButton
+                sx={{
+                  bgcolor: '#00564B',
+                  '&:hover': { bgcolor: '#00564B99' },
+                  borderRadius: 1,
+                  ...(isMinusDisabled && {
+                    pointerEvents: 'none',
+                    bgcolor: '#D9D9D9',
+                  }),
+                }}
+                onClick={() =>
+                  updateTics(ticket.id, {
+                    selectedQuantity: ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
+                    subTotal: ticket.selectedQuantity * ticket.price,
+                  })
+                }
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'translateY(1px)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <Iconify
+                  icon="ic:round-minus"
+                  width={15}
+                  color={isMinusDisabled ? '#676767' : 'white'}
+                />
+              </IconButton>
+              <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
+              <IconButton
+                sx={{
+                  bgcolor: '#00564B',
+                  borderRadius: 1,
+                  '&:hover': { bgcolor: '#00564B99' },
+                  ...(isPlusDisabled && {
+                    pointerEvents: 'none',
+                    bgcolor: '#D9D9D9',
+                  }),
+                }}
+                onClick={(e) =>
+                  updateTics(
+                    ticket.id,
+                    ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                      ? {
+                          selectedQuantity:
+                            ticket.selectedQuantity <
+                            ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                              ? ticket.selectedQuantity + 1
+                              : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
+                          subTotal: ticket.selectedQuantity * ticket.price,
+                        }
+                      : {
+                          selectedQuantity: ticket.selectedQuantity + 1,
+                          subTotal: ticket.selectedQuantity * ticket.price,
+                        }
+                  )
+                }
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'translateY(1px)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <Iconify
+                  icon="material-symbols:add-rounded"
+                  width={15}
+                  color={isPlusDisabled ? '#676767' : 'white'}
+                />
+              </IconButton>
+            </Stack>
+          </Stack>
+        </Grid2>
+        {!!ticket?.addOns?.length && (
+          <Grid2 size={12} alignContent="flex-end">
+            <Typography variant="caption" fontWeight={600} color="text.secondary">
+              Add Ons :
+            </Typography>
+
+            <Stack direction="row" spacing={1}>
+              {ticket.addOns.map((item) => (
+                <Box
+                  key={item.id}
+                  sx={{
+                    p: 1,
+                    position: 'relative',
+                    borderRadius: 1,
+                    border: 1,
+                    borderColor: 'divider',
+                    '&:hover': {
+                      borderColor: 'black',
+                      transition: 'linear .2s',
+                    },
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                  onClick={() => handleOpenAddOn(ticket.id, item)}
+                >
+                  <Box
+                    sx={{
+                      borderRadius: 10,
+                      width: 18,
+                      height: 18,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'absolute',
+                      right: -8,
+                      top: -8,
+                    }}
+                  >
+                    {!!item?.selectedQuantity && (
+                      <Typography variant="caption" color="success">
+                        {item?.selectedQuantity}x
+                      </Typography>
+                    )}
+                  </Box>
+                  <ListItemText
+                    primary={item.name}
+                    secondary={item.description}
+                    slotProps={{
+                      primary: {
+                        fontWeight: 600,
+                        letterSpacing: -0.9,
+                        fontSize: 14,
+                        color: '#00000',
+                        mb: -0.3,
+                      },
+                      secondary: {
+                        variant: 'caption',
+                        fontWeight: 500,
+                        fontSize: 12,
+                        letterSpacing: -0.9,
+                        color: '#606060',
+                        maxWidth: 300,
+                        whiteSpace: 'pretty',
+                      },
+                    }}
+                  />
+                  <Typography fontWeight={600} fontSize={12}>
+                    {Intl.NumberFormat('en-MY', {
+                      style: 'currency',
+                      currency: 'MYR',
+                    }).format(item.price)}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Grid2>
+        )}
       </Grid2>
     );
   });
@@ -313,43 +387,24 @@ const TicketSelectionCard = () => {
   }, [collapse]);
 
   return (
-    <Stack
-      component={Card}
-      boxShadow={10}
+    <Box
       sx={{
         height: 1,
-        borderRadius: 2,
+        p: 2,
         overflow: 'hidden',
       }}
     >
-      <Box
-        sx={{
-          bgcolor: 'black',
-          p: 2,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          color: 'whitesmoke',
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Image src="/assets/tickets/ticket-1.svg" width={25} />
-          <ListItemText
-            primary="Event Ticket"
-            secondary={eventData.name}
-            primaryTypographyProps={{ variant: 'subtitle1' }}
-            secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
-          />
-        </Stack>
-        <Typography>{`{{ event logo }}`}</Typography>
-      </Box>
-
+      <ListItemText
+        primary="Event Ticket"
+        secondary="Choose from our available tickets, including Standard and Early Bird options. Select your quantity and secure your spot today!"
+        primaryTypographyProps={{ variant: 'subtitle1' }}
+        secondaryTypographyProps={{ variant: 'caption' }}
+      />
       <Box
         ref={ref}
         flexGrow={1}
         sx={{
-          px: 2,
-          height: 'calc(100vh - 30vh)',
+          ...(mdDown ? { maxHeight: 'calc(100vh - 280px)' } : { height: 1 }),
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
@@ -406,18 +461,22 @@ const TicketSelectionCard = () => {
       {mdDown && (
         <Box
           ref={boxRef}
-          p={1}
           mt="auto"
+          p={1}
           boxShadow={10}
           sx={{
-            ...(mdDown && {
-              borderTop: 1.5,
-              borderColor: (theme) => theme.palette.divider,
-            }),
+            borderTop: 1.5,
+            borderColor: (theme) => theme.palette.divider,
           }}
+          position="fixed"
+          width={1}
+          left={0}
+          bottom={0}
+          zIndex={1111}
+          component={Card}
         >
           <Collapse in={collapse.value} timeout="auto">
-            <Box sx={{ height: '30vh', p: 1 }} position="relative">
+            <Box sx={{ height: '40vh', p: 1 }} position="relative">
               {!totalTicketsQuantitySelected ? (
                 <Typography
                   sx={{
@@ -549,8 +608,136 @@ const TicketSelectionCard = () => {
           </LoadingButton>
         </Box>
       )}
-    </Stack>
+
+      <AddOnDialog
+        addOnDialog={addOnDialog}
+        handleCloseAddOn={handleCloseAddOn}
+        addOnInfo={addOnInfo}
+        tixs={tixs}
+        updateAddOnQuantity={updateAddOnQuantity}
+      />
+    </Box>
   );
 };
 
 export default TicketSelectionCard;
+
+const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAddOnQuantity }) => {
+  const currentAddOn = useMemo(
+    () =>
+      tixs?.find((a) => a.id === addOnInfo?.ticketId)?.addOns.find((b) => b.id === addOnInfo?.id),
+    [tixs, addOnInfo]
+  );
+
+  const totalSelectedQuantity = useMemo(
+    () =>
+      tixs
+        ?.find((a) => a.id === addOnInfo?.ticketId)
+        ?.addOns?.reduce((acc, curr) => acc + (curr?.selectedQuantity || 0), 0) || 0,
+    [tixs, addOnInfo]
+  );
+
+  return (
+    <Dialog
+      open={addOnDialog.value}
+      onClose={handleCloseAddOn}
+      PaperProps={{
+        sx: { borderRadius: 0.5 },
+      }}
+      fullWidth
+      maxWidth="xs"
+    >
+      <DialogTitle>
+        <Stack direction="row" alignItems="flex-end">
+          <ListItemText
+            primary={addOnInfo?.name || ''}
+            secondary={addOnInfo?.description || ''}
+            slotProps={{ primary: { variant: 'subtitle1' }, secondary: { variant: 'caption' } }}
+          />
+          <Typography variant="caption" fontWeight={600} color="text.secondary">
+            Add on (
+            {tixs
+              ?.find((a) => a.id === addOnInfo?.ticketId)
+              ?.addOns?.reduce((acc, curr) => acc + (curr.selectedQuantity || 0), 0) || 0}
+            /{addOnInfo?.selectedQuantity})
+          </Typography>
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Typography fontWeight={600}>
+            {Intl.NumberFormat('en-MY', {
+              style: 'currency',
+              currency: 'MYR',
+            }).format(addOnInfo?.price || 0)}
+          </Typography>
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            justifyContent="end"
+            overflow="hidden"
+          >
+            <IconButton
+              sx={{
+                bgcolor: '#00564B',
+                '&:hover': { bgcolor: '#00564B99' },
+                borderRadius: 1,
+                ...(currentAddOn?.selectedQuantity === 0 && {
+                  pointerEvents: 'none',
+                  bgcolor: '#D9D9D9',
+                }),
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(1px)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onClick={() => {
+                if (currentAddOn?.selectedQuantity === 0) {
+                  return;
+                }
+                updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'decrement');
+              }}
+            >
+              <Iconify icon="ic:round-minus" width={15} color="white" />
+            </IconButton>
+            <Typography variant="subtitle1">{currentAddOn?.selectedQuantity}</Typography>
+            <IconButton
+              sx={{
+                bgcolor: '#00564B',
+                borderRadius: 1,
+                '&:hover': { bgcolor: '#00564B99' },
+                ...((totalSelectedQuantity === addOnInfo?.selectedQuantity ||
+                  totalSelectedQuantity === currentAddOn?.quantity) && {
+                  pointerEvents: 'none',
+                  bgcolor: '#D9D9D9',
+                }),
+              }}
+              onClick={() => {
+                updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'increment');
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(1px)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <Iconify icon="material-symbols:add-rounded" width={15} color="white" />
+            </IconButton>
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions />
+    </Dialog>
+  );
+};

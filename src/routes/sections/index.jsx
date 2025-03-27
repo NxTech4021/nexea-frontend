@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 
 import { PATH_AFTER_LOGIN } from 'src/config-global';
@@ -9,6 +10,8 @@ import { eventRoutes } from './event';
 import { dashboardRoutes } from './dashboard';
 
 // ----------------------------------------------------------------------
+
+const SuccessView = lazy(() => import('src/pages/tickets/success-view'));
 
 export default function Router() {
   return useRoutes([
@@ -29,6 +32,8 @@ export default function Router() {
     ...ticketRoutes,
 
     ...eventRoutes,
+
+    { path: '/success', element: <SuccessView /> },
 
     // No match 404
     { path: '*', element: <Navigate to="/404" replace /> },

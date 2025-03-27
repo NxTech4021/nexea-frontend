@@ -38,7 +38,6 @@ const TicketOverviewCard = () => {
   const [discountCode, setDiscountCode] = useState(null);
   const mdDown = useResponsive('down', 'md');
   const { data: cartData, cartMutate, handleCheckout } = useGetCartData();
-  const tixs = useCartStore((state) => state.tickets);
   const collapse = useBoolean();
 
   const {
@@ -53,9 +52,9 @@ const TicketOverviewCard = () => {
   );
 
   const totalTicketsQuantitySelected = useMemo(() => {
-    const ticketsTotal = tixs.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
+    const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
     return ticketsTotal;
-  }, [tixs]);
+  }, [tickets]);
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -117,7 +116,7 @@ const TicketOverviewCard = () => {
                     },
                   }}
                 >
-                  {tixs
+                  {tickets
                     .filter((ticket) => ticket.selectedQuantity > 0)
                     .map((ticket) => (
                       <Stack
@@ -233,14 +232,15 @@ const TicketOverviewCard = () => {
   return (
     <Box height={1} position="relative">
       <Stack
-        component={Card}
+        // component={Card}
         sx={{
-          borderRadius: 2,
+          // borderRadius: 2,
           minHeight: 1,
           overflow: 'hidden',
+          boxShadow: 5,
         }}
       >
-        <Box sx={{ bgcolor: 'black', p: 2 }}>
+        {/* <Box sx={{ bgcolor: 'black', p: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Iconify icon="lets-icons:order-fill" width={30} color="white" />
 
@@ -251,7 +251,7 @@ const TicketOverviewCard = () => {
               secondaryTypographyProps={{ variant: 'caption', color: 'white' }}
             />
           </Stack>
-        </Box>
+        </Box> */}
 
         {subTotal || cartData ? (
           <Stack
@@ -282,44 +282,123 @@ const TicketOverviewCard = () => {
                 <Stack spacing={2}>
                   {cartData
                     ? cartData.cartItem.map((item) => (
-                        <Stack
-                          key={item.id}
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Typography noWrap>
-                            {/* {shortenString(`${item.quantity} x ${item.ticketType.title}`, 30)} */}
-                            {`${item.quantity} x ${item.ticketType.title}`}
-                          </Typography>
+                        <Stack key={item.id}>
+                          <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography noWrap>
+                              {/* {shortenString(`${item.quantity} x ${item.ticketType.title}`, 30)} */}
+                              {`${item.quantity} x ${item.ticketType.title}`}
+                            </Typography>
 
-                          <Typography>
-                            {Intl.NumberFormat('en-MY', {
-                              style: 'currency',
-                              currency: 'MYR',
-                            }).format(item.quantity * item.ticketType.price)}
-                          </Typography>
+                            <Typography>
+                              {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(item.quantity * item.ticketType.price)}
+                            </Typography>
+                          </Stack>
+                          {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
+                            <Stack
+                              ml={3}
+                              sx={{
+                                '& .MuiTypography-root': {
+                                  fontSize: 13,
+                                  fontWeight: 400,
+                                },
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  '&.MuiTypography-root': {
+                                    fontWeight: 600,
+                                  },
+                                }}
+                              >
+                                Add Ons:
+                              </Typography>
+                              {item?.cartAddOn
+                                // ?.filter((a) => a.selectedQuantity > 0)
+                                ?.map((a) => (
+                                  <Stack
+                                    key={a.id}
+                                    direction="row"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                  >
+                                    <Typography
+                                      noWrap
+                                    >{`${a.quantity} x ${a.addOn.name}`}</Typography>
+                                    <Typography>
+                                      {Intl.NumberFormat('en-MY', {
+                                        style: 'currency',
+                                        currency: 'MYR',
+                                      }).format(a.quantity * a.addOn.price)}
+                                    </Typography>
+                                  </Stack>
+                                ))}
+                            </Stack>
+                          )}
                         </Stack>
                       ))
                     : tickets
                         .filter((ticket) => ticket.selectedQuantity > 0)
                         .map((ticket) => (
-                          <Stack
-                            key={ticket.id}
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
-                            <Typography noWrap>
-                              {/* {shortenString(`${ticket.selectedQuantity} x ${ticket.title}`, 30)} */}
-                              {`${ticket.selectedQuantity} x ${ticket.title}`}
-                            </Typography>
-                            <Typography>
-                              {Intl.NumberFormat('en-MY', {
-                                style: 'currency',
-                                currency: 'MYR',
-                              }).format(ticket.subTotal)}
-                            </Typography>
+                          <Stack key={ticket.id}>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="space-between"
+                            >
+                              <Typography noWrap>
+                                {/* {shortenString(`${ticket.selectedQuantity} x ${ticket.title}`, 30)} */}
+                                {`${ticket.selectedQuantity} x ${ticket.title}`}
+                              </Typography>
+                              <Typography>
+                                {Intl.NumberFormat('en-MY', {
+                                  style: 'currency',
+                                  currency: 'MYR',
+                                }).format(ticket.subTotal)}
+                              </Typography>
+                            </Stack>
+                            {ticket?.addOns?.some((a) => a?.selectedQuantity > 0) && (
+                              <Stack
+                                ml={3}
+                                sx={{
+                                  '& .MuiTypography-root': {
+                                    fontSize: 13,
+                                    fontWeight: 400,
+                                  },
+                                }}
+                              >
+                                <Typography
+                                  sx={{
+                                    '&.MuiTypography-root': {
+                                      fontWeight: 600,
+                                    },
+                                  }}
+                                >
+                                  Add Ons:
+                                </Typography>
+                                {ticket?.addOns
+                                  ?.filter((a) => a.selectedQuantity > 0)
+                                  ?.map((item) => (
+                                    <Stack
+                                      direction="row"
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                    >
+                                      <Typography
+                                        noWrap
+                                      >{`${item.selectedQuantity} x ${item.name}`}</Typography>
+                                      <Typography>
+                                        {Intl.NumberFormat('en-MY', {
+                                          style: 'currency',
+                                          currency: 'MYR',
+                                        }).format(item.selectedQuantity * item.price)}
+                                      </Typography>
+                                    </Stack>
+                                  ))}
+                              </Stack>
+                            )}
                           </Stack>
                         ))}
                 </Stack>

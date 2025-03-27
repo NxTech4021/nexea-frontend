@@ -15,8 +15,6 @@ const AddOn = () => {
   const { setSelectedAddOns } = useAddOnsStore();
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
-  console.log(selectedAddOns);
-
   if (isLoading) {
     return (
       <Box

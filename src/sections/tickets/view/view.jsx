@@ -7,6 +7,8 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 
 import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
 
+import { useSearchParams } from 'src/routes/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -43,8 +45,26 @@ const schema = yup.object().shape({
     yup.object().shape({
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
-      email: yup.string().email('Must be a valid email').required('Email is required'),
-      phoneNumber: yup.string().required('Phone number is required'),
+      email: yup
+        .string()
+        .email('Must be a valid email')
+        .required('Email is required')
+        .test('unique-email', 'Email must be unique', (value, context) => {
+          if (!value) return false;
+          const { from } = context;
+
+          const emails = from[1].value.attendees.map((user) => user.email);
+          return emails.filter((email) => email === value).length === 1;
+        }),
+      phoneNumber: yup
+        .string()
+        .required('Phone number is required')
+        .test('unique-phone-number', 'Phone number must be unique', (value, context) => {
+          if (!value) return false;
+          const { from } = context;
+          const phones = from[1].value.attendees.map((user) => user.phoneNumber);
+          return phones.filter((phone) => phone === value).length === 1;
+        }),
       company: yup.string().required('Company name is required'),
     })
   ),
@@ -56,6 +76,8 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const settings = useSettingsContext();
   const tixs = useCartStore((state) => state.tickets);
   const loading = useBoolean();
+  const searchParams = useSearchParams();
+  const cartSessionId = localStorage.getItem('cartSessionId');
 
   const {
     eventData,
@@ -63,7 +85,13 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     eventMutate: mutate,
   } = useGetEvent(eventIdParams);
 
-  const { data: cartData, isLoading: cartLoading, mutate: cartMutate } = useGetCart();
+  const {
+    data: cartData,
+    isLoading: cartLoading,
+    mutate: cartMutate,
+    error: cartError,
+    isCartExist,
+  } = useGetCart(cartSessionId);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -83,20 +111,14 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     reValidateMode: 'onChange',
   });
 
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // const newData = {
-      //   ...data,
-      //   ...(cartData.discount && { discount: cartData.discount }), // Only add discount if it exists
-      // };
-      await axiosInstance.post('/api/cart/continuePayment', data);
+      const res = await axiosInstance.post('/api/cart/continuePayment', data);
+      window.location.href = res.data.paymentUrl;
     } catch (error) {
-      console.log(error);
+      toast.error(error?.message);
     }
   });
 
@@ -109,16 +131,14 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       // Filter only selected tickets
       const tickets = tixs.filter((tix) => tix.selectedQuantity !== 0);
 
-      await axiosInstance.post('/api/cart/checkout', {
+      const res = await axiosInstance.post('/api/cart/checkout', {
         tickets,
         eventId: eventData.id,
       });
+      localStorage.setItem('cartSessionId', res.data.cartSessionId);
       toast.info('Your cart is ready!');
       cartMutate();
     } catch (error) {
-      // if (error?.ticketId) {
-      //   setUnavailableTicket(error?.ticketId);
-      // }
       toast.error(error?.message);
     } finally {
       loading.onFalse();
@@ -168,7 +188,6 @@ const TicketPurchaseView = ({ eventIdParams }) => {
           thickness={7}
           size={25}
           sx={{
-            // color: (theme) => theme.palette.common.black,
             strokeLinecap: 'round',
           }}
         />
@@ -222,7 +241,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
       <Box minHeight={76} />
 
-      <Box position="absolute">
+      <Box position="absolute" left="62%" zIndex={1111}>
         <MaterialUISwitch
           sx={{ m: 1 }}
           checked={settings.themeMode !== 'light'}
@@ -234,7 +253,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Box
-          px={{ lg: 15 }}
+          // px={{ lg: 15 }}
           // bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
           overflow="auto"
           sx={{
@@ -245,9 +264,9 @@ const TicketPurchaseView = ({ eventIdParams }) => {
           }}
         >
           {!mdDown ? (
-            <Grid container spacing={2} minHeight={1} p={2}>
+            <Grid container spacing={2} minHeight={1}>
               <Grid size={{ xs: 12, md: 8 }} position="relative">
-                {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+                {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
                 <TicketOverviewCard />
@@ -255,7 +274,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
             </Grid>
           ) : (
             <Box height={`calc(100vh - ${76}px)`} px={1}>
-              {cartData ? <TicketInformationCard /> : <TicketSelectionCard />}
+              {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
             </Box>
           )}
         </Box>
