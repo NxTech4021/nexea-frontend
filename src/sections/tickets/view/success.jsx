@@ -136,6 +136,7 @@ const SuccessPayment = () => {
                 <TableCell>Email</TableCell>
                 <TableCell>Phone Number</TableCell>
                 <TableCell>Ticket ID</TableCell>
+                <TableCell>Add On Ticket</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -146,6 +147,9 @@ const SuccessPayment = () => {
                   <TableCell>{attendee.phoneNumber}</TableCell>
                   <TableCell>
                     <Label>{attendee.ticket.ticketCode}</Label>
+                  </TableCell>
+                  <TableCell>
+                    <Label>{attendee.ticket?.ticketAddOn?.addOn?.name || 'N/A'}</Label>
                   </TableCell>
                 </TableRow>
               ))}

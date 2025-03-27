@@ -33,6 +33,7 @@ import Iconify from 'src/components/iconify';
 import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
 import { TextFieldCustom } from './components/text-field';
+import useGetCartData from './hooks/use-get-cart';
 
 const defaultAttendee = {
   firstName: '',
@@ -55,6 +56,7 @@ const TicketInformationCard = () => {
   const searchParams = useSearchParams();
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
+  const { cartMutate } = useGetCartData();
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
@@ -112,7 +114,10 @@ const TicketInformationCard = () => {
       const existingValue = newAttendees[existingTagIndex];
 
       if (existingTagIndex !== -1) {
-        update(existingTagIndex, { ...defaultAttendee, ticket: existingValue.ticket });
+        update(existingTagIndex, {
+          ...defaultAttendee,
+          ticket: existingValue.ticket,
+        });
         setLastRemoved(null); // Reset last removed after restoring
       }
 
@@ -125,6 +130,7 @@ const TicketInformationCard = () => {
         phoneNumber: buyerInfo.phoneNumber || '',
         company: buyerInfo.company || '',
         ticket: newAttendees[index].ticket,
+        addOn: newAttendees[index]?.addOn || null,
       };
 
       if (index !== -1) {
@@ -141,7 +147,7 @@ const TicketInformationCard = () => {
       setValue('buyer.ticket', '');
       const latestAttendeeesInfo = attendees.map((item) =>
         item.isForbuyer
-          ? { ...defaultAttendee, ticket: item.ticket }
+          ? { ...defaultAttendee, ticket: item.ticket, addOn: item.addOn }
           : { ...item, isForbuyer: false }
       );
 
@@ -189,14 +195,21 @@ const TicketInformationCard = () => {
   const removeTicket = async (item, index) => {
     const attendees = JSON.parse(localStorage.getItem('attendees'));
 
-    attendees.splice(index, 1); // Remove item at the specified index
+    if (attendees.length > index) {
+      attendees.splice(index, 1); // Remove item at the specified index
+      localStorage.setItem('attendees', JSON.stringify(attendees));
+    }
 
-    localStorage.setItem('attendees', JSON.stringify(attendees));
+    // Ensure that attendees is empty before removing from localStorage
+    if (attendees.length === 0) {
+      localStorage.removeItem('attendees');
+    }
 
     try {
       const ticket = data.cartItem.find((a) => a.ticketType.id === item);
       const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
-      mutate();
+      mutate(`/api/cart/${cartSessionId}`);
+      cartMutate();
       toast.success(res?.data?.message);
     } catch (error) {
       toast.error('Failed to remove');
@@ -374,6 +387,12 @@ const TicketInformationCard = () => {
                     {field.ticket.title}
                   </Label>
                   {field.isForbuyer && <Label color="success">Buyer&apos;s ticket</Label>}
+                  {field.addOn && (
+                    <Label color="warning">
+                      <Iconify icon="icon-park-solid:add-one" width={18} mr={1} />
+                      Add On - {field?.addOn?.addOn?.name}
+                    </Label>
+                  )}
                 </Stack>
               </Stack>
 
@@ -497,12 +516,16 @@ const TicketInformationCard = () => {
     }
 
     // Generate attendee list based on ticket quantity
-    const result = data.cartItem.flatMap((item) =>
-      Array.from({ length: item.quantity }, () => ({
+    const result = data.cartItem.flatMap((item) => {
+      const addOns =
+        item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
+
+      return Array.from({ length: item.quantity }, (_, index) => ({
         ticket: item.ticketType,
+        addOn: addOns[index] || null,
         ...defaultAttendee,
-      }))
-    );
+      }));
+    });
 
     setValue('attendees', result);
     localStorage.setItem('attendees', JSON.stringify(result)); // Cache the data

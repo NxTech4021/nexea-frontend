@@ -13,13 +13,13 @@ import {
   Collapse,
   TextField,
   Typography,
-  ListItemText,
+  IconButton,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance from 'src/utils/axios';
+import axiosInstance, { endpoints } from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
 
 import Iconify from 'src/components/iconify';
@@ -47,7 +47,8 @@ const TicketOverviewCard = () => {
   const subTotal = useMemo(
     () =>
       tickets.reduce((acc, cur) => acc + cur.subTotal, 0) ||
-      cartData?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
+      // cartData?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
+      cartData?.orderSummary?.subtotal,
     [tickets, cartData]
   );
 
@@ -68,6 +69,16 @@ const TicketOverviewCard = () => {
       cartMutate();
     } catch (error) {
       toast.error(error);
+    }
+  };
+
+  const removeDiscountCode = async () => {
+    try {
+      const res = await axiosInstance.patch(endpoints.discount.remove);
+      cartMutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error(error?.message || 'Error removing code');
     }
   };
 
@@ -441,9 +452,14 @@ const TicketOverviewCard = () => {
                           </Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="caption" fontSize={12}>
-                            {cartData.discount.code}
-                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Typography variant="caption" fontSize={12}>
+                              {cartData.discount.code}
+                            </Typography>
+                            <IconButton size="small" onClick={removeDiscountCode}>
+                              <Iconify icon="mdi:trash-outline" width={16} color="error.main" />
+                            </IconButton>
+                          </Stack>
                           <Typography variant="caption" color="error" fontSize={12}>
                             - {cartData.discount.value}
                           </Typography>
@@ -521,13 +537,6 @@ const TicketOverviewCard = () => {
                     }
                     type="submit"
                     loading={isSubmitting}
-                    // onClick={() => {
-                    //   const a = document.createElement('a');
-                    //   a.href = 'https://api.payex.io/Payment/Form/95697b93ae784cab990a433d1f5b7b4b';
-                    //   document.body.appendChild(a);
-                    //   a.click();
-                    //   document.body.removeChild(a);
-                    // }}
                   >
                     Proceed to payment
                   </LoadingButton>

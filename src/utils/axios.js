@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: 'http://localhost:81' });
@@ -114,6 +113,7 @@ export const endpoints = {
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
     delete: (id) => `/api/discount/delete/${id}`,
+    remove: '/api/cart/removeDiscountCode',
   },
   order: {
     root: '/api/order/',
