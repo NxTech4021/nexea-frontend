@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: 'http://localhost:81' });
+const axiosInstance = axios.create({ baseURL: 'http://localhost' });
 
 // axiosInstance.defaults.withCredentials = true
 
