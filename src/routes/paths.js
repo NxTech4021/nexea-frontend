@@ -3,7 +3,7 @@
 const ROOTS = {
   AUTH: '/auth',
   DASHBOARD: '/dashboard',
-  EVENT: "/event"
+  EVENT: '/event',
 };
 
 // ----------------------------------------------------------------------
@@ -40,7 +40,9 @@ export const paths = {
     ticketType: {
       root: `${ROOTS.DASHBOARD}/ticket-type`,
       settings: `${ROOTS.DASHBOARD}/ticket-type/settings`,
-      addOn: `${ROOTS.DASHBOARD}/ticket-type/addOn`,
+    },
+    addOn: {
+      root: `${ROOTS.DASHBOARD}/add-on`,
     },
     discountCode: {
       root: `${ROOTS.DASHBOARD}/discount-code`,
@@ -52,7 +54,7 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/templates`,
     },
     tickets: {
-      root: (id) => `${ROOTS.EVENT}/${id}`
+      root: (id) => `${ROOTS.EVENT}/${id}`,
     },
     attendees: `${ROOTS.DASHBOARD}/attendees`,
     test: `${ROOTS.DASHBOARD}/test`,

@@ -68,11 +68,6 @@ export function useNavData() {
             title: 'Ticket Types',
             path: paths.dashboard.ticketType.root,
             icon: <Iconify icon="f7:tickets-fill" width={22} />,
-          },
-          {
-            title: 'Add Ons',
-            path: paths.dashboard.ticketType.addOn,
-            icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
             children: [
               {
                 title: 'List',
@@ -82,18 +77,19 @@ export function useNavData() {
                 title: 'Settings',
                 path: paths.dashboard.ticketType.settings,
               },
-              {
-                title: 'Add Ons',
-                path: paths.dashboard.ticketType.addOn,
-                children: [
-                  {
-                    title: 'List',
-                    path: paths.dashboard.ticketType.addOn,
-                  },
-                ],
-              },
             ],
+          },
+          {
+            title: 'Add Ons',
+            path: paths.dashboard.addOn.root,
+            icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
 
+            // children: [
+            //   {
+            //     title: 'List',
+            //     path: paths.dashboard.ticketType.addOn,
+            //   },
+            // ],
           },
           {
             title: 'Discount Codes',

@@ -69,11 +69,19 @@ export const dashboardRoutes = [
           { path: 'notifcationStatus/:id', element: <NotificationStatus /> },
         ],
       },
-      { 
+      {
         path: 'ticket-type',
         children: [
-          {element: <TicketTypeView />, index: true },
-          {path: ':settings', element: <TicketTypesPage />},
+          { element: <TicketTypeView />, index: true },
+          { path: 'list', element: <TicketTypeView /> },
+          { path: 'settings', element: <TicketTypesPage /> },
+          // { path: 'addOn', element: <AddOnView /> },
+        ],
+      },
+      {
+        path: 'add-on',
+        children: [
+          { element: <AddOnView />, index: true },
           { path: 'addOn', element: <AddOnView /> },
         ],
       },
