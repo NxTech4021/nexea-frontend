@@ -131,7 +131,9 @@ const EventCreateDialog = ({ open, onClose }) => {
   });
 
   return (
-    <Dialog open={open} maxWidth="md" fullWidth onClose={handleCancel}>
+
+    <Dialog open={open} maxWidth="md" fullWidth>
+
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogTitle>Create Event</DialogTitle>
         <DialogContent>

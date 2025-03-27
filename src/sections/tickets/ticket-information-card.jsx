@@ -1,17 +1,20 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Stack,
   alpha,
+  Button,
   Divider,
+  Tooltip,
   MenuItem,
   Collapse,
+  TextField,
   Typography,
   IconButton,
   ListItemText,
@@ -19,39 +22,15 @@ import {
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
-import { fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
-import Image from 'src/components/image';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
+import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
 import { TextFieldCustom } from './components/text-field';
-
-const schema = yup.object().shape({
-  buyer: yup.object().shape({
-    firstName: yup.string().required('First name is required'),
-    lastName: yup.string().required('Last name is required'),
-    email: yup.string().email('Must be a valid email').required('Email is required'),
-    phoneNumber: yup.string().required('Phone number is required'),
-    company: yup.string().required('Company name is required'),
-    isAnAttendee: yup.boolean(),
-    ticket: yup.string().when('isAnAttendee', {
-      is: (y) => y.val,
-      then: (y) => y.string().required('Ticket type is required'),
-    }),
-  }),
-  attendees: yup.array().of(
-    yup.object().shape({
-      firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('Last name is required'),
-      email: yup.string().required('Email is required'),
-      phoneNumber: yup.string().required('Phone number is required'),
-      company: yup.string().required('Company name is required'),
-    })
-  ),
-});
 
 const defaultAttendee = {
   firstName: '',
@@ -64,39 +43,46 @@ const defaultAttendee = {
 
 const TicketInformationCard = () => {
   const collapse = useBoolean();
+  const anotherCollapse = useBoolean();
   const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
+  const mdDown = useResponsive('down', 'md');
+  const [discountCode, setDiscountCode] = useState(null);
+  const boxRef = useRef();
+  const cartSessionId = localStorage.getItem('cartSessionId');
 
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
-  const { data, isLoading: cartLoading } = useSWR('/api/cart/', fetcher);
+  const { data, isLoading: cartLoading, mutate } = useSWR(`/api/cart/${cartSessionId}`, fetcher);
 
-  const isCartExpired = useMemo(() => dayjs(data.expiryDate).isBefore(dayjs(), 'date'), [data]);
+  const isCartExpired = useMemo(() => dayjs(data?.expiryDate).isBefore(dayjs(), 'date'), [data]);
 
   const ticketTypes = useMemo(() => data?.cartItem, [data]);
 
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      buyer: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        company: '',
-        isAnAttendee: false,
-        ticket: '',
-      },
-      attendees: null,
-    },
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-  });
+  const handleRedeemDiscount = async () => {
+    if (!discountCode) {
+      toast.error('Please enter a discount code');
+      return;
+    }
 
-  const { watch, control, setValue, getValues } = methods;
+    try {
+      const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
+      toast.success(res?.data?.message);
+      mutate();
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+
+  const subTotal = useMemo(
+    () => data?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
+    [data]
+  );
+
+  const { watch, control, setValue, getValues } = useFormContext();
 
   const buyer = watch('buyer.isAnAttendee');
 
@@ -182,7 +168,23 @@ const TicketInformationCard = () => {
     setValue(name, value, { shouldValidate: true });
   };
 
-  const copyCompanyName = () => {};
+  const copyCompanyName = () => {
+    const companyName = getValues('buyer.company');
+    fields.forEach((field, index) => {
+      setValue(`attendees.${index}.company`, companyName, { shouldValidate: true });
+    });
+  };
+
+  const removeTicket = async (item) => {
+    try {
+      const ticket = data.cartItem.find((a) => a.ticketType.id === item);
+      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
+      mutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error('Failed to remove');
+    }
+  };
 
   const helperText = (
     <Stack spacing={0.5} color="text.secondary" my={2}>
@@ -258,7 +260,12 @@ const TicketInformationCard = () => {
             inputMode="decimal"
             onChange={onChangeInputBuyer}
           />
-          <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
+            <Button variant="text" size="small" onClick={copyCompanyName}>
+              Copy
+            </Button>
+          </Stack>
           {buyer && (
             <RHFSelect
               name="buyer.ticket"
@@ -340,7 +347,7 @@ const TicketInformationCard = () => {
                 },
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
                 <Typography variant="subtitle2" color="text.secondary">
                   Attendee {index + 1}
                 </Typography>
@@ -353,13 +360,27 @@ const TicketInformationCard = () => {
                 </Stack>
               </Stack>
 
-              <IconButton>
-                {collapseAttendees.includes(index) ? (
-                  <Iconify icon="ep:arrow-down-bold" width={20} />
-                ) : (
-                  <Iconify icon="ep:arrow-right-bold" width={20} />
-                )}
-              </IconButton>
+              <Stack direction="row" spacing={1}>
+                <Tooltip title="Remove ticket">
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeTicket(field.ticket.id);
+                    }}
+                  >
+                    <Iconify icon="mdi:trash" width={20} />
+                  </IconButton>
+                </Tooltip>
+
+                <IconButton>
+                  {collapseAttendees.includes(index) ? (
+                    <Iconify icon="ep:arrow-down-bold" width={20} />
+                  ) : (
+                    <Iconify icon="ep:arrow-right-bold" width={20} />
+                  )}
+                </IconButton>
+              </Stack>
             </Stack>
 
             <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
@@ -454,7 +475,6 @@ const TicketInformationCard = () => {
       Array.from({ length: item.quantity }, () => ({
         ticket: item.ticketType,
         ...defaultAttendee,
-        isCollapse: true,
       }))
     );
 
@@ -519,11 +539,23 @@ const TicketInformationCard = () => {
     };
   }, [fields]);
 
-  // useEffect(() => {
-  //   if (!data) return;
-  //   window.onbeforeunload = () =>
-  //     'Any string value here forces a dialog box to \n appear before closing the window.';
-  // }, [data]);
+  useLayoutEffect(() => {
+    if (!boxRef.current) return;
+    const overviewBox = boxRef.current;
+
+    const handleClick = (event) => {
+      if (!overviewBox.contains(event.target)) {
+        anotherCollapse.onFalse();
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [anotherCollapse]);
 
   if (cartLoading) {
     <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
@@ -539,26 +571,20 @@ const TicketInformationCard = () => {
   }
 
   return (
-    <Stack
+    <Box
       sx={{
         height: 1,
         borderRadius: 2,
         overflow: 'hidden',
-        color: 'whitesmoke',
-        bgcolor: 'white',
+        p: 2,
       }}
     >
-      <Box sx={{ bgcolor: 'black', p: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Image src="/assets/tickets/ticket-2.svg" width={20} />
-          <ListItemText
-            primary="Billing Information"
-            secondary="Personal and contact information of the buyer."
-            primaryTypographyProps={{ variant: 'subtitle1' }}
-            secondaryTypographyProps={{ color: 'white', variant: 'caption' }}
-          />
-        </Stack>
-      </Box>
+      <ListItemText
+        primary="Billing Information"
+        secondary="Personal and contact information of the buyer."
+        primaryTypographyProps={{ variant: 'subtitle1' }}
+        secondaryTypographyProps={{ variant: 'caption' }}
+      />
       <Box
         ref={ref}
         flexGrow={1}
@@ -570,15 +596,14 @@ const TicketInformationCard = () => {
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
           scrollBehavior: 'smooth',
-          color: 'black',
         }}
       >
         {isCartExpired && 'Expired already'}
-        <FormProvider methods={methods}>
-          {buyerInfo}
-          <Divider sx={{ my: 2 }} />
-          {attendeeinfo}
-        </FormProvider>
+
+        {buyerInfo}
+        <Divider sx={{ my: 2 }} />
+        {attendeeinfo}
+
         <IconButton
           size="small"
           sx={{
@@ -633,7 +658,230 @@ const TicketInformationCard = () => {
           ))}
         </Stack>
       )}
-    </Stack>
+
+      {mdDown && (
+        <Box
+          ref={boxRef}
+          p={1}
+          mt="auto"
+          boxShadow={10}
+          sx={{
+            borderTop: 1.5,
+            borderColor: (theme) => theme.palette.divider,
+          }}
+        >
+          <>
+            <Collapse in={anotherCollapse.value} timeout="auto">
+              <Box sx={{ height: '55vh', p: 1 }} position="relative">
+                <Stack
+                  sx={{
+                    '& .MuiTypography-root': {
+                      fontSize: 14,
+                      fontWeight: 400,
+                    },
+                    textWrap: 'nowrap',
+                  }}
+                  mt={2}
+                  width={1}
+                  spacing={2}
+                  flexShrink={2}
+                  flex={1}
+                  justifyContent="space-between"
+                >
+                  <Box>
+                    <Stack spacing={2}>
+                      {data?.cartItem.map((item) => (
+                        <Stack
+                          key={item.id}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography>{`${item.quantity} x ${item.ticketType.title}`}</Typography>
+                          <Typography>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(item.quantity * item.ticketType.price)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  <Stack spacing={2}>
+                    {data && (
+                      <Stack spacing={1}>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          spacing={1}
+                        >
+                          <TextField
+                            size="small"
+                            fullWidth
+                            placeholder="Enter Discount Code"
+                            value={discountCode}
+                            onChange={(e) =>
+                              setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                            }
+                          />
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleRedeemDiscount}
+                            sx={{ height: 36 }}
+                          >
+                            Apply
+                          </Button>
+                        </Stack>
+
+                        {!!data.discount && (
+                          <Stack maxWidth={200} spacing={1}>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <Iconify
+                                icon="lets-icons:check-fill"
+                                color="success.main"
+                                width={13}
+                              />
+                              <Typography variant="caption" fontSize={12} color="success">
+                                Discount code applied
+                              </Typography>
+                            </Stack>
+                            <Stack direction="row" justifyContent="space-between">
+                              <Typography variant="caption" fontSize={12}>
+                                {data.discount.code}
+                              </Typography>
+                              <Typography variant="caption" color="error" fontSize={12}>
+                                - {data.discount.value}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        )}
+                      </Stack>
+                    )}
+
+                    <Divider />
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>Subtotal:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(subTotal)}
+                      </Typography>
+                    </Stack>
+
+                    {data && (
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        gap={10}
+                        justifyContent="space-between"
+                      >
+                        <Typography>Discount</Typography>
+                        <Typography>
+                          -{' '}
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(data?.orderSummary?.discount)}
+                        </Typography>
+                      </Stack>
+                    )}
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>SST:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(11.94)}
+                      </Typography>
+                    </Stack>
+
+                    <Divider />
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                      sx={{
+                        '&  .MuiTypography-root': {
+                          fontSize: 20,
+                          fontWeight: 600,
+                        },
+                      }}
+                    >
+                      <Typography>Total:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', {
+                          style: 'currency',
+                          currency: 'MYR',
+                        }).format(
+                          data?.orderSummary?.totalPrice
+                            ? data.orderSummary.totalPrice + 11.94
+                            : subTotal + 11.94
+                        )}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Collapse>
+
+            <Box my={1} onClick={() => anotherCollapse.onToggle()}>
+              <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
+                {anotherCollapse.value ? (
+                  <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
+                ) : (
+                  <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+                )}
+                <Typography
+                  variant="subtitle1"
+                  textAlign="end"
+                  fontSize={18}
+                  fontWeight={600}
+                  letterSpacing={-0.7}
+                >
+                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                    data?.orderSummary?.totalPrice && data.orderSummary.totalPrice + 11.94
+                  )}
+                </Typography>
+              </Stack>
+            </Box>
+          </>
+
+          <LoadingButton
+            size="large"
+            variant="contained"
+            fullWidth
+            type="submit"
+            // loading={loading.value}
+            // onClick={handleCheckout}
+            // disabled={!totalTicketsQuantitySelected}
+            startIcon={
+              <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+            }
+          >
+            Proceed to payment
+          </LoadingButton>
+        </Box>
+      )}
+    </Box>
   );
 };
 

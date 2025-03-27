@@ -2,8 +2,7 @@
 /* eslint-disable import/no-unresolved */
 
 import dayjs from 'dayjs';
-//  import PropTypes from 'prop-types';
-import 'react-toastify/dist/ReactToastify.css';
+
 import React, { useMemo, useState } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -43,19 +42,19 @@ import {
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
-import { toast } from 'react-toastify';
+
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';
 import useUploadCSV from 'src/hooks/use-upload-csv';
 import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
 import PropTypes from 'prop-types';
-import { grey } from '@mui/material/colors';
 import { useGetAllEvents } from 'src/api/event';
 import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 import { TableNoData } from 'src/components/table';
+import { toast } from 'sonner';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 
 const EventStatus = {
@@ -93,8 +92,6 @@ const EventLists = ({ query }) => {
   const a = useAuthContext();
 
   const { data, isLoading, error: errorEvents } = useGetAllEvents();
-
-  console.log(data);
 
   const notFound = !data?.events?.length;
 
@@ -245,6 +242,7 @@ const EventLists = ({ query }) => {
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>
                 Actions
               </TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -435,6 +433,29 @@ const EventLists = ({ query }) => {
                         </MenuItem>
                       </Menu>
                     </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        const link = `http://localhost:81/event/${event.id}`;
+                        navigator.clipboard.writeText(link);
+                        toast.success('Link Copied');
+
+                        // const b = document.createElement('a');
+                        // b.href = `http://localhost:81/event/${event.id}`;
+                        // b.target = '_blank';
+                        // document.body.appendChild(b);
+                        // b.click();
+                        // document.body.removeChild(b);
+                      }}
+                      sx={{
+                        fontSize: 14,
+                        px: 2,
+                      }}
+                    >
+                      Copy Link
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

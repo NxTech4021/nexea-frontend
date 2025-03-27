@@ -51,19 +51,16 @@ const NavItem = forwardRef(
             {icon}
           </Box>
         )}
-
         {title && (
           <Box component="span" className="label">
             {title}
           </Box>
         )}
-
         {caption && (
           <Tooltip title={caption} arrow placement="right">
             <Iconify width={16} icon="eva:info-outline" className="caption" />
           </Tooltip>
         )}
-
         {info && subItem && (
           <Box component="span" className="info">
             {info}
@@ -171,12 +168,17 @@ const StyledNavItem = styled(ListItemButton, {
     caption: {
       color: theme.palette.text.disabled,
     },
+    container: {
+      width: 65,
+      height: 50,
+    },
   };
 
   return {
     // Root item
     ...(!subItem && {
       ...baseStyles.item,
+      ...baseStyles.container,
       fontSize: 10,
       minHeight: 56,
       lineHeight: '16px',
@@ -207,11 +209,18 @@ const StyledNavItem = styled(ListItemButton, {
       },
       ...(active && {
         fontWeight: theme.typography.fontWeightBold,
-        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-        color: lightMode ? theme.palette.primary.main : theme.palette.primary.light,
+        color: theme.palette.mode === 'light' ? 'white' : 'black',
+        backgroundColor: theme.palette.mode === 'light' ? '#1F1F1F' : 'white',
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.16),
+          // backgroundColor: alpha(theme.palette.primary.main, 0.16),
+          backgroundColor:
+            theme.palette.mode === 'light' ? alpha('#1F1F1F', 0.9) : alpha('#FFFFFF', 0.9),
         },
+        // backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        // color: lightMode ? theme.palette.primary.main : theme.palette.primary.light,
+        // '&:hover': {
+        //   backgroundColor: alpha(theme.palette.primary.main, 0.16),
+        // },
       }),
       ...(opened && {
         color: theme.palette.text.primary,

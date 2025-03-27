@@ -30,6 +30,7 @@ import { useResponsive } from 'src/hooks/use-responsive';
 
 import Iconify from 'src/components/iconify';
 import { RHFTextField } from 'src/components/hook-form';
+import AddOn from '../components/addOn';
 
 const RenderSelectField = ({ name, control, label, options, required }) => (
   <Stack width={1} spacing={1}>
@@ -182,7 +183,6 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                   control={control}
                   render={({ field, fieldState: { error } }) => (
                     <NumericFormat
-                      // {...field}
                       customInput={TextField}
                       thousandSeparator
                       prefix="RM "
@@ -284,7 +284,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
           </Box>
         )}
 
-        {activeStep === 1 && <Typography>Add ons</Typography>}
+        {activeStep === 1 && <AddOn />}
       </DialogContent>
 
       <DialogActions>

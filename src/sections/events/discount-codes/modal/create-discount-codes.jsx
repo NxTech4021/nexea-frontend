@@ -115,7 +115,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
     reValidateMode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, isSubmitting, watch } = methods;
+  const { control, handleSubmit, reset, isSubmitting, watch, setValue } = methods;
 
   const discountType = watch('type');
 
@@ -200,11 +200,23 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
               <RHFAutocomplete
                 name="availability"
                 multiple
-                options={ticketTypes}
-                getOptionLabel={(option) => `${option.title} ( ${option.event.name} )`}
+                options={[{ id: 'all', title: 'Select all', event: { name: '' } }, ...ticketTypes]}
+                getOptionLabel={(option) =>
+                  option.id === 'all' ? 'Select all' : `${option.title} ( ${option.event.name} )`
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect
                 placeholder="Select ticket types"
+                onChange={(event, selected) => {
+                  if (selected.some((item) => item.id === 'all')) {
+                    setValue(
+                      'availability',
+                      ticketTypes.map(({ id, title, event }) => ({ id, title, event })) // Select all except "Select all"
+                    );
+                  } else {
+                    setValue('availability', selected);
+                  }
+                }}
               />
             </FormField>
 

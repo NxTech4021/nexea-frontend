@@ -1,7 +1,9 @@
-const price = 'RM 20,000.00';
+/* eslint-disable no-plusplus */
+const n = 7;
 
-const formatPrice = (price) => {
-  return price.split(' ')[1];
-};
-
-console.log(parseFloat(formatPrice(price)));
+// eslint-disable-next-line no-plusplus
+for (let i = 1; i < n + 1; i++) {
+  for (let x = i; x < n + 1; x++) {
+    console.log(`*`.repeat(i).padStart(n));
+  }
+}

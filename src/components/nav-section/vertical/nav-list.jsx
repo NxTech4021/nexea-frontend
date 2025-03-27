@@ -58,7 +58,6 @@ export default function NavList({ data, depth, slotProps }) {
         className={active ? 'active' : ''}
         sx={{
           mb: `${slotProps?.gap}px`,
-
           ...(depth === 1 ? slotProps?.rootItem : slotProps?.subItem),
         }}
       />
@@ -102,7 +101,7 @@ function NavSubList({ data, depth, slotProps }) {
     >
       {data.map((list) => (
         <Box
-          mt={1}
+          // mt={1}
           paddingLeft={2}
           key={list.title}
           sx={{

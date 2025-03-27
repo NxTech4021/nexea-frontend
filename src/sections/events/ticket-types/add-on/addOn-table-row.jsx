@@ -20,6 +20,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import dayjs from 'dayjs';
 
 // ----------------------------------------------------------------------
 
@@ -32,18 +33,8 @@ export const dataMapping = {
   speaker: 'Speaker',
 };
 
-export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
-  const {
-    event: { name, id },
-    id: ticketTypeId,
-    ticketUrl,
-    type,
-    category,
-    price,
-    title,
-    isActive,
-    description,
-  } = row;
+export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
+  const { name, price, description, createdAt, quantity } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -91,11 +82,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
-
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {new Intl.NumberFormat('en-MY', {
             minimumFractionDigits: 2,
@@ -103,11 +90,10 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
             currency: 'MYR',
           }).format(price)}
         </TableCell>
-
-        <TableCell>
-          <Label variant="soft" color={getStatusColor(isActive)}>
-            {isActive ? 'Active' : 'Inactive'}
-          </Label>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{quantity}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{description || 'N/A'}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {dayjs(createdAt).format('LL') || 'N/A'}
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
@@ -178,15 +164,6 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
             fullWidth
             margin="normal"
           />
-          {ticketUrl && (
-            <TextField
-              label="Link Url"
-              value={ticketUrl.url}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="normal"
-            />
-          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDetailsDialogOpen(false)} color="primary">
@@ -199,7 +176,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
-        content={`Are you sure want to delete ${title}?`}
+        // content={`Are you sure want to delete ${title}?`}
         action={
           <Button
             variant="contained"
@@ -217,7 +194,7 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
   );
 }
 
-TicketTableRow.propTypes = {
+AddOnTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onSelectRow: PropTypes.func,
   row: PropTypes.object,

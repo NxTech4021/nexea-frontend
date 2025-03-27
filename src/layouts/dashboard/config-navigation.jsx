@@ -85,11 +85,11 @@ export function useNavData() {
               },
               {
                 title: 'Add Ons',
-                path: paths.dashboard.events.root,
+                path: paths.dashboard.ticketType.addOn,
                 children: [
                   {
                     title: 'List',
-                    path: paths.dashboard.discountCode.root,
+                    path: paths.dashboard.ticketType.addOn,
                   },
                 ],
               },

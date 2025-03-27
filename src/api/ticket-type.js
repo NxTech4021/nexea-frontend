@@ -29,6 +29,7 @@ export const createTicketType = async ({
   maximumTicketPerOrder,
   isActive = false,
   isDraft = false,
+  selectedAddOns,
 }) => {
   try {
     if (!isDraft && (!title || !type || !eventId || !category || !price || !quantity)) {
@@ -48,6 +49,7 @@ export const createTicketType = async ({
       minimumTicketPerOrder,
       maximumTicketPerOrder,
       description,
+      selectedAddOns,
     });
 
     return data;

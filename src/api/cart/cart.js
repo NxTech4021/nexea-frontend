@@ -1,13 +1,19 @@
+import useSWR from 'swr';
 import { useMemo } from 'react';
-import useSWR from 'swr/immutable';
 
 import { fetcher, endpoints } from 'src/utils/axios';
 
-export const useGetCart = () => {
-  const { data, isLoading, mutate, error } = useSWR(endpoints.cart.root, fetcher);
+export const useGetCart = (id) => {
+  const { data, isLoading, mutate, error } = useSWR(`${endpoints.cart.root}/${id}`, fetcher);
 
   const memoizedValue = useMemo(
-    () => ({ data, isLoading, error, mutate }),
+    () => ({
+      data: data?.isCartExist ? data : null,
+      isLoading,
+      error,
+      mutate,
+      isCartExist: data?.isCartExist,
+    }),
     [data, isLoading, error, mutate]
   );
 

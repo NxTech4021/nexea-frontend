@@ -39,7 +39,6 @@ export default function NavMini() {
           position: 'fixed',
           left: 10,
           width: NAV.W_MINI,
-
           border: 1,
           borderRadius: 2,
           borderColor: (theme) => theme.palette.divider,
@@ -57,6 +56,7 @@ export default function NavMini() {
           slotProps={{
             currentRole: user?.role,
           }}
+          sx={{ mx: 'auto' }}
         />
       </Stack>
     </Box>

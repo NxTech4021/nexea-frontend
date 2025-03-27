@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { mutate } from 'swr';
 import { toast } from 'sonner';
 import Duration from 'dayjs/plugin/duration';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -11,7 +12,6 @@ import {
   Dialog,
   Button,
   Typography,
-  IconButton,
   ListItemText,
   DialogContent,
 } from '@mui/material';
@@ -29,10 +29,11 @@ import useGetCartData from './hooks/use-get-cart';
 dayjs.extend(Duration);
 
 const TickerPurchaseHeader = () => {
-  const { data: cartData, eventData, mutate: eventMutate, cartMutate: mutate } = useGetCartData();
+  const { data: cartData, eventData, mutate: eventMutate, cartMutate } = useGetCartData();
   const [expiryTime, setExpiryTime] = useState(null);
 
   const smUp = useResponsive('up', 'sm');
+  const mdDown = useResponsive('down', 'md');
   const timeOut = useBoolean();
   const extend = useBoolean();
 
@@ -40,21 +41,22 @@ const TickerPurchaseHeader = () => {
     if (!cartData) return;
     try {
       await axiosInstance.delete(`/api/cart/${cartData?.id}`);
-      mutate(undefined);
+      cartMutate(undefined);
       eventMutate();
+      localStorage.removeItem('cartSessionId');
       timeOut.onFalse();
     } catch (error) {
       toast.error(error?.message || 'Error remove cart', {
         variant: 'error',
       });
     }
-  }, [cartData, mutate, timeOut, eventMutate]);
+  }, [cartData, cartMutate, timeOut, eventMutate]);
 
   const extendSession = useCallback(async () => {
     try {
       extend.onTrue();
       const res = await axiosInstance.patch(endpoints.cart.extendSession);
-      mutate();
+      mutate(endpoints.cart.root);
       toast.success(res?.data?.message);
       timeOut.onFalse();
     } catch (error) {
@@ -62,7 +64,7 @@ const TickerPurchaseHeader = () => {
     } finally {
       extend.onFalse();
     }
-  }, [mutate, extend, timeOut]);
+  }, [extend, timeOut]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -106,15 +108,22 @@ const TickerPurchaseHeader = () => {
   return (
     <>
       <AppBar sx={{ bgcolor: '#000000', color: 'whitesmoke', p: 2 }} position="fixed">
-        <Stack direction="row" alignItems="center" px={{ sm: 5, md: 15 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          px={{ sm: 5, md: 15 }}
+          justifyContent={mdDown && 'space-between'}
+        >
           <Image src="/assets/nexea.png" width={120} />
-          <Stack flexGrow={1}>
-            <ListItemText
-              primary={eventData?.name}
-              secondary={dayjs(eventData?.date).format('LLL')}
-              sx={{ textAlign: 'center' }}
-            />
-          </Stack>
+          {!mdDown && (
+            <Stack flexGrow={1}>
+              <ListItemText
+                primary={eventData?.name}
+                secondary={dayjs(eventData?.date).format('LLL')}
+                sx={{ textAlign: 'center' }}
+              />
+            </Stack>
+          )}
 
           {cartData && (
             <Typography
@@ -127,6 +136,7 @@ const TickerPurchaseHeader = () => {
           )}
         </Stack>
       </AppBar>
+
       <Dialog
         open={timeOut.value}
         fullScreen={!smUp}
@@ -143,9 +153,9 @@ const TickerPurchaseHeader = () => {
       >
         {/* <DialogTitle>Time Limit Reached</DialogTitle> */}
         <DialogContent sx={{ p: 2, textAlign: 'center', position: 'relative' }}>
-          <IconButton sx={{ position: 'absolute', right: 10 }}>
+          {/* <IconButton sx={{ position: 'absolute', right: 10 }}>
             <Iconify icon="material-symbols:close-rounded" width={24} />
-          </IconButton>
+          </IconButton> */}
           <Box
             sx={{
               position: 'absolute',
