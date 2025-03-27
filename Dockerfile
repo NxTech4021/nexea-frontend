@@ -77,4 +77,4 @@ RUN yarn install --frozen-lockfile --production
 EXPOSE 3031
 
 # Start the app
-CMD ["npx", "serve", "-s", "dist", "-l", "3030"]
+CMD ["npx", "serve", "-s", "dist", "-l", "3031"]
