@@ -211,6 +211,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
                   if (selected.some((item) => item.id === 'all')) {
                     setValue(
                       'availability',
+                      // eslint-disable-next-line no-shadow
                       ticketTypes.map(({ id, title, event }) => ({ id, title, event })) // Select all except "Select all"
                     );
                   } else {
