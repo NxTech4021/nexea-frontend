@@ -1,3 +1,6 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
+/* eslint-disable no-shadow */
 export const types = [
   { id: 'fixedAmountPerItems', name: 'Fixed Amount (per item)' },
   { id: 'fixedAmountPerOrder', name: 'Fixed Amount (per order)' },

@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
+import { Box, Card, Stack, Typography, CardContent } from '@mui/material';
+
+import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import { Card, Typography, CardContent, Box, Stack } from '@mui/material';
-
 import Iconify from 'src/components/iconify';
-import { paths } from 'src/routes/paths';
 
 const TicketAnalytics = ({ tickets }) => {
   const router = useRouter();

@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 
-import { Card, Typography, CardContent, Box, Stack } from '@mui/material';
+import { Box, Card, Stack, Typography, CardContent } from '@mui/material';
+
+import { paths } from 'src/routes/paths';
 
 import Iconify from 'src/components/iconify';
-import { paths } from 'src/routes/paths';
 
 const CheckInAnalytics = ({ checkedIns, id }) => {
   const navigate = useNavigate();

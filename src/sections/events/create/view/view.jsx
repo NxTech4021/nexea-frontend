@@ -1,17 +1,14 @@
 import { useState, useCallback } from 'react';
 
 import Container from '@mui/material/Container';
-import { Card, Stack, Button, TextField, IconButton } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { _jobs } from 'src/_mock';
 
-import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 

@@ -51,10 +51,10 @@ import {
 } from 'src/components/table';
 
 import TicketTableRow from '../ticket-table-row';
+import { useAddOnsStore } from '../hooks/use-add-on';
 import CreateTicketTypeDialog from '../dialog/create';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
-import { useAddOnsStore } from '../hooks/use-add-on';
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...TICKET_STATUS_OPTIONS];
 

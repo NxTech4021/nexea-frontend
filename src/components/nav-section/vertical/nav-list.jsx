@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect, useCallback } from 'react';
 
-import { Box, List, ListItem } from '@mui/material';
+import { Box, List } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 
 import { usePathname } from 'src/routes/hooks';

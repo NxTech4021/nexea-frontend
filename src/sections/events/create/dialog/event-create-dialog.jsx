@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 import useSWR from 'swr';
-import React, { useState } from 'react';
 import * as yup from 'yup';
 import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -14,25 +14,22 @@ import {
   Dialog,
   Select,
   Button,
+  Avatar,
+  Divider,
   MenuItem,
   InputLabel,
+  Typography,
   DialogTitle,
   FormControl,
-  ListItemText,
   DialogContent,
   DialogActions,
   FormHelperText,
-  Divider,
-  Avatar,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  TextField,
 } from '@mui/material';
 
 import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+
 import { useGetAllEvents } from 'src/api/event';
+
 import FormProvider, { RHFTextField, RHFDatePicker } from 'src/components/hook-form';
 
 const RenderSelectField = ({ name, control, label, options, required }) => (

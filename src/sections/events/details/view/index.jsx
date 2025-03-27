@@ -2,24 +2,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Grid from '@mui/material/Grid2';
+import Button from '@mui/material/Button';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
   Box,
   Card,
   Stack,
   Container,
-  CardHeader,
   CardContent,
   CircularProgress,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-import Button from '@mui/material/Button';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'src/routes/hooks';
 
 import { useGetAllEvents } from 'src/api/event';
-
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import EventInformation from '../event-information';
 import TicketInformation from '../ticket-information';

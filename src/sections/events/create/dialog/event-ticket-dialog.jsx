@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { FormProvider, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import { enqueueSnackbar } from 'notistack';
 import useSWR from 'swr';
+import * as Yup from 'yup';
+import PropTypes from 'prop-types';
+import { enqueueSnackbar } from 'notistack';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, FormProvider } from 'react-hook-form';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -14,6 +14,7 @@ import {
   Dialog,
   Avatar,
   Button,
+  Divider,
   TableRow,
   TableHead,
   TableCell,
@@ -24,16 +25,18 @@ import {
   DialogActions,
   DialogContent,
   TableContainer,
-  Divider,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import Iconify from 'src/components/iconify';
-import CreateTicketTypeDialog from 'src/sections/events/ticket-types/dialog/create';
-import { createTicketType } from 'src/api/ticket-type';
-import { useAddOnsStore } from 'src/sections/events/ticket-types/hooks/use-add-on';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
+import { createTicketType } from 'src/api/ticket-type';
+
+import Iconify from 'src/components/iconify';
+
+import { useAddOnsStore } from 'src/sections/events/ticket-types/hooks/use-add-on';
+import CreateTicketTypeDialog from 'src/sections/events/ticket-types/dialog/create';
 
 const fetcher = async (url) => {
   const response = await axiosInstance.get(url);

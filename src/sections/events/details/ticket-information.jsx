@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { Card, CardContent, Typography, Box, useTheme } from '@mui/material';
+
+import { Box, Card, useTheme, Typography, CardContent } from '@mui/material';
 
 
 const ticketData = [

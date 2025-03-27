@@ -1,38 +1,36 @@
-import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
+import React, { useState, useEffect } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
+
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Card,
-  Stack,
-  Divider,
-  CardHeader,
-  Typography,
-  CardContent,
   Chip,
-  ListItemText,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Avatar,
   Grid,
-  TextField,
+  Stack,
+  Dialog,
+  Avatar,
   Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
-  DialogActions,
+  Divider,
+  MenuItem,
+  TextField,
+  Typography,
+  InputLabel,
+  CardContent,
+  DialogTitle,
+  FormControl,
+  DialogContent,
 } from '@mui/material';
 
-import Iconify from 'src/components/iconify';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
+import Iconify from 'src/components/iconify';
 
 const EventStatus = {
   ACTIVE: 'ACTIVE',

@@ -50,7 +50,6 @@ import useUploadCSV from 'src/hooks/use-upload-csv';
 import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
 import PropTypes from 'prop-types';
-import { grey } from '@mui/material/colors';
 import { useGetAllEvents } from 'src/api/event';
 import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';

@@ -2,23 +2,15 @@ import dayjs from 'dayjs';
 import { useNavigate } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '@mui/material/styles';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
+import { useTheme } from '@mui/material/styles';
 import {
-  Chip,
-  Table,
   Stack,
   Button,
   Divider,
-  TableRow,
-  TableBody,
-  TableHead,
-  TableCell,
   Typography,
-  TableContainer,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';

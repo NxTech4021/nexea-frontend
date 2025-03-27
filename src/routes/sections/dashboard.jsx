@@ -8,7 +8,6 @@ import { LoadingScreen } from 'src/components/loading-screen';
 
 import Profile from 'src/sections/profile/view';
 import EventAttendee from 'src/sections/events/create/event-attendee';
-import { element } from 'prop-types';
 
 // ----------------------------------------------------------------------
 

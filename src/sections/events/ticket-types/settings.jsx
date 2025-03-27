@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+
 import {
-  Button,
   Table,
+  Button,
+  Dialog,
+  TableRow,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TableRow,
-  Dialog,
+  TextField,
+  DialogTitle,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  TextField,
+  TableContainer,
 } from '@mui/material';
 
 const TicketTypesPage = () => {

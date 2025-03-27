@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -23,9 +24,9 @@ import {
 
 import { paths } from 'src/routes/paths';
 
+import { fetcher, endpoints } from 'src/utils/axios';
+
 import Iconify from 'src/components/iconify';
-import useSWR from 'swr';
-import { endpoints, fetcher } from 'src/utils/axios';
 
 // Mock data - replace later
 const attendees = [

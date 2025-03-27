@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import React from 'react';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router';
 
 import {
   Box,
@@ -18,14 +19,13 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { paths } from 'src/routes/paths';
 import { useSearchParams } from 'src/routes/hooks';
 
 import { fetcher } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-import { useNavigate } from 'react-router';
-import { paths } from 'src/routes/paths';
 
 const SuccessPayment = () => {
   const searchParams = useSearchParams();

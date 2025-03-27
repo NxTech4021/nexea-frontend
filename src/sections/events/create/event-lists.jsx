@@ -6,48 +6,34 @@ import dayjs from 'dayjs';
 import 'react-toastify/dist/ReactToastify.css';
 
 import React, { useMemo, useState } from 'react';
-import { Form, Field, Formik, ErrorMessage } from 'formik';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Pagination from '@mui/material/Pagination';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Grid,
   Menu,
   Chip,
+  Card,
   Stack,
-  Table,
-  Paper,
   Button,
   Dialog,
-  Select,
   Avatar,
   Divider,
-  TableRow,
+  Tooltip,
   MenuItem,
   Skeleton,
-  TableBody,
-  TableCell,
-  TableHead,
   TextField,
   Typography,
   IconButton,
-  InputLabel,
   DialogTitle,
-  FormControl,
+  CardContent,
+  ListItemIcon,
   DialogContent,
   DialogActions,
   useMediaQuery,
-  TableContainer,
-  Card,
-  CardContent,
   CardActionArea,
-  Tooltip,
-  ListItemIcon,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
-import { fDate, fDateTime } from 'src/utils/format-time';
+import { fDate } from 'src/utils/format-time';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import useSWR from 'swr';
@@ -63,8 +49,6 @@ import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 
-import { TableNoData } from 'src/components/table';
-import { toast } from 'sonner';
 
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
