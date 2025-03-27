@@ -5,7 +5,19 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useMemo, useEffect, useCallback } from 'react';
 
-import { Box, Stack, Button, Typography, Grid2 as Grid, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Button,
+  Dialog,
+  Typography,
+  DialogTitle,
+  ListItemText,
+  Grid2 as Grid,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from '@mui/material';
 
 import { useSearchParams } from 'src/routes/hooks';
 
@@ -18,6 +30,7 @@ import { useCartStore } from 'src/utils/store';
 import { useGetCart } from 'src/api/cart/cart';
 import { MaterialUISwitch } from 'src/layouts/dashboard/header';
 
+import Iconify from 'src/components/iconify';
 import FormProvider from 'src/components/hook-form';
 import { useSettingsContext } from 'src/components/settings';
 
@@ -52,6 +65,7 @@ const schema = yup.object().shape({
         .test('unique-email', 'Email must be unique', (value, context) => {
           if (!value) return false;
           const { from } = context;
+          console.log(from[1]);
 
           const emails = from[1].value.attendees.map((user) => user.email);
           return emails.filter((email) => email === value).length === 1;
@@ -77,7 +91,11 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const tixs = useCartStore((state) => state.tickets);
   const loading = useBoolean();
   const searchParams = useSearchParams();
+  const paymentStatus = searchParams.get('paymentStatus');
+  const paymentDialog = useBoolean(paymentStatus === 'failed');
+
   const cartSessionId = localStorage.getItem('cartSessionId');
+  const buyer = JSON.parse(localStorage.getItem('buyer'));
 
   const {
     eventData,
@@ -97,13 +115,13 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       buyer: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        company: '',
-        isAnAttendee: false,
-        ticket: '',
+        firstName: buyer?.firstName || '',
+        lastName: buyer?.lastName || '',
+        email: buyer?.email || '',
+        phoneNumber: buyer?.phoneNumber || '',
+        company: buyer?.company || '',
+        isAnAttendee: buyer?.isAnAttendee || false,
+        ticket: buyer?.ticket || '',
       },
       attendees: null,
     },
@@ -160,11 +178,11 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     }
   }, [eventData, setTickets]);
 
-  // useEffect(() => {
-  //   if (cartData && errors) {
-  //     toast.error('Please complete all information');
-  //   }
-  // }, [errors, cartData]);
+  useEffect(() => {
+    if (paymentStatus === 'failed') {
+      console.log(paymentStatus);
+    }
+  }, [paymentStatus]);
 
   const memoizedValue = useMemo(
     () => ({
@@ -279,6 +297,47 @@ const TicketPurchaseView = ({ eventIdParams }) => {
           )}
         </Box>
       </FormProvider>
+
+      <Dialog
+        open={isCartExist && paymentDialog.value}
+        PaperProps={{
+          sx: {
+            borderRadius: 1,
+          },
+        }}
+        fullWidth
+      >
+        <DialogTitle />
+        <DialogContent>
+          <Stack spacing={2} alignItems="center">
+            <Iconify icon="icon-park-solid:doc-fail" width={50} color="error.main" />
+            <ListItemText
+              primary="Payment failed"
+              secondary="Payment failed. Please check your details or try again."
+              slotProps={{
+                primary: {
+                  variant: 'subtitle1',
+                  color: 'text.secondary',
+                },
+              }}
+              sx={{
+                textAlign: 'center',
+              }}
+            />
+            <Button
+              variant="outlined"
+              onClick={() => {
+                const newUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                paymentDialog.onFalse();
+              }}
+            >
+              Okay
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions />
+      </Dialog>
     </Cart.Provider>
   );
 };

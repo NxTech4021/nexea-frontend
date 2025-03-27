@@ -39,6 +39,8 @@ const TickerPurchaseHeader = () => {
 
   const handleRemoveCart = useCallback(async () => {
     if (!cartData) return;
+    localStorage.removeItem('buyer');
+    localStorage.removeItem('attendees');
     try {
       await axiosInstance.delete(`/api/cart/${cartData?.id}`);
       cartMutate(undefined);
@@ -56,7 +58,7 @@ const TickerPurchaseHeader = () => {
     try {
       extend.onTrue();
       const res = await axiosInstance.patch(endpoints.cart.extendSession);
-      mutate(endpoints.cart.root);
+      mutate(`${endpoints.cart.root}/${cartData?.id}`);
       toast.success(res?.data?.message);
       timeOut.onFalse();
     } catch (error) {
@@ -64,7 +66,7 @@ const TickerPurchaseHeader = () => {
     } finally {
       extend.onFalse();
     }
-  }, [extend, timeOut]);
+  }, [extend, timeOut, cartData]);
 
   useEffect(() => {
     const timer = setInterval(() => {

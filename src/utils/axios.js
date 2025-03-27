@@ -69,6 +69,7 @@ export const endpoints = {
     location: '/api/event/sendlocation',
   },
   attendee: {
+    root: '/api/attendee/',
     create: '/api/attendee/create',
     upload: '/api/attendee/upload',
     update: '/api/attendee/update',
@@ -114,5 +115,8 @@ export const endpoints = {
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
     delete: (id) => `/api/discount/delete/${id}`,
+  },
+  order: {
+    root: '/api/order/',
   },
 };

@@ -3,6 +3,7 @@
 const ROOTS = {
   AUTH: '/auth',
   DASHBOARD: '/dashboard',
+  EVENT: "/event"
 };
 
 // ----------------------------------------------------------------------
@@ -38,11 +39,8 @@ export const paths = {
     },
     ticketType: {
       root: `${ROOTS.DASHBOARD}/ticket-type`,
-
       settings: `${ROOTS.DASHBOARD}/ticket-type/settings`,
-
       addOn: `${ROOTS.DASHBOARD}/ticket-type/addOn`,
-
     },
     discountCode: {
       root: `${ROOTS.DASHBOARD}/discount-code`,
@@ -52,6 +50,9 @@ export const paths = {
     },
     whatsappTemplate: {
       root: `${ROOTS.DASHBOARD}/templates`,
+    },
+    tickets: {
+      root: (id) => `${ROOTS.EVENT}/${id}`
     },
     attendees: `${ROOTS.DASHBOARD}/attendees`,
     test: `${ROOTS.DASHBOARD}/test`,

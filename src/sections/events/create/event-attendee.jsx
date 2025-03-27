@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import useSWR from 'swr';
 import { toast } from 'react-toastify';
 /* eslint-disable consistent-return */
 import { useParams } from 'react-router';
@@ -6,13 +7,22 @@ import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
-import { Box, Chip, Button, Dialog, Container, DialogTitle, DialogContent } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Button,
+  Dialog,
+  Container,
+  DialogTitle,
+  DialogContent,
+  CircularProgress,
+} from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -34,6 +44,7 @@ export default function EventAttendee() {
   const [allAttendees, setAllAttendees] = useState([]);
   const [event, setEvent] = useState(null);
   const dialog = useBoolean();
+  const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
   const fetchAttendees = useCallback(async () => {
     try {
@@ -83,33 +94,22 @@ export default function EventAttendee() {
     setSnackbar({ children: error.message, severity: 'error' });
   }, []);
 
-  useEffect(() => {
-    fetchAttendees();
-  }, [fetchAttendees]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchAttendees();
-    return () => {
-      controller.abort();
-    };
-  }, [fetchAttendees]);
-
   // Ajust the width  or use the slide to give more screen realestate
   const columns = [
-    { field: 'attendeeFullName', headerName: 'Attendee Name', width: 200, editable: true },
-    { field: 'attendeeEmail', headerName: 'Attendee Email', width: 200, editable: true },
+    {
+      field: 'fullName',
+      headerName: 'Attendee Name',
+      width: 200,
+      editable: true,
+      valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+    },
+    { field: 'email', headerName: 'Attendee Email', width: 200, editable: true },
     { field: 'phoneNumber', headerName: 'Attendee Phone Number', width: 200, editable: true },
     {
       field: 'orderNumber',
       headerName: 'Order Number',
       width: 200,
-      renderCell: (params) => {
-        if (params.value) {
-          return params.value;
-        }
-        return 'No order number';
-      },
+      valueGetter: (value, row) => `${row.order.orderNumber || ''}`,
     },
     {
       field: 'companyName',
@@ -127,37 +127,43 @@ export default function EventAttendee() {
       field: 'ticketType',
       headerName: 'Ticket Type',
       width: 200,
-      renderCell: (params) => {
-        if (params.value) {
-          return params.value;
-        }
-        return 'No ticket type.';
-      },
+      valueGetter: (value, row) => `${row.ticket.ticketType.title || ''}`,
     },
     {
       field: 'ticketCode',
       headerName: 'Ticket Code',
       width: 200,
-      renderCell: (params) => {
-        if (params.value) {
-          return params.value;
-        }
-        return 'No ticket code.';
-      },
+      valueGetter: (value, row) => `${row.ticket.ticketCode || ''}`,
     },
     {
-      field: 'checkedIn',
+      field: 'status',
       headerName: 'Checked In',
       width: 150,
       editable: true,
       renderCell: (params) =>
-        !params.value ? (
+        params.value === 'pending' ? (
           <Chip size="small" label="Pending" color="warning" />
         ) : (
           <Chip size="small" label="Checked In" color="success" />
         ),
     },
   ];
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+      >
+        <CircularProgress
+          thickness={7}
+          size={25}
+          sx={{
+            strokeLinecap: 'round',
+          }}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
@@ -182,16 +188,11 @@ export default function EventAttendee() {
         }
       />
 
-      {/* <Stack direction="row" justifyContent="space-between">
-        <Typography variant="h4">Attendees</Typography>
-        <Button variant="outlined">New Attendee</Button>
-      </Stack> */}
-
       <Box sx={{ height: 400, width: '100%', mt: 2 }}>
         <DataGrid
           editMode="row"
           apiRef={apiRef}
-          rows={attendees} // Filtered attendees based on selected event
+          rows={data} // Filtered attendees based on selected event
           columns={columns}
           pagination
           pageSize={5}

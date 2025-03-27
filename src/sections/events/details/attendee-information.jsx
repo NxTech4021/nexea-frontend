@@ -1,25 +1,31 @@
 import * as React from 'react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+
+import { grey } from '@mui/material/colors';
+import Tooltip from '@mui/material/Tooltip';
 import { styled, useTheme } from '@mui/material/styles';
 import {
   Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
   Chip,
-  Button,
+  Table,
   Stack,
   alpha,
+  Button,
+  TableRow,
+  TableBody,
+  TableCell,
+  TableHead,
+  Typography,
+  TableContainer,
+  CircularProgress,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+
 import { paths } from 'src/routes/paths';
+
 import Iconify from 'src/components/iconify';
-import PropTypes from 'prop-types';
-import { grey } from '@mui/material/colors';
-import Tooltip from '@mui/material/Tooltip';
+import useSWR from 'swr';
+import { endpoints, fetcher } from 'src/utils/axios';
 
 // Mock data - replace later
 const attendees = [
@@ -55,9 +61,7 @@ const attendees = [
 
 const TabsWrapper = styled('div')(({ theme }) => ({
   position: 'relative',
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? alpha(theme.palette.grey[900], 0.7) 
-    : '#f2f5f7',
+  backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[900], 0.7) : '#f2f5f7',
   borderRadius: 14,
   padding: '8px',
   display: 'flex',
@@ -65,14 +69,13 @@ const TabsWrapper = styled('div')(({ theme }) => ({
   minWidth: 400,
   marginBottom: 16,
   marginTop: 10,
-  border: theme.palette.mode === 'dark' 
-    ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` 
-    : 'none',
+  border:
+    theme.palette.mode === 'dark' ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` : 'none',
   [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
     minWidth: 'unset',
-    height: 200, 
-  }
+    height: 200,
+  },
 }));
 
 const TabButton = styled(Button)(({ theme, selected }) => {
@@ -103,23 +106,24 @@ const TabButton = styled(Button)(({ theme, selected }) => {
     [theme.breakpoints.down('sm')]: {
       width: '100%',
       height: '50%',
-    }
+    },
   };
 });
 
 const SliderIndicator = styled('div')(({ activeTab, theme }) => ({
   position: 'absolute',
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? alpha(theme.palette.grey[800], 0.9)
-    : theme.palette.background.paper,
-  boxShadow: theme.palette.mode === 'dark' 
-    ? `0 0 8px 2px ${alpha(theme.palette.common.black, 0.5)}` 
-    : '0 2px 8px rgba(0, 0, 0, 0.05)',
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? alpha(theme.palette.grey[800], 0.9)
+      : theme.palette.background.paper,
+  boxShadow:
+    theme.palette.mode === 'dark'
+      ? `0 0 8px 2px ${alpha(theme.palette.common.black, 0.5)}`
+      : '0 2px 8px rgba(0, 0, 0, 0.05)',
   borderRadius: 10,
   transition: 'all 0.3s ease',
-  border: theme.palette.mode === 'dark' 
-    ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` 
-    : 'none',
+  border:
+    theme.palette.mode === 'dark' ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` : 'none',
   zIndex: 0,
   [theme.breakpoints.up('sm')]: {
     left: activeTab === 0 ? '8px' : 'calc(50% + 4px)',
@@ -132,7 +136,7 @@ const SliderIndicator = styled('div')(({ activeTab, theme }) => ({
     width: 'calc(100% - 16px)',
     height: 'calc(50% - 12px)',
     top: activeTab === 0 ? '8px' : 'calc(50% + 4px)',
-  }
+  },
 }));
 
 const AttendeeInformation = ({ id }) => {
@@ -140,13 +144,32 @@ const AttendeeInformation = ({ id }) => {
   const [activeTab, setActiveTab] = React.useState(0);
   const theme = useTheme();
 
-  const checkedInCount = attendees.filter(attendee => attendee.status === 'Checked In').length;
-  const notCheckedInCount = attendees.filter(attendee => attendee.status === 'Pending').length;
+  const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
-  const filteredAttendees = attendees.filter(attendee =>
-    (activeTab === 0 && attendee.status === 'Pending') ||
-    (activeTab === 1 && attendee.status === 'Checked In')
+  const checkedInCount = data?.filter((attendee) => attendee.status === 'checkedIn').length;
+  const notCheckedInCount = data?.filter((attendee) => attendee.status === 'pending').length;
+
+  const filteredAttendees = data?.filter(
+    (attendee) =>
+      (activeTab === 0 && attendee.status === 'pending') ||
+      (activeTab === 1 && attendee.status === 'checkedIn')
   );
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+      >
+        <CircularProgress
+          thickness={7}
+          size={25}
+          sx={{
+            strokeLinecap: 'round',
+          }}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -155,18 +178,33 @@ const AttendeeInformation = ({ id }) => {
           <Typography variant="subtitle2" color="text.secondary">
             Total Attendees
           </Typography>
-          <Typography variant="h6" style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '16px', marginTop: '2px' }}>
-            {attendees.length}
+          <Typography
+            variant="h6"
+            style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              marginBottom: '16px',
+              marginTop: '2px',
+            }}
+          >
+            {data?.length}
           </Typography>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', marginBottom: '10px'}}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            marginBottom: '10px',
+          }}
+        >
           <Tooltip title="View Full Attendee List">
-            <Button 
-              variant="outlined" 
-              color="inherit" 
-              onClick={() => navigate(`${paths.dashboard.events.attendees}/${id}`)} 
-              style={{ 
-                width: '48px', 
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate(`${paths.dashboard.events.attendees}/${id}`)}
+              style={{
+                width: '48px',
                 height: '48px',
                 border: `1px solid ${theme.palette.divider}`,
                 backgroundColor: theme.palette.background.paper,
@@ -176,12 +214,12 @@ const AttendeeInformation = ({ id }) => {
             </Button>
           </Tooltip>
           <Tooltip title="Check In Attendees">
-            <Button 
-              variant="outlined" 
-              color="inherit" 
-              onClick={() => navigate(`${paths.dashboard.events.qr}/${id}`)} 
-              style={{ 
-                width: '48px', 
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate(`${paths.dashboard.events.qr}/${id}`)}
+              style={{
+                width: '48px',
                 height: '48px',
                 border: `1px solid ${theme.palette.divider}`,
                 backgroundColor: theme.palette.background.paper,
@@ -196,53 +234,57 @@ const AttendeeInformation = ({ id }) => {
 
       <TabsWrapper>
         <SliderIndicator activeTab={activeTab} />
-        <TabButton
-          selected={activeTab === 0}
-          onClick={() => setActiveTab(0)}
-          disableRipple
-        >
+        <TabButton selected={activeTab === 0} onClick={() => setActiveTab(0)} disableRipple>
           <Stack direction="row" alignItems="center" spacing={2}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '50%', 
-              backgroundColor: '#ea3323',
-              flexShrink: 0,
-            }}>
-              <img src="/assets/userNotCheckedIn.svg" alt="NotCheckedIn" style={{ height: '30px' }} />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#ea3323',
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/assets/userNotCheckedIn.svg"
+                alt="NotCheckedIn"
+                style={{ height: '30px' }}
+              />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>Not Checked In</span>
+              <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>
+                Not Checked In
+              </span>
               <Typography variant="body2" style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
                 {notCheckedInCount}
               </Typography>
             </div>
           </Stack>
         </TabButton>
-        
-        <TabButton
-          selected={activeTab === 1}
-          onClick={() => setActiveTab(1)}
-          disableRipple
-        >
+
+        <TabButton selected={activeTab === 1} onClick={() => setActiveTab(1)} disableRipple>
           <Stack direction="row" alignItems="center" spacing={2}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '50%', 
-              backgroundColor: '#7cd640',
-              flexShrink: 0,
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#7cd640',
+                flexShrink: 0,
+              }}
+            >
               <img src="/assets/userCheckedIn.svg" alt="CheckedIn" style={{ height: '30px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>Checked In</span>
+              <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>
+                Checked In
+              </span>
               <Typography variant="body2" style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
                 {checkedInCount}
               </Typography>
@@ -251,34 +293,36 @@ const AttendeeInformation = ({ id }) => {
         </TabButton>
       </TabsWrapper>
 
-        <TableContainer sx={{ 
+      <TableContainer
+        sx={{
           backgroundColor: theme.palette.background.paper,
           border: 1,
           borderColor: grey[200],
           borderRadius: 2,
-        }}>
-          <Table>
-            <TableHead sx={{ borderTop: '1px solid', borderColor: grey[200] }}>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Company</TableCell>
-                <TableCell>Ticket Type</TableCell>
+        }}
+      >
+        <Table>
+          <TableHead sx={{ borderTop: '1px solid', borderColor: grey[200] }}>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Company</TableCell>
+              <TableCell>Ticket Type</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredAttendees.map((attendee, index) => (
+              <TableRow key={index}>
+                <TableCell>{`${attendee.firstName}  ${attendee.lastName}`}</TableCell>
+                <TableCell>{attendee.companyName}</TableCell>
+                <TableCell>
+                  <Chip label={attendee.ticket.ticketType.title} />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredAttendees.map((attendee, index) => (
-                <TableRow key={index}>
-                  <TableCell>{attendee.name}</TableCell>
-                  <TableCell>{attendee.company}</TableCell>
-                  <TableCell>
-                    <Chip label={attendee.ticketType} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

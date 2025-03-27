@@ -72,8 +72,8 @@ const schema = yup.object().shape({
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Date is required'),
-  themeColor: yup.string().required('Theme color is required'),
-  sst: yup.number().required('SST is required').typeError('SST must be a number'),
+  // themeColor: yup.string().required('Theme color is required'),
+  // sst: yup.number().required('SST is required').typeError('SST must be a number'),
 });
 
 const EventCreateDialog = ({ open, onClose }) => {
@@ -107,6 +107,8 @@ const EventCreateDialog = ({ open, onClose }) => {
     formState: { errors, isSubmitting },
   } = methods;
 
+  console.log(errors);
+
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
 
@@ -117,6 +119,7 @@ const EventCreateDialog = ({ open, onClose }) => {
   };
 
   const onSubmit = handleSubmit(async (eventData) => {
+    console.log(eventData);
     try {
       const formData = new FormData();
       Object.keys(eventData).forEach((key) => {

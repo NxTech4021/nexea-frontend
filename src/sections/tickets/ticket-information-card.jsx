@@ -21,6 +21,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { useSearchParams } from 'src/routes/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -50,7 +52,7 @@ const TicketInformationCard = () => {
   const [discountCode, setDiscountCode] = useState(null);
   const boxRef = useRef();
   const cartSessionId = localStorage.getItem('cartSessionId');
-
+  const searchParams = useSearchParams();
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
 
@@ -165,6 +167,15 @@ const TicketInformationCard = () => {
       update(index, { ...updatedAttendee, ticket: updatedAttendee.ticket });
     }
 
+    const buyerData = JSON.parse(localStorage.getItem('buyer')) || {};
+
+    const buyerInfo = {
+      ...buyerData,
+      [name.split('.')[1]]: value,
+    };
+
+    localStorage.setItem('buyer', JSON.stringify(buyerInfo));
+
     setValue(name, value, { shouldValidate: true });
   };
 
@@ -175,7 +186,13 @@ const TicketInformationCard = () => {
     });
   };
 
-  const removeTicket = async (item) => {
+  const removeTicket = async (item, index) => {
+    const attendees = JSON.parse(localStorage.getItem('attendees'));
+
+    attendees.splice(index, 1); // Remove item at the specified index
+
+    localStorage.setItem('attendees', JSON.stringify(attendees));
+
     try {
       const ticket = data.cartItem.find((a) => a.ticketType.id === item);
       const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
@@ -366,7 +383,7 @@ const TicketInformationCard = () => {
                     color="error"
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeTicket(field.ticket.id);
+                      removeTicket(field.ticket.id, index);
                     }}
                   >
                     <Iconify icon="mdi:trash" width={20} />
@@ -471,6 +488,15 @@ const TicketInformationCard = () => {
   useEffect(() => {
     if (!data?.cartItem?.length) return;
 
+    // Load existing attendees from localStorage
+    const storedAttendees = localStorage.getItem('attendees');
+
+    if (storedAttendees) {
+      setValue('attendees', JSON.parse(storedAttendees));
+      return;
+    }
+
+    // Generate attendee list based on ticket quantity
     const result = data.cartItem.flatMap((item) =>
       Array.from({ length: item.quantity }, () => ({
         ticket: item.ticketType,
@@ -479,7 +505,16 @@ const TicketInformationCard = () => {
     );
 
     setValue('attendees', result);
+    localStorage.setItem('attendees', JSON.stringify(result)); // Cache the data
   }, [data, setValue]);
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      localStorage.setItem('attendees', JSON.stringify(values.attendees));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   useEffect(() => {
     const el = ref?.current;

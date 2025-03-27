@@ -6,6 +6,7 @@ import {
   Box,
   Stack,
   Table,
+  Button,
   TableRow,
   Container,
   TableHead,
@@ -23,10 +24,13 @@ import { fetcher } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
+import { useNavigate } from 'react-router';
+import { paths } from 'src/routes/paths';
 
 const SuccessPayment = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const navigate = useNavigate();
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
 
@@ -148,6 +152,15 @@ const SuccessPayment = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </Box>
+
+      <Box mt={5} textAlign="center">
+        <Button
+          variant="outlined"
+          onClick={() => navigate(paths.dashboard.tickets.root(data?.event?.id))}
+        >
+          Continue shopping
+        </Button>
       </Box>
     </Container>
   );
