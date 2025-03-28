@@ -866,7 +866,7 @@ const TicketInformationCard = () => {
                         {Intl.NumberFormat('en-MY', {
                           style: 'currency',
                           currency: 'MYR',
-                        }).format(11.94)}
+                        }).format(0.1)}
                       </Typography>
                     </Stack>
 
@@ -891,8 +891,8 @@ const TicketInformationCard = () => {
                           currency: 'MYR',
                         }).format(
                           data?.orderSummary?.totalPrice
-                            ? data.orderSummary.totalPrice + 11.94
-                            : subTotal + 11.94
+                            ? data.orderSummary.totalPrice + 0.1
+                            : subTotal + 0.1
                         )}
                       </Typography>
                     </Stack>
@@ -916,7 +916,7 @@ const TicketInformationCard = () => {
                   letterSpacing={-0.7}
                 >
                   {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    data?.orderSummary?.totalPrice && data.orderSummary.totalPrice + 11.94
+                    data?.orderSummary?.totalPrice && data.orderSummary.totalPrice + 0.1
                   )}
                 </Typography>
               </Stack>

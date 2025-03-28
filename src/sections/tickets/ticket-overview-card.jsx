@@ -165,7 +165,7 @@ const TicketOverviewCard = () => {
                       {Intl.NumberFormat('en-MY', {
                         style: 'currency',
                         currency: 'MYR',
-                      }).format(11.94)}
+                      }).format(0.1)}
                     </Typography>
                   </Stack>
                   <Divider />
@@ -186,7 +186,7 @@ const TicketOverviewCard = () => {
                       {Intl.NumberFormat('en-MY', {
                         style: 'currency',
                         currency: 'MYR',
-                      }).format(subTotal && subTotal + 11.94)}
+                      }).format(subTotal && subTotal + 0.1)}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -210,7 +210,7 @@ const TicketOverviewCard = () => {
               letterSpacing={-0.7}
             >
               {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                (subTotal && subTotal + 11.94) || 0
+                (subTotal && subTotal + 0.1) || 0
               )}
             </Typography>
           </Stack>
@@ -500,9 +500,7 @@ const TicketOverviewCard = () => {
                 <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
                   <Typography>SST:</Typography>
                   <Typography>
-                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                      11.94
-                    )}
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0.1)}
                   </Typography>
                 </Stack>
                 <Divider />
@@ -522,8 +520,8 @@ const TicketOverviewCard = () => {
                   <Typography>
                     {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
                       cartData?.orderSummary?.totalPrice
-                        ? cartData.orderSummary.totalPrice + 11.94
-                        : subTotal + 11.94
+                        ? cartData.orderSummary.totalPrice + 0.1
+                        : subTotal + 0.1
                     )}
                   </Typography>
                 </Stack>

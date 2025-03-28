@@ -542,7 +542,7 @@ const TicketSelectionCard = () => {
                         {Intl.NumberFormat('en-MY', {
                           style: 'currency',
                           currency: 'MYR',
-                        }).format(11.94)}
+                        }).format(0.1)}
                       </Typography>
                     </Stack>
                     <Divider />
@@ -563,7 +563,7 @@ const TicketSelectionCard = () => {
                         {Intl.NumberFormat('en-MY', {
                           style: 'currency',
                           currency: 'MYR',
-                        }).format(subTotal && subTotal + 11.94)}
+                        }).format(subTotal && subTotal + 0.1)}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -587,7 +587,7 @@ const TicketSelectionCard = () => {
                 letterSpacing={-0.7}
               >
                 {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                  subTotal && subTotal + 11.94
+                  subTotal && subTotal + 0.1
                 )}
               </Typography>
             </Stack>
