@@ -25,8 +25,9 @@ import {
   DialogContent,
 } from '@mui/material';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
 import { useResponsive } from 'src/hooks/use-responsive';
+
+import axiosInstance, { endpoints } from 'src/utils/axios';
 
 // Event Status options
 const EventStatus = {

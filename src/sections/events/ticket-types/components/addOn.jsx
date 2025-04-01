@@ -36,7 +36,7 @@ const AddOn = () => {
   }
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} flexWrap="wrap">
       {data.map((item) => (
         <Tooltip key={item.id} title={`Add ${item.name}`}>
           <Button
@@ -46,7 +46,7 @@ const AddOn = () => {
               height: 200,
               position: 'relative',
               overflow: 'hidden',
-              '&:before': selectedAddOns?.some((a) => a.name === item.name) && {
+              '&:before': selectedAddOns?.some((a) => a.id === item.id) && {
                 content: "''",
                 position: 'absolute',
                 width: 1,
@@ -58,7 +58,7 @@ const AddOn = () => {
               setSelectedAddOns(item);
             }}
           >
-            <Stack sx={{ opacity: selectedAddOns?.some((a) => a.name === item.name) && 0.15 }}>
+            <Stack sx={{ opacity: selectedAddOns?.some((a) => a.id === item.id) && 0.15 }}>
               <Typography variant="subtitle1">{item.name}</Typography>
               <Typography variant="body2" color="text.secondary">
                 {new Intl.NumberFormat('en-MY', {
@@ -71,7 +71,7 @@ const AddOn = () => {
                 {item.description}
               </Typography>
             </Stack>
-            {selectedAddOns?.some((a) => a.name === item.name) && (
+            {selectedAddOns?.some((a) => a.id === item.id) && (
               <Box position="absolute">
                 <Iconify icon="material-symbols:check-rounded" width={20} />
               </Box>

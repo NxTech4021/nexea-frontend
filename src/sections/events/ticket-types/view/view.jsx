@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import dayjs from 'dayjs';
 import * as yup from 'yup';
 import isEqual from 'lodash/isEqual';
 import { useForm } from 'react-hook-form';
@@ -225,7 +226,9 @@ export default function TicketTypeView({ data }) {
 
   useEffect(() => {
     if (ticketTypesData?.ticketTypes?.length) {
-      setTableData(ticketTypesData?.ticketTypes);
+      setTableData(
+        ticketTypesData?.ticketTypes.sort((a, b) => dayjs(b.createdAt).diff(dayjs(a.createdAt)))
+      );
     }
   }, [ticketTypesData]);
 
