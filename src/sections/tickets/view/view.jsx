@@ -23,6 +23,7 @@ import { useSearchParams } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
@@ -93,6 +94,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const searchParams = useSearchParams();
   const paymentStatus = searchParams.get('paymentStatus');
   const paymentDialog = useBoolean(paymentStatus === 'failed');
+  const isActive = useUserActivity();
 
   const cartSessionId = localStorage.getItem('cartSessionId');
   const buyer = JSON.parse(localStorage.getItem('buyer'));
@@ -261,7 +263,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
       <Box position="absolute" left="62%" zIndex={1111}>
         <MaterialUISwitch
-          sx={{ m: 1 }}
+          sx={{ m: 1, opacity: isActive ? 1 : 0.2, transition: 'all linear .2s' }}
           checked={settings.themeMode !== 'light'}
           onChange={() =>
             settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
