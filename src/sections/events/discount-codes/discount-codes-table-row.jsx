@@ -71,7 +71,15 @@ export default function DiscountCodeTableRow({
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {types.find((val) => val.id === type).name}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{value}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {type === 'percentage'
+            ? `${value.toFixed(2)} %`
+            : new Intl.NumberFormat('en-MY', {
+                minimumFractionDigits: 2,
+                style: 'currency',
+                currency: 'MYR',
+              }).format(value)}
+        </TableCell>
         <TableCell>
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {ticketType.slice(0, 3).map((item) => (
