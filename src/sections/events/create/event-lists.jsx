@@ -49,7 +49,6 @@ import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 
-
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
@@ -140,17 +139,9 @@ const EventLists = ({ query }) => {
 
   const openn = Boolean(anchorEl);
 
-  // const [viewFormat, setViewFormat] = useState('card'); // 'card' or 'table'
-
   const [searchQuery, setSearchQuery] = useState('');
 
   const createDialog = useBoolean();
-
-  // const handleViewFormatChange = (event, newFormat) => {
-  //   if (newFormat !== null) {
-  //     setViewFormat(newFormat);
-  //   }
-  // };
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -540,20 +531,20 @@ const EventLists = ({ query }) => {
                   py: 1.5,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease-in-out',
-                  bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
-                  color: getTextColor(isExpanded, theme.palette.mode),
-                  '&:hover': {
-                    bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
-                  },
-                  '& .MuiTypography-root:not(.status-text)': {
-                    color: getTextColor(isExpanded, theme.palette.mode),
-                  },
-                  '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
-                    color: getIconColor(isExpanded, theme.palette.mode),
-                  },
-                  '& .event-secondary-text': {
-                    color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
-                  },
+                  // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
+                  // color: getTextColor(isExpanded, theme.palette.mode),
+                  // '&:hover': {
+                  //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
+                  // },
+                  // '& .MuiTypography-root:not(.status-text)': {
+                  //   color: getTextColor(isExpanded, theme.palette.mode),
+                  // },
+                  // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
+                  //   color: getIconColor(isExpanded, theme.palette.mode),
+                  // },
+                  // '& .event-secondary-text': {
+                  //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
+                  // },
                 }}
                 onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
               >
@@ -690,7 +681,7 @@ const EventLists = ({ query }) => {
                 <Stack
                   direction="row"
                   sx={{
-                    bgcolor: theme.palette.mode === 'light' ? 'grey.800' : 'grey.100',
+                    // bgcolor: theme.palette.mode === 'light' ? 'grey.800' : 'grey.100',
                     borderTop: '1px solid',
                     borderColor: 'divider',
                     height: 50,
@@ -720,7 +711,7 @@ const EventLists = ({ query }) => {
                         cursor: 'pointer',
                         height: '100%',
                         px: 1.5,
-                        color: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.light',
+                        // color: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.light',
                         '&:hover': {
                           bgcolor:
                             theme.palette.mode === 'dark'
@@ -754,7 +745,7 @@ const EventLists = ({ query }) => {
                         cursor: 'pointer',
                         height: '100%',
                         px: 1.5,
-                        color: theme.palette.mode === 'dark' ? 'info.dark' : 'info.light',
+                        // color: theme.palette.mode === 'dark' ? 'info.dark' : 'info.light',
                         '&:hover': {
                           bgcolor:
                             theme.palette.mode === 'dark'
