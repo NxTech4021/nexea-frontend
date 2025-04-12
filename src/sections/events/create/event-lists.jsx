@@ -668,7 +668,7 @@ const EventLists = ({ query }) => {
                     sx={{
                       transform: isExpanded ? 'rotate(180deg)' : 'none',
                       transition: 'transform 0.2s ease-in-out',
-                      color: getExpandedIconColor(isExpanded, theme.palette.mode),
+                      // color: getExpandedIconColor(isExpanded, theme.palette.mode),
                     }}
                   >
                     <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />

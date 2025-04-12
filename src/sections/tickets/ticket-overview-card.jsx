@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
-import React, { useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
@@ -37,8 +37,9 @@ const TicketOverviewCard = () => {
   const { tickets } = useCartStore();
   const [discountCode, setDiscountCode] = useState(null);
   const mdDown = useResponsive('down', 'md');
-  const { data: cartData, cartMutate, handleCheckout } = useGetCartData();
+  const { data: cartData, cartMutate, handleCheckout, eventData } = useGetCartData();
   const collapse = useBoolean();
+  const [calculatedSST, setCalculatedSST] = useState(null);
 
   const {
     formState: { isSubmitting },
@@ -81,6 +82,13 @@ const TicketOverviewCard = () => {
       toast.error(error?.message || 'Error removing code');
     }
   };
+
+  useEffect(() => {
+    const sst = eventData?.sst || null;
+
+    const sstPrice = parseFloat(((subTotal * sst) / 100).toFixed(2));
+    setCalculatedSST(sstPrice);
+  }, [eventData, subTotal]);
 
   if (mdDown) {
     return (
@@ -186,7 +194,7 @@ const TicketOverviewCard = () => {
                       {Intl.NumberFormat('en-MY', {
                         style: 'currency',
                         currency: 'MYR',
-                      }).format(subTotal && subTotal + 0.1)}
+                      }).format(subTotal && subTotal + calculatedSST)}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -210,7 +218,7 @@ const TicketOverviewCard = () => {
               letterSpacing={-0.7}
             >
               {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                (subTotal && subTotal + 0.1) || 0
+                (subTotal && subTotal + calculatedSST) || 0
               )}
             </Typography>
           </Stack>
@@ -243,7 +251,6 @@ const TicketOverviewCard = () => {
   return (
     <Box height={1} position="relative">
       <Stack
-        // component={Card}
         sx={{
           // borderRadius: 2,
           minHeight: 1,
@@ -471,39 +478,52 @@ const TicketOverviewCard = () => {
 
                 <Divider />
 
-                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                  <Typography>Subtotal:</Typography>
-                  <Typography>
-                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                      subTotal
-                    )}
-                  </Typography>
-                </Stack>
-
                 {cartData && (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    gap={10}
-                    justifyContent="space-between"
-                  >
-                    <Typography>Discount</Typography>
-                    <Typography>
-                      -{' '}
-                      {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                        cartData?.orderSummary?.discount
-                      )}
-                    </Typography>
-                  </Stack>
+                  <>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>Subtotal:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                          subTotal
+                        )}
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>Discount</Typography>
+                      <Typography>
+                        -{' '}
+                        {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                          cartData?.orderSummary?.discount
+                        )}
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={10}
+                      justifyContent="space-between"
+                    >
+                      <Typography>SST:</Typography>
+                      <Typography>
+                        {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                          calculatedSST
+                        )}
+                      </Typography>
+                    </Stack>
+                    <Divider />
+                  </>
                 )}
 
-                <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                  <Typography>SST:</Typography>
-                  <Typography>
-                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0.1)}
-                  </Typography>
-                </Stack>
-                <Divider />
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -520,8 +540,8 @@ const TicketOverviewCard = () => {
                   <Typography>
                     {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
                       cartData?.orderSummary?.totalPrice
-                        ? cartData.orderSummary.totalPrice + 0.1
-                        : subTotal + 0.1
+                        ? cartData.orderSummary.totalPrice + calculatedSST
+                        : subTotal
                     )}
                   </Typography>
                 </Stack>

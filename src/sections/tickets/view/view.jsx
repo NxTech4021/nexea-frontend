@@ -271,14 +271,13 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Box
-          // px={{ lg: 15 }}
-          // bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
           overflow="auto"
           sx={{
             height: `calc(100vh - ${76}px)`,
             scrollbarWidth: 'thin',
             scrollBehavior: 'smooth',
-            scrollbarColor: '#000000 white',
+            scrollbarColor: (theme) =>
+              theme.palette.mode === 'dark' ? '#FFF #0A0E15' : '#000000 white',
           }}
         >
           {!mdDown ? (
@@ -286,7 +285,15 @@ const TicketPurchaseView = ({ eventIdParams }) => {
               <Grid size={{ xs: 12, md: 8 }} position="relative">
                 {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
               </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid
+                size={{ xs: 12, md: 4 }}
+                maxHeight={1}
+                position="fixed"
+                right={0}
+                top={76}
+                // bgcolor="beige"
+                height={`calc(100vh - ${76}px)`}
+              >
                 <TicketOverviewCard />
               </Grid>
             </Grid>
