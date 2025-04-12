@@ -74,17 +74,14 @@ export default function DiscountCodeView() {
   const { data, isLoading } = useGetAllTicketTypes();
   const { discountCodes, discountCodesIsLoading } = useGetAllDiscountCode();
 
-  //   const [tableData, setTableData] = useState([]);
-  //   const [isCreating, setIsCreating] = useState(false);
-  //   const [editingDiscountCode, setEditingDiscountCode] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
   const confirm = useBoolean();
 
   useEffect(() => {
-    setTableData(mockDiscountCodes);
-  }, []);
+    setTableData(discountCodes);
+  }, [discountCodes]);
 
-  const notFound = tableData.length === 0;
+  const notFound = tableData?.length === 0;
 
   const dataFiltered = applyFilter({
     inputData: discountCodes,

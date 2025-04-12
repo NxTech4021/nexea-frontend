@@ -57,7 +57,6 @@ export default function DiscountCodeTableRow({
   };
 
   const handleSave = () => {
-    console.log('Saved data:', editedData);
     onSave(editedData);
     setIsEditing(false);
   };
@@ -75,9 +74,10 @@ export default function DiscountCodeTableRow({
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{value}</TableCell>
         <TableCell>
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            {ticketType.map((item) => (
+            {ticketType.slice(0, 3).map((item) => (
               <Label key={item.id}>{`${item.title} ( ${item.event.name} )`}</Label>
             ))}
+            {ticketType?.length > 3 && <Label>{`${(ticketType?.length || null) - 3} more`}</Label>}
           </Stack>
         </TableCell>
 
