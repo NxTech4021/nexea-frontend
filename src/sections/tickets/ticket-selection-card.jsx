@@ -108,6 +108,7 @@ const TicketSelectionCard = () => {
             borderColor: 'black',
             transition: 'linear .3s',
           },
+          boxShadow: 1,
           userSelect: 'none',
         }}
         size={{ xs: 12, md: 4 }}
