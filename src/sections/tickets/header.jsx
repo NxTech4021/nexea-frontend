@@ -58,15 +58,23 @@ const TickerPurchaseHeader = () => {
     try {
       extend.onTrue();
       const res = await axiosInstance.patch(endpoints.cart.extendSession);
-      mutate(`${endpoints.cart.root}/${cartData?.id}`);
-      toast.success(res?.data?.message);
+      
+      const updatedCartData = {
+        ...cartData,
+        expiryDate: dayjs().add(5, 'minutes').toISOString(),
+      };
+      
       timeOut.onFalse();
+      mutate(`${endpoints.cart.root}/${cartData?.id}`, updatedCartData, false);
+      cartMutate(updatedCartData, false);
+      
+      toast.success(res?.data?.message);
     } catch (error) {
       toast.error(error);
     } finally {
       extend.onFalse();
     }
-  }, [extend, timeOut, cartData]);
+  }, [extend, timeOut, cartData, cartMutate]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -143,60 +151,77 @@ const TickerPurchaseHeader = () => {
         open={timeOut.value}
         fullScreen={!smUp}
         fullWidth
-        maxWidth="md"
+        maxWidth="xs"
         PaperProps={{
           ...(smUp && {
             sx: {
               borderRadius: 1,
-              height: 500,
+              maxHeight: 360,
+              overflow: 'hidden',
             },
           }),
         }}
       >
-        {/* <DialogTitle>Time Limit Reached</DialogTitle> */}
-        <DialogContent sx={{ p: 2, textAlign: 'center', position: 'relative' }}>
-          {/* <IconButton sx={{ position: 'absolute', right: 10 }}>
-            <Iconify icon="material-symbols:close-rounded" width={24} />
-          </IconButton> */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            <Stack alignItems="center" spacing={2}>
-              <Typography variant="subtitle1">Time Limit Reached</Typography>
-              <Typography variant="subtitle2" color="text.secondary" fontSize={13}>
-                Your reservation has been released. Please re-start your purchase.
-              </Typography>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                <Button
-                  variant="outlined"
+        <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
+          <Box sx={{ 
+            bgcolor: 'grey.800', 
+            color: 'common.white', 
+            p: 2, 
+            mb: 0
+          }}>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Iconify icon="solar:alarm-broken" width={18} />
+              <Typography variant="subtitle1" fontWeight={500}>Time Limit Reached</Typography>
+            </Stack>
+          </Box>
+          
+          <Box sx={{ p: 2.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, textAlign: 'center' }}>
+              Your session has expired and the tickets are no longer reserved. Please start again.
+            </Typography>
+            
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                fullWidth
+                startIcon={<Iconify icon="solar:restart-bold" width={16} />}
+                variant="outlined"
+                size="medium"
+                sx={{
+                  borderRadius: 1,
+                  borderColor: 'grey.400',
+                  color: 'grey.700',
+                  py: 0.8,
+                  '&:hover': {
+                    borderColor: 'grey.600',
+                    bgcolor: 'grey.100',
+                  }
+                }}
+                onClick={() => {
+                  handleRemoveCart();
+                }}
+              >
+                Start again
+              </Button>
+              {!cartData?.isExtended && (
+                <LoadingButton
+                  fullWidth
+                  startIcon={<Iconify icon="mingcute:time-line" width={16} />}
+                  variant="contained"
+                  size="medium"
                   sx={{
-                    borderRadius: 0.5,
+                    borderRadius: 1,
+                    py: 0.8,
+                    bgcolor: 'grey.800',
+                    '&:hover': {
+                      bgcolor: 'grey.900',
+                    }
                   }}
-                  onClick={() => {
-                    handleRemoveCart();
-                  }}
+                  loading={extend.value}
+                  onClick={extendSession}
                 >
-                  Return to tickets
-                </Button>
-                {!cartData?.isExtended && (
-                  <LoadingButton
-                    startIcon={<Iconify icon="mingcute:time-line" width={18} />}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 0.5,
-                    }}
-                    loading={extend.value}
-                    onClick={extendSession}
-                  >
-                    Extend 5 minutes
-                  </LoadingButton>
-                )}
-              </Stack>
+                  Extend 5 mins.
+                </LoadingButton>
+              )}
             </Stack>
           </Box>
         </DialogContent>
