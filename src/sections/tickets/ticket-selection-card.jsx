@@ -23,10 +23,14 @@ import {
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
 
+import { MaterialUISwitch } from 'src/layouts/dashboard/header';
+
 import Iconify from 'src/components/iconify';
+import { useSettingsContext } from 'src/components/settings';
 
 import useGetCartData from './hooks/use-get-cart';
 
@@ -42,6 +46,8 @@ const TicketSelectionCard = () => {
   const collapse = useBoolean();
   const loading = useBoolean();
   const addOnDialog = useBoolean();
+  const settings = useSettingsContext();
+  const isActive = useUserActivity();
 
   const tixs = useCartStore((state) => state.tickets);
 
@@ -108,6 +114,7 @@ const TicketSelectionCard = () => {
             borderColor: 'black',
             transition: 'linear .3s',
           },
+          boxShadow: 1,
           userSelect: 'none',
         }}
         size={{ xs: 12, md: 4 }}
@@ -392,6 +399,7 @@ const TicketSelectionCard = () => {
         height: 1,
         p: 2,
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <ListItemText
@@ -400,6 +408,16 @@ const TicketSelectionCard = () => {
         primaryTypographyProps={{ variant: 'subtitle1' }}
         secondaryTypographyProps={{ variant: 'caption' }}
       />
+
+      <Box position="absolute" right={0} zIndex={1111} top={5}>
+        <MaterialUISwitch
+          sx={{ m: 1, opacity: isActive ? 1 : 0.2, transition: 'all linear .2s' }}
+          checked={settings.themeMode !== 'light'}
+          onChange={() =>
+            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
+          }
+        />
+      </Box>
       <Box
         ref={ref}
         flexGrow={1}
@@ -491,9 +509,20 @@ const TicketSelectionCard = () => {
                 </Typography>
               ) : (
                 <Stack height={1}>
-                  <Typography mb={2} variant="subtitle2">
-                    Order Summary
-                  </Typography>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="subtitle2">
+                      Order Summary
+                    </Typography>
+                    <IconButton 
+                      size="small" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        collapse.onFalse();
+                      }}
+                    >
+                      <Iconify icon="iconamoon:arrow-up-2-bold" width={20} />
+                    </IconButton>
+                  </Stack>
                   <Stack
                     spacing={1}
                     flexGrow={1}
@@ -573,23 +602,35 @@ const TicketSelectionCard = () => {
           </Collapse>
 
           <Box my={1} onClick={() => collapse.onToggle()}>
-            <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
-              {collapse.value ? (
-                <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
-              ) : (
-                <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2 }}>
+              {!collapse.value && (
+                <Typography
+                  variant="subtitle1"
+                  fontSize={18}
+                  fontWeight={600}
+                  letterSpacing={-0.7}
+                >
+                  Total
+                </Typography>
               )}
-              <Typography
-                variant="subtitle1"
-                textAlign="end"
-                fontSize={18}
-                fontWeight={600}
-                letterSpacing={-0.7}
-              >
-                {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                  subTotal && subTotal + 0.1
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {!collapse.value && (
+                  <>
+                    <Typography
+                      variant="subtitle1"
+                      textAlign="end"
+                      fontSize={18}
+                      fontWeight={600}
+                      letterSpacing={-0.7}
+                    >
+                      {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                        subTotal && subTotal + 0.1
+                      )}
+                    </Typography>
+                    <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+                  </>
                 )}
-              </Typography>
+              </Stack>
             </Stack>
           </Box>
 
@@ -698,7 +739,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
-              onClick={() => {
+              onClick={(e) => {
                 if (currentAddOn?.selectedQuantity === 0) {
                   return;
                 }
@@ -719,7 +760,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                   bgcolor: '#D9D9D9',
                 }),
               }}
-              onClick={() => {
+              onClick={(e) => {
                 updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'increment');
               }}
               onMouseDown={(e) => {

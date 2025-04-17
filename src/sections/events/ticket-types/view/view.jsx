@@ -191,6 +191,7 @@ export default function TicketTypeView({ data }) {
       setOpenDialog(false);
       enqueueSnackbar('Ticket type created successfully!', { variant: 'success' });
     } catch (error) {
+      console.log(error.message);
       enqueueSnackbar(error.message || 'Failed to create ticket type', { variant: 'error' });
     }
   });

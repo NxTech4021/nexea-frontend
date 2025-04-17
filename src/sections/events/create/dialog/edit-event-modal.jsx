@@ -148,7 +148,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             description: selectedEvent?.description,
             date: selectedEvent?.date,
             personInCharge: selectedEvent?.personInCharge?.id,
-            tickera_api: selectedEvent?.tickera_api,
+            sst: selectedEvent?.sst,
             status: selectedEvent?.status,
           }}
           onSubmit={(values, { setSubmitting }) => {
@@ -480,17 +480,25 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         fontSize: '0.8rem',
                       }}
                     >
-                      Tickera API
+                      SST{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
                     </Typography>
+
                     <Field
                       as={TextField}
-                      type="text"
-                      name="tickera_api"
-                      id="tickera_api"
+                      type="number"
+                      name="sst"
                       fullWidth
                       variant="outlined"
-                      placeholder="Enter Tickera API"
+                      placeholder="SST in %"
                       InputLabelProps={{ shrink: true }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'e' || e.key === '-') {
+                          e.preventDefault();
+                        }
+                      }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,

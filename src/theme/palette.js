@@ -130,8 +130,8 @@ export function palette(mode) {
       disabled: grey[600],
     },
     background: {
-      paper: '#1C252E',
-      default: '#181c24',
+      paper: '#202531',
+      default: '#0A0E15',
       neutral: alpha(grey[500], 0.12),
     },
     action: {
