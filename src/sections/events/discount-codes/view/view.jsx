@@ -228,7 +228,7 @@ export default function DiscountCodeView() {
           />
         )}
 
-        {tableData.length > 0 && (
+        {tableData?.length > 0 && (
           <Card>
             <Tabs
               value={filters.status}
