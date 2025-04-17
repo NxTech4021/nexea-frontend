@@ -210,7 +210,7 @@ const StyledNavItem = styled(ListItemButton, {
       ...(active && {
         fontWeight: theme.typography.fontWeightBold,
         color: theme.palette.mode === 'light' ? 'white' : 'black',
-        backgroundColor: theme.palette.mode === 'light' ? '#1F1F1F' : 'white',
+        backgroundColor: theme.palette.mode === 'light' ? '#202531' : '#D1D6E0',
         '&:hover': {
           // backgroundColor: alpha(theme.palette.primary.main, 0.16),
           backgroundColor:

@@ -23,11 +23,13 @@ import {
   DialogTitle,
   FormControl,
   DialogContent,
+  FormHelperText,
 } from '@mui/material';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
+import { Upload } from 'src/components/upload';
 
 // Event Status options
 const EventStatus = {
@@ -148,12 +150,21 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             description: selectedEvent?.description,
             date: selectedEvent?.date,
             personInCharge: selectedEvent?.personInCharge?.id,
-            tickera_api: selectedEvent?.tickera_api,
+            sst: selectedEvent?.eventSetting?.sst,
             status: selectedEvent?.status,
+            eventLogo: selectedEvent?.eventSetting?.eventLogo,
           }}
           onSubmit={(values, { setSubmitting }) => {
+            const formData = new FormData();
+            formData.append('eventLogo', values.eventLogo);
+            formData.append('data', JSON.stringify(values));
+
             axiosInstance
-              .put(`${endpoints.events.update}/${selectedEvent?.id}`, values)
+              .put(`${endpoints.events.update}/${selectedEvent?.id}`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              })
               .then((response) => {
                 setSubmitting(false);
                 toast.success('Event updated successfully.');
@@ -480,17 +491,25 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         fontSize: '0.8rem',
                       }}
                     >
-                      Tickera API
+                      SST{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
                     </Typography>
+
                     <Field
                       as={TextField}
-                      type="text"
-                      name="tickera_api"
-                      id="tickera_api"
+                      type="number"
+                      name="sst"
                       fullWidth
                       variant="outlined"
-                      placeholder="Enter Tickera API"
+                      placeholder="SST in %"
                       InputLabelProps={{ shrink: true }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'e' || e.key === '-') {
+                          e.preventDefault();
+                        }
+                      }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -594,6 +613,103 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
                           </MenuItem>
                         ))}
+                      </Field>
+                    </FormControl>
+                    <ErrorMessage
+                      name="status"
+                      component={Typography}
+                      sx={{
+                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        fontSize: '0.75rem',
+                        mt: 0.75,
+                        ml: 1.5,
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={12}>
+                    <Typography
+                      component="label"
+                      htmlFor="status"
+                      sx={{
+                        display: 'block',
+                        mb: 1,
+                        fontWeight: 500,
+                        color: (theme) => theme.palette.text.primary,
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      Event Logo{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <FormControl
+                      fullWidth
+                      required
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: (theme) =>
+                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
+                          color: (theme) => theme.palette.text.primary,
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            backgroundColor: (theme) =>
+                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: (theme) =>
+                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
+                            '& fieldset': {
+                              borderColor: (theme) =>
+                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
+                              borderWidth: '1.5px',
+                            },
+                          },
+                          '& .MuiSelect-select': {
+                            color: (theme) => theme.palette.text.primary,
+                          },
+                        },
+                      }}
+                    >
+                      <Field
+                        name="eventLogo"
+                        id="eventLogo"
+                        variant="outlined"
+                        displayEmpty
+                        placeholder="Select status"
+                        sx={{
+                          '& .MuiMenuItem-root': {
+                            color: (theme) => theme.palette.text.primary,
+                          },
+                        }}
+                      >
+                        {({ field, form }) => (
+                          <div>
+                            <Upload
+                              accept={{ 'image/*': [] }}
+                              file={
+                                !!field.value &&
+                                (typeof field?.value === 'string'
+                                  ? field?.value
+                                  : URL.createObjectURL(field?.value))
+                              }
+                              error={!!form.errors.image}
+                              helperText={
+                                !!form.errors.image && (
+                                  <FormHelperText error={!!form.errors.image} sx={{ px: 2 }}>
+                                    {form.errors.image}
+                                  </FormHelperText>
+                                )
+                              }
+                              onDrop={(e) => {
+                                setFieldValue('eventLogo', e[0]); // Set the selected file in Formik state
+                              }}
+                            />
+                          </div>
+                        )}
                       </Field>
                     </FormControl>
                     <ErrorMessage

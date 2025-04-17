@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { Controller, useFormContext } from 'react-hook-form';
+import * as yup from 'yup';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -33,9 +34,29 @@ import { RHFTextField } from 'src/components/hook-form';
 
 import AddOn from '../components/addOn';
 
+// Custom InputLabel with red asterisk
+const StyledInputLabel = ({ required, children, ...props }) => (
+  <InputLabel
+    required={required}
+    {...props}
+    sx={{
+      '& .MuiFormLabel-asterisk': {
+        color: 'error.main',
+      },
+    }}
+  >
+    {children}
+  </InputLabel>
+);
+
+StyledInputLabel.propTypes = {
+  required: PropTypes.bool,
+  children: PropTypes.node,
+};
+
 const RenderSelectField = ({ name, control, label, options, required }) => (
   <Stack width={1} spacing={1}>
-    <InputLabel required={required}>{label}</InputLabel>
+    <StyledInputLabel required={required}>{label}</StyledInputLabel>
     <Controller
       name={name}
       control={control}
@@ -49,9 +70,9 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
               options.find((item) => item.id === selected)?.name || selected || 'Select an option'
             }
           >
-            <MenuItem disabled value="">
+            {/* <MenuItem disabled value="">
               <em>Select an option</em>
-            </MenuItem>
+            </MenuItem> */}
             {options.map((option) => (
               <MenuItem key={option?.id || option} value={option?.id || option}>
                 {option.name || option}
@@ -73,29 +94,96 @@ const stepper = [
   { label: 'Add ons', icon: <Iconify icon="ri:function-add-fill" width={25} /> },
 ];
 
+// Validation Schema
+const validationSchema = [
+  // Step 1 - Ticket Information Schema
+  yup.object().shape({
+    eventId: yup.string().required('Event name is required'),
+    type: yup.string().required('Ticket type is required'),
+    category: yup.string().required('Category is required'),
+    title: yup.string().required('Title is required'),
+    price: yup.string().required('Price is required'),
+    quantity: yup.number()
+      .typeError('Quantity must be a number')
+      .integer('Quantity must be an integer')
+      .min(1, 'Quantity must be at least 1')
+      .required('Quantity is required'),
+    description: yup.string().required('Description is required'),
+    requirement: yup.object().shape({
+      minimumTicketPerOrder: yup.number()
+        .transform((value) => (Number.isNaN(value) ? undefined : value))
+        .nullable()
+        .integer('Minimum must be an integer')
+        .min(1, 'Minimum must be at least 1'),
+      maximumTicketPerOrder: yup.number()
+        .transform((value) => (Number.isNaN(value) ? undefined : value))
+        .nullable()
+        .integer('Maximum must be an integer')
+        .min(1, 'Maximum must be at least 1')
+        .test(
+          'max-greater-than-min',
+          'Maximum must be greater than or equal to minimum',
+          function (value) {
+            const { minimumTicketPerOrder } = this.parent;
+            return !minimumTicketPerOrder || !value || value >= minimumTicketPerOrder;
+          }
+        ),
+    }),
+  }),
+  // Step 2 - Add Ons Schema (optional)
+  yup.object(),
+];
+
 const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) => {
   const methods = useFormContext();
   const smDown = useResponsive('down', 'sm');
   const [activeStep, setActiveStep] = useState(0);
 
-  const { control, watch, setValue } = methods;
+  const { control, watch, setValue, formState, trigger } = methods;
+  const { errors, isValid } = formState;
 
   const type = watch('type');
   const category = watch('category');
+  const eventId = watch('eventId');
+  const title = watch('title');
+  const price = watch('price');
+  const quantity = watch('quantity');
+  const description = watch('description');
+  const minTickets = watch('requirement.minimumTicketPerOrder');
+  const maxTickets = watch('requirement.maximumTicketPerOrder');
 
-  const handleNext = () => {
-    setActiveStep((prev) => prev + 1);
+  const handleNext = async () => {
+    const currentSchema = validationSchema[activeStep];
+    const fieldsToValidate = Object.keys(currentSchema.fields);
+    
+    const isStepValid = await trigger(fieldsToValidate);
+
+    if (isStepValid) {
+      setActiveStep((prev) => prev + 1);
+    }
   };
 
   const handlePrev = () => {
     setActiveStep((prev) => prev - 1);
   };
 
+  // Validate min/max ticket numbers
+  useEffect(() => {
+    if (minTickets && maxTickets && Number(minTickets) > Number(maxTickets)) {
+      setValue('requirement.maximumTicketPerOrder', minTickets, { shouldValidate: true });
+    }
+  }, [minTickets, maxTickets, setValue]);
+
   useEffect(() => {
     if (type && category) {
       setValue('title', `${category} - ${type}`, { shouldValidate: true });
     }
   }, [type, category, setValue]);
+
+  // Check if required fields for the first step are filled
+  const isFirstStepValid = Boolean(
+    eventId && type && category && title && price && quantity && description && !Object.keys(errors).length
+  );
 
   return (
     <Dialog
@@ -166,7 +254,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             </Stack>
 
             <Stack spacing={1} width={1}>
-              <InputLabel required>Title</InputLabel>
+              <StyledInputLabel required>Title</StyledInputLabel>
               <RHFTextField name="title" placeholder="Ticket Title" />
             </Stack>
 
@@ -177,7 +265,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
               gap={1}
             >
               <Stack spacing={1} width={1}>
-                <InputLabel required>Price</InputLabel>
+                <StyledInputLabel required>Price</StyledInputLabel>
 
                 <Controller
                   name="price"
@@ -204,7 +292,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
               </Stack>
 
               <Stack spacing={1} width={1}>
-                <InputLabel required>Quantity</InputLabel>
+                <StyledInputLabel required>Quantity</StyledInputLabel>
 
                 <Controller
                   name="quantity"
@@ -224,13 +312,14 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                       required
                       error={!!fieldState.error}
                       helperText={fieldState.error ? fieldState.error.message : ''}
+                      inputProps={{ min: 1 }}
                     />
                   )}
                 />
               </Stack>
 
               <Stack spacing={1} width={1}>
-                <InputLabel required={false}>Minimum tickets per order</InputLabel>
+                <StyledInputLabel>Minimum tickets per order</StyledInputLabel>
 
                 <Controller
                   name="requirement.minimumTicketPerOrder"
@@ -242,16 +331,16 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                       placeholder="No minimum"
                       variant="outlined"
                       fullWidth
-                      required
                       error={!!fieldState.error}
                       helperText={fieldState.error ? fieldState.error.message : ''}
+                      inputProps={{ min: 1 }}
                     />
                   )}
                 />
               </Stack>
 
               <Stack spacing={1} width={1}>
-                <InputLabel required={false}>Maximum tickets per order</InputLabel>
+                <StyledInputLabel>Maximum tickets per order</StyledInputLabel>
 
                 <Controller
                   name="requirement.maximumTicketPerOrder"
@@ -263,9 +352,9 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                       placeholder="No maximum"
                       variant="outlined"
                       fullWidth
-                      required
                       error={!!fieldState.error}
                       helperText={fieldState.error ? fieldState.error.message : ''}
+                      inputProps={{ min: minTickets || 1 }}
                     />
                   )}
                 />
@@ -273,7 +362,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             </Box>
 
             <Stack spacing={1} width={1}>
-              <InputLabel required>Description</InputLabel>
+              <StyledInputLabel required>Description</StyledInputLabel>
 
               <RHFTextField
                 name="description"
@@ -294,7 +383,11 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             <Button variant="outlined" onClick={handlePrev} sx={{ fontWeight: 400 }}>
               Back
             </Button>
-            <LoadingButton onClick={onSubmit} variant="contained" sx={{ fontWeight: 400 }}>
+            <LoadingButton 
+              onClick={onSubmit} 
+              variant="contained" 
+              sx={{ fontWeight: 400 }}
+            >
               Submit
             </LoadingButton>
           </>
@@ -303,7 +396,12 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             <Button variant="outlined" onClick={onClose} sx={{ fontWeight: 400 }}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleNext} sx={{ fontWeight: 400 }}>
+            <Button 
+              variant="contained" 
+              onClick={handleNext} 
+              sx={{ fontWeight: 400 }}
+              disabled={!isFirstStepValid}
+            >
               Next
             </Button>
           </>
