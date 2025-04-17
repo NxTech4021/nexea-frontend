@@ -13,9 +13,10 @@ const Page = () => {
   const { event } = useParams();
 
   const eventArray = event.split('@');
-  let eventId = eventArray[eventArray.length - 1];
+  const eventId = eventArray[eventArray.length - 1];
+  // let eventId = eventArray[eventArray.length - 1];
 
-  if (localStorage.getItem('eventId')) eventId = localStorage.getItem('eventId');
+  // if (localStorage.getItem('eventId')) eventId = localStorage.getItem('eventId');
 
   if (!eventId) {
     return (
