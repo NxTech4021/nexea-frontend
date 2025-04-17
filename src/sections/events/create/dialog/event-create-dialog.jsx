@@ -3,8 +3,8 @@ import useSWR from 'swr';
 import dayjs from 'dayjs';
 import * as yup from 'yup';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
+import React, { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -36,7 +36,7 @@ import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 
-import FormProvider, { RHFTextField, RHFDatePicker } from 'src/components/hook-form';
+import FormProvider, { RHFUpload, RHFTextField, RHFDatePicker } from 'src/components/hook-form';
 
 const steps = ['Event Information', 'Settings'];
 
@@ -81,6 +81,7 @@ const schema = yup.object().shape({
   eventDate: yup.date().required('Date is required'),
   // themeColor: yup.string().required('Theme color is required'),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
+  eventLogo: yup.object().required('Logo is required.'),
 });
 
 const EventCreateDialog = ({ open, onClose }) => {
@@ -102,7 +103,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       eventDate: null,
       themeColor: '',
       sst: '',
-      logo: null,
+      eventLogo: null,
     },
     mode: 'onChange',
   });
@@ -125,6 +126,14 @@ const EventCreateDialog = ({ open, onClose }) => {
     onClose();
   };
 
+  const onDrop = useCallback(
+    (e) => {
+      const preview = URL.createObjectURL(e[0]);
+      setValue('eventLogo', { file: e[0], preview });
+    },
+    [setValue]
+  );
+
   const onSubmit = handleSubmit(async (eventData) => {
     if (dayjs(eventData.eventDate).isBefore(dayjs(), 'date')) {
       setError('eventDate', {
@@ -136,12 +145,9 @@ const EventCreateDialog = ({ open, onClose }) => {
 
     try {
       const formData = new FormData();
-      Object.keys(eventData).forEach((key) => {
-        formData.append(key, eventData[key]);
-      });
-      if (eventData.logo) {
-        formData.append('logo', eventData.logo);
-      }
+
+      formData.append('data', JSON.stringify(eventData));
+      formData.append('eventLogo', eventData.eventLogo?.file);
 
       const res = await axiosInstance.post(endpoints.events.create, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -236,10 +242,6 @@ const EventCreateDialog = ({ open, onClose }) => {
               const stepProps = {};
               const labelProps = {};
 
-              // if (index === 0) {
-              //   labelProps.error = true;
-              // }
-
               return (
                 <Step
                   key={label}
@@ -303,18 +305,8 @@ const EventCreateDialog = ({ open, onClose }) => {
           {activeStep === 1 && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
-                <InputLabel required>SST</InputLabel>
-                <RHFTextField
-                  name="sst"
-                  type="number"
-                  placeholder="SST in %"
-                  fullWidth
-                  onKeyDown={(e) => {
-                    if (e.key === 'e' || e.key === '-') {
-                      e.preventDefault();
-                    }
-                  }}
-                />
+                <InputLabel required>Event Logo</InputLabel>
+                <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
               </Stack>
             </Box>
           )}

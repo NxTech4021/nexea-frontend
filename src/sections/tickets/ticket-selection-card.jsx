@@ -23,10 +23,14 @@ import {
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
 
+import { MaterialUISwitch } from 'src/layouts/dashboard/header';
+
 import Iconify from 'src/components/iconify';
+import { useSettingsContext } from 'src/components/settings';
 
 import useGetCartData from './hooks/use-get-cart';
 
@@ -42,6 +46,8 @@ const TicketSelectionCard = () => {
   const collapse = useBoolean();
   const loading = useBoolean();
   const addOnDialog = useBoolean();
+  const settings = useSettingsContext();
+  const isActive = useUserActivity();
 
   const tixs = useCartStore((state) => state.tickets);
 
@@ -393,6 +399,7 @@ const TicketSelectionCard = () => {
         height: 1,
         p: 2,
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <ListItemText
@@ -401,6 +408,16 @@ const TicketSelectionCard = () => {
         primaryTypographyProps={{ variant: 'subtitle1' }}
         secondaryTypographyProps={{ variant: 'caption' }}
       />
+
+      <Box position="absolute" right={0} zIndex={1111} top={5}>
+        <MaterialUISwitch
+          sx={{ m: 1, opacity: isActive ? 1 : 0.2, transition: 'all linear .2s' }}
+          checked={settings.themeMode !== 'light'}
+          onChange={() =>
+            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
+          }
+        />
+      </Box>
       <Box
         ref={ref}
         flexGrow={1}

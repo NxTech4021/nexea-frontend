@@ -85,11 +85,11 @@ export function RHFUpload({ name, multiple, type, helperText, ...other }) {
               type === 'file'
                 ? { 'image/*': [] }
                 : // eslint-disable-next-line no-nested-ternary
-                type === 'video'
-                ? { 'video/*': [] }
-                : type === 'doc'
-                ? { file: [] }
-                : { 'application/pdf': [] }
+                  type === 'video'
+                  ? { 'video/*': [] }
+                  : type === 'doc'
+                    ? { file: [] }
+                    : { 'application/pdf': [] }
             }
             file={field.value}
             error={!!error}

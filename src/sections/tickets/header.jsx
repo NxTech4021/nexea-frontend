@@ -116,7 +116,11 @@ const TickerPurchaseHeader = () => {
           px={{ sm: 5, md: 15 }}
           justifyContent={mdDown && 'space-between'}
         >
-          <Image src="/assets/nexea.png" width={120} />
+          {eventData?.eventSetting?.eventLogo ? (
+            <Image src={eventData?.eventSetting?.eventLogo} width={120} />
+          ) : (
+            <Image src="/assets/nexea.png" width={120} />
+          )}
           {!mdDown && (
             <Stack flexGrow={1}>
               <ListItemText
@@ -138,6 +142,8 @@ const TickerPurchaseHeader = () => {
           )}
         </Stack>
       </AppBar>
+
+      {/* <Box minHeight={headerRef?.current?.offsetHeight} /> */}
 
       <Dialog
         open={timeOut.value}
