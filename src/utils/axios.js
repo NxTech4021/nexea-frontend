@@ -4,9 +4,10 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
-
-// axiosInstance.defaults.withCredentials = true
+const axiosInstance = axios.create({
+  baseURL: HOST_API,
+  withCredentials: true
+});
 
 axiosInstance.interceptors.response.use(
   (res) => res,
@@ -84,7 +85,8 @@ export const endpoints = {
     list: '/api/users',
   },
   tickets: {
-    toggle: '/api/tickets/toggle',
+    //toggle: '/api/tickets/toggle',
+    toggle: (id) => `/api/tickets/toggle/${id}`,
   },
   ticketType: {
     get: '/api/ticket-type/',

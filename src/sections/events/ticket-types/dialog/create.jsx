@@ -144,7 +144,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                 name="eventId"
                 control={control}
                 label="Event Name"
-                options={eventsData.events.map((event) => ({ id: event.id, name: event.name }))}
+                options={eventsData?.events?.map((event) => ({ id: event?.id, name: event?.name }))}
                 required
               />
             </Stack>

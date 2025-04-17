@@ -51,7 +51,16 @@ const TicketOverviewCard = () => {
       cartData?.orderSummary?.subtotal,
     [tickets, cartData]
   );
-
+  
+  // SST percentage value
+  const sstPercentage = 10;
+  
+  // Calculate SST amount as 10% of subtotal
+  const sstAmount = subTotal ? subTotal * (sstPercentage / 100) : 0;
+  
+  // Calculate total with proper SST
+  const totalAmount = subTotal ? subTotal + sstAmount : 0;
+  
   const totalTicketsQuantitySelected = useMemo(() => {
     const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
     return ticketsTotal;
@@ -135,7 +144,6 @@ const TicketOverviewCard = () => {
                         direction="row"
                         alignItems="center"
                         justifyContent="space-between"
-                        // "&"
                       >
                         <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
                         <Typography>
@@ -160,12 +168,12 @@ const TicketOverviewCard = () => {
                       },
                     }}
                   >
-                    <Typography>SST:</Typography>
+                    <Typography>{`SST (${sstPercentage}%):`}</Typography>
                     <Typography>
                       {Intl.NumberFormat('en-MY', {
                         style: 'currency',
                         currency: 'MYR',
-                      }).format(0.1)}
+                      }).format(sstAmount)}
                     </Typography>
                   </Stack>
                   <Divider />
@@ -186,7 +194,7 @@ const TicketOverviewCard = () => {
                       {Intl.NumberFormat('en-MY', {
                         style: 'currency',
                         currency: 'MYR',
-                      }).format(subTotal && subTotal + 0.1)}
+                      }).format(totalAmount)}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -210,7 +218,7 @@ const TicketOverviewCard = () => {
               letterSpacing={-0.7}
             >
               {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                (subTotal && subTotal + 0.1) || 0
+                totalAmount || 0
               )}
             </Typography>
           </Stack>
@@ -243,31 +251,15 @@ const TicketOverviewCard = () => {
   return (
     <Box height={1} position="relative">
       <Stack
-        // component={Card}
         sx={{
-          // borderRadius: 2,
           minHeight: 1,
           overflow: 'hidden',
           boxShadow: 5,
         }}
       >
-        {/* <Box sx={{ bgcolor: 'black', p: 2 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Iconify icon="lets-icons:order-fill" width={30} color="white" />
-
-            <ListItemText
-              primary="Order Summary"
-              secondary="Review Your Order."
-              primaryTypographyProps={{ variant: 'subtitle1', color: 'white' }}
-              secondaryTypographyProps={{ variant: 'caption', color: 'white' }}
-            />
-          </Stack>
-        </Box> */}
-
         {subTotal || cartData ? (
           <Stack
             sx={{
-              // color: 'black',
               p: 2,
               px: 3,
               flex: 1,
@@ -285,7 +277,6 @@ const TicketOverviewCard = () => {
               width={1}
               spacing={2}
               flexShrink={2}
-              // color={grey[800]}
               flex={1}
               justifyContent="space-between"
             >
@@ -296,7 +287,6 @@ const TicketOverviewCard = () => {
                         <Stack key={item.id}>
                           <Stack direction="row" alignItems="center" justifyContent="space-between">
                             <Typography noWrap>
-                              {/* {shortenString(`${item.quantity} x ${item.ticketType.title}`, 30)} */}
                               {`${item.quantity} x ${item.ticketType.title}`}
                             </Typography>
 
@@ -327,7 +317,6 @@ const TicketOverviewCard = () => {
                                 Add Ons:
                               </Typography>
                               {item?.cartAddOn
-                                // ?.filter((a) => a.selectedQuantity > 0)
                                 ?.map((a) => (
                                   <Stack
                                     key={a.id}
@@ -360,7 +349,6 @@ const TicketOverviewCard = () => {
                               justifyContent="space-between"
                             >
                               <Typography noWrap>
-                                {/* {shortenString(`${ticket.selectedQuantity} x ${ticket.title}`, 30)} */}
                                 {`${ticket.selectedQuantity} x ${ticket.title}`}
                               </Typography>
                               <Typography>
@@ -393,6 +381,7 @@ const TicketOverviewCard = () => {
                                   ?.filter((a) => a.selectedQuantity > 0)
                                   ?.map((item) => (
                                     <Stack
+                                      key={item.id}
                                       direction="row"
                                       alignItems="center"
                                       justifyContent="space-between"
@@ -498,9 +487,9 @@ const TicketOverviewCard = () => {
                 )}
 
                 <Stack direction="row" alignItems="center" gap={10} justifyContent="space-between">
-                  <Typography>SST:</Typography>
+                  <Typography>{`SST (${sstPercentage}%):`}</Typography>
                   <Typography>
-                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(0.1)}
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(sstAmount)}
                   </Typography>
                 </Stack>
                 <Divider />
@@ -520,8 +509,8 @@ const TicketOverviewCard = () => {
                   <Typography>
                     {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
                       cartData?.orderSummary?.totalPrice
-                        ? cartData.orderSummary.totalPrice + 0.1
-                        : subTotal + 0.1
+                        ? cartData.orderSummary.totalPrice + (cartData.orderSummary.totalPrice * (sstPercentage / 100))
+                        : totalAmount
                     )}
                   </Typography>
                 </Stack>

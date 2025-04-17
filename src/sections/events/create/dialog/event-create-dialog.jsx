@@ -104,7 +104,7 @@ const EventCreateDialog = ({ open, onClose }) => {
     formState: { errors, isSubmitting },
   } = methods;
 
-  console.log(errors);
+  // console.log(errors);
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
