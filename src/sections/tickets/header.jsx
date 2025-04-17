@@ -58,16 +58,16 @@ const TickerPurchaseHeader = () => {
     try {
       extend.onTrue();
       const res = await axiosInstance.patch(endpoints.cart.extendSession);
-      
+
       const updatedCartData = {
         ...cartData,
         expiryDate: dayjs().add(5, 'minutes').toISOString(),
       };
-      
+
       timeOut.onFalse();
       mutate(`${endpoints.cart.root}/${cartData?.id}`, updatedCartData, false);
       cartMutate(updatedCartData, false);
-      
+
       toast.success(res?.data?.message);
     } catch (error) {
       toast.error(error);
@@ -124,7 +124,11 @@ const TickerPurchaseHeader = () => {
           px={{ sm: 5, md: 15 }}
           justifyContent={mdDown && 'space-between'}
         >
-          <Image src="/assets/nexea.png" width={120} />
+          {eventData?.eventSetting?.eventLogo ? (
+            <Image src={eventData?.eventSetting?.eventLogo} width={120} height={50} />
+          ) : (
+            <Image src="/assets/nexea.png" width={120} />
+          )}
           {!mdDown && (
             <Stack flexGrow={1}>
               <ListItemText
@@ -147,6 +151,8 @@ const TickerPurchaseHeader = () => {
         </Stack>
       </AppBar>
 
+      {/* <Box minHeight={headerRef?.current?.offsetHeight} /> */}
+
       <Dialog
         open={timeOut.value}
         fullScreen={!smUp}
@@ -163,23 +169,31 @@ const TickerPurchaseHeader = () => {
         }}
       >
         <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
-          <Box sx={{ 
-            bgcolor: 'grey.800', 
-            color: 'common.white', 
-            p: 2, 
-            mb: 0
-          }}>
+          <Box
+            sx={{
+              bgcolor: 'grey.800',
+              color: 'common.white',
+              p: 2,
+              mb: 0,
+            }}
+          >
             <Stack direction="row" spacing={1.5} alignItems="center">
               <Iconify icon="solar:alarm-broken" width={18} />
-              <Typography variant="subtitle1" fontWeight={500}>Time Limit Reached</Typography>
+              <Typography variant="subtitle1" fontWeight={500}>
+                Time Limit Reached
+              </Typography>
             </Stack>
           </Box>
-          
+
           <Box sx={{ p: 2.5 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, textAlign: 'center' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2.5, textAlign: 'center' }}
+            >
               Your session has expired and the tickets are no longer reserved. Please start again.
             </Typography>
-            
+
             <Stack direction="row" spacing={1.5}>
               <Button
                 fullWidth
@@ -194,7 +208,7 @@ const TickerPurchaseHeader = () => {
                   '&:hover': {
                     borderColor: 'grey.600',
                     bgcolor: 'grey.100',
-                  }
+                  },
                 }}
                 onClick={() => {
                   handleRemoveCart();
@@ -214,7 +228,7 @@ const TickerPurchaseHeader = () => {
                     bgcolor: 'grey.800',
                     '&:hover': {
                       bgcolor: 'grey.900',
-                    }
+                    },
                   }}
                   loading={extend.value}
                   onClick={extendSession}

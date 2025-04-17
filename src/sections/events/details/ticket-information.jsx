@@ -3,7 +3,6 @@ import ReactApexChart from 'react-apexcharts';
 
 import { Box, Card, useTheme, Typography, CardContent } from '@mui/material';
 
-
 const ticketData = [
   {
     label: 'Startups',
@@ -53,8 +52,7 @@ const TicketInformation = () => {
               fontSize: '16px',
               fontWeight: theme.typography.fontWeightBold,
               formatter() {
-                return ticketData
-                  .reduce((sum, item) => sum + item.count, 0).toLocaleString();
+                return ticketData.reduce((sum, item) => sum + item.count, 0).toLocaleString();
               },
             },
             value: {
@@ -78,11 +76,15 @@ const TicketInformation = () => {
       horizontalAlign: 'center',
       labels: {
         colors: theme.palette.mode === 'light' ? '#000' : '#fff',
-      },  
+      },
     },
     tooltip: {
       enabled: true,
-      custom: ({series, seriesIndex, w}) => `<div style="background: ${theme.palette.background.paper};
+      custom: ({
+        series,
+        seriesIndex,
+        w,
+      }) => `<div style="background: ${theme.palette.background.paper};
                             padding: 8px;
                             color: ${theme.palette.text.primary};
                             display: flex;

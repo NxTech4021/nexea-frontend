@@ -26,9 +26,12 @@ import {
   DialogTitle,
   FormControl,
   DialogContent,
+  keyframes,
 } from '@mui/material';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
+import { useGetAllEvents } from 'src/api/event';
 
 import Iconify from 'src/components/iconify';
 
@@ -43,28 +46,38 @@ const getStatusConfig = (status) => {
       return {
         color: '#229A16',
         bgColor: '#E9FCD4',
-        icon: 'eva:checkmark-circle-2-fill'
+        icon: 'eva:checkmark-circle-2-fill',
       };
     case 'INACTIVE':
       return {
         color: '#B72136',
         bgColor: '#FFE7D9',
-        icon: 'ic:outline-block'
+        icon: 'ic:outline-block',
       };
     default:
       return {
         color: '#637381',
         bgColor: '#F4F6F8',
-        icon: 'mdi:help-circle'
+        icon: 'mdi:help-circle',
       };
   }
 };
+
+const borderAnimation = keyframes`
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const EventInformation = ({ event }) => {
   const [countdown, setCountdown] = useState('');
   const [eventStatus, setEventStatus] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const { mutate } = useGetAllEvents(event.id);
 
   useEffect(() => {
     const calculateCountdown = () => {
@@ -78,7 +91,7 @@ const EventInformation = ({ event }) => {
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
         setCountdown(`${days}D : ${hours}H : ${minutes}M : ${seconds}S`);
-        setEventStatus(''); 
+        setEventStatus('');
       } else {
         setCountdown('');
         setEventStatus('Event Ended');
@@ -102,13 +115,28 @@ const EventInformation = ({ event }) => {
 
   return (
     <Card
-      sx={{ 
-        background: 'linear-gradient(to right, rgba(0, 0, 0, 1), rgba(226, 228, 230, 0.2) 400%)', 
-        borderRadius: 2, 
-        width: 1, 
+      sx={{
+        background: 'linear-gradient(to right, rgba(0, 0, 0, 1), rgba(226, 228, 230, 0.2) 400%)',
+        borderRadius: 2,
+        width: 1,
         marginTop: 1.5,
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        '::before': {
+          content: '""',
+          position: 'absolute',
+          top: '-2px',
+          left: '-2px',
+          right: '-2px',
+          bottom: '-2px',
+          borderRadius: '18px',
+          padding: '2px',
+          background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
+          backgroundSize: '200% auto',
+          backgroundRepeat: 'repeat',
+          animation: `${borderAnimation} 7s linear infinite`,
+          zIndex: -1,
+        },
       }}
     >
       <Box
@@ -121,9 +149,9 @@ const EventInformation = ({ event }) => {
           top: 0,
           right: 0,
           width: {
-            xs: '25%', 
-            sm: '15%', 
-            md: '8%', 
+            xs: '25%',
+            sm: '15%',
+            md: '8%',
           },
           height: '36px',
           backgroundColor: 'white',
@@ -139,14 +167,14 @@ const EventInformation = ({ event }) => {
           },
         }}
       >
-        <Iconify 
-          icon="eva:edit-fill" 
-          width={14} 
-          height={14} 
-          sx={{ 
+        <Iconify
+          icon="eva:edit-fill"
+          width={14}
+          height={14}
+          sx={{
             color: 'grey.800',
-            display: { xs: 'block', sm: 'block' }
-          }} 
+            display: { xs: 'block', sm: 'block' },
+          }}
         />
         <Typography
           variant="caption"
@@ -156,22 +184,31 @@ const EventInformation = ({ event }) => {
             fontSize: {
               xs: '0.7rem',
               sm: '0.75rem',
-              md: '0.8rem'
-            }
+              md: '0.8rem',
+            },
           }}
         >
           Edit
         </Typography>
       </Box>
-
       <Divider />
       <CardContent>
         <Box display="flex" justifyContent="space-between" sx={{ p: 0.8 }}>
           <Box>
-            <img src="/assets/nexea.png" alt="Nexea Logo" style={{ width: '90px', marginBottom: '8px' }} />
-            <Typography variant="h6" sx={{ color: 'white', marginBottom: '14px' }}>{items[0].content}</Typography> 
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>{items[1].content}</Typography> 
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>{items[2].content}</Typography> 
+            <img
+              src="/assets/nexea.png"
+              alt="Nexea Logo"
+              style={{ width: '90px', marginBottom: '8px' }}
+            />
+            <Typography variant="h6" sx={{ color: 'white', marginBottom: '14px' }}>
+              {items[0].content}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {items[1].content}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {items[2].content}
+            </Typography>
           </Box>
           <Stack alignItems="center" justifyContent="center">
             <Chip
@@ -181,17 +218,20 @@ const EventInformation = ({ event }) => {
                 backgroundColor: getStatusConfig(event.status).bgColor,
                 color: getStatusConfig(event.status).color,
                 borderRadius: 2,
-                height: 25, 
+                height: 25,
                 paddingX: 2,
                 justifyContent: 'center',
                 '& .MuiChip-icon': { color: getStatusConfig(event.status).color },
                 '&:hover': {
                   backgroundColor: getStatusConfig(event.status).bgColor,
-                }
+                },
               }}
             />
             {eventStatus ? (
-              <Typography variant="subtitle2" sx={{ color: 'red', fontWeight: 'bold', marginTop: 1 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: 'red', fontWeight: 'bold', marginTop: 1 }}
+              >
                 {eventStatus}
               </Typography>
             ) : (
@@ -202,7 +242,6 @@ const EventInformation = ({ event }) => {
           </Stack>
         </Box>
       </CardContent>
-
       {/* Edit Information Modal */}
       <Dialog
         open={openEdit}
@@ -239,6 +278,7 @@ const EventInformation = ({ event }) => {
                 .put(`${endpoints.events.update}/${selectedEvent?.id}`, values)
                 .then((response) => {
                   setSubmitting(false);
+                  mutate();
                   toast.success('Event updated successfully.');
                 })
                 .catch((error) => {
