@@ -83,7 +83,7 @@ const schema = yup.object().shape({
 });
 
 const TicketPurchaseView = ({ eventIdParams }) => {
-  localStorage.setItem('eventId', eventIdParams);
+  // localStorage.setItem('eventId', eventIdParams);
   const mdDown = useResponsive('down', 'md');
 
   const tixs = useCartStore((state) => state.tickets);
@@ -108,6 +108,13 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     error: cartError,
     isCartExist,
   } = useGetCart(cartSessionId);
+
+  useEffect(() => {
+    if (cartData && cartData.event && cartData.event.id !== eventIdParams) {
+      localStorage.removeItem('cartSessionId');
+      cartMutate();
+    }
+  }, [cartData, eventIdParams, cartMutate]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -149,10 +156,10 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
       const res = await axiosInstance.post('/api/cart/checkout', {
         tickets,
-        eventId: eventData.id,
+        eventId: eventIdParams,
       });
       localStorage.setItem('cartSessionId', res.data.cartSessionId);
-      toast.info('Your cart is ready!');
+      toast.info('Cart ready! Please fill in your details to continue.');
       cartMutate();
     } catch (error) {
       toast.error(error?.message);
@@ -160,7 +167,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       loading.onFalse();
       mutate();
     }
-  }, [cartMutate, eventData, loading, mutate, tixs]);
+  }, [cartMutate, eventIdParams, loading, mutate, tixs]);
 
   const setTickets = useCartStore((state) => state.setTickets);
 

@@ -7,6 +7,7 @@ import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 're
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Card,
   Stack,
   alpha,
   Button,
@@ -216,25 +217,30 @@ const TicketInformationCard = () => {
     }
   };
 
-  const helperText = (
-    <Stack spacing={0.5} color="text.secondary" my={2}>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Iconify icon="material-symbols:mail-outline" width={24} />
-        <Typography variant="caption">
-          Your ticket(s) will be sent to your provided email address.
-        </Typography>
-      </Stack>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Iconify icon="ic:baseline-whatsapp" width={24} />
-        <Typography variant="caption">
-          Information regarding the event will be sent to your WhatsApp.
-        </Typography>
-      </Stack>
-    </Stack>
-  );
+  const isAttendeeInfoComplete = (attendee, index) => {
+    if (!attendee) return false;
+    
+    const attendeeValues = watch(`attendees.${index}`);
+    
+    const requiredFields = ['firstName', 'lastName', 'email', 'phoneNumber', 'company'];
+    return requiredFields.every(field => 
+      attendeeValues && 
+      attendeeValues[field] && 
+      attendeeValues[field].trim() !== ''
+    );
+  };
 
   const buyerInfo = (
-    <Stack spacing={1}>
+    <Card 
+      elevation={0}
+      sx={{ 
+        borderRadius: 2, 
+        border: '1px solid',
+        borderColor: 'divider',
+        mb: 2.5,
+        overflow: 'visible'
+      }}
+    >
       <Stack
         direction="row"
         alignItems="center"
@@ -252,250 +258,407 @@ const TicketInformationCard = () => {
         }}
         sx={{
           cursor: 'pointer',
-          p: 1.5,
-          borderRadius: 2,
-          transition: 'all .1s',
-          transitionTimingFunction: 'linear',
-          '&:hover': {
-            bgcolor: (theme) => theme.palette.divider,
-          },
+          p: 2,
+          borderRadius: '16px 16px 0 0',
+          transition: 'all 0.2s ease',
+          bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
         }}
       >
-        <Typography variant="subtitle1">Buyer&apos;s information</Typography>
-        <IconButton>
-          {collapse.value ? (
-            <Iconify icon="ep:arrow-down-bold" width={20} />
-          ) : (
-            <Iconify icon="ep:arrow-right-bold" width={20} />
-          )}
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Iconify icon="mdi:account-outline" width={20} />
+          <Typography variant="subtitle1" fontWeight={500}>Buyer&apos;s Information</Typography>
+        </Stack>
+        <IconButton size="small" sx={{ transition: 'transform 0.2s ease', transform: collapse.value ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <Iconify icon="ep:arrow-down-bold" width={18} />
         </IconButton>
       </Stack>
 
       <Collapse in={collapse.value} timeout="auto" unmountOnExit>
-        <Box
-          display="grid"
-          gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
-          gap={2}
-        >
-          <TextFieldCustom
-            name="buyer.firstName"
-            label="First Name"
-            onChange={onChangeInputBuyer}
-          />
-          <TextFieldCustom name="buyer.lastName" label="Last Name" onChange={onChangeInputBuyer} />
-          <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
-          <TextFieldCustom
-            name="buyer.phoneNumber"
-            label="Phone Number"
-            inputMode="decimal"
-            onChange={onChangeInputBuyer}
-          />
-          <Stack direction="row" spacing={1} alignItems="center">
-            <TextFieldCustom name="buyer.company" label="Company" onChange={onChangeInputBuyer} />
-            <Button variant="text" size="small" onClick={copyCompanyName}>
-              Copy
-            </Button>
+        <Box sx={{ p: 2.5, pt: 2 }}>
+          <Box
+            display="grid"
+            gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
+            gap={2}
+          >
+            <TextFieldCustom
+              name="buyer.firstName"
+              label="First Name"
+              onChange={onChangeInputBuyer}
+            />
+            <TextFieldCustom name="buyer.lastName" label="Last Name" onChange={onChangeInputBuyer} />
+            <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
+            <TextFieldCustom
+              name="buyer.phoneNumber"
+              label="Phone Number"
+              inputMode="decimal"
+              onChange={onChangeInputBuyer}
+            />
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+              <TextFieldCustom 
+                name="buyer.company" 
+                label="Company" 
+                onChange={onChangeInputBuyer}
+                sx={{ width: '100%' }}
+              />
+              <Button 
+                variant="outlined" 
+                size="small" 
+                onClick={copyCompanyName}
+                sx={{ 
+                  height: 36,
+                  minWidth: 70,
+                  ml: 1,
+                  borderRadius: 1,
+                  borderColor: 'grey.400',
+                  color: 'grey.700',
+                  fontSize: '0.8rem',
+                  '&:hover': {
+                    borderColor: 'grey.600',
+                    bgcolor: 'grey.100',
+                  }
+                }}
+              >
+                Copy
+              </Button>
+            </Stack>
+            {buyer && (
+              <Box sx={{ width: '100%' }}>
+                <Typography 
+                  variant="body2" 
+                  component="label" 
+                  htmlFor="buyer-ticket" 
+                  sx={{ 
+                    mb: 0.75, 
+                    display: 'block', 
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                  }}
+                >
+                  For which ticket?
+                </Typography>
+                <RHFSelect
+                  name="buyer.ticket"
+                  id="buyer-ticket"
+                  onChange={(e) => handleChangeTicket(e.target.value)}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      '& fieldset': {
+                        borderColor: (theme) => alpha(theme.palette.text.primary, 0.2),
+                      },
+                      borderRadius: 1,
+                      fontSize: '0.9rem',
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      padding: '12px 14px',
+                    },
+                  }}
+                >
+                  {ticketTypes?.map((ticket) => (
+                    <MenuItem key={ticket.id} value={ticket.ticketType.id}>
+                      {ticket.ticketType.title}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </Box>
+            )}
+          </Box>
+
+          <Stack 
+            spacing={1} 
+            sx={{ 
+              mt: 2.5,
+              p: 1.5, 
+              borderRadius: 1.5,
+              bgcolor: (theme) => alpha(theme.palette.grey[200], 0.6),
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="material-symbols:mail-outline" width={18} color="grey.700" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Your ticket(s) will be sent to your provided email address.
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="ic:baseline-whatsapp" width={18} color="grey.700" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Information regarding the event will be sent to your WhatsApp.
+              </Typography>
+            </Stack>
           </Stack>
-          {buyer && (
-            <RHFSelect
-              name="buyer.ticket"
-              label="For which ticket?"
-              onChange={(e) => handleChangeTicket(e.target.value)}
+
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+            <RHFCheckbox
+              name="buyer.isAnAttendee"
+              label="I am also an attendee"
+              onChange={(_, val) => handleBuyerCheckbox(val)}
               sx={{
-                '& .MuiInputBase-root': {
-                  '& fieldset': {
-                    borderColor: '#DFDFDF', // Change the border color here
+                '& .MuiCheckbox-root': {
+                  padding: '4px',
+                  color: (theme) => theme.palette.grey[600],
+                  '&.Mui-checked': {
+                    color: (theme) => theme.palette.grey[800],
                   },
-                  borderRadius: 0.5,
                 },
-                '& .MuiInputLabel-root': {
-                  color: '#707070',
-                },
+                '& .MuiFormControlLabel-label': {
+                  fontSize: '0.85rem',
+                }
               }}
-            >
-              <MenuItem disabled value="">
-                <em>Select an option</em>
-              </MenuItem>
-              {ticketTypes?.map((ticket) => (
-                <MenuItem key={ticket.id} value={ticket.ticketType.id}>
-                  {ticket.ticketType.title}
-                </MenuItem>
-              ))}
-            </RHFSelect>
-          )}
+            />
+          </Box>
         </Box>
-
-        {helperText}
-
-        <RHFCheckbox
-          name="buyer.isAnAttendee"
-          label="I am also an attendee"
-          onChange={(_, val) => handleBuyerCheckbox(val)}
-          sx={{
-            '&.Mui-checked': {
-              color: 'black',
-            },
-          }}
-        />
       </Collapse>
-    </Stack>
+    </Card>
   );
 
   const attendeeinfo = (
-    <Stack spacing={1}>
-      <Typography variant="subtitle1">Attendee&apos;s information</Typography>
+    <Card 
+      elevation={0}
+      sx={{ 
+        borderRadius: 2, 
+        border: '1px solid',
+        borderColor: 'divider',
+        mb: 2.5,
+        overflow: 'visible'
+      }}
+    >
+      <Stack 
+        direction="row" 
+        spacing={1.5} 
+        alignItems="center" 
+        sx={{ 
+          borderRadius: '16px 16px 0 0',
+          p: 2,
+          bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
+        }}
+      >
+        <Iconify icon="mdi:account-group-outline" width={20} />
+        <Typography variant="subtitle1" fontWeight={500}>Attendee&apos;s Information</Typography>
+      </Stack>
 
-      <Stack spacing={2}>
-        {fields.map((field, index) => (
-          <Box key={field.id}>
-            <Stack
-              id={field.id}
-              component="div"
-              onMouseDown={(e) => {
-                e.currentTarget.style.position = 'relative';
-                e.currentTarget.style.top = '1px';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.position = '';
-              }}
-              mb={1}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleCollapse(index);
-              }}
-              sx={{
-                cursor: 'pointer',
-                p: 1.5,
-                borderRadius: 2,
-                transition: 'all .1s',
-                transitionTimingFunction: 'linear',
+      <Box sx={{ p: 2 }}>
+        <Stack spacing={2}>
+          {fields.map((field, index) => (
+            <Card
+              key={field.id}
+              elevation={0}
+              sx={{ 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1.5,
+                overflow: 'hidden',
+                transition: 'all 0.2s',
                 '&:hover': {
-                  bgcolor: (theme) => theme.palette.divider,
-                },
+                  borderColor: (theme) => alpha(theme.palette.grey[700], 0.3),
+                  boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+                }
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-                <Typography variant="subtitle2" color="text.secondary">
-                  Attendee {index + 1}
-                </Typography>
-                <Stack direction="row" alignItems="center" flexWrap="wrap" spacing={1}>
-                  <Label color="info">
-                    <Iconify icon="mingcute:ticket-line" width={20} mr={1} />
-                    {field.ticket.title}
-                  </Label>
-                  {field.isForbuyer && <Label color="success">Buyer&apos;s ticket</Label>}
-                  {field.addOn && (
-                    <Label color="warning">
-                      <Iconify icon="icon-park-solid:add-one" width={18} mr={1} />
-                      Add On - {field?.addOn?.addOn?.name}
+              <Stack
+                id={field.id}
+                component="div"
+                onMouseDown={(e) => {
+                  e.currentTarget.style.position = 'relative';
+                  e.currentTarget.style.top = '1px';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.position = '';
+                }}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCollapse(index);
+                }}
+                sx={{
+                  cursor: 'pointer',
+                  p: 1.75,
+                  transition: 'all 0.2s ease',
+                  bgcolor: collapseAttendees.includes(index) 
+                    ? (theme) => alpha(theme.palette.grey[300], 0.5) 
+                    : 'transparent',
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+                  {/* Attendee completion status indicator */}
+                  <Tooltip title={isAttendeeInfoComplete(field, index) ? "Information complete" : "Information incomplete"}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
+                      {isAttendeeInfoComplete(field, index) ? (
+                        <Iconify 
+                          icon="mdi:check-circle" 
+                          width={16} 
+                          sx={{ 
+                            color: 'success.main'
+                          }} 
+                        />
+                      ) : (
+                        <Iconify 
+                          icon="mdi:alert-circle-outline" 
+                          width={16} 
+                          sx={{ 
+                            color: 'warning.main'
+                          }} 
+                        />
+                      )}
+                    </Box>
+                  </Tooltip>
+
+                  <Typography 
+                    variant="subtitle2" 
+                    color={collapseAttendees.includes(index) ? 'grey.800' : 'text.secondary'}
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Attendee {index + 1}
+                  </Typography>
+
+                  <Stack direction="row" alignItems="center" flexWrap="wrap" spacing={0.75} sx={{ ml: 0.5 }}>
+                    <Label 
+                      color="info" 
+                      sx={{ 
+                        borderRadius: '4px',
+                        py: 0.5,
+                        height: 22,
+                        fontSize: '0.7rem',
+                      }}
+                    >
+                      <Iconify icon="mingcute:ticket-line" width={14} sx={{ mr: 0.5 }} />
+                      {field.ticket.title}
                     </Label>
-                  )}
+                    {field.isForbuyer && (
+                      <Label 
+                        color="success"
+                        sx={{ 
+                          borderRadius: '4px',
+                          py: 0.5,
+                          height: 22,
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                          Buyer&apos;s ticket
+                      </Label>
+                    )}
+                    {field.addOn && (
+                      <Label 
+                        color="warning"
+                        sx={{ 
+                          borderRadius: '4px',
+                          py: 0.5,
+                          height: 22,
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        <Iconify icon="icon-park-solid:add-one" width={12} sx={{ mr: 0.5 }} />
+                        Add On - {field?.addOn?.addOn?.name}
+                      </Label>
+                    )}
+                  </Stack>
+                </Stack>
+
+                <Stack direction="row" spacing={0.75}>
+                  <Tooltip title="Remove ticket">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTicket(field.ticket.id, index);
+                      }}
+                      sx={{
+                        bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
+                        '&:hover': {
+                          bgcolor: (theme) => alpha(theme.palette.error.main, 0.2),
+                        }
+                      }}
+                    >
+                      <Iconify icon="mdi:trash" width={16} />
+                    </IconButton>
+                  </Tooltip>
+
+                  <IconButton 
+                    size="small"
+                    sx={{ 
+                      transition: 'transform 0.2s ease',
+                      transform: collapseAttendees.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}
+                  >
+                    <Iconify icon="ep:arrow-down-bold" width={16} />
+                  </IconButton>
                 </Stack>
               </Stack>
 
-              <Stack direction="row" spacing={1}>
-                <Tooltip title="Remove ticket">
-                  <IconButton
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeTicket(field.ticket.id, index);
-                    }}
+              <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
+                <Box sx={{ px: 2, pb: 2 }}>
+                  <Box
+                    display="grid"
+                    gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
+                    gap={2}
+                    sx={{ mt: 2 }}
                   >
-                    <Iconify icon="mdi:trash" width={20} />
-                  </IconButton>
-                </Tooltip>
-
-                <IconButton>
-                  {collapseAttendees.includes(index) ? (
-                    <Iconify icon="ep:arrow-down-bold" width={20} />
-                  ) : (
-                    <Iconify icon="ep:arrow-right-bold" width={20} />
-                  )}
-                </IconButton>
-              </Stack>
-            </Stack>
-
-            <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
-              <Box
-                display="grid"
-                gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
-                gap={2}
-              >
-                <TextFieldCustom
-                  name={`attendees.${index}.firstName`}
-                  label="First Name"
-                  slotProps={
-                    getValues(`attendees.${index}.isForbuyer`) && {
-                      input: {
-                        readOnly: true,
-                      },
-                    }
-                  }
-                />
-                <TextFieldCustom
-                  name={`attendees.${index}.lastName`}
-                  label="Last Name"
-                  slotProps={
-                    getValues(`attendees.${index}.isForbuyer`) && {
-                      input: {
-                        readOnly: true,
-                      },
-                    }
-                  }
-                />
-                <TextFieldCustom
-                  name={`attendees.${index}.email`}
-                  label="Email"
-                  slotProps={
-                    getValues(`attendees.${index}.isForbuyer`) && {
-                      input: {
-                        readOnly: true,
-                      },
-                    }
-                  }
-                />
-                <TextFieldCustom
-                  name={`attendees.${index}.phoneNumber`}
-                  label="Phone Number"
-                  inputMode="decimal"
-                  slotProps={
-                    getValues(`attendees.${index}.isForbuyer`) && {
-                      input: {
-                        readOnly: true,
-                      },
-                    }
-                  }
-                />
-                <TextFieldCustom
-                  name={`attendees.${index}.company`}
-                  label="Company"
-                  slotProps={
-                    getValues(`attendees.${index}.isForbuyer`) && {
-                      input: {
-                        readOnly: true,
-                      },
-                    }
-                  }
-                />
-              </Box>
-            </Collapse>
-
-            {index < fields.length - 1 && (
-              <Divider
-                sx={{
-                  mt: 3,
-                  mb: 2,
-                }}
-              />
-            )}
-          </Box>
-        ))}
-      </Stack>
-    </Stack>
+                    <TextFieldCustom
+                      name={`attendees.${index}.firstName`}
+                      label="First Name"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.lastName`}
+                      label="Last Name"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.email`}
+                      label="Email"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.phoneNumber`}
+                      label="Phone Number"
+                      inputMode="decimal"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.company`}
+                      label="Company"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                  </Box>
+                </Box>
+              </Collapse>
+            </Card>
+          ))}
+        </Stack>
+      </Box>
+    </Card>
   );
 
   const scrollToTop = () => {
@@ -616,66 +779,117 @@ const TicketInformationCard = () => {
   }, [anotherCollapse]);
 
   if (cartLoading) {
-    <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-      <CircularProgress
-        thickness={7}
-        size={25}
-        sx={{
-          color: (theme) => theme.palette.common.black,
-          strokeLinecap: 'round',
+    return (
+      <Box 
+        sx={{ 
+          height: '100%',
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          p: 5,
+          borderRadius: 3,
+          bgcolor: 'background.paper'
         }}
-      />
-    </Box>;
+      >
+        <CircularProgress
+          thickness={4}
+          size={40}
+          sx={{
+            color: 'grey.800',
+            mb: 3,
+          }}
+        />
+        <Typography variant="h6" sx={{ mb: 1 }}>Loading Your Cart</Typography>
+        <Typography variant="body2" color="text.secondary" align="center">
+          We&apos;re retrieving your order information...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
     <Box
       sx={{
         height: 1,
-        borderRadius: 2,
+        borderRadius: 3,
         overflow: 'hidden',
-        p: 2,
+        p: { xs: 2, md: 3 },
+        bgcolor: 'background.paper',
+        boxShadow: '0 0 24px rgba(0,0,0,0.05)',
       }}
     >
-      <ListItemText
-        primary="Billing Information"
-        secondary="Personal and contact information of the buyer."
-        primaryTypographyProps={{ variant: 'subtitle1' }}
-        secondaryTypographyProps={{ variant: 'caption' }}
-      />
+      <Stack 
+        direction="row" 
+        alignItems="center" 
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Iconify icon="solar:cart-3-bold" width={28} color="grey.800" />
+        <ListItemText
+          primary="Billing Information"
+          secondary="Personal and contact information of the buyer."
+          primaryTypographyProps={{ variant: 'h5', fontWeight: 600 }}
+          secondaryTypographyProps={{ variant: 'body2', mt: 0.5 }}
+        />
+      </Stack>
+
       <Box
         ref={ref}
         flexGrow={1}
         sx={{
-          px: 2,
+          px: { xs: 1, md: 2 },
           my: 2,
           height: 'calc(100vh - 30vh)',
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
           scrollBehavior: 'smooth',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: (theme) => alpha(theme.palette.text.primary, 0.2),
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: (theme) => alpha(theme.palette.text.primary, 0.3),
+          },
         }}
       >
-        {isCartExpired && 'Expired already'}
+        {isCartExpired && (
+          <Card sx={{ mb: 3, p: 2, bgcolor: 'error.lighter', borderRadius: 3 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Iconify icon="solar:clock-circle-bold" width={24} color="error.main" />
+              <Typography color="error.main" fontWeight={500}>Your cart has expired</Typography>
+            </Stack>
+          </Card>
+        )}
 
         {buyerInfo}
-        <Divider sx={{ my: 2 }} />
+        
+        <Divider sx={{ my: 3 }} />
+        
         {attendeeinfo}
 
         <IconButton
           size="small"
           sx={{
-            position: 'absolute',
-            bottom: 10,
-            right: 10,
-            display: isOverflow.value && 'none',
-            bgcolor: 'black',
-            color: 'whitesmoke',
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            display: isOverflow.value ? 'flex' : 'none',
+            bgcolor: 'grey.800',
+            color: 'common.white',
+            boxShadow: '0 8px 16px 0 rgba(0,0,0,0.1)',
+            transition: 'all 0.2s',
             '&.MuiIconButton-root': {
               '&:hover': {
-                bgcolor: alpha('#000000', 0.8),
+                bgcolor: 'grey.900',
+                transform: 'translateY(-2px)',
               },
             },
+            zIndex: 999,
           }}
           onClick={scrollToTop}
         >
@@ -695,11 +909,11 @@ const TicketInformationCard = () => {
                 ...(activeFieldId === field.id && {
                   position: 'relative',
                   left: 4,
-                  color: 'black',
+                  color: 'grey.900',
                   fontWeight: 600,
                 }),
                 '&:hover': {
-                  color: alpha('#000000', 1),
+                  color: 'grey.800',
                 },
               }}
               onClick={(e) => {
@@ -720,33 +934,46 @@ const TicketInformationCard = () => {
       {mdDown && (
         <Box
           ref={boxRef}
-          p={1}
+          p={2.5}
           mt="auto"
-          boxShadow={10}
           sx={{
-            borderTop: 1.5,
-            borderColor: (theme) => theme.palette.divider,
+            position: 'sticky',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            bgcolor: 'background.paper',
+            borderTop: 1,
+            borderColor: 'divider',
+            boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+            zIndex: 9,
           }}
         >
           <>
             <Collapse in={anotherCollapse.value} timeout="auto">
-              <Box sx={{ height: '55vh', p: 1 }} position="relative">
+              <Box sx={{ maxHeight: '55vh', overflowY: 'auto', mb: 2.5 }} position="relative">
+                <Typography variant="h6" sx={{ mb: 2, mt: 1 }}>Order Summary</Typography>
                 <Stack
                   sx={{
                     '& .MuiTypography-root': {
                       fontSize: 14,
-                      fontWeight: 400,
                     },
-                    textWrap: 'nowrap',
                   }}
-                  mt={2}
                   width={1}
-                  spacing={2}
+                  spacing={2.5}
                   flexShrink={2}
                   flex={1}
                   justifyContent="space-between"
                 >
-                  <Box>
+                  <Card
+                    elevation={0}
+                    sx={{ 
+                      p: 2, 
+                      borderRadius: 2, 
+                      bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
                     <Stack spacing={2}>
                       {data?.cartItem.map((item) => (
                         <Stack
@@ -755,8 +982,11 @@ const TicketInformationCard = () => {
                           alignItems="center"
                           justifyContent="space-between"
                         >
-                          <Typography>{`${item.quantity} x ${item.ticketType.title}`}</Typography>
-                          <Typography>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Iconify icon="mdi:ticket-outline" width={16} />
+                            <Typography sx={{ fontWeight: 500 }}>{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                          </Stack>
+                          <Typography sx={{ fontWeight: 600 }}>
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
                               currency: 'MYR',
@@ -765,178 +995,236 @@ const TicketInformationCard = () => {
                         </Stack>
                       ))}
                     </Stack>
-                  </Box>
+                  </Card>
 
-                  <Stack spacing={2}>
+                  <Stack spacing={2.5}>
                     {data && (
-                      <Stack spacing={1}>
+                      <Card 
+                        elevation={0}
+                        sx={{ 
+                          p: 2, 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Stack spacing={1.5}>
+                          <Typography variant="subtitle2" mb={0.5}>Discount Code</Typography>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            spacing={1}
+                          >
+                            <TextField
+                              size="small"
+                              fullWidth
+                              placeholder="Enter Discount Code"
+                              value={discountCode}
+                              onChange={(e) =>
+                                setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                              }
+                              InputProps={{
+                                sx: { borderRadius: 1.5 }
+                              }}
+                            />
+                            <Button
+                              variant="contained"
+                              size="medium"
+                              onClick={handleRedeemDiscount}
+                              sx={{ 
+                                height: 40,
+                                borderRadius: 1.5,
+                                px: 2,
+                                bgcolor: 'grey.800',
+                                '&:hover': {
+                                  bgcolor: 'grey.900',
+                                }
+                              }}
+                            >
+                              Apply
+                            </Button>
+                          </Stack>
+
+                          {!!data.discount && (
+                            <Stack spacing={1} sx={{ mt: 1 }}>
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                <Iconify
+                                  icon="lets-icons:check-fill"
+                                  color="success.main"
+                                  width={16}
+                                />
+                                <Typography variant="body2" color="success.main" fontWeight={500}>
+                                  Discount code applied
+                                </Typography>
+                              </Stack>
+                              <Stack 
+                                direction="row" 
+                                justifyContent="space-between"
+                                sx={{
+                                  p: 1.5,
+                                  borderRadius: 1.5,
+                                  bgcolor: (theme) => alpha(theme.palette.success.lighter, 0.5),
+                                }}
+                              >
+                                <Typography variant="body2" fontWeight={500}>
+                                  {data.discount.code}
+                                </Typography>
+                                <Typography variant="body2" color="error" fontWeight={500}>
+                                  - {data.discount.value}
+                                </Typography>
+                              </Stack>
+                            </Stack>
+                          )}
+                        </Stack>
+                      </Card>
+                    )}
+
+                    <Card
+                      elevation={0}
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Stack spacing={2}>
                         <Stack
                           direction="row"
                           alignItems="center"
                           justifyContent="space-between"
-                          spacing={1}
                         >
-                          <TextField
-                            size="small"
-                            fullWidth
-                            placeholder="Enter Discount Code"
-                            value={discountCode}
-                            onChange={(e) =>
-                              setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
-                            }
-                          />
-                          <Button
-                            variant="contained"
-                            size="small"
-                            onClick={handleRedeemDiscount}
-                            sx={{ height: 36 }}
-                          >
-                            Apply
-                          </Button>
+                          <Typography color="text.secondary">Subtotal:</Typography>
+                          <Typography fontWeight={500}>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(subTotal)}
+                          </Typography>
                         </Stack>
 
-                        {!!data.discount && (
-                          <Stack maxWidth={200} spacing={1}>
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <Iconify
-                                icon="lets-icons:check-fill"
-                                color="success.main"
-                                width={13}
-                              />
-                              <Typography variant="caption" fontSize={12} color="success">
-                                Discount code applied
-                              </Typography>
-                            </Stack>
-                            <Stack direction="row" justifyContent="space-between">
-                              <Typography variant="caption" fontSize={12}>
-                                {data.discount.code}
-                              </Typography>
-                              <Typography variant="caption" color="error" fontSize={12}>
-                                - {data.discount.value}
-                              </Typography>
-                            </Stack>
+                        {data && (
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Typography color="text.secondary">Discount:</Typography>
+                            <Typography fontWeight={500} color="error.main">
+                              - {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(data?.orderSummary?.discount)}
+                            </Typography>
                           </Stack>
                         )}
+
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography color="text.secondary">SST:</Typography>
+                          <Typography fontWeight={500}>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(0.1)}
+                          </Typography>
+                        </Stack>
+
+                        <Divider />
+
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography variant="subtitle1">Total:</Typography>
+                          <Typography variant="h6" color="grey.800">
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(
+                              data?.orderSummary?.totalPrice
+                                ? data.orderSummary.totalPrice + 0.1
+                                : subTotal + 0.1
+                            )}
+                          </Typography>
+                        </Stack>
                       </Stack>
-                    )}
-
-                    <Divider />
-
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      gap={10}
-                      justifyContent="space-between"
-                    >
-                      <Typography>Subtotal:</Typography>
-                      <Typography>
-                        {Intl.NumberFormat('en-MY', {
-                          style: 'currency',
-                          currency: 'MYR',
-                        }).format(subTotal)}
-                      </Typography>
-                    </Stack>
-
-                    {data && (
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        gap={10}
-                        justifyContent="space-between"
-                      >
-                        <Typography>Discount</Typography>
-                        <Typography>
-                          -{' '}
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(data?.orderSummary?.discount)}
-                        </Typography>
-                      </Stack>
-                    )}
-
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      gap={10}
-                      justifyContent="space-between"
-                    >
-                      <Typography>SST:</Typography>
-                      <Typography>
-                        {Intl.NumberFormat('en-MY', {
-                          style: 'currency',
-                          currency: 'MYR',
-                        }).format(0.1)}
-                      </Typography>
-                    </Stack>
-
-                    <Divider />
-
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      gap={10}
-                      justifyContent="space-between"
-                      sx={{
-                        '&  .MuiTypography-root': {
-                          fontSize: 20,
-                          fontWeight: 600,
-                        },
-                      }}
-                    >
-                      <Typography>Total:</Typography>
-                      <Typography>
-                        {Intl.NumberFormat('en-MY', {
-                          style: 'currency',
-                          currency: 'MYR',
-                        }).format(
-                          data?.orderSummary?.totalPrice
-                            ? data.orderSummary.totalPrice + 0.1
-                            : subTotal + 0.1
-                        )}
-                      </Typography>
-                    </Stack>
+                    </Card>
                   </Stack>
                 </Stack>
               </Box>
             </Collapse>
 
-            <Box my={1} onClick={() => anotherCollapse.onToggle()}>
-              <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
-                {anotherCollapse.value ? (
-                  <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
-                ) : (
-                  <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
-                )}
+            <Box 
+              onClick={() => anotherCollapse.onToggle()}
+              sx={{ 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                mb: 2,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
+                '&:hover': {
+                  bgcolor: (theme) => alpha(theme.palette.grey[300], 0.5),
+                }
+              }}
+            >
+              <Typography variant="subtitle1">
+                {anotherCollapse.value ? 'Hide Order Summary' : 'View Order Summary'}
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1.5}>
                 <Typography
                   variant="subtitle1"
-                  textAlign="end"
-                  fontSize={18}
                   fontWeight={600}
-                  letterSpacing={-0.7}
+                  color="grey.800"
                 >
                   {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    data?.orderSummary?.totalPrice && data.orderSummary.totalPrice + 0.1
+                    data?.orderSummary?.totalPrice ? data.orderSummary.totalPrice + 0.1 : 0
                   )}
                 </Typography>
+                <Iconify 
+                  icon={anotherCollapse.value ? "iconamoon:arrow-up-2-bold" : "iconamoon:arrow-down-2-bold"} 
+                  width={20}
+                  sx={{ 
+                    transition: 'transform 0.2s ease',
+                    transform: anotherCollapse.value ? 'rotate(0deg)' : 'rotate(0deg)'
+                  }}
+                />
               </Stack>
             </Box>
-          </>
 
-          <LoadingButton
-            size="large"
-            variant="contained"
-            fullWidth
-            type="submit"
-            // loading={loading.value}
-            // onClick={handleCheckout}
-            // disabled={!totalTicketsQuantitySelected}
-            startIcon={
-              <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
-            }
-          >
-            Proceed to payment
-          </LoadingButton>
+            <LoadingButton
+              size="large"
+              variant="contained"
+              fullWidth
+              type="submit"
+              // loading={loading.value}
+              // onClick={handleCheckout}
+              // disabled={!totalTicketsQuantitySelected}
+              startIcon={
+                <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+              }
+              sx={{
+                borderRadius: 2,
+                py: 1.5,
+                bgcolor: 'grey.800',
+                '&:hover': {
+                  bgcolor: 'grey.900',
+                  transform: 'translateY(-2px)',
+                },
+                transition: 'all 0.2s',
+              }}
+            >
+              Proceed to Payment
+            </LoadingButton>
+          </>
         </Box>
       )}
     </Box>
