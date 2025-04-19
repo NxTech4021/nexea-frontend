@@ -123,7 +123,7 @@ const TicketSelectionCard = () => {
           <Stack spacing={2.5}>
             <ListItemText
               primary={ticket.title}
-              secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
+              secondary={ticket.description}
               slotProps={{
                 primary: {
                   fontWeight: 600,
@@ -144,6 +144,7 @@ const TicketSelectionCard = () => {
             />
           </Stack>
         </Grid2>
+
         <Grid2 size={12} alignContent="flex-end">
           <Stack direction="row" flexWrap="wrap" spacing={1}>
             <ListItemText
@@ -249,6 +250,7 @@ const TicketSelectionCard = () => {
             </Stack>
           </Stack>
         </Grid2>
+
         {!!ticket?.addOns?.length && (
           <Grid2 size={12} alignContent="flex-end">
             <Typography variant="caption" fontWeight={600} color="text.secondary">
@@ -643,7 +645,8 @@ export default TicketSelectionCard;
 const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAddOnQuantity }) => {
   const currentAddOn = useMemo(
     () =>
-      tixs?.find((a) => a.id === addOnInfo?.ticketId)?.addOns.find((b) => b.id === addOnInfo?.id),
+      tixs?.find((a) => a.id === addOnInfo?.ticketId)?.addOns.find((b) => b.id === addOnInfo?.id) ||
+      0,
     [tixs, addOnInfo]
   );
 
@@ -654,6 +657,8 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
         ?.addOns?.reduce((acc, curr) => acc + (curr?.selectedQuantity || 0), 0) || 0,
     [tixs, addOnInfo]
   );
+
+  const selectedQuantity = currentAddOn?.selectedQuantity || 0;
 
   return (
     <Dialog
@@ -702,7 +707,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 bgcolor: '#00564B',
                 '&:hover': { bgcolor: '#00564B99' },
                 borderRadius: 1,
-                ...(currentAddOn?.selectedQuantity === 0 && {
+                ...(selectedQuantity === 0 && {
                   pointerEvents: 'none',
                   bgcolor: '#D9D9D9',
                 }),
@@ -717,7 +722,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
               onClick={() => {
-                if (currentAddOn?.selectedQuantity === 0) {
+                if (selectedQuantity === 0) {
                   return;
                 }
                 updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'decrement');
@@ -725,7 +730,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
             >
               <Iconify icon="ic:round-minus" width={15} color="white" />
             </IconButton>
-            <Typography variant="subtitle1">{currentAddOn?.selectedQuantity}</Typography>
+            <Typography variant="subtitle1">{selectedQuantity}</Typography>
             <IconButton
               sx={{
                 bgcolor: '#00564B',

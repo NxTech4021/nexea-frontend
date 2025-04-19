@@ -65,7 +65,7 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
-const ticketTypes = ['Early Bird', 'Standard'];
+const ticketTypes = ['Early Bird', 'Standard', 'After Party'];
 const ticketCategories = ['Startup', 'General', 'Speaker', 'VIP'];
 
 const stepper = [
@@ -156,13 +156,15 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
                 options={ticketTypes}
                 required
               />
-              <RenderSelectField
-                name="category"
-                control={control}
-                label="Category"
-                options={ticketCategories}
-                required
-              />
+              {type !== 'After Party' && (
+                <RenderSelectField
+                  name="category"
+                  control={control}
+                  label="Category"
+                  options={ticketCategories}
+                  required
+                />
+              )}
             </Stack>
 
             <Stack spacing={1} width={1}>

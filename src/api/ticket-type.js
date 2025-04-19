@@ -32,7 +32,10 @@ export const createTicketType = async ({
   selectedAddOns,
 }) => {
   try {
-    if (!isDraft && (!title || !type || !eventId || !category || !price || !quantity)) {
+    if (
+      !isDraft &&
+      (!title || !type || !eventId || (type !== 'After Party' && !category) || !price || !quantity)
+    ) {
       throw new Error('Arguments not enough');
     }
 

@@ -30,6 +30,7 @@ export const dataMapping = {
   vip: 'Vip',
   standard: 'Standard',
   speaker: 'Speaker',
+  afterParty: 'After Party',
 };
 
 export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
@@ -94,8 +95,8 @@ export default function TicketTableRow({ row, selected, onSelectRow, onDeleteRow
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type] || 'N/A'}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category] || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {new Intl.NumberFormat('en-MY', {
             minimumFractionDigits: 2,

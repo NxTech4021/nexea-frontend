@@ -11,6 +11,7 @@ import {
   AppBar,
   Dialog,
   Button,
+  keyframes,
   Typography,
   ListItemText,
   DialogContent,
@@ -27,6 +28,15 @@ import Iconify from 'src/components/iconify';
 import useGetCartData from './hooks/use-get-cart';
 
 dayjs.extend(Duration);
+
+const borderAnimation = keyframes`
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const TickerPurchaseHeader = () => {
   const { data: cartData, eventData, mutate: eventMutate, cartMutate } = useGetCartData();
@@ -117,7 +127,28 @@ const TickerPurchaseHeader = () => {
 
   return (
     <>
-      <AppBar sx={{ bgcolor: '#000000', color: 'whitesmoke', p: 2 }} position="fixed">
+      <AppBar
+        sx={{
+          bgcolor: '#000000',
+          color: 'whitesmoke',
+          p: 2,
+          '::before': {
+            content: '""',
+            position: 'absolute',
+            top: '-2px',
+            left: '-2px',
+            right: '-2px',
+            bottom: '-2px',
+            padding: '2px',
+            background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
+            backgroundSize: '200% auto',
+            backgroundRepeat: 'repeat',
+            animation: `${borderAnimation} 7s linear infinite`,
+            zIndex: -1,
+          },
+        }}
+        position="fixed"
+      >
         <Stack
           direction="row"
           alignItems="center"
@@ -135,6 +166,12 @@ const TickerPurchaseHeader = () => {
                 primary={eventData?.name}
                 secondary={dayjs(eventData?.date).format('LLL')}
                 sx={{ textAlign: 'center' }}
+                slotProps={{
+                  secondary: {
+                    variant: 'caption',
+                    color: 'text.secondary',
+                  },
+                }}
               />
             </Stack>
           )}
