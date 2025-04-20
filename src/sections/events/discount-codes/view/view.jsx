@@ -23,7 +23,7 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import mockDiscountCodes from 'src/_mock/_discountCodes';
+// import mockDiscountCodes from 'src/_mock/_discountCodes';
 import { useGetAllTicketTypes } from 'src/api/ticket-type';
 import { useGetAllDiscountCode } from 'src/api/discount-code';
 

@@ -5,6 +5,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
+import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Card,
@@ -66,6 +67,8 @@ const TicketInformationCard = () => {
   const isCartExpired = useMemo(() => dayjs(data?.expiryDate).isBefore(dayjs(), 'date'), [data]);
 
   const ticketTypes = useMemo(() => data?.cartItem, [data]);
+
+  const theme = useTheme();
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -259,14 +262,12 @@ const TicketInformationCard = () => {
           p: 2,
           borderRadius: '16px 16px 0 0',
           transition: 'all 0.2s ease',
-          bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
+          bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.5),
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Iconify icon="mdi:account-outline" width={20} />
-          <Typography variant="subtitle1" fontWeight={500}>
-            Buyer&apos;s Information
-          </Typography>
+          <Iconify icon="mdi:account-outline" width={20} color="text.primary" />
+          <Typography variant="subtitle1" fontWeight={500}>Buyer&apos;s Information</Typography>
         </Stack>
         <IconButton
           size="small"
@@ -308,27 +309,41 @@ const TicketInformationCard = () => {
                 name="buyer.company"
                 label="Company"
                 onChange={onChangeInputBuyer}
-                sx={{ width: '100%' }}
+                sx={{ width: '100%', flex: 1 }}
               />
               <Button
                 variant="outlined"
                 size="small"
                 onClick={copyCompanyName}
-                sx={{
-                  height: 36,
-                  minWidth: 70,
+                sx={{ 
+                  height: 40,
+                  alignSelf: 'flex-end',
+                  width: 'auto',
+                  minWidth: 'auto',
+
+//                 sx={{
+//                   height: 36,
+//                   minWidth: 70,
+
                   ml: 1,
+                  mb: '1px',
                   borderRadius: 1,
-                  borderColor: 'grey.400',
-                  color: 'grey.700',
-                  fontSize: '0.8rem',
+                  borderColor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.400',
+                  color: 'text.secondary',
+                  fontSize: '0.75rem',
+                  whiteSpace: 'nowrap',
+                  px: 1.5,
+                  flexShrink: 0,
                   '&:hover': {
-                    borderColor: 'grey.600',
-                    bgcolor: 'grey.100',
-                  },
+                    borderColor: theme.palette.mode === 'dark' ? 'grey.400' : 'grey.600',
+                    bgcolor: alpha(theme.palette.grey[500], theme.palette.mode === 'dark' ? 0.12 : 0.08),
+                  }
+//                     borderColor: 'grey.600',
+//                     bgcolor: 'grey.100',
+//                   },
                 }}
               >
-                Copy
+                Copy to All
               </Button>
             </Stack>
             {buyer && (
@@ -354,7 +369,7 @@ const TicketInformationCard = () => {
                   sx={{
                     '& .MuiInputBase-root': {
                       '& fieldset': {
-                        borderColor: (theme) => alpha(theme.palette.text.primary, 0.2),
+                        borderColor: alpha(theme.palette.text.primary, 0.2),
                       },
                       borderRadius: 1,
                       fontSize: '0.9rem',
@@ -380,17 +395,17 @@ const TicketInformationCard = () => {
               mt: 2.5,
               p: 1.5,
               borderRadius: 1.5,
-              bgcolor: (theme) => alpha(theme.palette.grey[200], 0.6),
+              bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.6),
             }}
           >
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="material-symbols:mail-outline" width={18} color="grey.700" />
+              <Iconify icon="material-symbols:mail-outline" width={18} color="text.secondary" />
               <Typography variant="body2" fontSize="0.85rem">
                 Your ticket(s) will be sent to your provided email address.
               </Typography>
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="ic:baseline-whatsapp" width={18} color="grey.700" />
+              <Iconify icon="ic:baseline-whatsapp" width={18} color="text.secondary" />
               <Typography variant="body2" fontSize="0.85rem">
                 Information regarding the event will be sent to your WhatsApp.
               </Typography>
@@ -405,9 +420,9 @@ const TicketInformationCard = () => {
               sx={{
                 '& .MuiCheckbox-root': {
                   padding: '4px',
-                  color: (theme) => theme.palette.grey[600],
+                  color: theme.palette.text.secondary,
                   '&.Mui-checked': {
-                    color: (theme) => theme.palette.grey[800],
+                    color: theme.palette.text.primary,
                   },
                 },
                 '& .MuiFormControlLabel-label': {
@@ -439,13 +454,11 @@ const TicketInformationCard = () => {
         sx={{
           borderRadius: '16px 16px 0 0',
           p: 2,
-          bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
+          bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.5),
         }}
       >
-        <Iconify icon="mdi:account-group-outline" width={20} />
-        <Typography variant="subtitle1" fontWeight={500}>
-          Attendee&apos;s Information
-        </Typography>
+        <Iconify icon="mdi:account-group-outline" width={20} color="text.primary" />
+        <Typography variant="subtitle1" fontWeight={500}>Attendee&apos;s Information</Typography>
       </Stack>
 
       <Box sx={{ p: 2 }}>
@@ -461,9 +474,18 @@ const TicketInformationCard = () => {
                 overflow: 'hidden',
                 transition: 'all 0.2s',
                 '&:hover': {
-                  borderColor: (theme) => alpha(theme.palette.grey[700], 0.3),
-                  boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.grey[500], 0.2)}`,
-                },
+                  borderColor: alpha(
+                    theme.palette.mode === 'dark' ? theme.palette.grey[500] : theme.palette.grey[700], 
+                    theme.palette.mode === 'dark' ? 0.5 : 0.3
+                  ),
+                  boxShadow: `0 0 0 1px ${alpha(
+                    theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[500], 
+                    theme.palette.mode === 'dark' ? 0.3 : 0.2
+                  )}`,
+                }
+//                   borderColor: (theme) => alpha(theme.palette.grey[700], 0.3),
+//                   boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+//                 },
               }}
             >
               <Stack
@@ -487,8 +509,13 @@ const TicketInformationCard = () => {
                   cursor: 'pointer',
                   p: 1.75,
                   transition: 'all 0.2s ease',
-                  bgcolor: collapseAttendees.includes(index)
-                    ? (theme) => alpha(theme.palette.grey[300], 0.5)
+                  bgcolor: collapseAttendees.includes(index) 
+                    ? alpha(
+                        theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300], 
+                        theme.palette.mode === 'dark' ? 0.6 : 0.5
+                      ) 
+//                   bgcolor: collapseAttendees.includes(index)
+//                     ? (theme) => alpha(theme.palette.grey[300], 0.5)
                     : 'transparent',
                 }}
               >
@@ -522,9 +549,9 @@ const TicketInformationCard = () => {
                     </Box>
                   </Tooltip>
 
-                  <Typography
-                    variant="subtitle2"
-                    color={collapseAttendees.includes(index) ? 'grey.800' : 'text.secondary'}
+                  <Typography 
+                    variant="subtitle2" 
+                    color={collapseAttendees.includes(index) ? 'text.primary' : 'text.secondary'}
                     sx={{ fontWeight: 500 }}
                   >
                     Attendee {index + 1}
@@ -589,10 +616,10 @@ const TicketInformationCard = () => {
                         removeTicket(field.ticket.id, index);
                       }}
                       sx={{
-                        bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
+                        bgcolor: alpha(theme.palette.error.main, theme.palette.mode === 'dark' ? 0.2 : 0.1),
                         '&:hover': {
-                          bgcolor: (theme) => alpha(theme.palette.error.main, 0.2),
-                        },
+                          bgcolor: alpha(theme.palette.error.main, theme.palette.mode === 'dark' ? 0.3 : 0.2),
+                        }
                       }}
                     >
                       <Iconify icon="mdi:trash" width={16} />
@@ -614,7 +641,7 @@ const TicketInformationCard = () => {
               </Stack>
 
               <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
-                <Box sx={{ px: 2, pb: 2 }}>
+                <Box sx={{ px: 2, pb: mdDown ? 4 : 2 }}>
                   <Box
                     display="grid"
                     gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
@@ -822,7 +849,7 @@ const TicketInformationCard = () => {
           thickness={4}
           size={40}
           sx={{
-            color: 'grey.800',
+            color: 'text.primary',
             mb: 3,
           }}
         />
@@ -844,11 +871,16 @@ const TicketInformationCard = () => {
         overflow: 'hidden',
         p: { xs: 2, md: 3 },
         bgcolor: 'background.paper',
-        boxShadow: '0 0 24px rgba(0,0,0,0.05)',
+        boxShadow: `0 0 24px ${alpha(theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.black, 0.05)}`,
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <Iconify icon="solar:cart-3-bold" width={28} color="grey.800" />
+      <Stack 
+        direction="row" 
+        alignItems="center" 
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Iconify icon="solar:cart-3-bold" width={28} color="text.primary" />
         <ListItemText
           primary="Billing Information"
           secondary="Personal and contact information of the buyer."
@@ -863,25 +895,31 @@ const TicketInformationCard = () => {
         sx={{
           px: { xs: 1, md: 2 },
           my: 2,
-          height: 'calc(100vh - 30vh)',
+          height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
           scrollBehavior: 'smooth',
+          pb: mdDown ? 12 : 2, 
           '&::-webkit-scrollbar': {
             width: '6px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: (theme) => alpha(theme.palette.text.primary, 0.2),
+            background: alpha(theme.palette.text.primary, 0.2),
             borderRadius: '10px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            background: (theme) => alpha(theme.palette.text.primary, 0.3),
+            background: alpha(theme.palette.text.primary, 0.3),
           },
         }}
       >
         {isCartExpired && (
-          <Card sx={{ mb: 3, p: 2, bgcolor: 'error.lighter', borderRadius: 3 }}>
+          <Card sx={{ 
+            mb: 3, 
+            p: 2, 
+            bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.error.dark, 0.2) : 'error.lighter', 
+            borderRadius: 3 
+          }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <Iconify icon="solar:clock-circle-bold" width={24} color="error.main" />
               <Typography color="error.main" fontWeight={500}>
@@ -904,13 +942,13 @@ const TicketInformationCard = () => {
             bottom: 16,
             right: 16,
             display: isOverflow.value ? 'flex' : 'none',
-            bgcolor: 'grey.800',
+            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.800',
             color: 'common.white',
-            boxShadow: '0 8px 16px 0 rgba(0,0,0,0.1)',
+            boxShadow: `0 8px 16px 0 ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.3 : 0.1)}`,
             transition: 'all 0.2s',
             '&.MuiIconButton-root': {
               '&:hover': {
-                bgcolor: 'grey.900',
+                bgcolor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.900',
                 transform: 'translateY(-2px)',
               },
             },
@@ -923,7 +961,7 @@ const TicketInformationCard = () => {
       </Box>
 
       {fields?.length && (
-        <Stack sx={{ color: 'black', position: 'absolute', top: 100, left: -100 }}>
+        <Stack sx={{ position: 'absolute', top: 100, left: -100 }}>
           {fields.map((field, index) => (
             <Typography
               key={index}
@@ -934,11 +972,11 @@ const TicketInformationCard = () => {
                 ...(activeFieldId === field.id && {
                   position: 'relative',
                   left: 4,
-                  color: 'grey.900',
+                  color: 'text.primary',
                   fontWeight: 600,
                 }),
                 '&:hover': {
-                  color: 'grey.800',
+                  color: 'text.primary',
                 },
               }}
               onClick={(e) => {
@@ -969,16 +1007,26 @@ const TicketInformationCard = () => {
             bgcolor: 'background.paper',
             borderTop: 1,
             borderColor: 'divider',
-            boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+            boxShadow: `0 -4px 12px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.15 : 0.05)}`,
             zIndex: 9,
+            marginTop: 3,
           }}
         >
           <>
             <Collapse in={anotherCollapse.value} timeout="auto">
-              <Box sx={{ maxHeight: '55vh', overflowY: 'auto', mb: 2.5 }} position="relative">
-                <Typography variant="h6" sx={{ mb: 2, mt: 1 }}>
-                  Order Summary
-                </Typography>
+              <Box sx={{ 
+                maxHeight: '45vh',
+                overflowY: 'auto',
+                mb: 2.5,
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: alpha(theme.palette.text.primary, 0.2),
+                  borderRadius: '10px',
+                }
+              }} position="relative">
+                <Typography variant="h6" sx={{ mb: 2, mt: 1 }}>Order Summary</Typography>
                 <Stack
                   sx={{
                     '& .MuiTypography-root': {
@@ -993,10 +1041,15 @@ const TicketInformationCard = () => {
                 >
                   <Card
                     elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                    sx={{ 
+                      p: 2, 
+                      borderRadius: 2, 
+                      bgcolor: alpha(
+                        theme.palette.mode === 'dark' 
+                          ? theme.palette.background.neutral 
+                          : theme.palette.background.neutral, 
+                        theme.palette.mode === 'dark' ? 0.3 : 0.6
+                      ),
                       border: '1px solid',
                       borderColor: 'divider',
                     }}
@@ -1010,10 +1063,8 @@ const TicketInformationCard = () => {
                           justifyContent="space-between"
                         >
                           <Stack direction="row" alignItems="center" spacing={1}>
-                            <Iconify icon="mdi:ticket-outline" width={16} />
-                            <Typography
-                              sx={{ fontWeight: 500 }}
-                            >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                            <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
+                            <Typography sx={{ fontWeight: 500 }}>{`${item.quantity} × ${item.ticketType.title}`}</Typography>
                           </Stack>
                           <Typography sx={{ fontWeight: 600 }}>
                             {Intl.NumberFormat('en-MY', {
@@ -1067,10 +1118,10 @@ const TicketInformationCard = () => {
                                 height: 40,
                                 borderRadius: 1.5,
                                 px: 2,
-                                bgcolor: 'grey.800',
+                                bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
                                 '&:hover': {
-                                  bgcolor: 'grey.900',
-                                },
+                                  bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
+                                }
                               }}
                             >
                               Apply
@@ -1095,7 +1146,12 @@ const TicketInformationCard = () => {
                                 sx={{
                                   p: 1.5,
                                   borderRadius: 1.5,
-                                  bgcolor: (theme) => alpha(theme.palette.success.lighter, 0.5),
+                                  bgcolor: alpha(
+                                    theme.palette.mode === 'dark' 
+                                      ? theme.palette.success.dark 
+                                      : theme.palette.success.lighter, 
+                                    theme.palette.mode === 'dark' ? 0.2 : 0.5
+                                  ),
                                 }}
                               >
                                 <Typography variant="body2" fontWeight={500}>
@@ -1158,7 +1214,7 @@ const TicketInformationCard = () => {
 
                         <Stack direction="row" alignItems="center" justifyContent="space-between">
                           <Typography variant="subtitle1">Total:</Typography>
-                          <Typography variant="h6" color="grey.800">
+                          <Typography variant="h6" color="text.primary">
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
                               currency: 'MYR',
@@ -1186,9 +1242,9 @@ const TicketInformationCard = () => {
                 mb: 2,
                 p: 1.5,
                 borderRadius: 2,
-                bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
+                bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.5),
                 '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.grey[300], 0.5),
+                  bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300], 0.5),
                 },
               }}
             >
@@ -1196,7 +1252,11 @@ const TicketInformationCard = () => {
                 {anotherCollapse.value ? 'Hide Order Summary' : 'View Order Summary'}
               </Typography>
               <Stack direction="row" alignItems="center" spacing={1.5}>
-                <Typography variant="subtitle1" fontWeight={600} color="grey.800">
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
+                  color="text.primary"
+                >
                   {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
                     data?.orderSummary?.totalPrice ? data.orderSummary.totalPrice + 0.1 : 0
                   )}
@@ -1230,9 +1290,9 @@ const TicketInformationCard = () => {
               sx={{
                 borderRadius: 2,
                 py: 1.5,
-                bgcolor: 'grey.800',
+                bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
                 '&:hover': {
-                  bgcolor: 'grey.900',
+                  bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
                   transform: 'translateY(-2px)',
                 },
                 transition: 'all 0.2s',
