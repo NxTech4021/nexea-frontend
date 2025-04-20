@@ -29,7 +29,7 @@ export const useCartStore = create((set) => ({
           ...ticket,
           ...updatedData,
           addOns: [...updatedAddOns], // Ensure a new reference
-          subTotal: newQuantity * ticket.price + addOnsTotal,
+          subTotal: newQuantity * ticket.price,
         };
       }),
     })),
@@ -60,7 +60,7 @@ export const useCartStore = create((set) => ({
         return {
           ...ticket,
           addOns: updatedAddOns,
-          subTotal: ticket.price * ticket.selectedQuantity + addOnsTotal, // Updated subtotal
+          // subTotal: ticket.price * ticket.selectedQuantity + addOnsTotal, // Updated subtotal
         };
       }),
     })),

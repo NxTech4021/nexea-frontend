@@ -65,14 +65,14 @@ export default function JwtRegisterView() {
 
       router.push(paths.auth.jwt.verify);
     } catch (error) {
-      reset();
+      // reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-      <Typography variant="h4">Sign up to Nexea Event App</Typography>
+      <Typography variant="h4">Sign up to Nexea Event Apppp</Typography>
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> Already have an account? </Typography>
 

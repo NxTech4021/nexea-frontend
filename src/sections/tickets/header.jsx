@@ -11,6 +11,7 @@ import {
   AppBar,
   Dialog,
   Button,
+  keyframes,
   Typography,
   ListItemText,
   DialogContent,
@@ -27,6 +28,15 @@ import Iconify from 'src/components/iconify';
 import useGetCartData from './hooks/use-get-cart';
 
 dayjs.extend(Duration);
+
+const borderAnimation = keyframes`
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const TickerPurchaseHeader = () => {
   const { data: cartData, eventData, mutate: eventMutate, cartMutate } = useGetCartData();
@@ -58,16 +68,16 @@ const TickerPurchaseHeader = () => {
     try {
       extend.onTrue();
       const res = await axiosInstance.patch(endpoints.cart.extendSession);
-      
+
       const updatedCartData = {
         ...cartData,
         expiryDate: dayjs().add(5, 'minutes').toISOString(),
       };
-      
+
       timeOut.onFalse();
       mutate(`${endpoints.cart.root}/${cartData?.id}`, updatedCartData, false);
       cartMutate(updatedCartData, false);
-      
+
       toast.success(res?.data?.message);
     } catch (error) {
       toast.error(error);
@@ -117,20 +127,51 @@ const TickerPurchaseHeader = () => {
 
   return (
     <>
-      <AppBar sx={{ bgcolor: '#000000', color: 'whitesmoke', p: 2 }} position="fixed">
+      <AppBar
+        sx={{
+          bgcolor: '#000000',
+          color: 'whitesmoke',
+          p: 2,
+          '::before': {
+            content: '""',
+            position: 'absolute',
+            top: '-2px',
+            left: '-2px',
+            right: '-2px',
+            bottom: '-2px',
+            padding: '2px',
+            background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
+            backgroundSize: '200% auto',
+            backgroundRepeat: 'repeat',
+            animation: `${borderAnimation} 7s linear infinite`,
+            zIndex: -1,
+          },
+        }}
+        position="fixed"
+      >
         <Stack
           direction="row"
           alignItems="center"
           px={{ sm: 5, md: 15 }}
           justifyContent={mdDown && 'space-between'}
         >
-          <Image src="/assets/nexea.png" width={120} />
+          {eventData?.eventSetting?.eventLogo ? (
+            <Image src={eventData?.eventSetting?.eventLogo} width={120} height={50} />
+          ) : (
+            <Image src="/assets/nexea.png" width={120} />
+          )}
           {!mdDown && (
             <Stack flexGrow={1}>
               <ListItemText
                 primary={eventData?.name}
                 secondary={dayjs(eventData?.date).format('LLL')}
                 sx={{ textAlign: 'center' }}
+                slotProps={{
+                  secondary: {
+                    variant: 'caption',
+                    color: 'text.secondary',
+                  },
+                }}
               />
             </Stack>
           )}
@@ -146,6 +187,8 @@ const TickerPurchaseHeader = () => {
           )}
         </Stack>
       </AppBar>
+
+      {/* <Box minHeight={headerRef?.current?.offsetHeight} /> */}
 
       <Dialog
         open={timeOut.value}
@@ -163,23 +206,31 @@ const TickerPurchaseHeader = () => {
         }}
       >
         <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
-          <Box sx={{ 
-            bgcolor: 'grey.800', 
-            color: 'common.white', 
-            p: 2, 
-            mb: 0
-          }}>
+          <Box
+            sx={{
+              bgcolor: 'grey.800',
+              color: 'common.white',
+              p: 2,
+              mb: 0,
+            }}
+          >
             <Stack direction="row" spacing={1.5} alignItems="center">
               <Iconify icon="solar:alarm-broken" width={18} />
-              <Typography variant="subtitle1" fontWeight={500}>Time Limit Reached</Typography>
+              <Typography variant="subtitle1" fontWeight={500}>
+                Time Limit Reached
+              </Typography>
             </Stack>
           </Box>
-          
+
           <Box sx={{ p: 2.5 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, textAlign: 'center' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2.5, textAlign: 'center' }}
+            >
               Your session has expired and the tickets are no longer reserved. Please start again.
             </Typography>
-            
+
             <Stack direction="row" spacing={1.5}>
               <Button
                 fullWidth
@@ -194,7 +245,7 @@ const TickerPurchaseHeader = () => {
                   '&:hover': {
                     borderColor: 'grey.600',
                     bgcolor: 'grey.100',
-                  }
+                  },
                 }}
                 onClick={() => {
                   handleRemoveCart();
@@ -214,7 +265,7 @@ const TickerPurchaseHeader = () => {
                     bgcolor: 'grey.800',
                     '&:hover': {
                       bgcolor: 'grey.900',
-                    }
+                    },
                   }}
                   loading={extend.value}
                   onClick={extendSession}

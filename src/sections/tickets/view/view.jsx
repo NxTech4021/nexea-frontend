@@ -28,11 +28,10 @@ import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
 
 import { useGetCart } from 'src/api/cart/cart';
-import { MaterialUISwitch } from 'src/layouts/dashboard/header';
 
+import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 import FormProvider from 'src/components/hook-form';
-import { useSettingsContext } from 'src/components/settings';
 
 import TickerPurchaseHeader from '../header';
 import { Cart } from '../context/ticket-context';
@@ -65,7 +64,6 @@ const schema = yup.object().shape({
         .test('unique-email', 'Email must be unique', (value, context) => {
           if (!value) return false;
           const { from } = context;
-          console.log(from[1]);
 
           const emails = from[1].value.attendees.map((user) => user.email);
           return emails.filter((email) => email === value).length === 1;
@@ -87,7 +85,7 @@ const schema = yup.object().shape({
 const TicketPurchaseView = ({ eventIdParams }) => {
   // localStorage.setItem('eventId', eventIdParams);
   const mdDown = useResponsive('down', 'md');
-  const settings = useSettingsContext();
+
   const tixs = useCartStore((state) => state.tickets);
   const loading = useBoolean();
   const searchParams = useSearchParams();
@@ -141,7 +139,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const res = await axiosInstance.post('/api/cart/continuePayment', data);
-      window.location.href = res.data.paymentUrl;
+      // window.location.href = res.data.paymentUrl;
     } catch (error) {
       toast.error(error?.message);
     }
@@ -260,40 +258,56 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     );
   }
 
+  if (!eventData?.ticketType.length) {
+    return (
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <Stack alignItems="center" spacing={4}>
+          <Image src="/logo/empty.svg" width={300} height={300} />
+          <Typography variant="subtitle2" color="text.secondary">
+            Tickets are empty
+          </Typography>
+        </Stack>
+      </Box>
+    );
+  }
+
   return (
     <Cart.Provider value={memoizedValue}>
       <TickerPurchaseHeader />
 
       <Box minHeight={76} />
 
-      <Box position="absolute" left="62%" zIndex={1111}>
-        <MaterialUISwitch
-          sx={{ m: 1 }}
-          checked={settings.themeMode !== 'light'}
-          onChange={() =>
-            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
-          }
-        />
-      </Box>
-
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Box
-          // px={{ lg: 15 }}
-          // bgcolor={settings.themeMode === 'light' && '#F4F4F4'}
           overflow="auto"
           sx={{
             height: `calc(100vh - ${76}px)`,
             scrollbarWidth: 'thin',
             scrollBehavior: 'smooth',
-            scrollbarColor: '#000000 white',
+            scrollbarColor: (theme) =>
+              theme.palette.mode === 'dark' ? '#FFF #0A0E15' : '#000000 white',
           }}
         >
           {!mdDown ? (
-            <Grid container spacing={2} minHeight={1}>
+            <Grid container minHeight={1}>
               <Grid size={{ xs: 12, md: 8 }} position="relative">
                 {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
               </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid
+                size={{ xs: 12, md: 4 }}
+                maxHeight={1}
+                position="fixed"
+                right={0}
+                top={76}
+                height={`calc(100vh - ${76}px)`}
+              >
                 <TicketOverviewCard />
               </Grid>
             </Grid>

@@ -23,7 +23,13 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
     <Box
       component="img"
       src="https://res.cloudinary.com/dirld0zbv/image/upload/v1707284953/nexea-logo_vhaun4.png"
-      sx={{ width: 40, height: 40, cursor: 'pointer', ...sx }}
+      sx={{
+        width: 40,
+        height: 40,
+        cursor: 'pointer',
+
+        ...sx,
+      }}
     />
   );
 

@@ -78,7 +78,11 @@ const defaultFilters = {
 const schema = yup.object().shape({
   eventId: yup.string().required('Event is required'),
   type: yup.string().required('Type is required'),
-  category: yup.string().required('Category is required'),
+  category: yup.string().when('type', {
+    is: (val) => val !== 'After Party',
+    then: (s) => s.string().required('Category is required'),
+    otherwise: (s) => yup.string().notRequired(),
+  }),
   price: yup.string().required('Price is required'),
   title: yup.string().required('Ticket title is required'),
   quantity: yup
@@ -191,6 +195,7 @@ export default function TicketTypeView({ data }) {
       setOpenDialog(false);
       enqueueSnackbar('Ticket type created successfully!', { variant: 'success' });
     } catch (error) {
+      console.log(error.message);
       enqueueSnackbar(error.message || 'Failed to create ticket type', { variant: 'error' });
     }
   });
