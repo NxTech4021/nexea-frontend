@@ -222,26 +222,24 @@ const TicketInformationCard = () => {
 
   const isAttendeeInfoComplete = (attendee, index) => {
     if (!attendee) return false;
-    
+
     const attendeeValues = watch(`attendees.${index}`);
-    
+
     const requiredFields = ['firstName', 'lastName', 'email', 'phoneNumber', 'company'];
-    return requiredFields.every(field => 
-      attendeeValues && 
-      attendeeValues[field] && 
-      attendeeValues[field].trim() !== ''
+    return requiredFields.every(
+      (field) => attendeeValues && attendeeValues[field] && attendeeValues[field].trim() !== ''
     );
   };
 
   const buyerInfo = (
-    <Card 
+    <Card
       elevation={0}
-      sx={{ 
-        borderRadius: 2, 
+      sx={{
+        borderRadius: 2,
         border: '1px solid',
         borderColor: 'divider',
         mb: 2.5,
-        overflow: 'visible'
+        overflow: 'visible',
       }}
     >
       <Stack
@@ -271,7 +269,13 @@ const TicketInformationCard = () => {
           <Iconify icon="mdi:account-outline" width={20} color="text.primary" />
           <Typography variant="subtitle1" fontWeight={500}>Buyer&apos;s Information</Typography>
         </Stack>
-        <IconButton size="small" sx={{ transition: 'transform 0.2s ease', transform: collapse.value ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+        <IconButton
+          size="small"
+          sx={{
+            transition: 'transform 0.2s ease',
+            transform: collapse.value ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
           <Iconify icon="ep:arrow-down-bold" width={18} />
         </IconButton>
       </Stack>
@@ -288,7 +292,11 @@ const TicketInformationCard = () => {
               label="First Name"
               onChange={onChangeInputBuyer}
             />
-            <TextFieldCustom name="buyer.lastName" label="Last Name" onChange={onChangeInputBuyer} />
+            <TextFieldCustom
+              name="buyer.lastName"
+              label="Last Name"
+              onChange={onChangeInputBuyer}
+            />
             <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
             <TextFieldCustom
               name="buyer.phoneNumber"
@@ -296,30 +304,27 @@ const TicketInformationCard = () => {
               inputMode="decimal"
               onChange={onChangeInputBuyer}
             />
-            <Stack 
-              direction="row" 
-              spacing={1} 
-              alignItems="center" 
-              sx={{ 
-                width: '100%',
-                display: 'flex'
-              }}
-            >
-              <TextFieldCustom 
-                name="buyer.company" 
-                label="Company" 
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+              <TextFieldCustom
+                name="buyer.company"
+                label="Company"
                 onChange={onChangeInputBuyer}
                 sx={{ width: '100%', flex: 1 }}
               />
-              <Button 
-                variant="outlined" 
-                size="small" 
+              <Button
+                variant="outlined"
+                size="small"
                 onClick={copyCompanyName}
                 sx={{ 
                   height: 40,
                   alignSelf: 'flex-end',
                   width: 'auto',
                   minWidth: 'auto',
+
+//                 sx={{
+//                   height: 36,
+//                   minWidth: 70,
+
                   ml: 1,
                   mb: '1px',
                   borderRadius: 1,
@@ -333,6 +338,9 @@ const TicketInformationCard = () => {
                     borderColor: theme.palette.mode === 'dark' ? 'grey.400' : 'grey.600',
                     bgcolor: alpha(theme.palette.grey[500], theme.palette.mode === 'dark' ? 0.12 : 0.08),
                   }
+//                     borderColor: 'grey.600',
+//                     bgcolor: 'grey.100',
+//                   },
                 }}
               >
                 Copy to All
@@ -340,13 +348,13 @@ const TicketInformationCard = () => {
             </Stack>
             {buyer && (
               <Box sx={{ width: '100%' }}>
-                <Typography 
-                  variant="body2" 
-                  component="label" 
-                  htmlFor="buyer-ticket" 
-                  sx={{ 
-                    mb: 0.75, 
-                    display: 'block', 
+                <Typography
+                  variant="body2"
+                  component="label"
+                  htmlFor="buyer-ticket"
+                  sx={{
+                    mb: 0.75,
+                    display: 'block',
                     fontSize: '0.85rem',
                     fontWeight: 500,
                     color: 'text.secondary',
@@ -381,11 +389,11 @@ const TicketInformationCard = () => {
             )}
           </Box>
 
-          <Stack 
-            spacing={1} 
-            sx={{ 
+          <Stack
+            spacing={1}
+            sx={{
               mt: 2.5,
-              p: 1.5, 
+              p: 1.5,
               borderRadius: 1.5,
               bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.6),
             }}
@@ -419,7 +427,7 @@ const TicketInformationCard = () => {
                 },
                 '& .MuiFormControlLabel-label': {
                   fontSize: '0.85rem',
-                }
+                },
               }}
             />
           </Box>
@@ -429,21 +437,21 @@ const TicketInformationCard = () => {
   );
 
   const attendeeinfo = (
-    <Card 
+    <Card
       elevation={0}
-      sx={{ 
-        borderRadius: 2, 
+      sx={{
+        borderRadius: 2,
         border: '1px solid',
         borderColor: 'divider',
         mb: 2.5,
-        overflow: 'visible'
+        overflow: 'visible',
       }}
     >
-      <Stack 
-        direction="row" 
-        spacing={1.5} 
-        alignItems="center" 
-        sx={{ 
+      <Stack
+        direction="row"
+        spacing={1.5}
+        alignItems="center"
+        sx={{
           borderRadius: '16px 16px 0 0',
           p: 2,
           bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.5),
@@ -459,7 +467,7 @@ const TicketInformationCard = () => {
             <Card
               key={field.id}
               elevation={0}
-              sx={{ 
+              sx={{
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 1.5,
@@ -475,6 +483,9 @@ const TicketInformationCard = () => {
                     theme.palette.mode === 'dark' ? 0.3 : 0.2
                   )}`,
                 }
+//                   borderColor: (theme) => alpha(theme.palette.grey[700], 0.3),
+//                   boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+//                 },
               }}
             >
               <Stack
@@ -503,28 +514,36 @@ const TicketInformationCard = () => {
                         theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300], 
                         theme.palette.mode === 'dark' ? 0.6 : 0.5
                       ) 
+//                   bgcolor: collapseAttendees.includes(index)
+//                     ? (theme) => alpha(theme.palette.grey[300], 0.5)
                     : 'transparent',
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
                   {/* Attendee completion status indicator */}
-                  <Tooltip title={isAttendeeInfoComplete(field, index) ? "Information complete" : "Information incomplete"}>
+                  <Tooltip
+                    title={
+                      isAttendeeInfoComplete(field, index)
+                        ? 'Information complete'
+                        : 'Information incomplete'
+                    }
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
                       {isAttendeeInfoComplete(field, index) ? (
-                        <Iconify 
-                          icon="mdi:check-circle" 
-                          width={16} 
-                          sx={{ 
-                            color: 'success.main'
-                          }} 
+                        <Iconify
+                          icon="mdi:check-circle"
+                          width={16}
+                          sx={{
+                            color: 'success.main',
+                          }}
                         />
                       ) : (
-                        <Iconify 
-                          icon="mdi:alert-circle-outline" 
-                          width={16} 
-                          sx={{ 
-                            color: 'warning.main'
-                          }} 
+                        <Iconify
+                          icon="mdi:alert-circle-outline"
+                          width={16}
+                          sx={{
+                            color: 'warning.main',
+                          }}
                         />
                       )}
                     </Box>
@@ -538,10 +557,16 @@ const TicketInformationCard = () => {
                     Attendee {index + 1}
                   </Typography>
 
-                  <Stack direction="row" alignItems="center" flexWrap="wrap" spacing={0.75} sx={{ ml: 0.5 }}>
-                    <Label 
-                      color="info" 
-                      sx={{ 
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    spacing={0.75}
+                    sx={{ ml: 0.5 }}
+                  >
+                    <Label
+                      color="info"
+                      sx={{
                         borderRadius: '4px',
                         py: 0.5,
                         height: 22,
@@ -552,26 +577,26 @@ const TicketInformationCard = () => {
                       {field.ticket.title}
                     </Label>
                     {field.isForbuyer && (
-                      <Label 
+                      <Label
                         color="success"
-                        sx={{ 
+                        sx={{
                           borderRadius: '4px',
                           py: 0.5,
                           height: 22,
-                          fontSize: '0.7rem'
+                          fontSize: '0.7rem',
                         }}
                       >
-                          Buyer&apos;s ticket
+                        Buyer&apos;s ticket
                       </Label>
                     )}
                     {field.addOn && (
-                      <Label 
+                      <Label
                         color="warning"
-                        sx={{ 
+                        sx={{
                           borderRadius: '4px',
                           py: 0.5,
                           height: 22,
-                          fontSize: '0.7rem'
+                          fontSize: '0.7rem',
                         }}
                       >
                         <Iconify icon="icon-park-solid:add-one" width={12} sx={{ mr: 0.5 }} />
@@ -601,11 +626,13 @@ const TicketInformationCard = () => {
                     </IconButton>
                   </Tooltip>
 
-                  <IconButton 
+                  <IconButton
                     size="small"
-                    sx={{ 
+                    sx={{
                       transition: 'transform 0.2s ease',
-                      transform: collapseAttendees.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)'
+                      transform: collapseAttendees.includes(index)
+                        ? 'rotate(180deg)'
+                        : 'rotate(0deg)',
                     }}
                   >
                     <Iconify icon="ep:arrow-down-bold" width={16} />
@@ -806,16 +833,16 @@ const TicketInformationCard = () => {
 
   if (cartLoading) {
     return (
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           height: '100%',
-          display: 'flex', 
+          display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center', 
+          alignItems: 'center',
           justifyContent: 'center',
           p: 5,
           borderRadius: 3,
-          bgcolor: 'background.paper'
+          bgcolor: 'background.paper',
         }}
       >
         <CircularProgress
@@ -826,7 +853,9 @@ const TicketInformationCard = () => {
             mb: 3,
           }}
         />
-        <Typography variant="h6" sx={{ mb: 1 }}>Loading Your Cart</Typography>
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          Loading Your Cart
+        </Typography>
         <Typography variant="body2" color="text.secondary" align="center">
           We&apos;re retrieving your order information...
         </Typography>
@@ -893,15 +922,17 @@ const TicketInformationCard = () => {
           }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <Iconify icon="solar:clock-circle-bold" width={24} color="error.main" />
-              <Typography color="error.main" fontWeight={500}>Your cart has expired</Typography>
+              <Typography color="error.main" fontWeight={500}>
+                Your cart has expired
+              </Typography>
             </Stack>
           </Card>
         )}
 
         {buyerInfo}
-        
+
         <Divider sx={{ my: 3 }} />
-        
+
         {attendeeinfo}
 
         <IconButton
@@ -1048,17 +1079,19 @@ const TicketInformationCard = () => {
 
                   <Stack spacing={2.5}>
                     {data && (
-                      <Card 
+                      <Card
                         elevation={0}
-                        sx={{ 
-                          p: 2, 
+                        sx={{
+                          p: 2,
                           borderRadius: 2,
                           border: '1px solid',
                           borderColor: 'divider',
                         }}
                       >
                         <Stack spacing={1.5}>
-                          <Typography variant="subtitle2" mb={0.5}>Discount Code</Typography>
+                          <Typography variant="subtitle2" mb={0.5}>
+                            Discount Code
+                          </Typography>
                           <Stack
                             direction="row"
                             alignItems="center"
@@ -1074,14 +1107,14 @@ const TicketInformationCard = () => {
                                 setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
                               }
                               InputProps={{
-                                sx: { borderRadius: 1.5 }
+                                sx: { borderRadius: 1.5 },
                               }}
                             />
                             <Button
                               variant="contained"
                               size="medium"
                               onClick={handleRedeemDiscount}
-                              sx={{ 
+                              sx={{
                                 height: 40,
                                 borderRadius: 1.5,
                                 px: 2,
@@ -1107,8 +1140,8 @@ const TicketInformationCard = () => {
                                   Discount code applied
                                 </Typography>
                               </Stack>
-                              <Stack 
-                                direction="row" 
+                              <Stack
+                                direction="row"
                                 justifyContent="space-between"
                                 sx={{
                                   p: 1.5,
@@ -1136,19 +1169,15 @@ const TicketInformationCard = () => {
 
                     <Card
                       elevation={0}
-                      sx={{ 
-                        p: 2, 
+                      sx={{
+                        p: 2,
                         borderRadius: 2,
                         border: '1px solid',
                         borderColor: 'divider',
                       }}
                     >
                       <Stack spacing={2}>
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
                           <Typography color="text.secondary">Subtotal:</Typography>
                           <Typography fontWeight={500}>
                             {Intl.NumberFormat('en-MY', {
@@ -1159,14 +1188,11 @@ const TicketInformationCard = () => {
                         </Stack>
 
                         {data && (
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
+                          <Stack direction="row" alignItems="center" justifyContent="space-between">
                             <Typography color="text.secondary">Discount:</Typography>
                             <Typography fontWeight={500} color="error.main">
-                              - {Intl.NumberFormat('en-MY', {
+                              -{' '}
+                              {Intl.NumberFormat('en-MY', {
                                 style: 'currency',
                                 currency: 'MYR',
                               }).format(data?.orderSummary?.discount)}
@@ -1174,11 +1200,7 @@ const TicketInformationCard = () => {
                           </Stack>
                         )}
 
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
                           <Typography color="text.secondary">SST:</Typography>
                           <Typography fontWeight={500}>
                             {Intl.NumberFormat('en-MY', {
@@ -1190,11 +1212,7 @@ const TicketInformationCard = () => {
 
                         <Divider />
 
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
                           <Typography variant="subtitle1">Total:</Typography>
                           <Typography variant="h6" color="text.primary">
                             {Intl.NumberFormat('en-MY', {
@@ -1214,9 +1232,9 @@ const TicketInformationCard = () => {
               </Box>
             </Collapse>
 
-            <Box 
+            <Box
               onClick={() => anotherCollapse.onToggle()}
-              sx={{ 
+              sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -1227,7 +1245,7 @@ const TicketInformationCard = () => {
                 bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200], 0.5),
                 '&:hover': {
                   bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300], 0.5),
-                }
+                },
               }}
             >
               <Typography variant="subtitle1">
@@ -1243,12 +1261,16 @@ const TicketInformationCard = () => {
                     data?.orderSummary?.totalPrice ? data.orderSummary.totalPrice + 0.1 : 0
                   )}
                 </Typography>
-                <Iconify 
-                  icon={anotherCollapse.value ? "iconamoon:arrow-up-2-bold" : "iconamoon:arrow-down-2-bold"} 
+                <Iconify
+                  icon={
+                    anotherCollapse.value
+                      ? 'iconamoon:arrow-up-2-bold'
+                      : 'iconamoon:arrow-down-2-bold'
+                  }
                   width={20}
-                  sx={{ 
+                  sx={{
                     transition: 'transform 0.2s ease',
-                    transform: anotherCollapse.value ? 'rotate(0deg)' : 'rotate(0deg)'
+                    transform: anotherCollapse.value ? 'rotate(0deg)' : 'rotate(0deg)',
                   }}
                 />
               </Stack>

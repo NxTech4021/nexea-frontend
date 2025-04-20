@@ -45,10 +45,20 @@ const TicketOverviewCard = () => {
     formState: { isSubmitting },
   } = useFormContext();
 
-  const subTotal = useMemo(
-    () => tickets.reduce((acc, cur) => acc + cur.subTotal, 0) || cartData?.orderSummary?.subtotal,
-    [tickets, cartData]
-  );
+  const subTotal = useMemo(() => {
+    if (!cartData && tickets?.length) {
+      return tickets.reduce((acc, cur) => {
+        const ticketSubtotal = cur.subTotal || 0;
+        const addOnsTotal = (cur?.addOns || []).reduce(
+          (a, b) => a + (b.price || 0) * (b.selectedQuantity || 0),
+          0
+        );
+        return acc + ticketSubtotal + addOnsTotal;
+      }, 0);
+    }
+
+    return cartData?.orderSummary?.subtotal || 0;
+  }, [tickets, cartData]);
 
   const totalTicketsQuantitySelected = useMemo(() => {
     const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
@@ -65,6 +75,7 @@ const TicketOverviewCard = () => {
       const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
       toast.success(res?.data?.message);
       cartMutate();
+      setDiscountCode('');
     } catch (error) {
       toast.error(error);
     }
@@ -84,6 +95,8 @@ const TicketOverviewCard = () => {
     const sst = eventData?.eventSetting?.sst || null;
 
     const sstPrice = parseFloat(((subTotal * sst) / 100).toFixed(2));
+
+    console.log(subTotal);
 
     setCalculatedSST(sstPrice);
   }, [eventData, subTotal]);
@@ -345,7 +358,7 @@ const TicketOverviewCard = () => {
             },
           }}
         >
-          <Stack spacing={3} sx={{ mb: 3 }}>
+          <Stack spacing={3} sx={{ mb: 3 }} height={1}>
             <Card
               elevation={0}
               sx={{
@@ -529,6 +542,7 @@ const TicketOverviewCard = () => {
                         sx: { borderRadius: 1.5 },
                       }}
                     />
+
                     <Button
                       variant="contained"
                       size="medium"
@@ -584,7 +598,11 @@ const TicketOverviewCard = () => {
                           </IconButton>
                         </Stack>
                         <Typography variant="body2" color="error.main" fontWeight={600}>
-                          - {cartData.discount.value}
+                          -{' '}
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(cartData.orderSummary.discount)}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -674,7 +692,8 @@ const TicketOverviewCard = () => {
                   transition: 'all 0.2s',
                   '& .MuiSvgIcon-root': {
                     color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
-                  }
+                  },
+                  mt: 'auto',
                 }}
               >
                 Proceed to Payment
@@ -703,7 +722,8 @@ const TicketOverviewCard = () => {
                   transition: 'all 0.2s',
                   '& .MuiSvgIcon-root': {
                     color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
-                  }
+                  },
+                  mt: 'auto',
                 }}
               >
                 Check Out

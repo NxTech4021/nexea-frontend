@@ -27,6 +27,7 @@ import { fetcher, endpoints } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
+import EmptyContent from 'src/components/empty-content';
 import { TablePaginationCustom } from 'src/components/table';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
@@ -443,7 +444,6 @@ export default function OrderView() {
                     </Typography>
                   </Stack>
                 </Stack>
-
                 <Stack
                   sx={{
                     maxHeight: '70vh',
@@ -451,7 +451,7 @@ export default function OrderView() {
                     minWidth: { xs: 800, sm: '100%' },
                   }}
                 >
-                  {filteredOrders
+                  {(filteredOrders || [])
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((order) => {
                       let statusConfig = {};
@@ -552,6 +552,18 @@ export default function OrderView() {
                     })}
                 </Stack>
               </Box>
+
+              {!filteredOrders && (
+                <EmptyContent
+                  filled
+                  title="No Orders"
+                  sx={{
+                    py: 10,
+                  }}
+                />
+              )}
+              {/* <TableNoData notFound={!filteredOrders} sx={{ width: 1 }} /> */}
+
               <TablePaginationCustom
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
