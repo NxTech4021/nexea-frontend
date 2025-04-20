@@ -80,7 +80,7 @@ const schema = yup.object().shape({
   type: yup.string().required('Type is required'),
   category: yup.string().when('type', {
     is: (val) => val !== 'After Party',
-    then: (s) => s.string().required('Category is required'),
+    then: (s) => yup.string().required('Category is required'),
     otherwise: (s) => yup.string().notRequired(),
   }),
   price: yup.string().required('Price is required'),
