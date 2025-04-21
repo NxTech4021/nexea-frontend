@@ -139,7 +139,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const res = await axiosInstance.post('/api/cart/continuePayment', data);
-      // window.location.href = res.data.paymentUrl;
+      window.location.href = res.data.paymentUrl;
     } catch (error) {
       toast.error(error?.message);
     }

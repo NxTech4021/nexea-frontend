@@ -96,8 +96,6 @@ const TicketOverviewCard = () => {
 
     const sstPrice = parseFloat(((subTotal * sst) / 100).toFixed(2));
 
-    console.log(subTotal);
-
     setCalculatedSST(sstPrice);
   }, [eventData, subTotal]);
 
@@ -207,7 +205,6 @@ const TicketOverviewCard = () => {
                     borderColor: 'divider',
                   }}
                 >
-                  
                   <Stack spacing={2}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography color="text.secondary">SST:</Typography>
@@ -223,7 +220,10 @@ const TicketOverviewCard = () => {
 
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="subtitle1">Total:</Typography>
-                      <Typography variant="h6" color={(theme) => theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'}>
+                      <Typography
+                        variant="h6"
+                        color={(theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800')}
+                      >
                         {Intl.NumberFormat('en-MY', {
                           style: 'currency',
                           currency: 'MYR',
@@ -258,7 +258,11 @@ const TicketOverviewCard = () => {
             {collapse.value ? 'Hide Order Summary' : 'View Order Summary'}
           </Typography>
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Typography variant="subtitle1" fontWeight={600} color={(theme) => theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              color={(theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800')}
+            >
               {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
                 (subTotal && subTotal + calculatedSST) || 0
               )}
@@ -284,16 +288,16 @@ const TicketOverviewCard = () => {
               sx={{
                 borderRadius: 2,
                 py: 1.5,
-                bgcolor: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
-                color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
+                color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                 '&:hover': {
-                  bgcolor: (theme) => theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
                   transform: 'translateY(-2px)',
                 },
                 transition: 'all 0.2s',
                 '& .MuiSvgIcon-root': {
-                  color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
-                }
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
+                },
               }}
             >
               Proceed to payment
@@ -310,16 +314,16 @@ const TicketOverviewCard = () => {
               sx={{
                 borderRadius: 2,
                 py: 1.5,
-                bgcolor: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
-                color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
+                color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                 '&:hover': {
-                  bgcolor: (theme) => theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
                   transform: 'translateY(-2px)',
                 },
                 transition: 'all 0.2s',
                 '& .MuiSvgIcon-root': {
-                  color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
-                }
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
+                },
               }}
             >
               Check Out
@@ -341,14 +345,15 @@ const TicketOverviewCard = () => {
         overflow: 'hidden',
       }}
     >
-
       {subTotal || cartData ? (
         <Stack
           sx={{
             p: 2.5,
             flex: 1,
-            height: 'calc(100% - 68px)',
+            height: 1,
+            // height: 'calc(100% - 68px)',
             overflowY: 'auto',
+            // bgcolor: 'beige',
             '&::-webkit-scrollbar': {
               width: '6px',
             },
@@ -358,7 +363,7 @@ const TicketOverviewCard = () => {
             },
           }}
         >
-          <Stack spacing={3} sx={{ mb: 3 }} height={1}>
+          <Stack spacing={3} height={1}>
             <Card
               elevation={0}
               sx={{
@@ -551,10 +556,10 @@ const TicketOverviewCard = () => {
                         height: 40,
                         borderRadius: 1.5,
                         px: 2,
-                        bgcolor: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
-                        color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
+                        color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                         '&:hover': {
-                          bgcolor: (theme) => theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
                         },
                       }}
                     >
@@ -658,7 +663,10 @@ const TicketOverviewCard = () => {
 
                 <Stack direction="row" alignItems="center" justifyContent="space-between">
                   <Typography variant="subtitle1">Total:</Typography>
-                  <Typography variant="h6" color={(theme) => theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'}>
+                  <Typography
+                    variant="h6"
+                    color={(theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800')}
+                  >
                     {Intl.NumberFormat('en-MY', {
                       style: 'currency',
                       currency: 'MYR',
@@ -683,15 +691,15 @@ const TicketOverviewCard = () => {
                 sx={{
                   borderRadius: 1,
                   py: 1.5,
-                  bgcolor: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
-                  color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                   '&:hover': {
-                    bgcolor: (theme) => theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                    bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
                     transform: 'translateY(-2px)',
                   },
                   transition: 'all 0.2s',
                   '& .MuiSvgIcon-root': {
-                    color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                    color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                   },
                   mt: 'auto',
                 }}
@@ -713,15 +721,15 @@ const TicketOverviewCard = () => {
                 disabled={!totalTicketsQuantitySelected}
                 sx={{
                   py: 1.5,
-                  bgcolor: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
-                  color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                   '&:hover': {
-                    bgcolor: (theme) => theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                    bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
                     transform: 'translateY(-2px)',
                   },
                   transition: 'all 0.2s',
                   '& .MuiSvgIcon-root': {
-                    color: (theme) => theme.palette.mode === 'dark' ? '#000' : '#fff',
+                    color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
                   },
                   mt: 'auto',
                 }}

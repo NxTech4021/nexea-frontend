@@ -129,23 +129,26 @@ const TickerPurchaseHeader = () => {
     <>
       <AppBar
         sx={{
-          bgcolor: '#000000',
           color: 'whitesmoke',
           p: 2,
-          '::before': {
-            content: '""',
-            position: 'absolute',
-            top: '-2px',
-            left: '-2px',
-            right: '-2px',
-            bottom: '-2px',
-            padding: '2px',
-            background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
-            backgroundSize: '200% auto',
-            backgroundRepeat: 'repeat',
-            animation: `${borderAnimation} 7s linear infinite`,
-            zIndex: -1,
-          },
+          background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
+          backgroundSize: '200% auto',
+          backgroundRepeat: 'repeat',
+          animation: `${borderAnimation} 7s ease infinite`,
+
+          // '::before': {
+          //   content: '""',
+          //   position: 'absolute',
+          //   top: '-2px',
+          //   left: '-2px',
+          //   right: '-2px',
+          //   bottom: '-2px',
+          //   padding: '2px',
+          //   background: 'linear-gradient(to bottom, #200122, #6f0000, #200122)',
+          //   backgroundSize: '200% auto',
+          //   backgroundRepeat: 'repeat',
+          //   animation: `${borderAnimation} 7s linear infinite`,
+          // },
         }}
         position="fixed"
       >
