@@ -147,10 +147,17 @@ const AttendeeInformation = ({ id }) => {
 
   const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
-  const checkedInCount = data?.filter((attendee) => attendee.status === 'checkedIn').length;
-  const notCheckedInCount = data?.filter((attendee) => attendee.status === 'pending').length;
+  const attendeesData = data?.attendees || [];
 
-  const filteredAttendees = data?.filter(
+  const checkedInCount = attendeesData?.filter(
+    (attendee) => attendee.status === 'checkedIn'
+  ).length;
+
+  const notCheckedInCount = attendeesData?.filter(
+    (attendee) => attendee.status === 'pending'
+  ).length;
+
+  const filteredAttendees = attendeesData?.filter(
     (attendee) =>
       (activeTab === 0 && attendee.status === 'pending') ||
       (activeTab === 1 && attendee.status === 'checkedIn')
@@ -188,7 +195,7 @@ const AttendeeInformation = ({ id }) => {
               marginTop: '2px',
             }}
           >
-            {data?.length}
+            {attendeesData?.length}
           </Typography>
         </div>
         <div
