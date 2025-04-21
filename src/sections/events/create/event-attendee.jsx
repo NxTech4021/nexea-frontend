@@ -144,7 +144,7 @@ export default function EventAttendee() {
       renderCell: (params) =>
         params.value === 'pending' ? (
           <Tooltip title="Click to edit status">
-            <Iconify icon="mdi:pencil" width={16} height={16} color="#6c6c6c" />
+            {/* <Iconify icon="mdi:pencil" width={16} height={16} color="#6c6c6c" /> */}
             <Label size="small" color="warning">
               Pending
             </Label>
