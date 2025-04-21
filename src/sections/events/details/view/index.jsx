@@ -1,17 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import {
-  Box,
-  Card,
-  Stack,
-  Container,
-  CardContent,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Card, Stack, Container, CardContent, CircularProgress } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -25,11 +18,18 @@ import OrderAnalytics from '../analytics/order-analytics';
 import TicketAnalytics from '../analytics/ticket-analytics';
 import CheckInAnalytics from '../analytics/checkIn-analytics';
 
-
 const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
 
   const router = useRouter();
+
+  const totalCheckedIn = useMemo(() => {
+    const orders = data?.order || [];
+
+    const attendeesData = orders.flatMap((order) => order.attendees);
+
+    return attendeesData.filter((item) => item.status === 'checkedIn')?.length || 0;
+  }, [data]);
 
   if (error) return router.back();
   if (isLoading)
@@ -54,16 +54,6 @@ const EventDetails = ({ id }) => {
 
   return (
     <Container maxWidth="xl">
-
-      {/* <CustomBreadcrumbs
-        heading={data?.name}
-        links={[
-          { name: 'Dashboard' },
-          { name: 'Event', href: paths.dashboard.events.root },
-          { name: data?.name },
-        ]}
-      /> */}
-
       <Button
         variant="text"
         startIcon={<ArrowBackIcon />}
@@ -81,7 +71,7 @@ const EventDetails = ({ id }) => {
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
             <TicketAnalytics tickets={data.ticketType} />
             <OrderAnalytics orders={data.order} />
-            <CheckInAnalytics checkedIns={data.attendees?.map((attendee) => attendee.checkedIn) || []} />
+            <CheckInAnalytics checkedIns={totalCheckedIn} />
           </Stack>
         </Grid>
 

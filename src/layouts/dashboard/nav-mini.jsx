@@ -21,6 +21,7 @@ export default function NavMini() {
 
   return (
     <Box
+      component="div"
       sx={{
         flexShrink: { lg: 0 },
         width: { lg: NAV.W_MINI },

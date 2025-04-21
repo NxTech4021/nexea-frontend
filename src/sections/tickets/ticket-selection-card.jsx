@@ -23,10 +23,14 @@ import {
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
 
+import { MaterialUISwitch } from 'src/layouts/dashboard/header';
+
 import Iconify from 'src/components/iconify';
+import { useSettingsContext } from 'src/components/settings';
 
 import useGetCartData from './hooks/use-get-cart';
 
@@ -42,6 +46,8 @@ const TicketSelectionCard = () => {
   const collapse = useBoolean();
   const loading = useBoolean();
   const addOnDialog = useBoolean();
+  const settings = useSettingsContext();
+  const isActive = useUserActivity();
 
   const tixs = useCartStore((state) => state.tickets);
 
@@ -80,7 +86,7 @@ const TicketSelectionCard = () => {
     if (!ticket) return null;
 
     const maxPerOrder = ticket?.ticketTypeRequirement?.maximumTicketPerOrder;
-    const availableQuantity = ticket?.quantity;
+    const availableQuantity = ticket.quantity - ticket.sold;
     const selectedQuantity = ticket?.selectedQuantity;
 
     const maxSelectable = maxPerOrder
@@ -90,7 +96,7 @@ const TicketSelectionCard = () => {
     const isMinusDisabled = selectedQuantity === 0;
     const isPlusDisabled = selectedQuantity === maxSelectable;
 
-    const unavailable = unavailableTickets && ticket.id === unavailableTickets;
+    const unavailable = ticket.quantity - ticket.sold === 0;
 
     return (
       <Grid2
@@ -108,6 +114,7 @@ const TicketSelectionCard = () => {
             borderColor: 'black',
             transition: 'linear .3s',
           },
+          boxShadow: 1,
           userSelect: 'none',
         }}
         size={{ xs: 12, md: 4 }}
@@ -116,7 +123,7 @@ const TicketSelectionCard = () => {
           <Stack spacing={2.5}>
             <ListItemText
               primary={ticket.title}
-              secondary="lorem10l orem10lore m10lorem10lore m10lorem10"
+              secondary={ticket.description}
               slotProps={{
                 primary: {
                   fontWeight: 600,
@@ -137,6 +144,7 @@ const TicketSelectionCard = () => {
             />
           </Stack>
         </Grid2>
+
         <Grid2 size={12} alignContent="flex-end">
           <Stack direction="row" flexWrap="wrap" spacing={1}>
             <ListItemText
@@ -161,87 +169,95 @@ const TicketSelectionCard = () => {
                 },
               }}
             />
-            <Stack direction="row" alignItems="center" spacing={2} justifyContent="end">
-              <IconButton
-                sx={{
-                  bgcolor: '#00564B',
-                  '&:hover': { bgcolor: '#00564B99' },
-                  borderRadius: 1,
-                  ...(isMinusDisabled && {
-                    pointerEvents: 'none',
-                    bgcolor: '#D9D9D9',
-                  }),
-                }}
-                onClick={() =>
-                  updateTics(ticket.id, {
-                    selectedQuantity: ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
-                    subTotal: ticket.selectedQuantity * ticket.price,
-                  })
-                }
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'translateY(1px)';
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <Iconify
-                  icon="ic:round-minus"
-                  width={15}
-                  color={isMinusDisabled ? '#676767' : 'white'}
-                />
-              </IconButton>
-              <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
-              <IconButton
-                sx={{
-                  bgcolor: '#00564B',
-                  borderRadius: 1,
-                  '&:hover': { bgcolor: '#00564B99' },
-                  ...(isPlusDisabled && {
-                    pointerEvents: 'none',
-                    bgcolor: '#D9D9D9',
-                  }),
-                }}
-                onClick={(e) =>
-                  updateTics(
-                    ticket.id,
-                    ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                      ? {
-                          selectedQuantity:
-                            ticket.selectedQuantity <
-                            ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                              ? ticket.selectedQuantity + 1
-                              : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
-                          subTotal: ticket.selectedQuantity * ticket.price,
-                        }
-                      : {
-                          selectedQuantity: ticket.selectedQuantity + 1,
-                          subTotal: ticket.selectedQuantity * ticket.price,
-                        }
-                  )
-                }
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'translateY(1px)';
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <Iconify
-                  icon="material-symbols:add-rounded"
-                  width={15}
-                  color={isPlusDisabled ? '#676767' : 'white'}
-                />
-              </IconButton>
-            </Stack>
+            {unavailable ? (
+              <Typography variant="subtitle2" color="text.secondary" alignSelf="center">
+                Sold out
+              </Typography>
+            ) : (
+              <Stack direction="row" alignItems="center" spacing={2} justifyContent="end">
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    '&:hover': { bgcolor: '#00564B99' },
+                    borderRadius: 1,
+                    ...(isMinusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={() =>
+                    updateTics(ticket.id, {
+                      selectedQuantity:
+                        ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
+                      subTotal: ticket.selectedQuantity * ticket.price,
+                    })
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="ic:round-minus"
+                    width={15}
+                    color={isMinusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+                <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    borderRadius: 1,
+                    '&:hover': { bgcolor: '#00564B99' },
+                    ...(isPlusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={(e) =>
+                    updateTics(
+                      ticket.id,
+                      ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                        ? {
+                            selectedQuantity:
+                              ticket.selectedQuantity <
+                              ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                                ? ticket.selectedQuantity + 1
+                                : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                        : {
+                            selectedQuantity: ticket.selectedQuantity + 1,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                    )
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="material-symbols:add-rounded"
+                    width={15}
+                    color={isPlusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+              </Stack>
+            )}
           </Stack>
         </Grid2>
+
         {!!ticket?.addOns?.length && (
           <Grid2 size={12} alignContent="flex-end">
             <Typography variant="caption" fontWeight={600} color="text.secondary">
@@ -392,6 +408,7 @@ const TicketSelectionCard = () => {
         height: 1,
         p: 2,
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <ListItemText
@@ -400,6 +417,16 @@ const TicketSelectionCard = () => {
         primaryTypographyProps={{ variant: 'subtitle1' }}
         secondaryTypographyProps={{ variant: 'caption' }}
       />
+
+      <Box position="absolute" right={0} zIndex={1111} top={5}>
+        <MaterialUISwitch
+          sx={{ m: 1, opacity: isActive ? 1 : 0.2, transition: 'all linear .2s' }}
+          checked={settings.themeMode !== 'light'}
+          onChange={() =>
+            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
+          }
+        />
+      </Box>
       <Box
         ref={ref}
         flexGrow={1}
@@ -491,9 +518,18 @@ const TicketSelectionCard = () => {
                 </Typography>
               ) : (
                 <Stack height={1}>
-                  <Typography mb={2} variant="subtitle2">
-                    Order Summary
-                  </Typography>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="subtitle2">Order Summary</Typography>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        collapse.onFalse();
+                      }}
+                    >
+                      <Iconify icon="iconamoon:arrow-up-2-bold" width={20} />
+                    </IconButton>
+                  </Stack>
                   <Stack
                     spacing={1}
                     flexGrow={1}
@@ -573,23 +609,41 @@ const TicketSelectionCard = () => {
           </Collapse>
 
           <Box my={1} onClick={() => collapse.onToggle()}>
-            <Stack direction="row" alignItems="center" justifyContent="end" spacing={2}>
-              {collapse.value ? (
-                <Iconify icon="iconamoon:arrow-up-2-bold" width={24} />
-              ) : (
-                <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ px: 2 }}
+            >
+              {!collapse.value && (
+                <Typography variant="subtitle1" fontSize={18} fontWeight={600} letterSpacing={-0.7}>
+                  Total
+                </Typography>
               )}
-              <Typography
-                variant="subtitle1"
-                textAlign="end"
-                fontSize={18}
-                fontWeight={600}
-                letterSpacing={-0.7}
+              <Box
+                sx={{ position: 'absolute', left: '50%', top: -10, transform: 'translateX(-50%)' }}
               >
-                {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                  subTotal && subTotal + 0.1
+                <Iconify
+                  icon="fluent:line-horizontal-1-20-filled"
+                  width={50}
+                  color="text.secondary"
+                />
+              </Box>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {!collapse.value && (
+                  <Typography
+                    variant="subtitle1"
+                    textAlign="end"
+                    fontSize={18}
+                    fontWeight={600}
+                    letterSpacing={-0.7}
+                  >
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                      subTotal && subTotal + 0.1
+                    )}
+                  </Typography>
                 )}
-              </Typography>
+              </Stack>
             </Stack>
           </Box>
 
@@ -625,7 +679,8 @@ export default TicketSelectionCard;
 const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAddOnQuantity }) => {
   const currentAddOn = useMemo(
     () =>
-      tixs?.find((a) => a.id === addOnInfo?.ticketId)?.addOns.find((b) => b.id === addOnInfo?.id),
+      tixs?.find((a) => a.id === addOnInfo?.ticketId)?.addOns.find((b) => b.id === addOnInfo?.id) ||
+      0,
     [tixs, addOnInfo]
   );
 
@@ -636,6 +691,8 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
         ?.addOns?.reduce((acc, curr) => acc + (curr?.selectedQuantity || 0), 0) || 0,
     [tixs, addOnInfo]
   );
+
+  const selectedQuantity = currentAddOn?.selectedQuantity || 0;
 
   return (
     <Dialog
@@ -684,7 +741,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 bgcolor: '#00564B',
                 '&:hover': { bgcolor: '#00564B99' },
                 borderRadius: 1,
-                ...(currentAddOn?.selectedQuantity === 0 && {
+                ...(selectedQuantity === 0 && {
                   pointerEvents: 'none',
                   bgcolor: '#D9D9D9',
                 }),
@@ -699,7 +756,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
               onClick={() => {
-                if (currentAddOn?.selectedQuantity === 0) {
+                if (selectedQuantity === 0) {
                   return;
                 }
                 updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'decrement');
@@ -707,7 +764,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
             >
               <Iconify icon="ic:round-minus" width={15} color="white" />
             </IconButton>
-            <Typography variant="subtitle1">{currentAddOn?.selectedQuantity}</Typography>
+            <Typography variant="subtitle1">{selectedQuantity}</Typography>
             <IconButton
               sx={{
                 bgcolor: '#00564B',
@@ -719,7 +776,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                   bgcolor: '#D9D9D9',
                 }),
               }}
-              onClick={() => {
+              onClick={(e) => {
                 updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'increment');
               }}
               onMouseDown={(e) => {

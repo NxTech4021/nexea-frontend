@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
 import axios from 'axios';
@@ -6,8 +7,10 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+
 import Stack from '@mui/material/Stack';
 import { Typography } from '@mui/material';
+
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -18,14 +21,24 @@ import InputLabel from '@mui/material/InputLabel';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import { LoadingButton } from '@mui/lab';
+
+import {
+  Box,
+  Card,
+  Stack,
+  Drawer,
+  Select,
+  Typography,
+  CardHeader,
+  CardContent,
+  ListItemText,
+  MenuItem,
+  CircularProgress,
+  FormControlLabel,
+  FormControl,
+  Switch
+} from '@mui/material';
+
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
@@ -45,6 +58,7 @@ export const dataMapping = {
   vip: 'Vip',
   standard: 'Standard',
   speaker: 'Speaker',
+  afterParty: 'After Party',
 };
 
 // Ticket types and categories for dropdowns
@@ -64,6 +78,7 @@ export default function TicketTableRow({
     id: ticketTypeId,
     ticketUrl,
     type,
+    validity,
     category,
     price,
     title,
@@ -71,6 +86,8 @@ export default function TicketTableRow({
     description,
     quantity,
     requirement,
+    sold,
+    reservedQuantity,
   } = row;
 
   const confirm = useBoolean();
@@ -84,6 +101,7 @@ export default function TicketTableRow({
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [editedTicket, setEditedTicket] = useState({});
 
+
   // Use useEffect to automatically update title when type or category changes
   useEffect(() => {
     if (editedTicket.type && editedTicket.category) {
@@ -92,8 +110,24 @@ export default function TicketTableRow({
         ...prev,
         title: newTitle,
       }));
-    }
+      }
   }, [editedTicket.type, editedTicket.category]);
+
+  const [open, setOpen] = useState(false);
+
+  const toggleDrawer = (newOpen) => () => {
+    setOpen(newOpen);
+  };
+
+  const handleViewDetails = () => {
+    setSelectedTicket(row);
+    setDetailsDialogOpen(true);
+    if (onViewDetails) {
+      onViewDetails(row);
+    }
+  }
+
+    
 
   // const handleViewDetails = () => {
   //   setSelectedTicket(row);
@@ -292,8 +326,8 @@ export default function TicketTableRow({
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type]}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category]}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type] || 'N/A'}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category] || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {new Intl.NumberFormat('en-MY', {
             minimumFractionDigits: 2,
@@ -309,16 +343,13 @@ export default function TicketTableRow({
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+
           <Tooltip title="Edit Details" placement="top" arrow>
             <IconButton onClick={handleEditClick} sx={{ color: 'primary.main' }}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
           </Tooltip>
-          {/* <Tooltip title="View Details" placement="top" arrow>
-            <IconButton onClick={handleViewDetails}>
-              <Iconify icon="solar:eye-bold" />
-            </IconButton>
-          </Tooltip> */}
+
 
           <Tooltip title="Delete" placement="top" arrow>
             <IconButton
@@ -601,6 +632,199 @@ export default function TicketTableRow({
           </Button>
         }
       />
+
+      <Drawer
+        open={open}
+        onClose={toggleDrawer(false)}
+        anchor="right"
+        sx={{
+          '& .MuiDrawer-paper': {
+            height: '98vh',
+            mr: 1.2,
+            mt: 'auto',
+            borderRadius: 2,
+            width: { xs: '80vw', md: '40vw' },
+            top: 8,
+            overflow: 'hidden',
+            p: 2,
+          },
+        }}
+      >
+        <Stack spacing={1} overflow="hidden">
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="subtitle1">{title}</Typography>
+            <IconButton
+              sx={{
+                borderRadius: 1,
+                boxShadow: 4,
+              }}
+              size="small"
+              onClick={toggleDrawer(false)}
+            >
+              <Iconify icon="iconamoon:close-duotone" width={15} />
+            </IconButton>
+          </Stack>
+
+          {/* Basic Information */}
+          <Box overflow="auto" borderRadius={1} flexGrow={1}>
+            <Card sx={{ borderRadius: 1, mb: 1 }}>
+              <CardHeader title="Ticket Overview" titleTypographyProps={{ variant: 'subtitle1' }} />
+              <CardContent>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(3,1fr)' },
+                  }}
+                  gap={2}
+                >
+                  <ListItemText primary="Ticket title" secondary={title || 'N/A'} />
+                  <ListItemText primary="Event name" secondary={name || 'N/A'} />
+                  <ListItemText primary="Type" secondary={type || 'N/A'} />
+                  <ListItemText primary="Category" secondary={category || 'N/A'} />
+                  <ListItemText
+                    primary="Price"
+                    secondary={
+                      Intl.NumberFormat('en-MY', {
+                        style: 'currency',
+                        currency: 'MYR',
+                      }).format(price) || 'N/A'
+                    }
+                  />
+                  <ListItemText
+                    primary="Status"
+                    secondary={
+                      isActive ? (
+                        <Label color="success">Active</Label>
+                      ) : (
+                        <Label color="error">Inactive</Label> || 'N/A'
+                      )
+                    }
+                  />
+                  <ListItemText
+                    primary="Description"
+                    secondary={description || 'N/A'}
+                    sx={{ gridColumn: 'span 2' }}
+                  />
+                  <ListItemText
+                    primary="Validity"
+                    secondary={dayjs(validity).format('LL') || 'N/A'}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 1 }}>
+              <CardHeader title="Ticket Quantity" titleTypographyProps={{ variant: 'subtitle1' }} />
+              <CardContent>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(3,1fr)' },
+                  }}
+                  gap={2}
+                >
+                  <Stack alignItems="center" spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Total quantity
+                    </Typography>
+                    <Box position="relative" display="inline-flex">
+                      <CircularProgress
+                        value={quantity || 0}
+                        variant="determinate"
+                        color="black"
+                        size={80}
+                        thickness={7}
+                        sx={{
+                          strokeLinecap: 'round',
+                        }}
+                      />
+
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="subtitle2">{quantity || 0}</Typography>
+                      </Box>
+                    </Box>
+                  </Stack>
+                  <Stack alignItems="center" spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Reserved quantity
+                    </Typography>
+                    <Box position="relative" display="inline-flex">
+                      <CircularProgress
+                        value={reservedQuantity || 0}
+                        variant="determinate"
+                        color="black"
+                        size={80}
+                        thickness={7}
+                        sx={{
+                          strokeLinecap: 'round',
+                        }}
+                      />
+
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="subtitle2">{reservedQuantity || 0}</Typography>
+                      </Box>
+                    </Box>
+                  </Stack>
+                  <Stack alignItems="center" spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Sold quantity
+                    </Typography>
+                    <Box position="relative" display="inline-flex">
+                      <CircularProgress
+                        value={sold || 0}
+                        variant="determinate"
+                        color="black"
+                        size={80}
+                        thickness={7}
+                        sx={{
+                          strokeLinecap: 'round',
+                        }}
+                      />
+
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="subtitle2">{sold || 0}</Typography>
+                      </Box>
+                    </Box>
+                  </Stack>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </Stack>
+      </Drawer>
     </>
   );
 }

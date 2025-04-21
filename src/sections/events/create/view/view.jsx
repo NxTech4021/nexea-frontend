@@ -63,50 +63,6 @@ export default function Events() {
           mb: 5,
         }}
       />
-{/* 
-      <Card
-        sx={{
-          p: 1.5,
-        }}
-      >
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <TextField
-            name="search"
-            label="Search"
-            sx={{
-              width: { xs: 'auto', md: 300 },
-            }}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          {smUp ? (
-            <IconButton
-              sx={{
-                border: 1,
-              }}
-              component={RouterLink}
-              href={paths.dashboard.events.create}
-            >
-              <Iconify icon="mingcute:add-line" />
-            </IconButton>
-          ) : (
-            <Button
-              onClick={createDialog.onTrue}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New Event
-            </Button>
-          )}
-        </Stack>
-      </Card> */}
-
-      {/* <EventSearch
-        query={search.query}
-        results={search.results}
-        onSearch={handleSearch}
-        hrefItem={(id) => paths.dashboard.job.details(id)}
-      /> */}
 
       <EventLists query={search} />
 
