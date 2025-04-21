@@ -142,6 +142,8 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       window.location.href = res.data.paymentUrl;
     } catch (error) {
       toast.error(error?.message);
+    } finally {
+      localStorage.removeItem('attendees');
     }
   });
 
