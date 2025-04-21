@@ -1,19 +1,26 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
+import { alpha } from '@mui/material/styles';
 import {
   Box,
+  List,
   Grid,
+  Alert,
   Stack,
   Button,
   Select,
   Dialog,
   Avatar,
+  Tooltip,
   Divider,
+  ListItem,
   MenuItem,
+  Snackbar,
   Container,
   TextField,
+  IconButton,
   Typography,
   DialogTitle,
   DialogContent,
@@ -22,10 +29,11 @@ import {
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
-import { fetcher, endpoints } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
-import Label from 'src/components/label';
+// import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { TablePaginationCustom } from 'src/components/table';
@@ -66,7 +74,6 @@ const orders = [
   },
 ];
 const STATUS_TABS = ['All', 'paid', 'pending', 'failed'];
-const EVENT_OPTIONS = ['All', ...new Set(orders.map((order) => order.eventName))];
 
 export default function OrderView() {
   const [search, setSearch] = useState('');
@@ -81,8 +88,24 @@ export default function OrderView() {
     discountCode: '',
     orderDate: '',
   });
+  const [resendDialogOpen, setResendDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
+  const router = useRouter();
+
+  const eventOptions = useMemo(() => {
+    if (!data?.length) return ['All'];
+    
+    const uniqueEvents = [...new Set(data.map((order) => order.event.name))];
+    return ['All', ...uniqueEvents];
+  }, [data]);
 
   const filteredOrders =
     !!data?.length &&
@@ -131,6 +154,49 @@ export default function OrderView() {
       orderDate: '',
     });
     setOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleOpenResendDialog = (order) => {
+    setSelectedOrder(order);
+    setResendDialogOpen(true);
+  };
+
+  const handleCloseResendDialog = () => {
+    setResendDialogOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleResendConfirmationEmail = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setResendingEmail(true);
+      const response = await axiosInstance.post(endpoints.order.payment.resendConfirmation(selectedOrder.id));
+      
+      if (response.data.success) {
+        setSnackbar({
+          open: true,
+          message: 'Confirmation emails have been resent successfully!',
+          severity: 'success',
+        });
+        handleCloseResendDialog();
+      } else {
+        throw new Error(response.data.message || 'Failed to resend emails');
+      }
+    } catch (error) {
+      console.error('Error resending confirmation emails:', error);
+      setSnackbar({
+        open: true,
+        message: error.message || 'Failed to resend confirmation emails. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      setResendingEmail(false);
+    }
   };
 
   if (isLoading) {
@@ -217,7 +283,7 @@ export default function OrderView() {
                     height: 40,
                   }}
                 >
-                  {EVENT_OPTIONS.map((event) => (
+                  {eventOptions.map((event) => (
                     <MenuItem key={event} value={event}>
                       {event}
                     </MenuItem>
@@ -440,7 +506,31 @@ export default function OrderView() {
                         fontWeight: 550,
                       }}
                     >
+                      Price (RM)
+                    </Typography>
+
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        width: '15%',
+                        color: (theme) =>
+                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
+                        fontWeight: 550,
+                      }}
+                    >
                       Status
+                    </Typography>
+
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        width: '5%',
+                        color: (theme) =>
+                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
+                        fontWeight: 550,
+                      }}
+                    >
+                      Actions
                     </Typography>
                   </Stack>
                 </Stack>
@@ -493,11 +583,24 @@ export default function OrderView() {
                           }}
                           spacing={1}
                         >
-                          <Label sx={{ width: '15%' }}>
-                            {/* <Typography variant="body2" sx={{ width: '15%' }}> */}
-                            {order.orderNumber}
-                            {/* </Typography> */}
-                          </Label>
+                          <Box sx={{ width: '15%' }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                fontWeight: 600,
+                                color: 'grey.600',
+                                p: 0.75,
+                                borderRadius: 1,
+                                bgcolor: (theme) => alpha(theme.palette.grey[600], 0.08),
+                                display: 'inline-flex',
+                                fontSize: '0.8125rem',
+                                fontFamily: 'monospace',
+                                letterSpacing: '0.25px',
+                              }}
+                            >
+                              {order.orderNumber}
+                            </Typography>
+                          </Box>
 
                           <Typography variant="body2" sx={{ width: '20%' }}>
                             {order.event.name}
@@ -513,6 +616,10 @@ export default function OrderView() {
 
                           <Typography variant="body2" sx={{ width: '15%' }}>
                             {dayjs(order.createdAt).format('LL')}
+                          </Typography>
+
+                          <Typography variant="body2" sx={{ width: '15%' }}>
+                            RM {order.totalAmount.toFixed(2)}
                           </Typography>
 
                           <Box sx={{ width: '15%' }}>
@@ -543,9 +650,39 @@ export default function OrderView() {
                                   fontWeight: 600,
                                 }}
                               >
-                                {order.status}
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)} {/* added this because prisma's status is in lowercase, temporary solution */}
                               </Typography>
                             </Box>
+                          </Box>
+
+                          <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
+                            <Tooltip title="View Order Details">
+                              <IconButton 
+                                size="small"
+                                onClick={() => {
+                                  router.push(paths.dashboard.order.details(order.id));
+                                }}
+                                sx={{
+                                  color: 'primary.main',
+                                }}
+                              >
+                                <Iconify icon="eva:info-outline" width={20} height={20} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Resend Confirmation Email">
+                              <IconButton 
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenResendDialog(order);
+                                }}
+                                sx={{
+                                  color: 'info.main',
+                                }}
+                              >
+                                <Iconify icon="eva:email-outline" width={20} height={20} />
+                              </IconButton>
+                            </Tooltip>
                           </Box>
                         </Stack>
                       );
@@ -745,6 +882,149 @@ export default function OrderView() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={resendDialogOpen}
+        onClose={handleCloseResendDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            background: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
+                : 'linear-gradient(to bottom, #1a202c, #2d3748)',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            py: 2.5,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'rgba(245, 247, 250, 0.85)'
+                : 'rgba(26, 32, 44, 0.85)',
+          }}
+        >
+          <Iconify icon="eva:email-fill" width={28} height={28} sx={{ color: 'info.main' }} />
+          <Typography variant="h6">Resend Confirmation Email</Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2, px: 3 }}>
+          {selectedOrder && (
+            <>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Are you sure you want to resend the confirmation email for order <b>#{selectedOrder.orderNumber}</b>?
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Emails will be sent to the following addresses:
+              </Typography>
+              
+              <List
+                sx={{
+                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                  borderRadius: 1,
+                  mb: 2,
+                  py: 0,
+                }}
+                dense
+              >
+                <ListItem>
+                  <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+                    {selectedOrder.buyerEmail} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({selectedOrder.buyerName})</Typography>
+                  </Typography>
+                </ListItem>
+                
+                {selectedOrder.attendees && selectedOrder.attendees.length > 0 && (
+                  selectedOrder.attendees.map((attendee) => (
+                    <ListItem key={attendee.id}>
+                      <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+                        {attendee.email} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({attendee.firstName} {attendee.lastName})</Typography>
+                      </Typography>
+                    </ListItem>
+                  ))
+                )}
+              </List>
+              
+              <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
+                Note: This action will send emails to all the addresses listed above.
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
+            borderTop: '1px solid',
+            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleCloseResendDialog}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
+              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
+              borderWidth: '1.5px',
+              '&:hover': {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
+                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleResendConfirmationEmail}
+            disabled={resendingEmail}
+            variant="contained"
+            color="info"
+            startIcon={resendingEmail ? <CircularProgress size={20} thickness={4} /> : <Iconify icon="eva:email-fill" />}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: 'none',
+              },
+            }}
+          >
+            {resendingEmail ? 'Sending...' : 'Resend Email'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

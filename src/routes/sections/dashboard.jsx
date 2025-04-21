@@ -24,6 +24,7 @@ const CreateEvent = lazy(() => import('src/pages/dashboard/event/create/create')
 const NotificationStatus = lazy(() => import('src/pages/dashboard/event/notifications-status'));
 const DiscountCodeView = lazy(() => import('src/pages/dashboard/event/discount-code/view'));
 const OrderView = lazy(() => import('src/pages/dashboard/event/orders/view'));
+const OrderDetailsPage = lazy(() => import('src/pages/dashboard/event/order-details/view'));
 const TicketTypeView = lazy(() => import('src/pages/dashboard/event/ticket-types/view'));
 const TicketTypesPage = lazy(() => import('src/pages/dashboard/event/settings/view'));
 
@@ -86,6 +87,7 @@ export const dashboardRoutes = [
       },
       { path: 'discount-code', element: <DiscountCodeView /> },
       { path: 'order', element: <OrderView /> },
+      { path: 'order/:id', element: <OrderDetailsPage /> },
       {
         path: 'templates',
         children: [{ element: <WhatsappTemplate />, index: true }],

@@ -14,6 +14,7 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+export { axiosInstance };
 
 // ----------------------------------------------------------------------
 
@@ -119,5 +120,9 @@ export const endpoints = {
   },
   order: {
     root: '/api/order/',
+    payment: {
+      root: '/api/payment',
+      resendConfirmation: (orderId) => `/api/payment/resend-confirmation/${orderId}`,
+    },
   },
 };
