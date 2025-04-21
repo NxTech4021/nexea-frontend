@@ -329,7 +329,6 @@ const TicketOverviewCard = () => {
       </Card>
     );
   }
-
   return (
     <Card
       elevation={0}
@@ -562,13 +561,13 @@ const TicketOverviewCard = () => {
                     </Button>
                   </Stack>
 
-                  {!!cartData.discount && (
+                  {!!cartData.discount && (                  
                     <Stack spacing={1} sx={{ mt: 1 }}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="lets-icons:check-fill" color="success.main" width={16} />
                         <Typography variant="body2" color="success.main" fontWeight={500}>
                           Discount code applied
-                        </Typography>
+                        </Typography> 
                       </Stack>
                       <Stack
                         direction="row"
@@ -596,6 +595,11 @@ const TicketOverviewCard = () => {
                           >
                             <Iconify icon="mdi:trash-outline" width={14} color="error.main" />
                           </IconButton>
+                        </Stack>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Typography variant="body2" fontWeight={500}>
+                            Type: {cartData.discount.type}
+                          </Typography>
                         </Stack>
                         <Typography variant="body2" color="error.main" fontWeight={600}>
                           -{' '}
