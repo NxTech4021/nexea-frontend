@@ -17,6 +17,9 @@ import {
   DialogTitle,
   DialogContent,
   CircularProgress,
+  Select,
+  MenuItem,
+  Tooltip
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -142,27 +145,84 @@ export default function EventAttendee() {
       type: 'boolean',
       renderCell: (params) =>
         params.value === 'pending' ? (
+     <>
+      <Tooltip title="Click to edit status">
+         <Iconify  icon="mdi:pencil" width={16} height={16} color="#6c6c6c" />
           <Label size="small" color="warning">
             Pending
           </Label>
+  </Tooltip>
+</>
         ) : (
           <Label size="small" color="success">
             Checked In
           </Label>
         ),
-      renderEditCell: (params) => (
-        <Checkbox
-          checked={params.value === 'checkedIn'}
-          onChange={(e) => {
-            params.api.setEditCellValue({
+        renderEditCell: (params) => {
+          const handleChange = async (event) => {
+            await params.api.setEditCellValue({
               id: params.id,
               field: params.field,
-              value: e.target.checked ? 'checkedIn' : 'pending',
+              value: event.target.value,
             });
-          }}
-        />
-      ),
-    },
+        
+            params.api.stopCellEditMode({ id: params.id, field: params.field });
+          };
+        
+          const isDisabled = params.value === 'checkedIn';
+        
+          return (
+            <Select
+              value={params.value || ''}
+              onChange={handleChange}
+              size="small"
+              fullWidth
+              displayEmpty
+              disabled={isDisabled}
+              sx={{ height: 1 }}
+              renderValue={(selected) => {
+                // if (!selected) {
+                //   return <em>Select status</em>;
+                // }
+                if (selected === 'checkedIn') {
+                  return (
+                    <Chip
+                      label="Checked In"
+                      size="small"
+                      color="success"
+                      sx={{ width: '100%' }}
+                    />
+                  );
+                }
+                return selected;
+              }}
+            >
+              <MenuItem value="checkedIn">
+                <Chip
+                  label="Checked In"
+                  size="small"
+                  color="success"
+                  sx={{ width: '100%' }}
+                />
+              </MenuItem>
+            </Select>
+          );
+        }
+      
+    }
+//       renderEditCell: (params) => (
+//         <Checkbox
+//           checked={params.value === 'checkedIn'}
+//           onChange={(e) => {
+//             params.api.setEditCellValue({
+//               id: params.id,
+//               field: params.field,
+//               value: e.target.checked ? 'checkedIn' : 'pending',
+//             });
+//           }}
+//         />
+//       ),
+//     },
   ];
 
   if (isLoading) {
