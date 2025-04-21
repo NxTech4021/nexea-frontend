@@ -228,7 +228,15 @@ export default function TicketTypeView({ data }) {
   const handleViewDetails = (ticket) => {
     console.log('Viewing details for:', ticket);
   };
-
+  const handleEditSuccess = (updatedTicket) => {
+    // Update local state immediately
+    setTableData(prev => prev.map(ticket => 
+      ticket.id === updatedTicket.id ? updatedTicket : ticket
+    ));
+    
+    // Re-fresh data from server (if using SWR/mutate)
+    if (mutate) mutate(); 
+  };
   useEffect(() => {
     if (ticketTypesData?.ticketTypes?.length) {
       setTableData(
@@ -387,6 +395,7 @@ export default function TicketTypeView({ data }) {
                         onSelectRow={() => table.onSelectRow(row.id)}
                         onDeleteRow={() => handleDeleteRow(row.id)}
                         onViewDetails={handleViewDetails}
+                        onEditSuccess={handleEditSuccess} 
                       />
                     ))}
 
