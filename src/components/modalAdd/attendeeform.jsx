@@ -48,7 +48,7 @@ const initialValues = {
 };
 
 // eslint-disable-next-line react/prop-types
-const CreateAttendeeForm = ({ dialog, fetchAttendees, selectedEventId }) => {
+const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
     try {
       await axiosInstance.post(endpoints.attendee.create, {
@@ -57,24 +57,15 @@ const CreateAttendeeForm = ({ dialog, fetchAttendees, selectedEventId }) => {
         lastName: values.lastName,
         name: values.name,
         email: values.email,
-        // orderNumber: values.orderNumber,
-        // ticketTotal: values.ticketTotal,
-        // discountCode: values.discountCode,
-        // ticketCode: values.ticketCode,
-        // ticketID: values.ticketID,
-        // ticketType: values.ticketType,
-        // buyerFirstName: values.buyerFirstName,
-        // buyerLastName: values.buyerLastName,
-        // buyerName: values.buyerName,
         buyerEmail: values.buyerEmail,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
         checkedIn: true,
         eventId: selectedEventId,
       });
-      fetchAttendees();
+
       dialog.onFalse();
-      // setIsModalOpen(false);
+
       resetForm();
       toast.success('Attendeed added successfully!');
     } catch (error) {

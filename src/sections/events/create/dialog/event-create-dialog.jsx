@@ -29,6 +29,9 @@ import {
   DialogActions,
   FormHelperText,
 } from '@mui/material';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -75,10 +78,41 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
+// Add RHFTimePicker component
+const RHFTimePicker = ({ name, label, required = false }) => {
+  const { control } = useForm();
+  
+  return (
+    <Stack width={1} spacing={1}>
+      <InputLabel required={required}>{label}</InputLabel>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Controller
+          name={name}
+          control={control}
+          render={({ field, fieldState }) => (
+            <TimePicker
+              value={field.value}
+              onChange={(newValue) => field.onChange(newValue)}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  error: !!fieldState.error,
+                  helperText: fieldState.error ? fieldState.error.message : '',
+                },
+              }}
+            />
+          )}
+        />
+      </LocalizationProvider>
+    </Stack>
+  );
+};
+
 const schema = yup.object().shape({
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Date is required'),
+  eventTime: yup.date().required('Time is required'),
   // themeColor: yup.string().required('Theme color is required'),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
   eventLogo: yup.object().required('Logo is required.'),
@@ -101,6 +135,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       eventName: '',
       personInCharge: '',
       eventDate: null,
+      eventTime: null,
       themeColor: '',
       sst: '',
       eventLogo: null,
@@ -144,10 +179,27 @@ const EventCreateDialog = ({ open, onClose }) => {
     }
 
     try {
+      // Combine date and time before sending
+      const combinedDateTime = eventData.eventDate ? 
+        dayjs(eventData.eventDate)
+          .hour(eventData.eventTime ? dayjs(eventData.eventTime).hour() : 0)
+          .minute(eventData.eventTime ? dayjs(eventData.eventTime).minute() : 0)
+          .second(0) : null;
+
+      // Create a new object with the combined date and time
+      const formattedData = {
+        ...eventData,
+        eventDate: combinedDateTime ? combinedDateTime.toISOString() : null,
+      };
+      
+      // Remove the separate time field as it's now combined with date
+      delete formattedData.eventTime;
+
       const formData = new FormData();
 
-      formData.append('data', JSON.stringify(eventData));
+      formData.append('data', JSON.stringify(formattedData));
       formData.append('eventLogo', eventData.eventLogo?.file);
+      
 
       const res = await axiosInstance.post(endpoints.events.create, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -298,7 +350,37 @@ const EventCreateDialog = ({ open, onClose }) => {
                 />
               </Stack>
 
-              <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} />
+              {/* Date and Time picker row */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} width={1}>
+                <Box width={{ xs: 1, sm: 1/2 }}>
+                  <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} required />
+                </Box>
+                <Box width={{ xs: 1, sm: 1/2 }}>
+                  {/* Time Picker */}
+                  <Stack width={1} spacing={1}>
+                    <InputLabel required>Event Time</InputLabel>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Controller
+                        name="eventTime"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <TimePicker
+                            value={field.value}
+                            onChange={(newValue) => field.onChange(newValue)}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                error: !!fieldState.error,
+                                helperText: fieldState.error ? fieldState.error.message : '',
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  </Stack>
+                </Box>
+              </Stack>
             </Box>
           )}
 

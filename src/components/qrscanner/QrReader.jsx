@@ -56,9 +56,9 @@ const QrReader = () => {
   const fetchTicketDatabase = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${endpoints.attendee.root}?eventId=${eventId}`);
-
-      const ticketCode = response.data.map((obj) => obj.ticket.ticketCode);
-      setAttendeesData(response.data);
+      const attendees = response?.data?.attendees || [];
+      const ticketCode = attendees.map((obj) => obj.ticket.ticketCode);
+      setAttendeesData(attendees);
       return { ticketCode };
     } catch (error) {
       console.error('Error fetching attendees:', error);
