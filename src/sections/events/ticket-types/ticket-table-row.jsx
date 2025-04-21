@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
-import axios from 'axios';
-import axiosInstance, { endpoints } from 'src/utils/axios';
-
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
 
 import Stack from '@mui/material/Stack';
-import { Typography } from '@mui/material';
-
+import { LoadingButton } from '@mui/lab';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -21,33 +18,32 @@ import InputLabel from '@mui/material/InputLabel';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-
 import {
   Box,
   Card,
-  Stack,
   Drawer,
   Select,
+  Switch,
+  MenuItem,
   Typography,
   CardHeader,
   CardContent,
+  FormControl,
   ListItemText,
-  MenuItem,
   CircularProgress,
   FormControlLabel,
-  FormControl,
-  Switch
 } from '@mui/material';
-
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
+import axiosInstance from 'src/utils/axios';
+
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useSnackbar } from 'src/components/snackbar';
 
 // ----------------------------------------------------------------------
 
@@ -64,6 +60,42 @@ export const dataMapping = {
 // Ticket types and categories for dropdowns
 const ticketTypes = ['earlyBird', 'standard'];
 const ticketCategories = ['startup', 'general', 'speaker', 'vip'];
+
+// Helper for rendering select fields
+const RenderSelectField = ({
+  name,
+  label,
+  value,
+  onChange,
+  options,
+  mappingObj,
+  required = false,
+}) => (
+  <Stack width={1} spacing={1}>
+    <InputLabel required={required}>{label}</InputLabel>
+    <FormControl fullWidth>
+      <Select
+        value={value || ''}
+        onChange={onChange}
+        displayEmpty
+        MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+        renderValue={(selected) =>
+          // eslint-disable-next-line no-nested-ternary
+          selected ? (mappingObj ? mappingObj[selected] : selected) : 'Select an option'
+        }
+      >
+        <MenuItem disabled value="">
+          <em>Select an option</em>
+        </MenuItem>
+        {options.map((option) => (
+          <MenuItem key={option} value={option}>
+            {mappingObj ? mappingObj[option] : option}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  </Stack>
+);
 
 export default function TicketTableRow({
   row,
@@ -101,7 +133,6 @@ export default function TicketTableRow({
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [editedTicket, setEditedTicket] = useState({});
 
-
   // Use useEffect to automatically update title when type or category changes
   useEffect(() => {
     if (editedTicket.type && editedTicket.category) {
@@ -110,7 +141,7 @@ export default function TicketTableRow({
         ...prev,
         title: newTitle,
       }));
-      }
+    }
   }, [editedTicket.type, editedTicket.category]);
 
   const [open, setOpen] = useState(false);
@@ -125,9 +156,7 @@ export default function TicketTableRow({
     if (onViewDetails) {
       onViewDetails(row);
     }
-  }
-
-    
+  };
 
   // const handleViewDetails = () => {
   //   setSelectedTicket(row);
@@ -145,7 +174,7 @@ export default function TicketTableRow({
   };
 
   const handleEditChange = (field) => (event) => {
-    let value = event.target.value;
+    let { value } = event.target;
 
     // Handle special case for isActive toggle
     if (field === 'isActive') {
@@ -159,7 +188,7 @@ export default function TicketTableRow({
   };
 
   const handleNestedFieldChange = (parentField, childField) => (event) => {
-    const value = event.target.value;
+    const { value } = event.target;
 
     setEditedTicket((prev) => ({
       ...prev,
@@ -266,56 +295,23 @@ export default function TicketTableRow({
       setLoading(false);
     }
   };
-  const handleEditSuccess = (updatedTicket) => {
-    // Update local state immediately for fast UI response
-    setTableData((prev) =>
-      prev.map((ticket) => (ticket.id === updatedTicket.id ? updatedTicket : ticket))
-    );
 
-    // Optional: Re-validate with server data
-    mutate();
-  };
+  // const handleEditSuccess = (updatedTicket) => {
+  //   // Update local state immediately for fast UI response
+  //   setTableData((prev) =>
+  //     prev.map((ticket) => (ticket.id === updatedTicket.id ? updatedTicket : ticket))
+  //   );
+
+  //   // Optional: Re-validate with server data
+  //   mutate();
+  // };
+
   const getStatusColor = (item) => {
     if (item) {
       return 'success';
     }
     return 'error';
   };
-
-  // Helper for rendering select fields
-  const RenderSelectField = ({
-    name,
-    label,
-    value,
-    onChange,
-    options,
-    mappingObj,
-    required = false,
-  }) => (
-    <Stack width={1} spacing={1}>
-      <InputLabel required={required}>{label}</InputLabel>
-      <FormControl fullWidth>
-        <Select
-          value={value || ''}
-          onChange={onChange}
-          displayEmpty
-          MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
-          renderValue={(selected) =>
-            selected ? (mappingObj ? mappingObj[selected] : selected) : 'Select an option'
-          }
-        >
-          <MenuItem disabled value="">
-            <em>Select an option</em>
-          </MenuItem>
-          {options.map((option) => (
-            <MenuItem key={option} value={option}>
-              {mappingObj ? mappingObj[option] : option}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Stack>
-  );
 
   return (
     <>
@@ -343,13 +339,15 @@ export default function TicketTableRow({
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-
           <Tooltip title="Edit Details" placement="top" arrow>
-            <IconButton onClick={handleEditClick} sx={{ color: 'primary.main' }}>
+            <IconButton onClick={handleEditClick}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
           </Tooltip>
 
+          <IconButton onClick={toggleDrawer(true)}>
+            <Iconify icon="hugeicons:view" />
+          </IconButton>
 
           <Tooltip title="Delete" placement="top" arrow>
             <IconButton
@@ -835,6 +833,6 @@ TicketTableRow.propTypes = {
   row: PropTypes.object,
   selected: PropTypes.bool,
   onViewDetails: PropTypes.func,
-  onEditRow: PropTypes.func,
+  // onEditRow: PropTypes.func,
   onEditSuccess: PropTypes.func, // Added this prop
 };

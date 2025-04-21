@@ -29,6 +29,7 @@ import {
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
 import { Upload } from 'src/components/upload';
 
 // Event Status options
