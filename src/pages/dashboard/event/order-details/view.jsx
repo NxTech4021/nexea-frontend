@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'src/routes/hooks';
 
-import EventDetails from 'src/sections/events/details/view';
+import OrderDetails from 'src/sections/events/orders/view/order-details';
 
 // ----------------------------------------------------------------------
 
@@ -12,10 +12,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Event Details </title>
+        <title> Order Details </title>
       </Helmet>
 
-      <EventDetails id={id} />
+      <OrderDetails orderId={id} />
     </>
   );
 }
