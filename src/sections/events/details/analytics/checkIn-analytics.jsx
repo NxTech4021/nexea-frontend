@@ -17,19 +17,24 @@ const CheckInAnalytics = ({ checkedIns, id }) => {
 
   return (
     <Card
-      sx={{ border: 1, borderColor: (theme) => theme.palette.divider, borderRadius: 2, width: 1,
+      sx={{
+        border: 1,
+        borderColor: (theme) => theme.palette.divider,
+        borderRadius: 2,
+        width: 1,
         '&:hover': {
           cursor: 'pointer',
           border: '2px solid',
-          borderColor: (theme) => theme.palette.mode === 'dark' ? 'white' : 'black',
+          borderColor: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
           '& .hover-text': {
             textDecoration: 'underline',
-            color: (theme) => theme.palette.mode === 'dark' ? 'white' : 'black',
+            color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
           },
           '& .hover-icon': {
-            color: (theme) => theme.palette.mode === 'dark' ? 'white' : 'black',
-          }
-        }}}
+            color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
+          },
+        },
+      }}
       onClick={handleClick}
     >
       {/* <CardHeader
@@ -56,20 +61,17 @@ const CheckInAnalytics = ({ checkedIns, id }) => {
 
         <Box sx={{ cursor: 'pointer' }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography 
+            <Typography
               className="hover-text"
-              variant="subtitle2" 
-              color="text.secondary" 
+              variant="subtitle2"
+              color="text.secondary"
               sx={{ fontWeight: 600 }}
             >
               Total Checked In
             </Typography>
-            <Iconify 
-              className="hover-icon" 
-              icon="eva:arrow-ios-forward-fill"
-            />
+            <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" />
           </Stack>
-          <Typography variant="h2">{checkedIns?.length || 0}</Typography>
+          <Typography variant="h2">{checkedIns}</Typography>
         </Box>
       </CardContent>
     </Card>

@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
-import useSWR from 'swr';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
+import { toast } from 'sonner';
+import useSWR, { mutate } from 'swr';
 /* eslint-disable consistent-return */
 import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,6 +13,9 @@ import {
   Chip,
   Button,
   Dialog,
+  Select,
+  Tooltip,
+  MenuItem,
   Container,
   DialogTitle,
   DialogContent,
@@ -24,6 +28,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
@@ -37,7 +42,7 @@ export default function EventAttendee() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [snackbar, setSnackbar] = useState(null);
   const apiRef = useGridApiRef();
   const [selectedEventId, setSelectedEventId] = useState(null);
@@ -46,25 +51,25 @@ export default function EventAttendee() {
   const dialog = useBoolean();
   const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
-  const fetchAttendees = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${id}`);
-      setAttendees(
-        response.data?.attendee?.sort((a, b) => {
-          if (a.checkedIn && !b.checkedIn) {
-            return -1;
-          }
-          if (!a.checkedIn && b.checkedIn) {
-            return 1;
-          }
-          return 0;
-        })
-      );
-      setEvent(response?.data?.event);
-    } catch (error) {
-      toast.error('Error fetch attendees');
-    }
-  }, [id]);
+  // const fetchAttendees = useCallback(async () => {
+  //   try {
+  //     const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${id}`);
+  //     setAttendees(
+  //       response.data?.attendee?.sort((a, b) => {
+  //         if (a.checkedIn && !b.checkedIn) {
+  //           return -1;
+  //         }
+  //         if (!a.checkedIn && b.checkedIn) {
+  //           return 1;
+  //         }
+  //         return 0;
+  //       })
+  //     );
+  //     setEvent(response?.data?.event);
+  //   } catch (error) {
+  //     toast.error('Error fetch attendees');
+  //   }
+  // }, [id]);
 
   useEffect(() => {
     if (selectedEventId) {
@@ -75,20 +80,17 @@ export default function EventAttendee() {
     }
   }, [selectedEventId, allAttendees]);
 
-  const updateAttendees = useCallback(
-    async (newRow) => {
-      try {
-        await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
-        fetchAttendees();
-        toast.success(`Attendee ${newRow.buyerFullName} successfully saved.`);
-        setSnackbar({ children: 'User successfully saved', severity: 'success' });
-        return newRow;
-      } catch (error) {
-        console.error('Error fetching attendees:', error);
-      }
-    },
-    [fetchAttendees]
-  );
+  const updateAttendees = useCallback(async (newRow) => {
+    try {
+      await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
+      mutate();
+      toast.success(`Attendee ${newRow.firstName} ${newRow.lastName} successfully saved.`);
+      setSnackbar({ children: 'User successfully saved', severity: 'success' });
+      return newRow;
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    }
+  }, []);
 
   const handleProcessRowUpdateError = useCallback((error) => {
     setSnackbar({ children: error.message, severity: 'error' });
@@ -100,7 +102,7 @@ export default function EventAttendee() {
       field: 'fullName',
       headerName: 'Attendee Name',
       width: 200,
-      editable: true,
+      // editable: true,
       valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
     },
     { field: 'email', headerName: 'Attendee Email', width: 200, editable: true },
@@ -140,13 +142,74 @@ export default function EventAttendee() {
       headerName: 'Checked In',
       width: 150,
       editable: true,
+      type: 'boolean',
       renderCell: (params) =>
         params.value === 'pending' ? (
-          <Chip size="small" label="Pending" color="warning" />
+          <Tooltip title="Click to edit status">
+            <Iconify icon="mdi:pencil" width={16} height={16} color="#6c6c6c" />
+            <Label size="small" color="warning">
+              Pending
+            </Label>
+          </Tooltip>
         ) : (
-          <Chip size="small" label="Checked In" color="success" />
+          <Label size="small" color="success">
+            Checked In
+          </Label>
         ),
+      renderEditCell: (params) => {
+        const handleChange = async (e) => {
+          await params.api.setEditCellValue({
+            id: params.id,
+            field: params.field,
+            value: e.target.value,
+          });
+
+          params.api.stopCellEditMode({ id: params.id, field: params.field });
+        };
+
+        const isDisabled = params.value === 'checkedIn';
+
+        return (
+          <Select
+            value={params.value || ''}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            displayEmpty
+            disabled={isDisabled}
+            sx={{ height: 1 }}
+            renderValue={(selected) => {
+              // if (!selected) {
+              //   return <em>Select status</em>;
+              // }
+              if (selected === 'checkedIn') {
+                return (
+                  <Chip label="Checked In" size="small" color="success" sx={{ width: '100%' }} />
+                );
+              }
+              return selected;
+            }}
+          >
+            <MenuItem value="checkedIn">
+              <Chip label="Checked In" size="small" color="success" sx={{ width: '100%' }} />
+            </MenuItem>
+          </Select>
+        );
+      },
     },
+    //       renderEditCell: (params) => (
+    //         <Checkbox
+    //           checked={params.value === 'checkedIn'}
+    //           onChange={(e) => {
+    //             params.api.setEditCellValue({
+    //               id: params.id,
+    //               field: params.field,
+    //               value: e.target.checked ? 'checkedIn' : 'pending',
+    //             });
+    //           }}
+    //         />
+    //       ),
+    //     },
   ];
 
   if (isLoading) {
@@ -172,7 +235,7 @@ export default function EventAttendee() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           {
-            name: event?.name || 'Event',
+            name: data?.event?.name || 'Event',
             href: paths.dashboard.events.root,
           },
           { name: 'Attendees' },
@@ -192,7 +255,7 @@ export default function EventAttendee() {
         <DataGrid
           editMode="row"
           apiRef={apiRef}
-          rows={data} // Filtered attendees based on selected event
+          rows={data?.attendees || []} // Filtered attendees based on selected event
           columns={columns}
           pagination
           pageSize={5}
@@ -205,6 +268,7 @@ export default function EventAttendee() {
             if (JSON.stringify(newRow) === JSON.stringify(oldRow)) {
               return oldRow;
             }
+
             return updateAttendees(newRow);
           }}
           onProcessRowUpdateError={handleProcessRowUpdateError}
@@ -220,11 +284,7 @@ export default function EventAttendee() {
       <Dialog open={dialog.value} onClose={dialog.onFalse}>
         <DialogTitle> Add Attendee Information</DialogTitle>
         <DialogContent sx={{ py: 4 }}>
-          <CreateAttendeeForm
-            dialog={dialog}
-            fetchAttendees={fetchAttendees}
-            selectedEventId={event?.id}
-          />
+          <CreateAttendeeForm dialog={dialog} selectedEventId={event?.id} />
         </DialogContent>
       </Dialog>
     </Container>

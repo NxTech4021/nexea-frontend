@@ -86,7 +86,7 @@ const TicketSelectionCard = () => {
     if (!ticket) return null;
 
     const maxPerOrder = ticket?.ticketTypeRequirement?.maximumTicketPerOrder;
-    const availableQuantity = ticket?.quantity;
+    const availableQuantity = ticket.quantity - ticket.sold;
     const selectedQuantity = ticket?.selectedQuantity;
 
     const maxSelectable = maxPerOrder
@@ -96,7 +96,7 @@ const TicketSelectionCard = () => {
     const isMinusDisabled = selectedQuantity === 0;
     const isPlusDisabled = selectedQuantity === maxSelectable;
 
-    const unavailable = unavailableTickets && ticket.id === unavailableTickets;
+    const unavailable = ticket.quantity - ticket.sold === 0;
 
     return (
       <Grid2
@@ -169,85 +169,92 @@ const TicketSelectionCard = () => {
                 },
               }}
             />
-            <Stack direction="row" alignItems="center" spacing={2} justifyContent="end">
-              <IconButton
-                sx={{
-                  bgcolor: '#00564B',
-                  '&:hover': { bgcolor: '#00564B99' },
-                  borderRadius: 1,
-                  ...(isMinusDisabled && {
-                    pointerEvents: 'none',
-                    bgcolor: '#D9D9D9',
-                  }),
-                }}
-                onClick={() =>
-                  updateTics(ticket.id, {
-                    selectedQuantity: ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
-                    subTotal: ticket.selectedQuantity * ticket.price,
-                  })
-                }
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'translateY(1px)';
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <Iconify
-                  icon="ic:round-minus"
-                  width={15}
-                  color={isMinusDisabled ? '#676767' : 'white'}
-                />
-              </IconButton>
-              <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
-              <IconButton
-                sx={{
-                  bgcolor: '#00564B',
-                  borderRadius: 1,
-                  '&:hover': { bgcolor: '#00564B99' },
-                  ...(isPlusDisabled && {
-                    pointerEvents: 'none',
-                    bgcolor: '#D9D9D9',
-                  }),
-                }}
-                onClick={(e) =>
-                  updateTics(
-                    ticket.id,
-                    ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                      ? {
-                          selectedQuantity:
-                            ticket.selectedQuantity <
-                            ticket?.ticketTypeRequirement?.maximumTicketPerOrder
-                              ? ticket.selectedQuantity + 1
-                              : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
-                          subTotal: ticket.selectedQuantity * ticket.price,
-                        }
-                      : {
-                          selectedQuantity: ticket.selectedQuantity + 1,
-                          subTotal: ticket.selectedQuantity * ticket.price,
-                        }
-                  )
-                }
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'translateY(1px)';
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <Iconify
-                  icon="material-symbols:add-rounded"
-                  width={15}
-                  color={isPlusDisabled ? '#676767' : 'white'}
-                />
-              </IconButton>
-            </Stack>
+            {unavailable ? (
+              <Typography variant="subtitle2" color="text.secondary" alignSelf="center">
+                Sold out
+              </Typography>
+            ) : (
+              <Stack direction="row" alignItems="center" spacing={2} justifyContent="end">
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    '&:hover': { bgcolor: '#00564B99' },
+                    borderRadius: 1,
+                    ...(isMinusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={() =>
+                    updateTics(ticket.id, {
+                      selectedQuantity:
+                        ticket.selectedQuantity < 1 ? 0 : ticket.selectedQuantity - 1,
+                      subTotal: ticket.selectedQuantity * ticket.price,
+                    })
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="ic:round-minus"
+                    width={15}
+                    color={isMinusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+                <Typography variant="subtitle1">{ticket.selectedQuantity}</Typography>
+                <IconButton
+                  sx={{
+                    bgcolor: '#00564B',
+                    borderRadius: 1,
+                    '&:hover': { bgcolor: '#00564B99' },
+                    ...(isPlusDisabled && {
+                      pointerEvents: 'none',
+                      bgcolor: '#D9D9D9',
+                    }),
+                  }}
+                  onClick={(e) =>
+                    updateTics(
+                      ticket.id,
+                      ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                        ? {
+                            selectedQuantity:
+                              ticket.selectedQuantity <
+                              ticket?.ticketTypeRequirement?.maximumTicketPerOrder
+                                ? ticket.selectedQuantity + 1
+                                : ticket?.ticketTypeRequirement?.maximumTicketPerOrder,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                        : {
+                            selectedQuantity: ticket.selectedQuantity + 1,
+                            subTotal: ticket.selectedQuantity * ticket.price,
+                          }
+                    )
+                  }
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(1px)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Iconify
+                    icon="material-symbols:add-rounded"
+                    width={15}
+                    color={isPlusDisabled ? '#676767' : 'white'}
+                  />
+                </IconButton>
+              </Stack>
+            )}
           </Stack>
         </Grid2>
 
@@ -512,11 +519,9 @@ const TicketSelectionCard = () => {
               ) : (
                 <Stack height={1}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography variant="subtitle2">
-                      Order Summary
-                    </Typography>
-                    <IconButton 
-                      size="small" 
+                    <Typography variant="subtitle2">Order Summary</Typography>
+                    <IconButton
+                      size="small"
                       onClick={(e) => {
                         e.stopPropagation();
                         collapse.onFalse();
@@ -604,33 +609,39 @@ const TicketSelectionCard = () => {
           </Collapse>
 
           <Box my={1} onClick={() => collapse.onToggle()}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ px: 2 }}
+            >
               {!collapse.value && (
-                <Typography
-                  variant="subtitle1"
-                  fontSize={18}
-                  fontWeight={600}
-                  letterSpacing={-0.7}
-                >
+                <Typography variant="subtitle1" fontSize={18} fontWeight={600} letterSpacing={-0.7}>
                   Total
                 </Typography>
               )}
+              <Box
+                sx={{ position: 'absolute', left: '50%', top: -10, transform: 'translateX(-50%)' }}
+              >
+                <Iconify
+                  icon="fluent:line-horizontal-1-20-filled"
+                  width={50}
+                  color="text.secondary"
+                />
+              </Box>
               <Stack direction="row" alignItems="center" spacing={2}>
                 {!collapse.value && (
-                  <>
-                    <Typography
-                      variant="subtitle1"
-                      textAlign="end"
-                      fontSize={18}
-                      fontWeight={600}
-                      letterSpacing={-0.7}
-                    >
-                      {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                        subTotal && subTotal + 0.1
-                      )}
-                    </Typography>
-                    <Iconify icon="iconamoon:arrow-down-2-bold" width={24} />
-                  </>
+                  <Typography
+                    variant="subtitle1"
+                    textAlign="end"
+                    fontSize={18}
+                    fontWeight={600}
+                    letterSpacing={-0.7}
+                  >
+                    {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                      subTotal && subTotal + 0.1
+                    )}
+                  </Typography>
                 )}
               </Stack>
             </Stack>
@@ -744,7 +755,6 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
-
               onClick={() => {
                 if (selectedQuantity === 0) {
                   return;
