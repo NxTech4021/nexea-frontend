@@ -35,7 +35,7 @@ import {
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+import  { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 

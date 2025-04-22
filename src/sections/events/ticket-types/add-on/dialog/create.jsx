@@ -21,7 +21,7 @@ import {
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
