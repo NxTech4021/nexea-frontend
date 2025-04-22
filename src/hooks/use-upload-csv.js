@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 const useUploadCSV = () => {
   const handleFileUpload = async (file, selectedEvent) => {

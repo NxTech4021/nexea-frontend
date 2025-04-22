@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 const useGetEvents = () => {
   const [totalEvents, setTotalEvents] = useState(0);

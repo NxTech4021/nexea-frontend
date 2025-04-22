@@ -20,7 +20,7 @@ import {
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';

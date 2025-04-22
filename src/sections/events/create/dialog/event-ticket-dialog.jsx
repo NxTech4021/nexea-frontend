@@ -29,7 +29,7 @@ import {
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { createTicketType } from 'src/api/ticket-type';
 

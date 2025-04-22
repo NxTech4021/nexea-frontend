@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 
 import { useRouter } from 'src/routes/hooks';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useAuthContext } from 'src/auth/hooks';
 
