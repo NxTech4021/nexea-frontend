@@ -15,7 +15,7 @@ import { Box, Stack, Button, Container } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useSettingsContext } from 'src/components/settings';
 import FormProvider from 'src/components/hook-form/form-provider';

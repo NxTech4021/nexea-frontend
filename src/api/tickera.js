@@ -1,4 +1,4 @@
-import axiosInstance from 'src/utils/axios';
+import { axiosInstance } from 'src/utils/axios';
 
 import { APP_ID, APP_KEY } from 'src/config-global';
 

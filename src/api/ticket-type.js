@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 export const useGetAllTicketTypes = () => {
   const { data, isLoading, mutate } = useSWR(endpoints.ticketType.get, fetcher, {

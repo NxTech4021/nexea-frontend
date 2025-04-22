@@ -42,7 +42,7 @@ import {
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
 import { useTheme } from '@mui/material/styles';

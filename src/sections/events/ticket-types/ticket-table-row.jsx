@@ -37,7 +37,7 @@ import {
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance from 'src/utils/axios';
+import { axiosInstance } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';

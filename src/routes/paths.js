@@ -49,6 +49,7 @@ export const paths = {
     },
     order: {
       root: `${ROOTS.DASHBOARD}/order`,
+      details: (id) => `${ROOTS.DASHBOARD}/order/${id}`,
     },
     whatsappTemplate: {
       root: `${ROOTS.DASHBOARD}/templates`,

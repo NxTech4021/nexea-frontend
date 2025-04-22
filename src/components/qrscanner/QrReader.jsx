@@ -8,7 +8,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Box, Modal, Button, Container, TextField, Typography } from '@mui/material';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 const AttendanceStatus = {
   present: 'Yes',

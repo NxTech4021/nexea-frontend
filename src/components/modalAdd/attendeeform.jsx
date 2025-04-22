@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { Grid, Button, TextField } from '@mui/material';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;

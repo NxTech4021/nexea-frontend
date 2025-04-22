@@ -24,8 +24,8 @@ import { useSearchParams } from 'src/routes/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance from 'src/utils/axios';
 import { useCartStore } from 'src/utils/store';
+import { axiosInstance } from 'src/utils/axios';
 
 import { useGetCart } from 'src/api/cart/cart';
 

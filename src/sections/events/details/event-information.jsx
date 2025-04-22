@@ -29,7 +29,7 @@ import {
   DialogContent,
 } from '@mui/material';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 

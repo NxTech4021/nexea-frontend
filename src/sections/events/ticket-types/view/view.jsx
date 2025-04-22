@@ -28,7 +28,7 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 import { TICKET_STATUS_OPTIONS } from 'src/_mock/_ticketTypes';

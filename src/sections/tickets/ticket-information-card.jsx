@@ -28,7 +28,7 @@ import { useSearchParams } from 'src/routes/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';

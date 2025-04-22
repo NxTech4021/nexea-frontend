@@ -21,7 +21,7 @@ import {
   DialogContent,
 } from '@mui/material';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
