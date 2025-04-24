@@ -8,10 +8,14 @@ import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 
-const TicketAnalytics = ({ tickets }) => {
+const TicketAnalytics = ({ tickets, eventName }) => {
   const router = useRouter();
 
   const handleClick = () => {
+    // Store the event name in sessionStorage to be retrieved on the ticket types page
+    if (eventName) {
+      sessionStorage.setItem('ticketTypeEventFilter', JSON.stringify([eventName]));
+    }
     router.push(paths.dashboard.ticketType.root);
   };
 
@@ -73,4 +77,5 @@ export default TicketAnalytics;
 
 TicketAnalytics.propTypes = {
   tickets: PropTypes.array,
+  eventName: PropTypes.string,
 };

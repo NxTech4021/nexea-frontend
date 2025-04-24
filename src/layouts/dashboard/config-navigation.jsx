@@ -70,7 +70,7 @@ export function useNavData() {
             icon: <Iconify icon="f7:tickets-fill" width={22} />,
             children: [
               {
-                title: 'List',
+                title: 'Tickets',
                 path: paths.dashboard.ticketType.root,
               },
               {
@@ -80,7 +80,7 @@ export function useNavData() {
             ],
           },
           {
-            title: 'Add Ons',
+            title: 'Ticket Add Ons',
             path: paths.dashboard.addOn.root,
             icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
 

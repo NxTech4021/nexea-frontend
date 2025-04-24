@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
+import * as yup from 'yup';
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { Controller, useFormContext } from 'react-hook-form';
-import * as yup from 'yup';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -123,7 +123,7 @@ const validationSchema = [
         .test(
           'max-greater-than-min',
           'Maximum must be greater than or equal to minimum',
-          function (value) {
+          function validateMaximum(value) {
             const { minimumTicketPerOrder } = this.parent;
             return !minimumTicketPerOrder || !value || value >= minimumTicketPerOrder;
           }

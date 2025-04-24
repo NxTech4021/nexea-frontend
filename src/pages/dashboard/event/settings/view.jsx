@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Settings</title>
+        <title> Ticket Settings</title>
       </Helmet>
 
       <TicketTypesPage />

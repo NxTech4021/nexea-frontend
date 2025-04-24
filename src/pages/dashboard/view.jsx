@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title>Dashboard</title>
+        <title>NEXEA Event Dashboard</title>
       </Helmet>
 
       <Dashboard />

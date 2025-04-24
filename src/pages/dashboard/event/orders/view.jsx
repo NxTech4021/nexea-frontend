@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Orders </title>
+        <title> Ticket Orders </title>
       </Helmet>
 
       <OrderView />
