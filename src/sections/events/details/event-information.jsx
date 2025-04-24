@@ -113,10 +113,10 @@ const EventInformation = ({ event }) => {
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
-const handleEventUpdated = (updatedEvent) => {
-  // This will refresh the data using your SWR hook
-  mutate();
-};
+  const handleEventUpdated = (updatedEvent) => {
+    // This will refresh the data using your SWR hook
+    mutate();
+  };
   return (
     <Card
       sx={{
@@ -207,11 +207,15 @@ const handleEventUpdated = (updatedEvent) => {
             <Typography variant="h6" sx={{ color: 'white', marginBottom: '14px' }}>
               {items[0].content}
             </Typography>
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {items[1].content}
+            {/* <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
             </Typography>
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
               {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+            </Typography> */}
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {dayjs(event.date).format('LL')} | {dayjs(event.date).format('hh:mm A')} -{' '}
+              {dayjs(event.endDate).format('LL')} | {dayjs(event.endDate).format('hh:mm A')}
             </Typography>
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
               {items[3].content}
@@ -249,16 +253,14 @@ const handleEventUpdated = (updatedEvent) => {
           </Stack>
         </Box>
       </CardContent>
-      <>
-      {/* called ticket eventmodel in  Edit Information Modal */}
-      
-</>
-       <EditEventModal
-      open={openEdit}
-      onClose={handleCloseEdit}
-      selectedEvent={selectedEvent}
-      onEventUpdated={handleEventUpdated}
-    /> */
+      <>{/* called ticket eventmodel in  Edit Information Modal */}</>
+      <EditEventModal
+        open={openEdit}
+        onClose={handleCloseEdit}
+        selectedEvent={selectedEvent}
+        onEventUpdated={handleEventUpdated}
+      />{' '}
+      */
     </Card>
   );
 };

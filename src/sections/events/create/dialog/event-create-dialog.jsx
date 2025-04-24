@@ -82,6 +82,7 @@ const schema = yup.object().shape({
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
+  eventDate: yup.date().required('Event date is required'),
   startTime: yup.date().required('Start time is required'),
   endTime: yup.date().required('End time is required'),
   // themeColor: yup.string().required('Theme color is required'),
@@ -106,6 +107,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       eventName: '',
       personInCharge: '',
       eventDate: null,
+      endDate: null,
       startTime: null,
       endTime: null,
       themeColor: '',
@@ -151,52 +153,70 @@ const EventCreateDialog = ({ open, onClose }) => {
       });
       return;
     }
-  
-    // Validate endTime against startTime
-    if (dayjs(eventData.endTime, 'HH:mm').isBefore(dayjs(eventData.startTime, 'HH:mm'))) {
+
+    // Validate endDate against eventDate
+    if (dayjs(eventData.endDate).isBefore(dayjs(eventData.eventDate), 'date')) {
+      setError('endDate', {
+        type: 'custom',
+        message: 'End date cannot be before start date',
+      });
+      return;
+    }
+
+    // Validate endTime against startTime if same day
+    if (
+      dayjs(eventData.eventDate).isSame(dayjs(eventData.endDate), 'date') &&
+      dayjs(eventData.endTime).isBefore(dayjs(eventData.startTime))
+    ) {
       setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
       return;
     }
-  
+
     try {
       // Format the startDateTime and endDateTime for submission
       const startDateTimeFormatted =
-  dayjs(eventData.eventDate).format('YYYY-MM-DD') + 'T' + dayjs(eventData.startTime).format('HH:mm');
-const endDateTimeFormatted =
-  dayjs(eventData.eventDate).format('YYYY-MM-DD') + 'T' + dayjs(eventData.endTime).format('HH:mm');
+        dayjs(eventData.eventDate).format('YYYY-MM-DD') +
+        'T' +
+        dayjs(eventData.startTime).format('HH:mm');
+      const endDateTimeFormatted =
+        dayjs(eventData.endDate).format('YYYY-MM-DD') +
+        'T' +
+        dayjs(eventData.endTime).format('HH:mm');
 
-const formattedData = {
-  ...eventData,
-  date: startDateTimeFormatted, // start date as a full datetime
-  endDate: endDateTimeFormatted, // end date as a full datetime
-};
-  
-      // Remove startTime and endTime from the data to avoid sending them separately
+      const formattedData = {
+        ...eventData,
+        date: startDateTimeFormatted,
+        endDate: endDateTimeFormatted,
+      };
+
+      // Remove fields not needed in the API
       delete formattedData.startTime;
       delete formattedData.endTime;
-  
+      delete formattedData.eventDate;
+
       // Prepare FormData for file upload and event data
       const formData = new FormData();
       formData.append('data', JSON.stringify(formattedData));
       formData.append('eventLogo', eventData.eventLogo?.file);
-  
+
       // Send the request to create the event
       const res = await axiosInstance.post(endpoints.events.create, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-  
+
       // On success, refresh the data and display success message
       mutate();
-      enqueueSnackbar(res?.data?.message);
+      // enqueueSnackbar(res?.data?.message);
+      enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
+
       handleCancel();
     } catch (error) {
       // Handle errors
       enqueueSnackbar(error?.message, { variant: 'error' });
     }
   });
-  
+
   const startTimeValue = watch('startTime'); // Watch for startTime changes
-  
 
   return (
     <Dialog
@@ -334,10 +354,19 @@ const formattedData = {
                   }}
                 />
               </Stack>
-
               {/* Date picker */}
-              <Box width={1}>
-                <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} required />
+              <Box display="flex" width="100%" justifyContent="space-between">
+                <Box width="48%">
+                  <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} required />
+                </Box>
+                <Box width="48%">
+                  <RHFDatePicker
+                    name="endDate"
+                    label="End Date"
+                    minDate={watch('eventDate')}
+                    required
+                  />
+                </Box>
               </Box>
 
               {/* Time pickers row */}

@@ -150,7 +150,8 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
           initialValues={{
             name: selectedEvent?.name,
             description: selectedEvent?.description,
-            date: selectedEvent?.date,
+            date: dayjs(selectedEvent?.date).format('YYYY-MM-DD'), // Keep only the date part
+            endDate: dayjs(selectedEvent?.endDate).format('YYYY-MM-DD'),
             time: selectedEvent?.date ? dayjs(selectedEvent.date) : null,
             endTime: selectedEvent?.endDate ? dayjs(selectedEvent.endDate) : null,
             personInCharge: selectedEvent?.personInCharge?.id,
@@ -169,20 +170,20 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                     .format()
                 : values.date;
 
-            // Create end datetime (combining date + end time)
+            // Create end datetime (combining end date + end time)
             const combinedEndDateTime =
-              values.date && values.endTime
-                ? dayjs(values.date)
+              values.endDate && values.endTime
+                ? dayjs(values.endDate)
                     .hour(values.endTime.hour())
                     .minute(values.endTime.minute())
                     .second(0)
                     .format()
-                : values.date;
+                : values.endDate;
 
             const dataToSend = {
               ...values,
               date: combinedDateTime,
-              endDate: combinedEndDateTime, // Add this field to match backend
+              endDate: combinedEndDateTime,
             };
 
             // Remove time fields not expected by backend
@@ -417,6 +418,81 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                     </LocalizationProvider>
                     <ErrorMessage
                       name="date"
+                      component={Typography}
+                      sx={{
+                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        fontSize: '0.75rem',
+                        mt: 0.75,
+                        ml: 1.5,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography
+                      component="label"
+                      htmlFor="endDate"
+                      sx={{
+                        display: 'block',
+                        mb: 1,
+                        fontWeight: 500,
+                        color: (theme) => theme.palette.text.primary,
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      End Date{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={dayjs(values.endDate)}
+                        onChange={(newValue) => {
+                          setFieldValue('endDate', newValue);
+                        }}
+                        minDate={dayjs(values.date)} // Ensure end date can't be before start date
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            id: 'endDate',
+                            placeholder: 'Select end date',
+                            sx: {
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: (theme) =>
+                                  theme.palette.mode === 'light'
+                                    ? '#f8fafc'
+                                    : 'rgba(45, 55, 72, 0.5)',
+                                color: (theme) => theme.palette.text.primary,
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#f0f5fa'
+                                      : 'rgba(45, 55, 72, 0.8)',
+                                },
+                                '&.Mui-focused': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#fff'
+                                      : 'rgba(45, 55, 72, 0.9)',
+                                  '& fieldset': {
+                                    borderColor: (theme) =>
+                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
+                                    borderWidth: '1.5px',
+                                  },
+                                },
+                                '& .MuiInputBase-input': {
+                                  color: (theme) => theme.palette.text.primary,
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                    <ErrorMessage
+                      name="endDate"
                       component={Typography}
                       sx={{
                         color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
