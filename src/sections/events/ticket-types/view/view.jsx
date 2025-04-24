@@ -170,6 +170,7 @@ export default function TicketTypeView({ data }) {
       },
       isActive: true,
     },
+    mode: 'onChange',
   });
 
   const { handleSubmit } = methods;
