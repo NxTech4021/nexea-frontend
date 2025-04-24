@@ -35,7 +35,7 @@ import {
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import  { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 
@@ -78,41 +78,12 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
-// Add RHFTimePicker component
-const RHFTimePicker = ({ name, label, required = false }) => {
-  const { control } = useForm();
-  
-  return (
-    <Stack width={1} spacing={1}>
-      <InputLabel required={required}>{label}</InputLabel>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Controller
-          name={name}
-          control={control}
-          render={({ field, fieldState }) => (
-            <TimePicker
-              value={field.value}
-              onChange={(newValue) => field.onChange(newValue)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  error: !!fieldState.error,
-                  helperText: fieldState.error ? fieldState.error.message : '',
-                },
-              }}
-            />
-          )}
-        />
-      </LocalizationProvider>
-    </Stack>
-  );
-};
-
 const schema = yup.object().shape({
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
-  eventDate: yup.date().required('Date is required'),
-  eventTime: yup.date().required('Time is required'),
+  eventDate: yup.date().required('Event date is required'),
+  startTime: yup.date().required('Start time is required'),
+  endTime: yup.date().required('End time is required'),
   // themeColor: yup.string().required('Theme color is required'),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
   eventLogo: yup.object().required('Logo is required.'),
@@ -135,7 +106,8 @@ const EventCreateDialog = ({ open, onClose }) => {
       eventName: '',
       personInCharge: '',
       eventDate: null,
-      eventTime: null,
+      startTime: null,
+      endTime: null,
       themeColor: '',
       sst: '',
       eventLogo: null,
@@ -149,6 +121,7 @@ const EventCreateDialog = ({ open, onClose }) => {
     setValue,
     setError,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = methods;
 
@@ -170,6 +143,7 @@ const EventCreateDialog = ({ open, onClose }) => {
   );
 
   const onSubmit = handleSubmit(async (eventData) => {
+    // Validate eventDate
     if (dayjs(eventData.eventDate).isBefore(dayjs(), 'date')) {
       setError('eventDate', {
         type: 'custom',
@@ -177,41 +151,52 @@ const EventCreateDialog = ({ open, onClose }) => {
       });
       return;
     }
-
+  
+    // Validate endTime against startTime
+    if (dayjs(eventData.endTime, 'HH:mm').isBefore(dayjs(eventData.startTime, 'HH:mm'))) {
+      setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
+      return;
+    }
+  
     try {
-      // Combine date and time before sending
-      const combinedDateTime = eventData.eventDate ? 
-        dayjs(eventData.eventDate)
-          .hour(eventData.eventTime ? dayjs(eventData.eventTime).hour() : 0)
-          .minute(eventData.eventTime ? dayjs(eventData.eventTime).minute() : 0)
-          .second(0) : null;
+      // Format the startDateTime and endDateTime for submission
+      const startDateTimeFormatted =
+  dayjs(eventData.eventDate).format('YYYY-MM-DD') + 'T' + dayjs(eventData.startTime).format('HH:mm');
+const endDateTimeFormatted =
+  dayjs(eventData.eventDate).format('YYYY-MM-DD') + 'T' + dayjs(eventData.endTime).format('HH:mm');
 
-      // Create a new object with the combined date and time
-      const formattedData = {
-        ...eventData,
-        eventDate: combinedDateTime ? combinedDateTime.toISOString() : null,
-      };
-      
-      // Remove the separate time field as it's now combined with date
-      delete formattedData.eventTime;
-
+const formattedData = {
+  ...eventData,
+  date: startDateTimeFormatted, // start date as a full datetime
+  endDate: endDateTimeFormatted, // end date as a full datetime
+};
+  
+      // Remove startTime and endTime from the data to avoid sending them separately
+      delete formattedData.startTime;
+      delete formattedData.endTime;
+  
+      // Prepare FormData for file upload and event data
       const formData = new FormData();
-
       formData.append('data', JSON.stringify(formattedData));
       formData.append('eventLogo', eventData.eventLogo?.file);
-      
-
+  
+      // Send the request to create the event
       const res = await axiosInstance.post(endpoints.events.create, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
+  
+      // On success, refresh the data and display success message
       mutate();
       enqueueSnackbar(res?.data?.message);
       handleCancel();
     } catch (error) {
+      // Handle errors
       enqueueSnackbar(error?.message, { variant: 'error' });
     }
   });
+  
+  const startTimeValue = watch('startTime'); // Watch for startTime changes
+  
 
   return (
     <Dialog
@@ -350,18 +335,20 @@ const EventCreateDialog = ({ open, onClose }) => {
                 />
               </Stack>
 
-              {/* Date and Time picker row */}
+              {/* Date picker */}
+              <Box width={1}>
+                <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} required />
+              </Box>
+
+              {/* Time pickers row */}
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} width={1}>
-                <Box width={{ xs: 1, sm: 1/2 }}>
-                  <RHFDatePicker name="eventDate" label="Event Date" minDate={dayjs()} required />
-                </Box>
-                <Box width={{ xs: 1, sm: 1/2 }}>
-                  {/* Time Picker */}
+                <Box width={{ xs: 1, sm: 1 / 2 }}>
+                  {/* Start Time Picker */}
                   <Stack width={1} spacing={1}>
-                    <InputLabel required>Event Time</InputLabel>
+                    <InputLabel required>Start Time</InputLabel>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Controller
-                        name="eventTime"
+                        name="startTime"
                         control={control}
                         render={({ field, fieldState }) => (
                           <TimePicker
@@ -372,6 +359,34 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error ? fieldState.error.message : '',
+                                placeholder: 'Select start time',
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  </Stack>
+                </Box>
+                <Box width={{ xs: 1, sm: 1 / 2 }}>
+                  {/* End Time Picker */}
+                  <Stack width={1} spacing={1}>
+                    <InputLabel required>End Time</InputLabel>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Controller
+                        name="endTime"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <TimePicker
+                            value={field.value}
+                            onChange={(newValue) => field.onChange(newValue)}
+                            minTime={startTimeValue} // Ensure the end time can't be before start time
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                error: !!fieldState.error,
+                                helperText: fieldState.error ? fieldState.error.message : '',
+                                placeholder: 'Select end time',
                               },
                             }}
                           />

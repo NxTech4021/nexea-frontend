@@ -631,13 +631,14 @@ const EventLists = ({ query }) => {
 
                 {/* Date & Time */}
                 <Stack spacing={0.5} sx={{ width: '20%' }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="body2">{fDate(event.date)}</Typography>
-                  </Stack>
-                  <Typography variant="caption" className="event-secondary-text">
-                    {dayjs(event.date).format('HH:mm')}
-                  </Typography>
-                </Stack>
+  <Stack direction="row" alignItems="center" spacing={1}>
+    <Typography variant="body2">{fDate(event.date)}</Typography>
+  </Stack>
+  <Typography variant="caption" className="event-secondary-text">
+    {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+  </Typography>
+</Stack>
+
 
                 {/* Event Manager */}
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
@@ -994,7 +995,7 @@ const EventLists = ({ query }) => {
       </Stack>
     );
 
-  if (errorEvents)
+  if (errorEvents?.message)
     enqueueSnackbar(errorEvents?.message, {
       variant: 'error',
     });

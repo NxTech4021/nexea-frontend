@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
@@ -150,15 +151,52 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             name: selectedEvent?.name,
             description: selectedEvent?.description,
             date: selectedEvent?.date,
+            time: selectedEvent?.date ? dayjs(selectedEvent.date) : null,
+            endTime: selectedEvent?.endDate ? dayjs(selectedEvent.endDate) : null,
             personInCharge: selectedEvent?.personInCharge?.id,
             sst: selectedEvent?.eventSetting?.sst,
             status: selectedEvent?.status,
             eventLogo: selectedEvent?.eventSetting?.eventLogo,
           }}
           onSubmit={(values, { setSubmitting }) => {
+            // Create start datetime (combining date + start time)
+            const combinedDateTime =
+              values.date && values.time
+                ? dayjs(values.date)
+                    .hour(values.time.hour())
+                    .minute(values.time.minute())
+                    .second(0)
+                    .format()
+                : values.date;
+
+            // Create end datetime (combining date + end time)
+            const combinedEndDateTime =
+              values.date && values.endTime
+                ? dayjs(values.date)
+                    .hour(values.endTime.hour())
+                    .minute(values.endTime.minute())
+                    .second(0)
+                    .format()
+                : values.date;
+
+            const dataToSend = {
+              ...values,
+              date: combinedDateTime,
+              endDate: combinedEndDateTime, // Add this field to match backend
+            };
+
+            // Remove time fields not expected by backend
+            delete dataToSend.time;
+            delete dataToSend.endTime;
+            // Create a new FormData object - this was missing
             const formData = new FormData();
-            formData.append('eventLogo', values.eventLogo);
-            formData.append('data', JSON.stringify(values));
+
+            // Add the file if it exists and is not a string (URL)
+            if (values.eventLogo && typeof values.eventLogo !== 'string') {
+              formData.append('eventLogo', values.eventLogo);
+            }
+            // Continue with your existing form submission
+            formData.append('data', JSON.stringify(dataToSend));
 
             axiosInstance
               .put(`${endpoints.events.update}/${selectedEvent?.id}`, formData, {
@@ -388,7 +426,6 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                     />
                   </Grid>
-
                   <Grid item xs={12} sm={6}>
                     <Typography
                       component="label"
@@ -479,7 +516,154 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                     />
                   </Grid>
-
+                  <Grid item xs={12} sm={6}>
+                    <Typography
+                      component="label"
+                      htmlFor="time"
+                      sx={{
+                        display: 'block',
+                        mb: 1,
+                        fontWeight: 500,
+                        color: (theme) => theme.palette.text.primary,
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      Start Time{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TimePicker
+                        value={values.time}
+                        onChange={(newValue) => {
+                          setFieldValue('time', newValue);
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            id: 'time',
+                            placeholder: 'Select time',
+                            sx: {
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: (theme) =>
+                                  theme.palette.mode === 'light'
+                                    ? '#f8fafc'
+                                    : 'rgba(45, 55, 72, 0.5)',
+                                color: (theme) => theme.palette.text.primary,
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#f0f5fa'
+                                      : 'rgba(45, 55, 72, 0.8)',
+                                },
+                                '&.Mui-focused': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#fff'
+                                      : 'rgba(45, 55, 72, 0.9)',
+                                  '& fieldset': {
+                                    borderColor: (theme) =>
+                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
+                                    borderWidth: '1.5px',
+                                  },
+                                },
+                                '& .MuiInputBase-input': {
+                                  color: (theme) => theme.palette.text.primary,
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                    <ErrorMessage
+                      name="time"
+                      component={Typography}
+                      sx={{
+                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        fontSize: '0.75rem',
+                        mt: 0.75,
+                        ml: 1.5,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography
+                      component="label"
+                      htmlFor="time"
+                      sx={{
+                        display: 'block',
+                        mb: 1,
+                        fontWeight: 500,
+                        color: (theme) => theme.palette.text.primary,
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      End Time{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TimePicker
+                        value={values.endTime}
+                        onChange={(newValue) => {
+                          setFieldValue('endTime', newValue);
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            id: 'endTime',
+                            placeholder: 'Select time',
+                            sx: {
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: (theme) =>
+                                  theme.palette.mode === 'light'
+                                    ? '#f8fafc'
+                                    : 'rgba(45, 55, 72, 0.5)',
+                                color: (theme) => theme.palette.text.primary,
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#f0f5fa'
+                                      : 'rgba(45, 55, 72, 0.8)',
+                                },
+                                '&.Mui-focused': {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.mode === 'light'
+                                      ? '#fff'
+                                      : 'rgba(45, 55, 72, 0.9)',
+                                  '& fieldset': {
+                                    borderColor: (theme) =>
+                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
+                                    borderWidth: '1.5px',
+                                  },
+                                },
+                                '& .MuiInputBase-input': {
+                                  color: (theme) => theme.palette.text.primary,
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                    <ErrorMessage
+                      name="time"
+                      component={Typography}
+                      sx={{
+                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        fontSize: '0.75rem',
+                        mt: 0.75,
+                        ml: 1.5,
+                      }}
+                    />
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography
                       component="label"
