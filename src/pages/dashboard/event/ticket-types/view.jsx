@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Discount Codes</title>
+        <title> Event Tickets</title>
       </Helmet>
 
       <TicketTypeView />

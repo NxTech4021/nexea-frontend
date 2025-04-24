@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Add On</title>
+        <title> Ticket Add Ons</title>
       </Helmet>
 
       <AddOnView />

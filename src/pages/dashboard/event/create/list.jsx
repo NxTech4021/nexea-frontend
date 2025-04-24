@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Events</title>
+        <title> NEXEA Events</title>
       </Helmet>
 
       <Events />

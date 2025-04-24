@@ -8,10 +8,14 @@ import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 
-const OrderAnalytics = ({ orders }) => {
+const OrderAnalytics = ({ orders, eventName }) => {
   const router = useRouter();
 
   const handleClick = () => {
+    // Store the event name in sessionStorage to be retrieved on the orders page
+    if (eventName) {
+      sessionStorage.setItem('orderEventFilter', eventName);
+    }
     router.push(paths.dashboard.order.root);
   };
 
@@ -73,4 +77,5 @@ export default OrderAnalytics;
 
 OrderAnalytics.propTypes = {
   orders: PropTypes.array,
+  eventName: PropTypes.string,
 };

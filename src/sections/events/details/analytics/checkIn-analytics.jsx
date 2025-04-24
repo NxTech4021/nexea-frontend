@@ -81,6 +81,6 @@ const CheckInAnalytics = ({ checkedIns, id }) => {
 export default CheckInAnalytics;
 
 CheckInAnalytics.propTypes = {
-  checkedIns: PropTypes.array,
+  checkedIns: PropTypes.number,
   id: PropTypes.string.isRequired,
 };
