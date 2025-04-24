@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
+import { toast } from 'sonner';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
@@ -117,7 +118,7 @@ export default function TicketTableRow({
     isActive,
     description,
     quantity,
-    requirement,
+    ticketTypeRequirement,
     sold,
     reservedQuantity,
   } = row;
@@ -264,12 +265,19 @@ export default function TicketTableRow({
         quantity: parseInt(editedTicket.quantity || 0, 10),
       };
 
+      if (
+        updatedTicket?.ticketTypeRequirement?.minimumTicketPerOrder >=
+        updatedTicket?.ticketTypeRequirement?.maximumTicketPerOrder
+      ) {
+        toast.error('Minimum tickets must be less than the maximum tickets.');
+        return;
+      }
+
       const response = await axiosInstance.put(
         `/api/ticket-type/${updatedTicket.id}`,
         updatedTicket
       );
 
-      console.log('Request successful:', response.data);
       setEditDialogOpen(false);
       enqueueSnackbar('Ticket updated successfully!', { variant: 'success' });
 
@@ -558,11 +566,19 @@ export default function TicketTableRow({
                 <InputLabel required={false}>Minimum tickets per order</InputLabel>
                 <TextField
                   type="number"
-                  value={editedTicket.requirement?.minimumTicketPerOrder || ''}
-                  onChange={handleNestedFieldChange('requirement', 'minimumTicketPerOrder')}
+                  value={editedTicket.ticketTypeRequirement?.minimumTicketPerOrder || ''}
+                  onChange={handleNestedFieldChange(
+                    'ticketTypeRequirement',
+                    'minimumTicketPerOrder'
+                  )}
                   placeholder="No minimum"
                   variant="outlined"
                   fullWidth
+                  onKeyDown={(e) => {
+                    if (e.key === '-' || e.key === 'e') {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </Stack>
 
@@ -570,11 +586,19 @@ export default function TicketTableRow({
                 <InputLabel required={false}>Maximum tickets per order</InputLabel>
                 <TextField
                   type="number"
-                  value={editedTicket.requirement?.maximumTicketPerOrder || ''}
-                  onChange={handleNestedFieldChange('requirement', 'maximumTicketPerOrder')}
+                  value={editedTicket.ticketTypeRequirement?.maximumTicketPerOrder || ''}
+                  onChange={handleNestedFieldChange(
+                    'ticketTypeRequirement',
+                    'maximumTicketPerOrder'
+                  )}
                   placeholder="No maximum"
                   variant="outlined"
                   fullWidth
+                  onKeyDown={(e) => {
+                    if (e.key === '-' || e.key === 'e') {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </Stack>
             </Box>
@@ -707,6 +731,53 @@ export default function TicketTableRow({
                     primary="Validity"
                     secondary={dayjs(validity).format('LL') || 'N/A'}
                   />
+                </Box>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 1, mb: 1 }}>
+              <CardHeader
+                title="Ticket Requirement"
+                titleTypographyProps={{ variant: 'subtitle1' }}
+              />
+              <CardContent>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' },
+                  }}
+                  gap={2}
+                >
+                  {ticketTypeRequirement?.maximumTicketPerOrder ||
+                  ticketTypeRequirement?.minimumTicketPerOrder ? (
+                    <>
+                      <Stack alignItems="center" spacing={1}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Minimum Ticket Requirement
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {ticketTypeRequirement?.minimumTicketPerOrder || 0}
+                        </Typography>
+                      </Stack>
+                      <Stack alignItems="center" spacing={1}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Maxiumum Ticket Requirement
+                        </Typography>
+                        <Typography variant="subtitle1">
+                          {ticketTypeRequirement?.maximumTicketPerOrder || 0}
+                        </Typography>
+                      </Stack>
+                    </>
+                  ) : (
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      textAlign="center"
+                      gridColumn="span 2"
+                    >
+                      Not specify
+                    </Typography>
+                  )}
                 </Box>
               </CardContent>
             </Card>
