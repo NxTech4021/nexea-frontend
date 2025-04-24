@@ -82,7 +82,6 @@ const schema = yup.object().shape({
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
-  eventDate: yup.date().required('Event date is required'),
   startTime: yup.date().required('Start time is required'),
   endTime: yup.date().required('End time is required'),
   // themeColor: yup.string().required('Theme color is required'),
@@ -174,14 +173,8 @@ const EventCreateDialog = ({ open, onClose }) => {
 
     try {
       // Format the startDateTime and endDateTime for submission
-      const startDateTimeFormatted =
-        dayjs(eventData.eventDate).format('YYYY-MM-DD') +
-        'T' +
-        dayjs(eventData.startTime).format('HH:mm');
-      const endDateTimeFormatted =
-        dayjs(eventData.endDate).format('YYYY-MM-DD') +
-        'T' +
-        dayjs(eventData.endTime).format('HH:mm');
+      const startDateTimeFormatted = `${dayjs(eventData.eventDate).format('YYYY-MM-DD')}T${dayjs(eventData.startTime).format('HH:mm')}`;
+      const endDateTimeFormatted = `${dayjs(eventData.endDate).format('YYYY-MM-DD')}T${dayjs(eventData.endTime).format('HH:mm')}`;
 
       const formattedData = {
         ...eventData,
