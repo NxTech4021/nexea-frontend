@@ -1,5 +1,6 @@
 import useSWR from 'swr';
-import React, { useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 import { Box, Stack, alpha, Button, Tooltip, Typography, CircularProgress } from '@mui/material';
 
@@ -9,9 +10,9 @@ import Iconify from 'src/components/iconify';
 
 import { useAddOnsStore } from '../hooks/use-add-on';
 
-const AddOn = () => {
+const AddOn = ({ addOn }) => {
   const { data, isLoading } = useSWR(endpoints.ticketType.addOn.root, fetcher);
-  const [selected, setSelected] = useState([]);
+  // const [selected, setSelected] = useState([]);
   const { setSelectedAddOns } = useAddOnsStore();
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
@@ -79,8 +80,31 @@ const AddOn = () => {
           </Button>
         </Tooltip>
       ))}
+      <Tooltip title="Create new add on">
+        <Button
+          variant="outlined"
+          sx={{
+            minWidth: 200,
+            height: 200,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          onClick={() => {
+            // setSelectedAddOns(item);
+            addOn.onTrue();
+          }}
+        >
+          <Box position="absolute">
+            <Iconify icon="material-symbols:add-rounded" width={20} />
+          </Box>
+        </Button>
+      </Tooltip>
     </Stack>
   );
 };
 
 export default AddOn;
+
+AddOn.propTypes = {
+  addOn: PropTypes.object,
+};

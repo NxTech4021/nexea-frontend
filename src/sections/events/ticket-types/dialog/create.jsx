@@ -128,7 +128,7 @@ const validationSchema = [
         .test(
           'max-greater-than-min',
           'Maximum must be greater than or equal to minimum',
-          function (value) {
+          (value) => {
             const { minimumTicketPerOrder } = this.parent;
             return !minimumTicketPerOrder || !value || value >= minimumTicketPerOrder;
           }
@@ -139,7 +139,7 @@ const validationSchema = [
   yup.object(),
 ];
 
-const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) => {
+const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose, addOn }) => {
   const methods = useFormContext();
   const smDown = useResponsive('down', 'sm');
   const [activeStep, setActiveStep] = useState(0);
@@ -389,7 +389,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
           </Box>
         )}
 
-        {activeStep === 1 && <AddOn />}
+        {activeStep === 1 && <AddOn addOn={addOn} />}
       </DialogContent>
 
       <DialogActions>
