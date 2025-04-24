@@ -38,6 +38,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import EditAddOnDialog from '../dialog/edit';
 import AddOnTableRow from '../addOn-table-row';
 import CreateAddOnDialog from '../dialog/create';
 import AddOnTableToolbar from '../addOn-table-toolbar';
@@ -64,10 +65,12 @@ const AddOnView = () => {
 
   const [filters, setFilters] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [addOnItem, setAddOnItem] = useState({});
 
   useSWR(endpoints.ticketType.addOn.root, fetcher, { onSuccess: (data) => setTableData(data) });
 
   const create = useBoolean();
+  const edit = useBoolean();
 
   const dataFiltered = applyFilter({
     inputData: tableData || [],
@@ -114,6 +117,16 @@ const AddOnView = () => {
   const handleDeleteRows = useCallback(() => {
     console.log('Deleted');
   }, []);
+
+  const handleEditRow = useCallback(
+    async (id) => {
+      const item = tableData?.find((a) => a.id === id);
+      console.log(item);
+      setAddOnItem(item);
+      edit.onTrue();
+    },
+    [tableData, edit]
+  );
 
   return (
     <Container maxWidth="xl">
@@ -240,6 +253,7 @@ const AddOnView = () => {
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
                       onDeleteRow={() => handleDeleteRow(row.id)}
+                      onEditRow={() => handleEditRow(row.id)}
                       //   onViewDetails={handleViewDetails}
                     />
                   ))}
@@ -268,6 +282,7 @@ const AddOnView = () => {
       </Card>
 
       <CreateAddOnDialog onClose={create.onFalse} open={create.value} />
+      <EditAddOnDialog onClose={edit.onFalse} open={edit.value} item={addOnItem} />
     </Container>
   );
 };
