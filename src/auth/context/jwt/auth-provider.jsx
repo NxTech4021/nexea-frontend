@@ -121,14 +121,13 @@ export function AuthProvider({ children }) {
 
     const response = await axios.post(endpoints.auth.login, data);
 
-    const { accessToken, user } = response.data;
+    const { user } = response.data;
 
     dispatch({
       type: 'LOGIN',
       payload: {
         user: {
           ...user,
-          accessToken,
         },
       },
     });
@@ -145,14 +144,13 @@ export function AuthProvider({ children }) {
 
     const response = await axios.post(endpoints.auth.register, data);
 
-    const { accessToken, user } = response.data;
+    const { user } = response.data;
 
     dispatch({
       type: 'REGISTER',
       payload: {
         user: {
           ...user,
-          accessToken,
         },
       },
     });
