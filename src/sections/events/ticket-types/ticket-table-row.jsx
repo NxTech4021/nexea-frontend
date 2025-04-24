@@ -266,8 +266,10 @@ export default function TicketTableRow({
       };
 
       if (
+        updatedTicket?.ticketTypeRequirement?.minimumTicketPerOrder &&
+        updatedTicket?.ticketTypeRequirement?.maximumTicketPerOrder &&
         updatedTicket?.ticketTypeRequirement?.minimumTicketPerOrder >=
-        updatedTicket?.ticketTypeRequirement?.maximumTicketPerOrder
+          updatedTicket?.ticketTypeRequirement?.maximumTicketPerOrder
       ) {
         toast.error('Minimum tickets must be less than the maximum tickets.');
         return;
