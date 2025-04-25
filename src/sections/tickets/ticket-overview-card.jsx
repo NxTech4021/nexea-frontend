@@ -383,7 +383,8 @@ const TicketOverviewCard = () => {
             },
           }}
         >
-          <Stack spacing={3} height={1}>
+          <Stack spacing={3} height={1}
+          >
             <Card
               elevation={0}
               sx={{
@@ -392,6 +393,8 @@ const TicketOverviewCard = () => {
                 bgcolor: (theme) => theme.palette.background.neutral,
                 border: '1px solid',
                 borderColor: 'divider',
+                maxHeight: 300, 
+                overflowY: 'auto',
               }}
             >
               <Stack spacing={2.5}>
