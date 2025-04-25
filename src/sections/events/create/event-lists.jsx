@@ -303,7 +303,7 @@ const EventLists = ({ query }) => {
                           }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {event.attendees?.length || 0}
+                          {event.attendeeCount || 0}
                         </Typography>
                       </Stack>
                     </Tooltip>
@@ -322,9 +322,9 @@ const EventLists = ({ query }) => {
                         >
                           {event.personInCharge.fullName.charAt(0)}
                         </Avatar>
-                        <Typography variant="body2" noWrap>
-                          {event.personInCharge.fullName}
-                        </Typography>
+                        {/* <Typography variant="body2" noWrap>
+                          {/* {event.personInCharge.fullName} 
+                        </Typography> */}
                       </Stack>
                     </Tooltip>
                   </Stack>
@@ -515,6 +515,8 @@ const EventLists = ({ query }) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
 
+          const VITE_BASE_URL = "http://localhost:81";
+          console.log("events", event)
           return (
             <Stack
               key={event.id}
@@ -586,7 +588,7 @@ const EventLists = ({ query }) => {
                         className="event-secondary-text"
                       />
                       <Typography variant="caption" className="event-secondary-text">
-                        {event.attendees?.length || 0} Attendees
+                        {event.attendeeCount || 0} Attendees
                       </Typography>
                     </Stack>
                   </Stack>
@@ -631,13 +633,13 @@ const EventLists = ({ query }) => {
 
                 {/* Date & Time */}
                 <Stack spacing={0.5} sx={{ width: '20%' }}>
-  <Stack direction="row" alignItems="center" spacing={1}>
-    <Typography variant="body2">{fDate(event.date)}</Typography>
-  </Stack>
-  <Typography variant="caption" className="event-secondary-text">
-    {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
-  </Typography>
-</Stack>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="body2">{fDate(event.date)}</Typography>
+                  </Stack>
+                  <Typography variant="caption" className="event-secondary-text">
+                    {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+                  </Typography>
+                </Stack>
 
 
                 {/* Event Manager */}
