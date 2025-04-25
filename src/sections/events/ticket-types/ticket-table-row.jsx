@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
+import { toast } from 'sonner';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { NumericFormat } from 'react-number-format';
@@ -229,12 +230,12 @@ export default function TicketTableRow({
         row.ticketTypeRequirement?.minimumTicketPerOrder ||
         (row.requirement?.minimumTicketPerOrder !== undefined
           ? row.requirement.minimumTicketPerOrder
-          : 1),
+          : null),
       maximumTicketPerOrder:
         row.ticketTypeRequirement?.maximumTicketPerOrder ||
         (row.requirement?.maximumTicketPerOrder !== undefined
           ? row.requirement.maximumTicketPerOrder
-          : 10),
+          : null),
     };
 
     // Initialize edited ticket with row data
@@ -329,14 +330,19 @@ export default function TicketTableRow({
         };
       }
 
-      console.log('Sending update with data:', updatedTicket);
+      if (
+        updatedTicket?.requirement?.minimumTicketPerOrder >=
+        updatedTicket?.requirement?.maximumTicketPerOrder
+      ) {
+        toast.error('Minimum tickets must be less than the maximum tickets.');
+        return;
+      }
 
       const response = await axiosInstance.put(
         `/api/ticket-type/${updatedTicket.id}`,
         updatedTicket
       );
 
-      console.log('Request successful:', response.data);
       setEditDialogOpen(false);
       enqueueSnackbar('Ticket updated successfully!', { variant: 'success' });
 
@@ -573,7 +579,7 @@ export default function TicketTableRow({
                   sx={{
                     p: 2,
                     borderRadius: 1,
-                    bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                    bgcolor: (theme) => theme.palette.background.neutral,
                     border: '1px solid',
                     borderColor: 'divider',
                   }}
@@ -1448,7 +1454,7 @@ export default function TicketTableRow({
                 </Box>
               }
               sx={{
-                bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                bgcolor: (theme) => theme.palette.background.neutral,
                 p: 2, // Control header padding
                 pb: 1.75,
               }}
@@ -1507,7 +1513,7 @@ export default function TicketTableRow({
                 </Box>
               }
               sx={{
-                bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                bgcolor: (theme) => theme.palette.background.neutral,
                 p: 2, // Control header padding
                 pb: 1.75,
               }}
@@ -1518,7 +1524,7 @@ export default function TicketTableRow({
                 sx={{
                   p: 2,
                   borderRadius: 1.5,
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                  bgcolor: (theme) => theme.palette.background.neutral,
                   border: '1px solid',
                   borderColor: 'divider',
                 }}
@@ -1551,7 +1557,7 @@ export default function TicketTableRow({
                 </Box>
               }
               sx={{
-                bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                bgcolor: (theme) => theme.palette.background.neutral,
                 p: 2, // Control header padding
                 pb: 1.75,
               }}
@@ -1831,7 +1837,7 @@ export default function TicketTableRow({
                   </Box>
                 }
                 sx={{
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                  bgcolor: (theme) => theme.palette.background.neutral,
                   p: 2,
                 }}
               />

@@ -2,17 +2,15 @@ import useSWR from 'swr';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { 
-  Box, 
-  Card,
-  Grid,
-  Chip,
+import {
+  Box,
   Stack,
   alpha,
-  Divider,
-  // Button, 
-  // Tooltip, 
-  Typography, 
+  // Button,
+  Button,
+  Tooltip,
+  // Tooltip,
+  Typography,
   CircularProgress,
 } from '@mui/material';
 
@@ -43,7 +41,7 @@ const AddOn = ({ addOn }) => {
           size={32}
           sx={{
             strokeLinecap: 'round',
-            color: 'primary.main'
+            color: 'primary.main',
           }}
         />
       </Box>
@@ -63,16 +61,18 @@ const AddOn = ({ addOn }) => {
           textAlign: 'center',
         }}
       >
-        <Iconify 
-          icon="ph:ticket-duotone" 
-          width={64} 
-          height={64} 
-          sx={{ 
+        <Iconify
+          icon="ph:ticket-duotone"
+          width={64}
+          height={64}
+          sx={{
             mb: 2,
-            color: (theme) => alpha(theme.palette.primary.main, 0.4)
-          }} 
+            color: (theme) => alpha(theme.palette.primary.main, 0.4),
+          }}
         />
-        <Typography variant="h6" gutterBottom>No Add-ons Available</Typography>
+        <Typography variant="h6" gutterBottom>
+          No Add-ons Available
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           There are no add-ons available to select for this ticket
         </Typography>
@@ -144,113 +144,113 @@ const AddOn = ({ addOn }) => {
         </Button>
       </Tooltip>
     </Stack>
-//     <Box sx={{ pt: 1 }}>
-//       <Box sx={{ mb: 3 }}>
-//         <Typography variant="subtitle1" gutterBottom>
-//           Select Add-ons
-//         </Typography>
-//         <Typography variant="body2" color="text.secondary">
-//           Choose add-ons that will be available with this ticket type
-//         </Typography>
-//       </Box>
-      
-//       <Divider sx={{ mb: 3 }} />
-      
-//       <Box>
-//         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-//           {selectedAddOns?.length} add-on{selectedAddOns?.length !== 1 ? 's' : ''} selected
-//         </Typography>
-        
-//         <Grid container spacing={2}>
-//           {data.map((item) => {
-//             const isSelected = selectedAddOns?.some((a) => a.id === item.id);
-            
-//             return (
-//               <Grid item xs={12} sm={6} md={4} key={item.id}>
-//                 <Card
-//                   sx={{
-//                     p: 2,
-//                     height: '100%',
-//                     display: 'flex',
-//                     flexDirection: 'column',
-//                     borderRadius: 2,
-//                     cursor: 'pointer',
-//                     transition: 'all 0.2s ease-in-out',
-//                     position: 'relative',
-//                     ...(isSelected
-//                       ? {
-//                           borderColor: 'primary.main',
-//                           boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}`,
-//                           bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.12),
-//                         }
-//                       : {
-//                           boxShadow: (theme) => theme.customShadows.z8,
-//                           '&:hover': {
-//                             borderColor: (theme) => alpha(theme.palette.primary.main, 0.48),
-//                             boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.primary.main, 0.24)}`,
-//                             bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.08),
-//                           },
-//                         }),
-//                   }}
-//                   onClick={() => {
-//                     setSelectedAddOns(item);
-//                   }}
-//                 >
-//                   {isSelected && (
-//                     <Chip
-//                       icon={<Iconify icon="eva:checkmark-circle-fill" />}
-//                       label="Selected"
-//                       color="primary"
-//                       size="small"
-//                       sx={{
-//                         position: 'absolute',
-//                         top: 12,
-//                         right: 12,
-//                         fontSize: '0.75rem',
-//                       }}
-//                     />
-//                   )}
-                  
-//                   <Stack spacing={1}>
-//                     <Typography variant="subtitle1">{item.name}</Typography>
-                    
-//                     <Typography 
-//                       variant="h6" 
-//                       color="primary.main"
-//                       fontWeight={600}
-//                     >
-//                       {new Intl.NumberFormat('en-MY', {
-//                         minimumFractionDigits: 2,
-//                         style: 'currency',
-//                         currency: 'MYR',
-//                       }).format(item.price)}
-//                     </Typography>
+    //     <Box sx={{ pt: 1 }}>
+    //       <Box sx={{ mb: 3 }}>
+    //         <Typography variant="subtitle1" gutterBottom>
+    //           Select Add-ons
+    //         </Typography>
+    //         <Typography variant="body2" color="text.secondary">
+    //           Choose add-ons that will be available with this ticket type
+    //         </Typography>
+    //       </Box>
 
-//                     {item.description && (
-//                       <Typography 
-//                         variant="body2" 
-//                         color="text.secondary"
-//                         sx={{ 
-//                           mt: 1,
-//                           flexGrow: 1,
-//                           overflow: 'hidden',
-//                           textOverflow: 'ellipsis',
-//                           display: '-webkit-box',
-//                           WebkitLineClamp: 3,
-//                           WebkitBoxOrient: 'vertical',
-//                         }}
-//                       >
-//                         {item.description}
-//                       </Typography>
-//                     )}
-//                   </Stack>
-//                 </Card>
-//               </Grid>
-//             );
-//           })}
-//         </Grid>
-//       </Box>
-//     </Box>
+    //       <Divider sx={{ mb: 3 }} />
+
+    //       <Box>
+    //         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+    //           {selectedAddOns?.length} add-on{selectedAddOns?.length !== 1 ? 's' : ''} selected
+    //         </Typography>
+
+    //         <Grid container spacing={2}>
+    //           {data.map((item) => {
+    //             const isSelected = selectedAddOns?.some((a) => a.id === item.id);
+
+    //             return (
+    //               <Grid item xs={12} sm={6} md={4} key={item.id}>
+    //                 <Card
+    //                   sx={{
+    //                     p: 2,
+    //                     height: '100%',
+    //                     display: 'flex',
+    //                     flexDirection: 'column',
+    //                     borderRadius: 2,
+    //                     cursor: 'pointer',
+    //                     transition: 'all 0.2s ease-in-out',
+    //                     position: 'relative',
+    //                     ...(isSelected
+    //                       ? {
+    //                           borderColor: 'primary.main',
+    //                           boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}`,
+    //                           bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.12),
+    //                         }
+    //                       : {
+    //                           boxShadow: (theme) => theme.customShadows.z8,
+    //                           '&:hover': {
+    //                             borderColor: (theme) => alpha(theme.palette.primary.main, 0.48),
+    //                             boxShadow: (theme) => `0 0 0 1px ${alpha(theme.palette.primary.main, 0.24)}`,
+    //                             bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.08),
+    //                           },
+    //                         }),
+    //                   }}
+    //                   onClick={() => {
+    //                     setSelectedAddOns(item);
+    //                   }}
+    //                 >
+    //                   {isSelected && (
+    //                     <Chip
+    //                       icon={<Iconify icon="eva:checkmark-circle-fill" />}
+    //                       label="Selected"
+    //                       color="primary"
+    //                       size="small"
+    //                       sx={{
+    //                         position: 'absolute',
+    //                         top: 12,
+    //                         right: 12,
+    //                         fontSize: '0.75rem',
+    //                       }}
+    //                     />
+    //                   )}
+
+    //                   <Stack spacing={1}>
+    //                     <Typography variant="subtitle1">{item.name}</Typography>
+
+    //                     <Typography
+    //                       variant="h6"
+    //                       color="primary.main"
+    //                       fontWeight={600}
+    //                     >
+    //                       {new Intl.NumberFormat('en-MY', {
+    //                         minimumFractionDigits: 2,
+    //                         style: 'currency',
+    //                         currency: 'MYR',
+    //                       }).format(item.price)}
+    //                     </Typography>
+
+    //                     {item.description && (
+    //                       <Typography
+    //                         variant="body2"
+    //                         color="text.secondary"
+    //                         sx={{
+    //                           mt: 1,
+    //                           flexGrow: 1,
+    //                           overflow: 'hidden',
+    //                           textOverflow: 'ellipsis',
+    //                           display: '-webkit-box',
+    //                           WebkitLineClamp: 3,
+    //                           WebkitBoxOrient: 'vertical',
+    //                         }}
+    //                       >
+    //                         {item.description}
+    //                       </Typography>
+    //                     )}
+    //                   </Stack>
+    //                 </Card>
+    //               </Grid>
+    //             );
+    //           })}
+    //         </Grid>
+    //       </Box>
+    //     </Box>
   );
 };
 

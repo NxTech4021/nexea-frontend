@@ -132,7 +132,7 @@ const OrderDetails = ({ orderId }) => {
       const response = await axiosInstance.patch(`${endpoints.order.root}/${orderId}/status`, {
         status: newStatus,
       });
-      
+
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -148,7 +148,10 @@ const OrderDetails = ({ orderId }) => {
       console.error('Error updating order status:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || error.message || 'Failed to update order status. Please try again.',
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to update order status. Please try again.',
         severity: 'error',
       });
     } finally {
@@ -525,7 +528,7 @@ const OrderDetails = ({ orderId }) => {
                 sx={{
                   py: 4,
                   textAlign: 'center',
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+                  bgcolor: (theme) => theme.palette.background.neutral,
                   borderRadius: 1.5,
                 }}
               >
@@ -599,10 +602,10 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">
-                Payment Status
-              </Typography>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
+              <Typography variant="h6">Payment Status</Typography>
               <Button
                 size="small"
                 variant="outlined"
@@ -612,9 +615,9 @@ const OrderDetails = ({ orderId }) => {
                 Change Status
               </Button>
             </Box>
-            <Box 
-              sx={{ 
-                p: 2, 
+            <Box
+              sx={{
+                p: 2,
                 borderRadius: 1.5,
                 bgcolor: getStatusConfig(order.status).bgColor,
                 display: 'flex',
@@ -680,10 +683,10 @@ const OrderDetails = ({ orderId }) => {
               {order.status && order.status.toLowerCase() === 'pending' ? (
                 <Tooltip title="Resend only available for Paid orders">
                   <span style={{ width: '100%', cursor: 'not-allowed' }}>
-                    <Button 
-                      fullWidth 
-                      variant="outlined" 
-                      color="info" 
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      color="info"
                       startIcon={<Iconify icon="eva:email-fill" />}
                       disabled
                     >
@@ -692,10 +695,10 @@ const OrderDetails = ({ orderId }) => {
                   </span>
                 </Tooltip>
               ) : (
-                <Button 
-                  fullWidth 
-                  variant="outlined" 
-                  color="info" 
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="info"
                   startIcon={<Iconify icon="eva:email-fill" />}
                   onClick={handleOpenResendDialog}
                   disabled={resendingEmail}
@@ -916,9 +919,9 @@ const OrderDetails = ({ orderId }) => {
           {order && (
             <>
               <Typography variant="body1" sx={{ mb: 3, mt: 2 }}>
-                 <b>#{order.orderNumber}</b>
+                <b>#{order.orderNumber}</b>
               </Typography>
-              
+
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel id="status-select-label">Payment Status</InputLabel>
                 <Select
@@ -934,9 +937,9 @@ const OrderDetails = ({ orderId }) => {
                   <MenuItem value="cancelled">Cancelled</MenuItem>
                 </Select>
               </FormControl>
-              
+
               <Typography variant="body2" color="#ffa100" sx={{ mt: -1 }}>
-                Note: Use this option to update the payment status of an order. 
+                Note: Use this option to update the payment status of an order.
               </Typography>
             </>
           )}
@@ -975,7 +978,13 @@ const OrderDetails = ({ orderId }) => {
             disabled={updatingStatus}
             variant="contained"
             color="primary"
-            startIcon={updatingStatus ? <CircularProgress size={20} thickness={4} /> : <Iconify icon="eva:save-fill" />}
+            startIcon={
+              updatingStatus ? (
+                <CircularProgress size={20} thickness={4} />
+              ) : (
+                <Iconify icon="eva:save-fill" />
+              )
+            }
             sx={{
               borderRadius: 2,
               fontWeight: 600,
