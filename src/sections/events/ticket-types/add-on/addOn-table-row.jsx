@@ -32,7 +32,14 @@ export const dataMapping = {
   speaker: 'Speaker',
 };
 
-export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
+export default function AddOnTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onDeleteRow,
+  onViewDetails,
+  onEditRow,
+}) {
   const { name, price, description, createdAt, quantity } = row;
 
   const confirm = useBoolean();
@@ -96,9 +103,15 @@ export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow,
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+          <Tooltip title="Edit Details" placement="top" arrow>
+            <IconButton onClick={onEditRow}>
+              <Iconify icon="solar:pen-bold" />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title="View Details" placement="top" arrow>
             <IconButton onClick={handleViewDetails}>
-              <Iconify icon="solar:eye-bold" />
+              <Iconify icon="hugeicons:view" />
             </IconButton>
           </Tooltip>
 
@@ -199,4 +212,5 @@ AddOnTableRow.propTypes = {
   row: PropTypes.object,
   selected: PropTypes.bool,
   onViewDetails: PropTypes.func,
+  onEditRow: PropTypes.func,
 };

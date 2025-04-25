@@ -86,12 +86,12 @@ const RenderSelectField = ({
   required = false,
 }) => (
   <Stack width={1} spacing={0.5}>
-    <InputLabel 
+    <InputLabel
       required={required}
-      sx={{ 
-        fontSize: '0.875rem', 
+      sx={{
+        fontSize: '0.875rem',
         fontWeight: 500,
-        color: 'text.primary' 
+        color: 'text.primary',
       }}
     >
       {label}
@@ -115,14 +115,14 @@ const RenderSelectField = ({
             },
           },
         }}
-        MenuProps={{ 
-          PaperProps: { 
-            sx: { 
+        MenuProps={{
+          PaperProps: {
+            sx: {
               maxHeight: 240,
               mt: 0.5,
               boxShadow: (theme) => theme.customShadows.dropdown,
-            } 
-          }
+            },
+          },
         }}
         renderValue={(selected) =>
           // eslint-disable-next-line no-nested-ternary
@@ -165,7 +165,7 @@ export default function TicketTableRow({
     requirement,
     sold,
     reservedQuantity,
-    addOns, 
+    addOns,
   } = row;
 
   const confirm = useBoolean();
@@ -187,7 +187,7 @@ export default function TicketTableRow({
   // Use useEffect to automatically update title when type or category changes
   useEffect(() => {
     const isNewTicketForm = !editedTicket.id;
-    
+
     if (isNewTicketForm && editedTicket.type && editedTicket.category) {
       const newTitle = `${dataMapping[editedTicket.category]} - ${dataMapping[editedTicket.type]}`;
       setEditedTicket((prev) => ({
@@ -222,32 +222,36 @@ export default function TicketTableRow({
   const handleEditClick = () => {
     // Reset step when opening
     setActiveStep(0);
-    
+
     // Initialize requirement from ticketTypeRequirement or requirement
     const initialRequirement = {
-      minimumTicketPerOrder: row.ticketTypeRequirement?.minimumTicketPerOrder || 
-                            (row.requirement?.minimumTicketPerOrder !== undefined ? 
-                              row.requirement.minimumTicketPerOrder : 1),
-      maximumTicketPerOrder: row.ticketTypeRequirement?.maximumTicketPerOrder || 
-                            (row.requirement?.maximumTicketPerOrder !== undefined ? 
-                              row.requirement.maximumTicketPerOrder : 10),
+      minimumTicketPerOrder:
+        row.ticketTypeRequirement?.minimumTicketPerOrder ||
+        (row.requirement?.minimumTicketPerOrder !== undefined
+          ? row.requirement.minimumTicketPerOrder
+          : 1),
+      maximumTicketPerOrder:
+        row.ticketTypeRequirement?.maximumTicketPerOrder ||
+        (row.requirement?.maximumTicketPerOrder !== undefined
+          ? row.requirement.maximumTicketPerOrder
+          : 10),
     };
-    
+
     // Initialize edited ticket with row data
     setEditedTicket({
       ...row,
-      requirement: initialRequirement
+      requirement: initialRequirement,
     });
-    
+
     // Initialize addOns from the ticket
     // First clear any existing selections
     selectedAddOns.forEach((addon) => setSelectedAddOns(addon));
-    
+
     // Then set the addOns from the ticket
     if (row.addOns && row.addOns.length > 0) {
       row.addOns.forEach((addon) => setSelectedAddOns(addon));
     }
-    
+
     setEditDialogOpen(true);
   };
 
@@ -306,20 +310,22 @@ export default function TicketTableRow({
       if (editedTicket.type !== row.type) {
         updatedTicket.type = editedTicket.type;
       }
-      
+
       if (editedTicket.category !== row.category) {
         updatedTicket.category = editedTicket.category;
       }
-      
+
       // Include requirement changes if they exist
       if (editedTicket.requirement) {
         updatedTicket.requirement = {
-          minimumTicketPerOrder: editedTicket.requirement.minimumTicketPerOrder !== '' 
-            ? parseInt(editedTicket.requirement.minimumTicketPerOrder, 10) 
-            : null,
-          maximumTicketPerOrder: editedTicket.requirement.maximumTicketPerOrder !== '' 
-            ? parseInt(editedTicket.requirement.maximumTicketPerOrder, 10) 
-            : null,
+          minimumTicketPerOrder:
+            editedTicket.requirement.minimumTicketPerOrder !== ''
+              ? parseInt(editedTicket.requirement.minimumTicketPerOrder, 10)
+              : null,
+          maximumTicketPerOrder:
+            editedTicket.requirement.maximumTicketPerOrder !== ''
+              ? parseInt(editedTicket.requirement.maximumTicketPerOrder, 10)
+              : null,
         };
       }
 
@@ -391,11 +397,11 @@ export default function TicketTableRow({
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <Tooltip title="Edit Ticket" placement="top" arrow>
-            <IconButton 
+            <IconButton
               onClick={handleEditClick}
-              sx={{ 
+              sx={{
                 color: 'primary.main',
-                '&:hover': { 
+                '&:hover': {
                   bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.16),
                 },
               }}
@@ -405,11 +411,11 @@ export default function TicketTableRow({
           </Tooltip>
 
           <Tooltip title="View Details" placement="top" arrow>
-            <IconButton 
+            <IconButton
               onClick={toggleDrawer(true)}
-              sx={{ 
+              sx={{
                 color: 'info.main',
-                '&:hover': { 
+                '&:hover': {
                   bgcolor: (theme) => alpha(theme.palette.info.lighter, 0.16),
                 },
               }}
@@ -424,9 +430,9 @@ export default function TicketTableRow({
                 confirm.onTrue();
                 popover.onClose();
               }}
-              sx={{ 
+              sx={{
                 color: 'error.main',
-                '&:hover': { 
+                '&:hover': {
                   bgcolor: (theme) => alpha(theme.palette.error.lighter, 0.16),
                 },
               }}
@@ -438,8 +444,8 @@ export default function TicketTableRow({
       </TableRow>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={detailsDialogOpen} 
+      <Dialog
+        open={detailsDialogOpen}
         onClose={() => setDetailsDialogOpen(false)}
         fullWidth
         maxWidth="md"
@@ -451,11 +457,11 @@ export default function TicketTableRow({
         }}
       >
         <DialogTitle
-          sx={{ 
-            display: 'flex', 
+          sx={{
+            display: 'flex',
             flexDirection: 'column',
             pb: 1,
-            pt: 2.5
+            pt: 2.5,
           }}
         >
           <Typography variant="h5" fontWeight={600}>
@@ -465,45 +471,31 @@ export default function TicketTableRow({
             View detailed information about this ticket
           </Typography>
         </DialogTitle>
-        
+
         <Divider sx={{ borderStyle: 'dashed' }} />
-        
+
         <DialogContent sx={{ pt: 3, pb: 3 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <Stack spacing={3}>
                 <Box>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Event Name
                   </Typography>
-                  <Typography variant="body1">
-                    {selectedTicket?.event?.name || 'N/A'}
-                  </Typography>
+                  <Typography variant="body1">{selectedTicket?.event?.name || 'N/A'}</Typography>
                 </Box>
-                
+
                 <Box>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Ticket Type
                   </Typography>
                   <Typography variant="body1">
                     {selectedTicket?.type ? dataMapping[selectedTicket.type] : 'N/A'}
                   </Typography>
                 </Box>
-                
+
                 <Box>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Ticket Category
                   </Typography>
                   <Typography variant="body1">
@@ -512,18 +504,14 @@ export default function TicketTableRow({
                 </Box>
               </Stack>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <Stack spacing={3}>
                 <Box>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Price
                   </Typography>
-                  <Typography 
+                  <Typography
                     variant="body1"
                     color="primary.main"
                     fontWeight={600}
@@ -536,34 +524,26 @@ export default function TicketTableRow({
                     }).format(selectedTicket?.price || 0)}
                   </Typography>
                 </Box>
-                
+
                 <Box>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Status
                   </Typography>
-                  <Label 
-                    variant="soft" 
+                  <Label
+                    variant="soft"
                     color={selectedTicket?.isActive ? 'success' : 'error'}
                     sx={{ py: 0.75, px: 1.5 }}
                   >
                     {selectedTicket?.isActive ? 'Active' : 'Inactive'}
                   </Label>
                 </Box>
-                
+
                 {ticketUrl && (
                   <Box>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="text.secondary" 
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                       Link URL
                     </Typography>
-                    <Typography 
+                    <Typography
                       variant="body2"
                       component="div"
                       sx={{
@@ -582,17 +562,13 @@ export default function TicketTableRow({
                 )}
               </Stack>
             </Grid>
-            
+
             <Grid item xs={12}>
               <Box>
-                <Typography 
-                  variant="subtitle2" 
-                  color="text.secondary" 
-                  sx={{ mb: 1 }}
-                >
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                   Description
                 </Typography>
-                <Typography 
+                <Typography
                   variant="body2"
                   sx={{
                     p: 2,
@@ -606,16 +582,13 @@ export default function TicketTableRow({
                 </Typography>
               </Box>
             </Grid>
-            
+
             {/* Ticket Quantities */}
             <Grid item xs={12}>
-              <Typography 
-                variant="subtitle1"
-                sx={{ mb: 2, mt: 1 }}
-              >
+              <Typography variant="subtitle1" sx={{ mb: 2, mt: 1 }}>
                 Ticket Quantities
               </Typography>
-              
+
               <Box
                 sx={{
                   display: 'grid',
@@ -623,8 +596,8 @@ export default function TicketTableRow({
                   gap: 2,
                 }}
               >
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     p: 2,
                     borderRadius: 2,
                     boxShadow: (theme) => theme.customShadows.z8,
@@ -643,30 +616,20 @@ export default function TicketTableRow({
                         bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                       }}
                     >
-                      <Iconify 
-                        icon="solar:ticket-bold" 
-                        width={24} 
-                        sx={{ color: 'primary.main' }} 
-                      />
+                      <Iconify icon="solar:ticket-bold" width={24} sx={{ color: 'primary.main' }} />
                     </Box>
-                    
+
                     <Box>
-                      <Typography 
-                        variant="subtitle2" 
-                        color="text.secondary"
-                        sx={{ mb: 0.5 }}
-                      >
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
                         Total Quantity
                       </Typography>
-                      <Typography variant="h4">
-                        {selectedTicket?.quantity || 0}
-                      </Typography>
+                      <Typography variant="h4">{selectedTicket?.quantity || 0}</Typography>
                     </Box>
                   </Stack>
                 </Card>
-                
-                <Card 
-                  sx={{ 
+
+                <Card
+                  sx={{
                     p: 2,
                     borderRadius: 2,
                     boxShadow: (theme) => theme.customShadows.z8,
@@ -685,30 +648,24 @@ export default function TicketTableRow({
                         bgcolor: (theme) => alpha(theme.palette.warning.main, 0.08),
                       }}
                     >
-                      <Iconify 
-                        icon="solar:bookmark-bold" 
-                        width={24} 
-                        sx={{ color: 'warning.main' }} 
+                      <Iconify
+                        icon="solar:bookmark-bold"
+                        width={24}
+                        sx={{ color: 'warning.main' }}
                       />
                     </Box>
-                    
+
                     <Box>
-                      <Typography 
-                        variant="subtitle2" 
-                        color="text.secondary"
-                        sx={{ mb: 0.5 }}
-                      >
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
                         Reserved
                       </Typography>
-                      <Typography variant="h4">
-                        {selectedTicket?.reservedQuantity || 0}
-                      </Typography>
+                      <Typography variant="h4">{selectedTicket?.reservedQuantity || 0}</Typography>
                     </Box>
                   </Stack>
                 </Card>
-                
-                <Card 
-                  sx={{ 
+
+                <Card
+                  sx={{
                     p: 2,
                     borderRadius: 2,
                     boxShadow: (theme) => theme.customShadows.z8,
@@ -727,43 +684,40 @@ export default function TicketTableRow({
                         bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),
                       }}
                     >
-                      <Iconify 
-                        icon="solar:cart-check-bold" 
-                        width={24} 
-                        sx={{ color: 'success.main' }} 
+                      <Iconify
+                        icon="solar:cart-check-bold"
+                        width={24}
+                        sx={{ color: 'success.main' }}
                       />
                     </Box>
-                    
+
                     <Box>
-                      <Typography 
-                        variant="subtitle2" 
-                        color="text.secondary"
-                        sx={{ mb: 0.5 }}
-                      >
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
                         Sold
                       </Typography>
-                      <Typography variant="h4">
-                        {selectedTicket?.sold || 0}
-                      </Typography>
+                      <Typography variant="h4">{selectedTicket?.sold || 0}</Typography>
                     </Box>
                   </Stack>
                 </Card>
               </Box>
-              
+
               {/* Ticket requirement information */}
               <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
-                <Typography variant="subtitle2" gutterBottom>Order Limits</Typography>
+                <Typography variant="subtitle2" gutterBottom>
+                  Order Limits
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Iconify icon="solar:minimise-square-bold" width={20} color="info.main" />
                       <Typography variant="body2" color="text.secondary">
-                        Minimum tickets per order: 
+                        Minimum tickets per order:
                       </Typography>
                       <Typography variant="body2" fontWeight={600}>
-                        {row.ticketTypeRequirement?.minimumTicketPerOrder || 
-                          (row.requirement?.minimumTicketPerOrder !== undefined ? 
-                            row.requirement.minimumTicketPerOrder : 'No minimum')}
+                        {row.ticketTypeRequirement?.minimumTicketPerOrder ||
+                          (row.requirement?.minimumTicketPerOrder !== undefined
+                            ? row.requirement.minimumTicketPerOrder
+                            : 'No minimum')}
                       </Typography>
                     </Stack>
                   </Grid>
@@ -771,29 +725,27 @@ export default function TicketTableRow({
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Iconify icon="solar:maximise-square-bold" width={20} color="info.main" />
                       <Typography variant="body2" color="text.secondary">
-                        Maximum tickets per order: 
+                        Maximum tickets per order:
                       </Typography>
                       <Typography variant="body2" fontWeight={600}>
-                        {row.ticketTypeRequirement?.maximumTicketPerOrder || 
-                          (row.requirement?.maximumTicketPerOrder !== undefined ? 
-                            row.requirement.maximumTicketPerOrder : 'No maximum')}
+                        {row.ticketTypeRequirement?.maximumTicketPerOrder ||
+                          (row.requirement?.maximumTicketPerOrder !== undefined
+                            ? row.requirement.maximumTicketPerOrder
+                            : 'No maximum')}
                       </Typography>
                     </Stack>
                   </Grid>
                 </Grid>
               </Box>
             </Grid>
-            
+
             {/* Add Ons in Details Dialog */}
             {selectedTicket?.addOns && selectedTicket.addOns.length > 0 && (
               <Grid item xs={12}>
-                <Typography 
-                  variant="subtitle1"
-                  sx={{ mb: 2, mt: 1 }}
-                >
+                <Typography variant="subtitle1" sx={{ mb: 2, mt: 1 }}>
                   Add-ons
                 </Typography>
-                
+
                 <Grid container spacing={2}>
                   {selectedTicket.addOns.map((addon) => (
                     <Grid item xs={12} sm={6} md={4} key={addon.id}>
@@ -808,14 +760,16 @@ export default function TicketTableRow({
                           '&:hover': {
                             boxShadow: (theme) => theme.customShadows.z8,
                             bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.16),
-                          }
+                          },
                         }}
                       >
-                        <Typography variant="subtitle2" gutterBottom>{addon.name}</Typography>
-                        <Typography 
-                          variant="body2" 
-                          color="primary.main" 
-                          fontWeight={600} 
+                        <Typography variant="subtitle2" gutterBottom>
+                          {addon.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="primary.main"
+                          fontWeight={600}
                           gutterBottom
                         >
                           {new Intl.NumberFormat('en-MY', {
@@ -825,9 +779,9 @@ export default function TicketTableRow({
                           }).format(addon.price)}
                         </Typography>
                         {addon.description && (
-                          <Typography 
-                            variant="caption" 
-                            color="text.secondary" 
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
                             sx={{ mt: 0.5, display: 'block' }}
                           >
                             {addon.description}
@@ -841,12 +795,12 @@ export default function TicketTableRow({
             )}
           </Grid>
         </DialogContent>
-        
+
         <Divider sx={{ borderStyle: 'dashed' }} />
-        
+
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button 
-            onClick={() => setDetailsDialogOpen(false)} 
+          <Button
+            onClick={() => setDetailsDialogOpen(false)}
             variant="contained"
             sx={{ px: 3 }}
             startIcon={<Iconify icon="solar:close-circle-bold" />}
@@ -873,12 +827,12 @@ export default function TicketTableRow({
         }}
       >
         <DialogTitle
-          sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             pb: 1,
-            pt: 2.5
+            pt: 2.5,
           }}
         >
           <Stack>
@@ -907,7 +861,10 @@ export default function TicketTableRow({
                 />
               }
               label={
-                <Typography variant="body2" color={editedTicket.isActive ? 'success.main' : 'text.disabled'}>
+                <Typography
+                  variant="body2"
+                  color={editedTicket.isActive ? 'success.main' : 'text.disabled'}
+                >
                   {editedTicket.isActive ? 'Active' : 'Inactive'}
                 </Typography>
               }
@@ -918,11 +875,11 @@ export default function TicketTableRow({
         </DialogTitle>
 
         {/* Stepper */}
-        <Stepper 
-          alternativeLabel 
-          activeStep={activeStep} 
-          sx={{ 
-            px: 3, 
+        <Stepper
+          alternativeLabel
+          activeStep={activeStep}
+          sx={{
+            px: 3,
             py: 2,
             bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.08),
             borderTop: '1px solid',
@@ -938,7 +895,7 @@ export default function TicketTableRow({
             }
             return (
               <Step key={item.label}>
-                <StepLabel 
+                <StepLabel
                   icon={
                     <Box
                       sx={{
@@ -950,16 +907,17 @@ export default function TicketTableRow({
                         bgcolor: activeStep >= index ? 'primary.main' : 'background.neutral',
                         color: activeStep >= index ? 'primary.contrastText' : 'text.disabled',
                         borderRadius: '50%',
-                        boxShadow: activeStep >= index ? (theme) => theme.customShadows.primary : 'none',
+                        boxShadow:
+                          activeStep >= index ? (theme) => theme.customShadows.primary : 'none',
                       }}
                     >
                       {item.icon}
                     </Box>
-                  } 
+                  }
                   {...labelProps}
                 >
-                  <Typography 
-                    variant="subtitle2" 
+                  <Typography
+                    variant="subtitle2"
                     color={activeStep >= index ? 'text.primary' : 'text.disabled'}
                   >
                     {item.label}
@@ -970,11 +928,11 @@ export default function TicketTableRow({
           })}
         </Stepper>
 
-        <DialogContent 
-          sx={{ 
-            px: { xs: 2, md: 3 }, 
+        <DialogContent
+          sx={{
+            px: { xs: 2, md: 3 },
             py: 3,
-            scrollbarWidth: 'none' 
+            scrollbarWidth: 'none',
           }}
         >
           {/* Step 1: Ticket information */}
@@ -1002,12 +960,12 @@ export default function TicketTableRow({
               </Stack>
 
               <Stack spacing={0.5} width={1}>
-                <InputLabel 
-                  required 
-                  sx={{ 
-                    fontSize: '0.875rem', 
+                <InputLabel
+                  required
+                  sx={{
+                    fontSize: '0.875rem',
                     fontWeight: 500,
-                    color: 'text.primary' 
+                    color: 'text.primary',
                   }}
                 >
                   Title
@@ -1039,12 +997,12 @@ export default function TicketTableRow({
                 gap={2}
               >
                 <Stack spacing={0.5} width={1}>
-                  <InputLabel 
+                  <InputLabel
                     required
-                    sx={{ 
-                      fontSize: '0.875rem', 
+                    sx={{
+                      fontSize: '0.875rem',
                       fontWeight: 500,
-                      color: 'text.primary' 
+                      color: 'text.primary',
                     }}
                   >
                     Price
@@ -1082,12 +1040,12 @@ export default function TicketTableRow({
                 </Stack>
 
                 <Stack spacing={0.5} width={1}>
-                  <InputLabel 
+                  <InputLabel
                     required
-                    sx={{ 
-                      fontSize: '0.875rem', 
+                    sx={{
+                      fontSize: '0.875rem',
                       fontWeight: 500,
-                      color: 'text.primary' 
+                      color: 'text.primary',
                     }}
                   >
                     Quantity
@@ -1121,11 +1079,11 @@ export default function TicketTableRow({
                 </Stack>
 
                 <Stack spacing={0.5} width={1}>
-                  <InputLabel 
-                    sx={{ 
-                      fontSize: '0.875rem', 
+                  <InputLabel
+                    sx={{
+                      fontSize: '0.875rem',
                       fontWeight: 500,
-                      color: 'text.primary' 
+                      color: 'text.primary',
                     }}
                   >
                     Minimum tickets per order
@@ -1153,11 +1111,11 @@ export default function TicketTableRow({
                 </Stack>
 
                 <Stack spacing={0.5} width={1}>
-                  <InputLabel 
-                    sx={{ 
-                      fontSize: '0.875rem', 
+                  <InputLabel
+                    sx={{
+                      fontSize: '0.875rem',
                       fontWeight: 500,
-                      color: 'text.primary' 
+                      color: 'text.primary',
                     }}
                   >
                     Maximum tickets per order
@@ -1186,12 +1144,12 @@ export default function TicketTableRow({
               </Box>
 
               <Stack spacing={0.5} width={1}>
-                <InputLabel 
+                <InputLabel
                   required
-                  sx={{ 
-                    fontSize: '0.875rem', 
+                  sx={{
+                    fontSize: '0.875rem',
                     fontWeight: 500,
-                    color: 'text.primary' 
+                    color: 'text.primary',
                   }}
                 >
                   Description
@@ -1223,14 +1181,14 @@ export default function TicketTableRow({
           {activeStep === 1 && <AddOn />}
         </DialogContent>
 
-        <DialogActions 
-          sx={{ 
-            px: 3, 
+        <DialogActions
+          sx={{
+            px: 3,
             py: 2,
-            bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
+            bgcolor: (theme) => theme.palette.background.neutral,
             borderTop: '1px solid',
             borderColor: (theme) => alpha(theme.palette.grey[500], 0.12),
-            gap: 1
+            gap: 1,
           }}
         >
           {activeStep === 0 ? (
@@ -1238,15 +1196,15 @@ export default function TicketTableRow({
               <Button
                 variant="outlined"
                 onClick={() => setEditDialogOpen(false)}
-                sx={{ 
+                sx={{
                   px: 3,
                   py: 1,
                   color: 'text.primary',
                   borderColor: (theme) => alpha(theme.palette.grey[500], 0.24),
                   '&:hover': {
                     borderColor: 'primary.main',
-                    bgcolor: 'background.paper'
-                  }
+                    bgcolor: 'background.paper',
+                  },
                 }}
               >
                 Cancel
@@ -1254,10 +1212,10 @@ export default function TicketTableRow({
               <Button
                 variant="contained"
                 onClick={handleNext}
-                sx={{ 
+                sx={{
                   px: 3,
                   py: 1,
-                  boxShadow: (theme) => theme.customShadows.primary
+                  boxShadow: (theme) => theme.customShadows.primary,
                 }}
                 endIcon={<Iconify icon="eva:arrow-forward-fill" />}
               >
@@ -1269,15 +1227,15 @@ export default function TicketTableRow({
               <Button
                 variant="outlined"
                 onClick={handleBack}
-                sx={{ 
+                sx={{
                   px: 3,
                   py: 1,
                   color: 'text.primary',
                   borderColor: (theme) => alpha(theme.palette.grey[500], 0.24),
                   '&:hover': {
                     borderColor: 'primary.main',
-                    bgcolor: 'background.paper'
-                  }
+                    bgcolor: 'background.paper',
+                  },
                 }}
                 startIcon={<Iconify icon="eva:arrow-back-fill" />}
               >
@@ -1287,10 +1245,10 @@ export default function TicketTableRow({
                 loading={loading}
                 onClick={handleSaveEdit}
                 variant="contained"
-                sx={{ 
+                sx={{
                   px: 3,
                   py: 1,
-                  boxShadow: (theme) => theme.customShadows.primary
+                  boxShadow: (theme) => theme.customShadows.primary,
                 }}
                 endIcon={<Iconify icon="eva:checkmark-fill" />}
               >
@@ -1306,11 +1264,11 @@ export default function TicketTableRow({
         onClose={confirm.onFalse}
         title={
           <Stack spacing={1} alignItems="center" sx={{ pt: 1, pb: 1 }}>
-            <Iconify 
-              icon="solar:danger-triangle-bold-duotone" 
-              width={44} 
-              height={44} 
-              sx={{ color: 'error.main' }} 
+            <Iconify
+              icon="solar:danger-triangle-bold-duotone"
+              width={44}
+              height={44}
+              sx={{ color: 'error.main' }}
             />
             <Typography variant="h5" gutterBottom>
               Delete Ticket
@@ -1357,9 +1315,9 @@ export default function TicketTableRow({
         }}
       >
         {/* Header */}
-        <Stack 
-          direction="row" 
-          justifyContent="space-between" 
+        <Stack
+          direction="row"
+          justifyContent="space-between"
           alignItems="center"
           sx={{
             p: 3,
@@ -1374,7 +1332,9 @@ export default function TicketTableRow({
           }}
         >
           <Stack>
-            <Typography variant="h5" fontWeight={600}>{title}</Typography>
+            <Typography variant="h5" fontWeight={600}>
+              {title}
+            </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {dataMapping[type]} • {dataMapping[category]}
             </Typography>
@@ -1397,9 +1357,9 @@ export default function TicketTableRow({
         </Stack>
 
         {/* Content */}
-        <Box 
-          sx={{ 
-            p: { xs: 2.5, md: 3 }, 
+        <Box
+          sx={{
+            p: { xs: 2.5, md: 3 },
             pt: { xs: 3, md: 4 },
             pb: { xs: 14, md: 16 },
             height: 'calc(100% - 76px)',
@@ -1425,9 +1385,16 @@ export default function TicketTableRow({
               borderColor: (theme) => alpha(theme.palette.primary.main, 0.12),
             }}
           >
-            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" justifyContent="space-between" spacing={2}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              alignItems="center"
+              justifyContent="space-between"
+              spacing={2}
+            >
               <Box>
-                <Typography variant="overline" color="text.secondary">Ticket Price</Typography>
+                <Typography variant="overline" color="text.secondary">
+                  Ticket Price
+                </Typography>
                 <Typography variant="h3" color="primary.main">
                   {new Intl.NumberFormat('en-MY', {
                     style: 'currency',
@@ -1435,16 +1402,20 @@ export default function TicketTableRow({
                   }).format(price)}
                 </Typography>
               </Box>
-              
+
               <Stack direction="row" spacing={2} alignItems="center">
                 <Chip
-                  icon={<Iconify icon={isActive ? 'eva:checkmark-circle-fill' : 'eva:close-circle-fill'} />}
+                  icon={
+                    <Iconify
+                      icon={isActive ? 'eva:checkmark-circle-fill' : 'eva:close-circle-fill'}
+                    />
+                  }
                   label={isActive ? 'Active' : 'Inactive'}
                   color={isActive ? 'success' : 'error'}
                   variant="soft"
                   sx={{ borderRadius: 1, px: 1, height: 32 }}
                 />
-                
+
                 {/* <Chip
                   icon={<Iconify icon="solar:ticket-bold" />}
                   label={`${sold} / ${quantity}`}
@@ -1458,8 +1429,8 @@ export default function TicketTableRow({
 
           {/* Event Information */}
           <Card sx={{ mb: 3.5, borderRadius: 2, overflow: 'hidden' }}>
-            <CardHeader 
-              title="Event Information" 
+            <CardHeader
+              title="Event Information"
               titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
               avatar={
                 <Box
@@ -1486,19 +1457,29 @@ export default function TicketTableRow({
             <CardContent sx={{ pt: 2.5, pb: 2.5 }}>
               <Grid container spacing={2.5}>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">Event Name</Typography>
-                  <Typography variant="body1" fontWeight={500}>{name}</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Event Name
+                  </Typography>
+                  <Typography variant="body1" fontWeight={500}>
+                    {name}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">Ticket Type</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Ticket Type
+                  </Typography>
                   <Typography variant="body1">{dataMapping[type] || 'N/A'}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">Category</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Category
+                  </Typography>
                   <Typography variant="body1">{dataMapping[category] || 'N/A'}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">Valid Until</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Valid Until
+                  </Typography>
                   <Typography variant="body1">{dayjs(validity).format('LL') || 'N/A'}</Typography>
                 </Grid>
               </Grid>
@@ -1507,8 +1488,8 @@ export default function TicketTableRow({
 
           {/* Ticket Description */}
           <Card sx={{ mb: 3.5, borderRadius: 2, overflow: 'hidden' }}>
-            <CardHeader 
-              title="Description" 
+            <CardHeader
+              title="Description"
               titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
               avatar={
                 <Box
@@ -1551,8 +1532,8 @@ export default function TicketTableRow({
 
           {/* Ticket Quantities */}
           <Card sx={{ mb: 3.5, borderRadius: 2, overflow: 'hidden' }}>
-            <CardHeader 
-              title="Ticket Statistics" 
+            <CardHeader
+              title="Ticket Statistics"
               titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
               avatar={
                 <Box
@@ -1622,11 +1603,17 @@ export default function TicketTableRow({
                           justifyContent: 'center',
                         }}
                       >
-                        <Typography variant="h4" fontWeight="bold">{quantity}</Typography>
-                        <Typography variant="caption" color="text.secondary">Total</Typography>
+                        <Typography variant="h4" fontWeight="bold">
+                          {quantity}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Total
+                        </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" textAlign="center">Total Quantity</Typography>
+                    <Typography variant="subtitle2" textAlign="center">
+                      Total Quantity
+                    </Typography>
                   </Stack>
                 </Grid>
 
@@ -1674,11 +1661,17 @@ export default function TicketTableRow({
                           justifyContent: 'center',
                         }}
                       >
-                        <Typography variant="h4" fontWeight="bold">{reservedQuantity}</Typography>
-                        <Typography variant="caption" color="text.secondary">Reserved</Typography>
+                        <Typography variant="h4" fontWeight="bold">
+                          {reservedQuantity}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Reserved
+                        </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" textAlign="center">Reserved Tickets</Typography>
+                    <Typography variant="subtitle2" textAlign="center">
+                      Reserved Tickets
+                    </Typography>
                   </Stack>
                 </Grid>
 
@@ -1726,29 +1719,38 @@ export default function TicketTableRow({
                           justifyContent: 'center',
                         }}
                       >
-                        <Typography variant="h4" fontWeight="bold">{sold}</Typography>
-                        <Typography variant="caption" color="text.secondary">Sold</Typography>
+                        <Typography variant="h4" fontWeight="bold">
+                          {sold}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Sold
+                        </Typography>
                       </Box>
                     </Box>
-                    <Typography variant="subtitle2" textAlign="center">Sold Tickets</Typography>
+                    <Typography variant="subtitle2" textAlign="center">
+                      Sold Tickets
+                    </Typography>
                   </Stack>
                 </Grid>
               </Grid>
-              
+
               {/* Ticket requirement information */}
               <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
-                <Typography variant="subtitle2" gutterBottom>Order Limits</Typography>
+                <Typography variant="subtitle2" gutterBottom>
+                  Order Limits
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Iconify icon="solar:minimise-square-bold" width={20} color="info.main" />
                       <Typography variant="body2" color="text.secondary">
-                        Minimum tickets per order: 
+                        Minimum tickets per order:
                       </Typography>
                       <Typography variant="body2" fontWeight={600}>
-                        {row.ticketTypeRequirement?.minimumTicketPerOrder || 
-                          (row.requirement?.minimumTicketPerOrder !== undefined ? 
-                            row.requirement.minimumTicketPerOrder : 'No minimum')}
+                        {row.ticketTypeRequirement?.minimumTicketPerOrder ||
+                          (row.requirement?.minimumTicketPerOrder !== undefined
+                            ? row.requirement.minimumTicketPerOrder
+                            : 'No minimum')}
                       </Typography>
                     </Stack>
                   </Grid>
@@ -1756,12 +1758,13 @@ export default function TicketTableRow({
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Iconify icon="solar:maximise-square-bold" width={20} color="info.main" />
                       <Typography variant="body2" color="text.secondary">
-                        Maximum tickets per order: 
+                        Maximum tickets per order:
                       </Typography>
                       <Typography variant="body2" fontWeight={600}>
-                        {row.ticketTypeRequirement?.maximumTicketPerOrder || 
-                          (row.requirement?.maximumTicketPerOrder !== undefined ? 
-                            row.requirement.maximumTicketPerOrder : 'No maximum')}
+                        {row.ticketTypeRequirement?.maximumTicketPerOrder ||
+                          (row.requirement?.maximumTicketPerOrder !== undefined
+                            ? row.requirement.maximumTicketPerOrder
+                            : 'No maximum')}
                       </Typography>
                     </Stack>
                   </Grid>
@@ -1770,11 +1773,47 @@ export default function TicketTableRow({
             </CardContent>
           </Card>
 
+          <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Order Limits
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Iconify icon="solar:minimise-square-bold" width={20} color="info.main" />
+                  <Typography variant="body2" color="text.secondary">
+                    Minimum tickets per order:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {row.ticketTypeRequirement?.minimumTicketPerOrder ||
+                      (row.requirement?.minimumTicketPerOrder !== undefined
+                        ? row.requirement.minimumTicketPerOrder
+                        : 'No minimum')}
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Iconify icon="solar:maximise-square-bold" width={20} color="info.main" />
+                  <Typography variant="body2" color="text.secondary">
+                    Maximum tickets per order:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {row.ticketTypeRequirement?.maximumTicketPerOrder ||
+                      (row.requirement?.maximumTicketPerOrder !== undefined
+                        ? row.requirement.maximumTicketPerOrder
+                        : 'No maximum')}
+                  </Typography>
+                </Stack>
+              </Grid>
+            </Grid>
+          </Box>
+
           {/* Add Ons Section */}
           {row.addOns && row.addOns.length > 0 && (
             <Card sx={{ borderRadius: 2, overflow: 'hidden' }}>
-              <CardHeader 
-                title="Available Add-ons" 
+              <CardHeader
+                title="Available Add-ons"
                 titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
                 avatar={
                   <Box
@@ -1812,16 +1851,22 @@ export default function TicketTableRow({
                           bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.04),
                           borderLeft: '4px solid',
                           borderColor: 'primary.main',
-                          boxShadow: (theme) => `0 0 16px 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+                          boxShadow: (theme) =>
+                            `0 0 16px 0 ${alpha(theme.palette.grey[500], 0.08)}`,
                           transition: 'all 0.2s',
                           '&:hover': {
                             boxShadow: (theme) => theme.customShadows.z16,
                             bgcolor: (theme) => alpha(theme.palette.primary.lighter, 0.08),
-                          }
+                          },
                         }}
                       >
                         <Box>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            mb={1}
+                          >
                             <Typography variant="subtitle2">{addon.name}</Typography>
                             <Chip
                               label={new Intl.NumberFormat('en-MY', {
@@ -1830,19 +1875,19 @@ export default function TicketTableRow({
                               }).format(addon.price)}
                               color="primary"
                               size="small"
-                              sx={{ 
-                                height: 24, 
+                              sx={{
+                                height: 24,
                                 fontWeight: 600,
-                                borderRadius: 1 
+                                borderRadius: 1,
                               }}
                             />
                           </Stack>
-                          
+
                           {addon.description && (
-                            <Typography 
-                              variant="body2" 
-                              color="text.secondary" 
-                              sx={{ 
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
                                 mt: 0.5,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
@@ -1889,7 +1934,7 @@ export default function TicketTableRow({
           >
             Close
           </Button>
-          
+
           <Button
             variant="contained"
             color="primary"

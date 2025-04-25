@@ -54,6 +54,7 @@ import {
 import TicketTableRow from '../ticket-table-row';
 import { useAddOnsStore } from '../hooks/use-add-on';
 import CreateTicketTypeDialog from '../dialog/create';
+import CreateAddOnDialog from '../add-on/dialog/create';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
 
@@ -95,6 +96,8 @@ export default function TicketTypeView({ data }) {
   const table = useTable();
 
   const confirm = useBoolean();
+
+  const addOn = useBoolean();
 
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
@@ -170,6 +173,7 @@ export default function TicketTypeView({ data }) {
       },
       isActive: true,
     },
+    mode: 'onChange',
   });
 
   const { handleSubmit } = methods;
@@ -446,6 +450,7 @@ export default function TicketTypeView({ data }) {
           onClose={handleCloseDialog}
           openDialog={openDialog}
           onSubmit={onSubmit}
+          addOn={addOn}
         />
       </FormProvider>
 
@@ -471,6 +476,8 @@ export default function TicketTypeView({ data }) {
           </Button>
         }
       />
+
+      <CreateAddOnDialog open={addOn.value} onClose={addOn.onFalse} />
     </>
   );
 }

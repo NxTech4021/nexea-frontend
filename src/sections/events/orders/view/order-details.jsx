@@ -55,31 +55,31 @@ const formatCurrency = (value) => {
 
 const getStatusConfig = (status) => {
   const statusLower = status ? status.toLowerCase() : '';
-  
+
   if (statusLower === 'paid') {
-      return {
-        color: '#229A16',
-        bgColor: '#E9FCD4',
-        icon: 'eva:checkmark-circle-2-fill',
-      };
+    return {
+      color: '#229A16',
+      bgColor: '#E9FCD4',
+      icon: 'eva:checkmark-circle-2-fill',
+    };
   }
-  
+
   if (statusLower === 'pending') {
-      return {
+    return {
       color: '#B78103',
-        bgColor: '#FFF7CD',
+      bgColor: '#FFF7CD',
       icon: 'eva:clock-fill',
-      };
+    };
   }
-  
+
   if (statusLower === 'failed') {
-      return {
-        color: '#B72136',
-        bgColor: '#FFE7D9',
+    return {
+      color: '#B72136',
+      bgColor: '#FFE7D9',
       icon: 'ic:outline-block',
-      };
+    };
   }
-  
+
   return {
     color: '#637381',
     bgColor: '#F4F6F8',
@@ -159,8 +159,10 @@ const OrderDetails = ({ orderId }) => {
   const handleResendConfirmationEmail = async () => {
     try {
       setResendingEmail(true);
-      const response = await axiosInstance.post(endpoints.order.payment.resendConfirmation(orderId));
-      
+      const response = await axiosInstance.post(
+        endpoints.order.payment.resendConfirmation(orderId)
+      );
+
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -194,27 +196,29 @@ const OrderDetails = ({ orderId }) => {
   if (!order) {
     return (
       <Container maxWidth="lg">
-        <Box sx={{ 
-          textAlign: 'center', 
-          py: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2
-        }}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
           <Iconify icon="eva:alert-circle-outline" width={64} height={64} color="text.secondary" />
           <Typography variant="h5">Order not found</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             The order you&apos;re looking for doesn&apos;t exist or has been removed.
           </Typography>
-        <Button 
-          variant="contained" 
-          onClick={() => router.push(paths.dashboard.order.root)}
+          <Button
+            variant="contained"
+            onClick={() => router.push(paths.dashboard.order.root)}
             startIcon={<Iconify icon="eva:arrow-back-fill" />}
-        >
-          Back to Orders
-        </Button>
-      </Box>
+          >
+            Back to Orders
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -251,14 +255,14 @@ const OrderDetails = ({ orderId }) => {
       </Box>
 
       {/* Order Header Card */}
-    <Card
-      sx={{
+      <Card
+        sx={{
           mb: 4,
-        borderRadius: 2,
+          borderRadius: 2,
           background: (theme) => `linear-gradient(135deg, 
             ${theme.palette.primary.main} 0%, 
             ${alpha(theme.palette.primary.darker, 0.8)} 100%)`,
-          boxShadow: (theme) => `0 8px 16px 0 ${alpha(theme.palette.primary.main, 0.2)}`
+          boxShadow: (theme) => `0 8px 16px 0 ${alpha(theme.palette.primary.main, 0.2)}`,
         }}
       >
         <CardContent sx={{ p: 3 }}>
@@ -269,17 +273,21 @@ const OrderDetails = ({ orderId }) => {
                   <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
                     Order #{order.orderNumber}
                   </Typography>
-              <Chip
+                  <Chip
                     icon={
-                      <Iconify 
-                        icon={getStatusConfig(order.status).icon} 
-                        width={16} 
-                        height={16} 
-                        sx={{ color: getStatusConfig(order.status).color }} 
+                      <Iconify
+                        icon={getStatusConfig(order.status).icon}
+                        width={16}
+                        height={16}
+                        sx={{ color: getStatusConfig(order.status).color }}
                       />
                     }
-                    label={order.status ? `${order.status.charAt(0).toUpperCase()}${order.status.slice(1).toLowerCase()}` : 'Unknown'}
-                sx={{
+                    label={
+                      order.status
+                        ? `${order.status.charAt(0).toUpperCase()}${order.status.slice(1).toLowerCase()}`
+                        : 'Unknown'
+                    }
+                    sx={{
                       backgroundColor: getStatusConfig(order.status).bgColor,
                       color: getStatusConfig(order.status).color,
                       fontWeight: 600,
@@ -288,15 +296,20 @@ const OrderDetails = ({ orderId }) => {
                       '& .MuiChip-icon': {
                         color: `${getStatusConfig(order.status).color} !important`,
                       },
-                }}
-              />
-            </Box>
+                    }}
+                  />
+                </Box>
                 <Typography variant="body2" sx={{ color: 'white', opacity: 0.8 }}>
                   Created on {dayjs(order.createdAt).format('MMMM D, YYYY [at] h:mm A')}
                 </Typography>
               </Stack>
             </Grid>
-            <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+            >
               <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
                 <Typography variant="h3" sx={{ color: 'white', fontWeight: 700 }}>
                   {formatCurrency(order.totalAmount)}
@@ -314,13 +327,13 @@ const OrderDetails = ({ orderId }) => {
         {/* Left Column */}
         <Grid item xs={12} md={8}>
           {/* Buyer Information */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              p: 3, 
-              mb: 3, 
+            sx={{
+              p: 3,
+              mb: 3,
               borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -342,26 +355,22 @@ const OrderDetails = ({ orderId }) => {
                   <Typography variant="body2" color="text.secondary">
                     Email Address
                   </Typography>
-                  <Typography variant="subtitle1">
-                    {order.buyerEmail}
-                  </Typography>
+                  <Typography variant="subtitle1">{order.buyerEmail}</Typography>
                 </Stack>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Stack spacing={1}>
                   <Typography variant="body2" color="text.secondary">
                     Phone Number
-                </Typography>
-                  <Typography variant="subtitle1">
-                    {order.buyerPhoneNumber || 'N/A'}
-                </Typography>
+                  </Typography>
+                  <Typography variant="subtitle1">{order.buyerPhoneNumber || 'N/A'}</Typography>
                 </Stack>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Stack spacing={1}>
                   <Typography variant="body2" color="text.secondary">
                     Purchase Date
-                </Typography>
+                  </Typography>
                   <Typography variant="subtitle1">
                     {dayjs(order.createdAt).format('MMM D, YYYY, h:mm A')}
                   </Typography>
@@ -371,13 +380,13 @@ const OrderDetails = ({ orderId }) => {
           </Paper>
 
           {/* Event Information */}
-          <Paper 
+          <Paper
             elevation={0}
-              sx={{
-              p: 3, 
-              mb: 3, 
-                borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: 2,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -385,63 +394,73 @@ const OrderDetails = ({ orderId }) => {
             </Typography>
             <Stack spacing={2}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                <Box 
-                  sx={{ 
-                    width: 52, 
-                    height: 52, 
+                <Box
+                  sx={{
+                    width: 52,
+                    height: 52,
                     backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: 1.5
+                    borderRadius: 1.5,
                   }}
                 >
-                  <Iconify icon="eva:calendar-fill" width={28} height={28} sx={{ color: 'primary.main' }} />
-        </Box>
+                  <Iconify
+                    icon="eva:calendar-fill"
+                    width={28}
+                    height={28}
+                    sx={{ color: 'primary.main' }}
+                  />
+                </Box>
                 <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
                   <Typography variant="subtitle1" fontWeight={600}>
                     {order.event?.name || 'N/A'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {order.event?.date ? dayjs(order.event.date).format('MMMM D, YYYY h:mm A') : 'Date not available'}
+                    {order.event?.date
+                      ? dayjs(order.event.date).format('MMMM D, YYYY h:mm A')
+                      : 'Date not available'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {order.event?.description || 'No description available'} {/* Add location/venue in the future */}
+                    {order.event?.description || 'No description available'}{' '}
+                    {/* Add location/venue in the future */}
                   </Typography>
                 </Stack>
-                    </Box>
-                  </Stack>
+              </Box>
+            </Stack>
           </Paper>
 
           {/* Attendees */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              p: 3, 
-              mb: 3, 
+            sx={{
+              p: 3,
+              mb: 3,
               borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
-                    Attendees
-                  </Typography>
-                  {order.attendees && order.attendees.length > 0 ? (
+              Attendees
+            </Typography>
+            {order.attendees && order.attendees.length > 0 ? (
               <Stack spacing={2}>
                 {order.attendees.map((attendee, index) => (
-                  <Box 
+                  <Box
                     key={attendee.id}
                     sx={{
                       p: 2,
                       borderRadius: 1.5,
-                      bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                      bgcolor: (theme) => theme.palette.background.neutral,
                       ...(index < order.attendees.length - 1 && { mb: 1 }),
                     }}
                   >
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={6} md={4}>
                         <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>Attendee</Typography>
+                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                            Attendee
+                          </Typography>
                           <Typography variant="subtitle2" fontWeight={600}>
                             {`${attendee.firstName} ${attendee.lastName}`}
                           </Typography>
@@ -452,7 +471,9 @@ const OrderDetails = ({ orderId }) => {
                       </Grid>
                       <Grid item xs={6} md={4}>
                         <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>Ticket</Typography>
+                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                            Ticket
+                          </Typography>
                           <Typography variant="subtitle2">
                             {attendee?.ticket?.ticketType?.title || 'N/A'}
                           </Typography>
@@ -472,19 +493,26 @@ const OrderDetails = ({ orderId }) => {
                       </Grid>
                       <Grid item xs={6} md={4}>
                         <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>Price</Typography>
+                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                            Price
+                          </Typography>
                           <Typography variant="subtitle2" fontWeight={600} color="primary.main">
-                            {formatCurrency(attendee.ticket?.price || attendee.ticket?.ticketType?.price || 0)}
+                            {formatCurrency(
+                              attendee.ticket?.price || attendee.ticket?.ticketType?.price || 0
+                            )}
                           </Typography>
                           {attendee.ticket?.ticketAddOn?.addOn && (
                             <Box sx={{ mt: 1 }}>
-                              <Typography variant="caption" sx={{ display: 'block', fontWeight: 500 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ display: 'block', fontWeight: 500 }}
+                              >
                                 Add-on: {attendee.ticket.ticketAddOn.addOn.name}
-                        </Typography>
+                              </Typography>
                               <Typography variant="caption" color="text.secondary">
                                 +{formatCurrency(attendee.ticket.ticketAddOn.price || 0)}
-                        </Typography>
-                      </Box>
+                              </Typography>
+                            </Box>
                           )}
                         </Stack>
                       </Grid>
@@ -493,12 +521,12 @@ const OrderDetails = ({ orderId }) => {
                 ))}
               </Stack>
             ) : (
-              <Box 
-                sx={{ 
-                  py: 4, 
+              <Box
+                sx={{
+                  py: 4,
                   textAlign: 'center',
                   bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
-                  borderRadius: 1.5
+                  borderRadius: 1.5,
                 }}
               >
                 <Typography variant="body1" color="text.secondary">
@@ -512,13 +540,13 @@ const OrderDetails = ({ orderId }) => {
         {/* Right Column */}
         <Grid item xs={12} md={4}>
           {/* Order Summary */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              p: 3, 
-              mb: 3, 
+            sx={{
+              p: 3,
+              mb: 3,
               borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -531,7 +559,7 @@ const OrderDetails = ({ orderId }) => {
                   {formatCurrency((order.totalAmount || 0) + (order.discountAmount || 0))}
                 </Typography>
               </Box>
-              
+
               {order.discountCode && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body1">
@@ -539,36 +567,36 @@ const OrderDetails = ({ orderId }) => {
                   </Typography>
                   <Typography variant="body1" color="error.main">
                     -{formatCurrency(order.discountAmount || 0)}
-                        </Typography>
-                      </Box>
-                    )}
-                    
-                    {order.tax && order.tax > 0 && (
+                  </Typography>
+                </Box>
+              )}
+
+              {order.tax && order.tax > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body1">Tax</Typography>
                   <Typography variant="body1">{formatCurrency(order.tax)}</Typography>
-                      </Box>
-                    )}
-                    
-                    <Divider sx={{ my: 1 }} />
-                    
+                </Box>
+              )}
+
+              <Divider sx={{ my: 1 }} />
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Total</Typography>
                 <Typography variant="h6" color="primary.main" fontWeight={700}>
-                        {formatCurrency(order.totalAmount)}
-                      </Typography>
-                    </Box>
-                  </Stack>
+                  {formatCurrency(order.totalAmount)}
+                </Typography>
+              </Box>
+            </Stack>
           </Paper>
 
           {/* Payment Status */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
+            sx={{
               p: 3,
               mb: 3,
               borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -591,49 +619,64 @@ const OrderDetails = ({ orderId }) => {
                 bgcolor: getStatusConfig(order.status).bgColor,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2
+                gap: 2,
               }}
             >
-              <Iconify 
-                icon={getStatusConfig(order.status).icon} 
-                width={24} 
-                height={24} 
+              <Iconify
+                icon={getStatusConfig(order.status).icon}
+                width={24}
+                height={24}
                 sx={{ color: getStatusConfig(order.status).color }}
               />
               <Stack spacing={0.5}>
-                <Typography variant="subtitle1" sx={{ color: getStatusConfig(order.status).color, fontWeight: 600 }}>
-                  {order.status ? `${order.status.charAt(0).toUpperCase()}${order.status.slice(1).toLowerCase()}` : 'Unknown'}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ color: getStatusConfig(order.status).color, fontWeight: 600 }}
+                >
+                  {order.status
+                    ? `${order.status.charAt(0).toUpperCase()}${order.status.slice(1).toLowerCase()}`
+                    : 'Unknown'}
                 </Typography>
-                <Typography variant="body2" sx={{ color: getStatusConfig(order.status).color, opacity: 0.8 }}>
-                  {(order.status && order.status.toLowerCase() === 'paid') && 'Payment completed successfully'}
-                  {(order.status && order.status.toLowerCase() === 'pending') && 'Awaiting payment confirmation'}
-                  {(order.status && order.status.toLowerCase() === 'failed') && 'Payment transaction failed'}
-                  {(!order.status || (order.status.toLowerCase() !== 'paid' && order.status.toLowerCase() !== 'pending' && order.status.toLowerCase() !== 'failed')) && 'Status information unavailable'}
+                <Typography
+                  variant="body2"
+                  sx={{ color: getStatusConfig(order.status).color, opacity: 0.8 }}
+                >
+                  {order.status &&
+                    order.status.toLowerCase() === 'paid' &&
+                    'Payment completed successfully'}
+                  {order.status &&
+                    order.status.toLowerCase() === 'pending' &&
+                    'Awaiting payment confirmation'}
+                  {order.status &&
+                    order.status.toLowerCase() === 'failed' &&
+                    'Payment transaction failed'}
+                  {(!order.status ||
+                    (order.status.toLowerCase() !== 'paid' &&
+                      order.status.toLowerCase() !== 'pending' &&
+                      order.status.toLowerCase() !== 'failed')) &&
+                    'Status information unavailable'}
                 </Typography>
               </Stack>
             </Box>
           </Paper>
 
           {/* Order Actions */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
+            sx={{
               p: 3,
               borderRadius: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`
+              border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
               Order Actions
             </Typography>
             <Stack spacing={2}>
-              <Button 
-                fullWidth 
-                variant="outlined" 
-                startIcon={<Iconify icon="eva:printer-fill" />}
-              >
+              <Button fullWidth variant="outlined" startIcon={<Iconify icon="eva:printer-fill" />}>
                 Print Order Details
               </Button>
+
               {order.status && order.status.toLowerCase() === 'pending' ? (
                 <Tooltip title="Resend only available for Paid orders">
                   <span style={{ width: '100%', cursor: 'not-allowed' }}>
@@ -662,19 +705,19 @@ const OrderDetails = ({ orderId }) => {
               )}
             </Stack>
           </Paper>
-            </Grid>
-          </Grid>
+        </Grid>
+      </Grid>
 
       {/* Snackbar for notifications */}
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity} 
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
           variant="filled"
           sx={{ width: '100%' }}
         >
@@ -722,13 +765,14 @@ const OrderDetails = ({ orderId }) => {
           {order && (
             <>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Are you sure you want to resend the confirmation email for order <b>#{order.orderNumber}</b>?
+                Are you sure you want to resend the confirmation email for order{' '}
+                <b>#{order.orderNumber}</b>?
               </Typography>
-              
+
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Emails will be sent to the following addresses:
               </Typography>
-              
+
               <List
                 sx={{
                   bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
@@ -740,21 +784,37 @@ const OrderDetails = ({ orderId }) => {
               >
                 <ListItem>
                   <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {order.buyerEmail} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({order.buyerName})</Typography>
+                    {order.buyerEmail}{' '}
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      ({order.buyerName})
+                    </Typography>
                   </Typography>
                 </ListItem>
-                
-                {order.attendees && order.attendees.length > 0 && (
+
+                {order.attendees &&
+                  order.attendees.length > 0 &&
                   order.attendees.map((attendee) => (
                     <ListItem key={attendee.id}>
                       <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                        {attendee.email} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({attendee.firstName} {attendee.lastName})</Typography>
+                        {attendee.email}{' '}
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ ml: 1 }}
+                        >
+                          ({attendee.firstName} {attendee.lastName})
+                        </Typography>
                       </Typography>
                     </ListItem>
-                  ))
-                )}
+                  ))}
               </List>
-              
+
               <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
                 Note: This action will send emails to all the addresses listed above.
               </Typography>
@@ -795,7 +855,13 @@ const OrderDetails = ({ orderId }) => {
             disabled={resendingEmail}
             variant="contained"
             color="info"
-            startIcon={resendingEmail ? <CircularProgress size={20} thickness={4} /> : <Iconify icon="eva:email-fill" />}
+            startIcon={
+              resendingEmail ? (
+                <CircularProgress size={20} thickness={4} />
+              ) : (
+                <Iconify icon="eva:email-fill" />
+              )
+            }
             sx={{
               borderRadius: 2,
               fontWeight: 600,

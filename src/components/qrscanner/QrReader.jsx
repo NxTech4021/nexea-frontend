@@ -85,8 +85,9 @@ const QrReader = () => {
   const updateAttendees = useCallback(
     async (id) => {
       try {
-        await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
-        toast.success('Successfully checked in');
+        const response = await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
+
+        toast.success(`${response.data.attendee.firstName} successfully checked in`);
         await fetchTicketDatabase();
       } catch (error) {
         console.error('Error updating attendance:', error);
@@ -164,12 +165,11 @@ const QrReader = () => {
             (attendee) => attendee.ticket.ticketCode === scannedResult
           );
 
-          console.log(attendeeData);
-
           if (attendeeData) {
             if (attendeeData?.status === 'checkedIn') {
               return toast.warning(`${attendeeData.firstName} is already checked in.`);
             }
+
             updateAttendees(attendeeData.id);
             // setScannedAttendee((prev) => ({
             //   ...prev,

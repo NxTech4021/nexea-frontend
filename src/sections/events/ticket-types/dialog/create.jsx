@@ -100,22 +100,27 @@ const validationSchema = [
   yup.object().shape({
     eventId: yup.string().required('Event name is required'),
     type: yup.string().required('Ticket type is required'),
-    category: yup.string().required('Category is required'),
+    category: yup.string().when('type', {
+      is: (val) => val !== 'After Party',
+      then: (s) => s.string().required('Category is required'),
+      otherwise: (s) => s.string().notRequired(),
+    }),
     title: yup.string().required('Title is required'),
     price: yup.string().required('Price is required'),
-    quantity: yup.number()
-      .typeError('Quantity must be a number')
-      .integer('Quantity must be an integer')
-      .min(1, 'Quantity must be at least 1')
-      .required('Quantity is required'),
+    quantity: yup
+      .number()
+      .required('Quantity is required')
+      .positive('Quantity must be a positive number'),
     description: yup.string().required('Description is required'),
     requirement: yup.object().shape({
-      minimumTicketPerOrder: yup.number()
+      minimumTicketPerOrder: yup
+        .number()
         .transform((value) => (Number.isNaN(value) ? undefined : value))
         .nullable()
         .integer('Minimum must be an integer')
         .min(1, 'Minimum must be at least 1'),
-      maximumTicketPerOrder: yup.number()
+      maximumTicketPerOrder: yup
+        .number()
         .transform((value) => (Number.isNaN(value) ? undefined : value))
         .nullable()
         .integer('Maximum must be an integer')
@@ -123,7 +128,7 @@ const validationSchema = [
         .test(
           'max-greater-than-min',
           'Maximum must be greater than or equal to minimum',
-          function validateMaximum(value) {
+          (value) => {
             const { minimumTicketPerOrder } = this.parent;
             return !minimumTicketPerOrder || !value || value >= minimumTicketPerOrder;
           }
@@ -134,7 +139,7 @@ const validationSchema = [
   yup.object(),
 ];
 
-const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) => {
+const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose, addOn }) => {
   const methods = useFormContext();
   const smDown = useResponsive('down', 'sm');
   const [activeStep, setActiveStep] = useState(0);
@@ -155,7 +160,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
   const handleNext = async () => {
     const currentSchema = validationSchema[activeStep];
     const fieldsToValidate = Object.keys(currentSchema.fields);
-    
+
     const isStepValid = await trigger(fieldsToValidate);
 
     if (isStepValid) {
@@ -182,7 +187,15 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
 
   // Check if required fields for the first step are filled
   const isFirstStepValid = Boolean(
-    eventId && type && category && title && price && quantity && description && !Object.keys(errors).length
+    eventId &&
+      type &&
+      type !== 'After Party' &&
+      category &&
+      title &&
+      price &&
+      quantity &&
+      description &&
+      !Object.keys(errors).length
   );
 
   return (
@@ -376,7 +389,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
           </Box>
         )}
 
-        {activeStep === 1 && <AddOn />}
+        {activeStep === 1 && <AddOn addOn={addOn} />}
       </DialogContent>
 
       <DialogActions>
@@ -385,11 +398,7 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             <Button variant="outlined" onClick={handlePrev} sx={{ fontWeight: 400 }}>
               Back
             </Button>
-            <LoadingButton 
-              onClick={onSubmit} 
-              variant="contained" 
-              sx={{ fontWeight: 400 }}
-            >
+            <LoadingButton onClick={onSubmit} variant="contained" sx={{ fontWeight: 400 }}>
               Submit
             </LoadingButton>
           </>
@@ -398,11 +407,11 @@ const CreateTicketTypeDialog = ({ openDialog, onSubmit, eventsData, onClose }) =
             <Button variant="outlined" onClick={onClose} sx={{ fontWeight: 400 }}>
               Cancel
             </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleNext} 
+            <Button
+              variant="contained"
+              onClick={handleNext}
               sx={{ fontWeight: 400 }}
-              disabled={!isFirstStepValid}
+              // disabled={!isFirstStepValid}
             >
               Next
             </Button>

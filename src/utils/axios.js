@@ -96,6 +96,7 @@ export const endpoints = {
     generateUrl: '/api/ticket-type/generateUrl',
     addOn: {
       root: `/api/add-on`,
+      // edit: '/api/add-on',
     },
   },
   cart: {

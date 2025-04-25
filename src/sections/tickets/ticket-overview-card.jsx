@@ -60,6 +60,21 @@ const TicketOverviewCard = () => {
     return cartData?.orderSummary?.subtotal || 0;
   }, [tickets, cartData]);
 
+  const total = useMemo(() => {
+    if (!cartData && tickets?.length) {
+      return tickets.reduce((acc, cur) => {
+        const ticketSubtotal = cur.subTotal || 0;
+        const addOnsTotal = (cur?.addOns || []).reduce(
+          (a, b) => a + (b.price || 0) * (b.selectedQuantity || 0),
+          0
+        );
+        return acc + ticketSubtotal + addOnsTotal;
+      }, 0);
+    }
+
+    return (cartData?.orderSummary?.totalPrice || 0) + calculatedSST || 0;
+  }, [cartData, tickets, calculatedSST]);
+
   const totalTicketsQuantitySelected = useMemo(() => {
     const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
     return ticketsTotal;
@@ -93,11 +108,16 @@ const TicketOverviewCard = () => {
 
   useEffect(() => {
     const sst = eventData?.eventSetting?.sst || null;
+    const taxablePrice = subTotal - (cartData?.orderSummary?.discount || 0);
 
-    const sstPrice = parseFloat(((subTotal * sst) / 100).toFixed(2));
+    const sstPrice = parseFloat(((taxablePrice * sst) / 100).toFixed(2));
 
-    setCalculatedSST(sstPrice);
-  }, [eventData, subTotal]);
+    if (cartData?.orderSummary?.totalPrice === 0) {
+      setCalculatedSST(0);
+    } else {
+      setCalculatedSST(sstPrice);
+    }
+  }, [eventData, subTotal, cartData]);
 
   if (mdDown) {
     return (
@@ -333,6 +353,7 @@ const TicketOverviewCard = () => {
       </Card>
     );
   }
+
   return (
     <Card
       elevation={0}
@@ -566,13 +587,13 @@ const TicketOverviewCard = () => {
                     </Button>
                   </Stack>
 
-                  {!!cartData.discount && (                  
+                  {!!cartData.discount && (
                     <Stack spacing={1} sx={{ mt: 1 }}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="lets-icons:check-fill" color="success.main" width={16} />
                         <Typography variant="body2" color="success.main" fontWeight={500}>
                           Discount code applied
-                        </Typography> 
+                        </Typography>
                       </Stack>
                       <Stack
                         direction="row"
@@ -675,9 +696,10 @@ const TicketOverviewCard = () => {
                       style: 'currency',
                       currency: 'MYR',
                     }).format(
-                      cartData?.orderSummary?.totalPrice
-                        ? cartData.orderSummary.totalPrice + calculatedSST
-                        : subTotal
+                      total
+                      // cartData.orderSummary.totalPrice >= 0
+                      //   ? cartData.orderSummary.totalPrice + calculatedSST
+                      //   : subTotal
                     )}
                   </Typography>
                 </Stack>
