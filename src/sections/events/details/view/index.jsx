@@ -69,9 +69,9 @@ const EventDetails = ({ id }) => {
       <Grid container spacing={2} mt={2}>
         <Grid item size={{ xs: 12 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
-            <TicketAnalytics tickets={data.ticketType} />
-            <OrderAnalytics orders={data.order} />
-            <CheckInAnalytics checkedIns={totalCheckedIn} />
+            <TicketAnalytics tickets={data.ticketType} eventName={data.name} />
+            <OrderAnalytics orders={data.order} eventName={data.name} />
+            <CheckInAnalytics checkedIns={totalCheckedIn} id={id} />
           </Stack>
         </Grid>
 

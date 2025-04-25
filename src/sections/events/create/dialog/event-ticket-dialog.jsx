@@ -36,6 +36,7 @@ import { createTicketType } from 'src/api/ticket-type';
 import Iconify from 'src/components/iconify';
 
 import { useAddOnsStore } from 'src/sections/events/ticket-types/hooks/use-add-on';
+import EditTicketDialog from 'src/sections/events/ticket-types/edit-ticket-dialog';
 import CreateTicketTypeDialog from 'src/sections/events/ticket-types/dialog/create';
 
 const fetcher = async (url) => {
@@ -48,11 +49,23 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
   const { selectedAddOns } = useAddOnsStore();
   const [tickets, setTickets] = useState(initialTickets || []);
   const [isLoading, setIsLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingTicket, setEditingTicket] = useState(null);
 
   // Use SWR to fetch event details and tickets
   const { data: eventData, error: eventError, mutate } = useSWR(
     open && event?.id ? `${endpoints.events.root}/${event.id}` : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      revalidateIfStale: true,
+      refreshInterval: 0,
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
+      dedupingInterval: 0,
+      keepPreviousData: false,
+    }
   );
 
   // Update tickets whenever SWR data changes
@@ -72,9 +85,11 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
     if (!event?.id) return;
     setIsLoading(true);
     
-    mutate()
+    // Force immediate revalidation
+    mutate(undefined, { revalidate: true })
       .then(() => {
         setIsLoading(false);
+        console.log('Tickets refreshed successfully');
       })
       .catch((error) => {
         console.error('Error refreshing tickets:', error);
@@ -201,6 +216,60 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
         name: event?.name || 'Current Event',
       },
     ],
+  };
+
+  // Handle edit success
+  const handleEditSuccess = (updatedTicket) => {
+    console.log('Edit success called with updated ticket:', updatedTicket);
+    
+    if (!updatedTicket || !updatedTicket.id) {
+      console.error('Invalid ticket data received in handleEditSuccess');
+      return;
+    }
+    
+    // Ensure we're working with a complete ticket object
+    const completeTicket = {
+      ...updatedTicket,
+      // Make sure these properties exist for rendering
+      title: updatedTicket.title || updatedTicket.name,
+      name: updatedTicket.name || updatedTicket.title,
+      event: updatedTicket.event || { name: event.name, id: event.id }
+    };
+    
+    console.log('Processing ticket update with data:', completeTicket);
+    
+    // Update local tickets array for immediate UI feedback
+    setTickets((prevTickets) => {
+      const updatedTickets = prevTickets.map((ticket) => 
+        ticket.id === completeTicket.id ? completeTicket : ticket
+      );
+      console.log('Updated tickets array:', updatedTickets);
+      return updatedTickets;
+    });
+    
+    // Close the edit dialog
+    setEditDialogOpen(false);
+    setEditingTicket(null);
+    
+    // Force refresh from server to ensure data consistency
+    console.log('Triggering server data refresh');
+    mutate(undefined, { 
+      revalidate: true,
+      populateCache: true,
+    }).then(() => {
+      console.log('Data refresh complete');
+    }).catch((error) => {
+      console.error('Error refreshing tickets after edit:', error);
+    });
+  };
+
+  // Handle edit button click
+  const handleEditClick = (ticket) => {
+    setEditingTicket({
+      ...ticket,
+      event: { name: event.name, id: event.id }
+    });
+    setEditDialogOpen(true);
   };
 
   return (
@@ -412,7 +481,7 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
                       >
                         Type
                       </TableCell>
-                      <TableCell 
+                      {/* <TableCell 
                         sx={{ 
                           fontWeight: 600, 
                           color: (theme) => theme.palette.text.primary, 
@@ -420,7 +489,7 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
                         }}
                       >
                         Validity
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell 
                         sx={{ 
                           fontWeight: 600, 
@@ -490,21 +559,21 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
                             color: (theme) => theme.palette.text.secondary,
                           }}
                         >
-                          {ticket.type}
+                          {ticket.type ? ticket.type.charAt(0).toUpperCase() + ticket.type.slice(1) : ''}
                         </TableCell>
-                        <TableCell 
+                        {/* <TableCell 
                           sx={{ 
                             color: (theme) => theme.palette.text.secondary,
                           }}
                         >
                           {ticket.validity || '-'}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell 
                           sx={{ 
                             color: (theme) => theme.palette.text.secondary,
                           }}
                         >
-                          {ticket.category}
+                          {ticket.category ? ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1) : ''}
                         </TableCell>
                         <TableCell 
                           sx={{ 
@@ -535,6 +604,7 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
                                     theme.palette.mode === 'light' ? 'rgba(66, 153, 225, 0.2)' : 'rgba(66, 153, 225, 0.3)',
                                 }
                               }}
+                              onClick={() => handleEditClick(ticket)}
                             >
                               <Iconify icon="material-symbols:edit" width={18} />
                             </IconButton>
@@ -588,32 +658,6 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
                   </TableBody>
                 </Table>
               </TableContainer>
-            )}
-            
-            {tickets.length > 0 && (
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-                <Button 
-                  onClick={refreshTickets}
-                  startIcon={<Iconify icon="mdi:refresh" />}
-                  disabled={isLoading}
-                  sx={{
-                    borderRadius: 2,
-                    padding: '8px 16px',
-                    fontWeight: 500,
-                    backgroundColor: (theme) => 
-                      theme.palette.mode === 'light' ? 'rgba(237, 242, 247, 0.8)' : 'rgba(45, 55, 72, 0.5)',
-                    color: (theme) => theme.palette.text.primary,
-                    border: '1px solid',
-                    borderColor: (theme) => theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568',
-                    '&:hover': {
-                      backgroundColor: (theme) => 
-                        theme.palette.mode === 'light' ? 'rgba(226, 232, 240, 0.8)' : 'rgba(45, 55, 72, 0.8)',
-                    },
-                  }}
-                >
-                  Refresh
-                </Button>
-              </Box>
             )}
           </DialogContent>
 
@@ -688,6 +732,16 @@ const EventTicketDialog = ({ open, onClose, tickets: initialTickets, event }) =>
             eventsData={eventsData}
           />
         </FormProvider>
+
+        {/* Edit Ticket Dialog */}
+        {editingTicket && (
+          <EditTicketDialog
+            open={editDialogOpen}
+            onClose={() => setEditDialogOpen(false)}
+            ticket={editingTicket}
+            onEditSuccess={handleEditSuccess}
+          />
+        )}
       </>
     )
   );

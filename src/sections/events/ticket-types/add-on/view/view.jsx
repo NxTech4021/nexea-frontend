@@ -141,11 +141,11 @@ const AddOnView = () => {
         }}
       >
         <CustomBreadcrumbs
-          heading="Add Ons"
+          heading="Ticket Add Ons"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Ticket Types', href: paths.dashboard.ticketType.root },
-            { name: 'Add On' },
+            // { name: 'Ticket Types', href: paths.dashboard.ticketType.root },
+            { name: 'Ticket Add Ons' },
             { name: 'List' },
           ]}
         />

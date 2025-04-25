@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new event</title>
+        <title> Create a new event</title>
       </Helmet>
 
       <LinearStepper />

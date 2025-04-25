@@ -1,6 +1,7 @@
+// Order
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import { alpha } from '@mui/material/styles';
 import {
@@ -99,6 +100,20 @@ export default function OrderView() {
 
   const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
   const router = useRouter();
+
+  // Check for event filter from sessionStorage when component mounts
+  useEffect(() => {
+    const storedEventFilter = sessionStorage.getItem('orderEventFilter');
+    if (storedEventFilter && data?.length) {
+      // Check if the stored event name exists in available options
+      const eventExists = data.some(order => order.event.name === storedEventFilter);
+      if (eventExists) {
+        setEventFilter(storedEventFilter);
+      }
+      // Remove the stored filter to avoid applying it on subsequent visits
+      sessionStorage.removeItem('orderEventFilter');
+    }
+  }, [data]);
 
   const eventOptions = useMemo(() => {
     if (!data?.length) return ['All'];

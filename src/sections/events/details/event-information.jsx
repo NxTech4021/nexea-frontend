@@ -1,39 +1,40 @@
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 import React, { useState, useEffect } from 'react';
-import { Form, Field, Formik, ErrorMessage } from 'formik';
+// import { Form, Field, Formik, ErrorMessage } from 'formik';
 
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Card,
   Chip,
-  Grid,
+  // Grid,
   Stack,
-  Dialog,
-  Avatar,
-  Select,
-  Button,
+  // Dialog,
+  // Avatar,
+  // Select,
+  // Button,
   Divider,
-  MenuItem,
-  TextField,
+  // MenuItem,
+  // TextField,
   keyframes,
   Typography,
-  InputLabel,
+  // InputLabel,
   CardContent,
-  DialogTitle,
-  FormControl,
-  DialogContent,
+  // DialogTitle,
+  // FormControl,
+  // DialogContent,
 } from '@mui/material';
 
-import { endpoints, axiosInstance } from 'src/utils/axios';
-
+// import { endpoints, axiosInstance } from 'src/utils/axios';
 import { useGetAllEvents } from 'src/api/event';
 
 import Iconify from 'src/components/iconify';
+
+import EditEventModal from '../create/dialog/edit-event-modal';
 
 const EventStatus = {
   ACTIVE: 'ACTIVE',
@@ -105,6 +106,7 @@ const EventInformation = ({ event }) => {
   const items = [
     { title: 'Name', content: event.name },
     { title: 'Event Date', content: dayjs(event.date).format('LL') },
+    { title: 'Event Time', content: dayjs(event.date).format('hh:mm A') },
     { title: 'Person In charge', content: event.personInCharge.fullName },
     { title: 'Status', content: event.status },
   ];
@@ -112,7 +114,10 @@ const EventInformation = ({ event }) => {
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
-
+  const handleEventUpdated = (updatedEvent) => {
+    // This will refresh the data using your SWR hook
+    mutate();
+  };
   return (
     <Card
       sx={{
@@ -203,11 +208,18 @@ const EventInformation = ({ event }) => {
             <Typography variant="h6" sx={{ color: 'white', marginBottom: '14px' }}>
               {items[0].content}
             </Typography>
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {items[1].content}
+            {/* <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
             </Typography>
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {items[2].content}
+              {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+            </Typography> */}
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {dayjs(event.date).format('LL')} | {dayjs(event.date).format('hh:mm A')} -{' '}
+              {dayjs(event.endDate).format('LL')} | {dayjs(event.endDate).format('hh:mm A')}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+              {items[3].content}
             </Typography>
           </Box>
           <Stack alignItems="center" justifyContent="center">
@@ -242,242 +254,14 @@ const EventInformation = ({ event }) => {
           </Stack>
         </Box>
       </CardContent>
-      {/* Edit Information Modal */}
-      <Dialog
+      <>{/* called ticket eventmodel in  Edit Information Modal */}</>
+      <EditEventModal
         open={openEdit}
         onClose={handleCloseEdit}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="alert-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
-          />
-          <Box>
-            <Typography variant="h6">{selectedEvent?.name}</Typography>
-            <Typography variant="subtitle1">Edit Information</Typography>
-          </Box>
-        </DialogTitle>
-        <Divider sx={{ my: -1, mb: 2 }} />
-        <DialogContent>
-          <Formik
-            initialValues={{
-              name: selectedEvent?.name,
-              description: selectedEvent?.description,
-              date: selectedEvent?.date,
-              personInCharge: selectedEvent?.personInCharge?.id,
-              tickera_api: selectedEvent?.tickera_api,
-              status: selectedEvent?.status,
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              axiosInstance
-                .put(`${endpoints.events.update}/${selectedEvent?.id}`, values)
-                .then((response) => {
-                  setSubmitting(false);
-                  mutate();
-                  toast.success('Event updated successfully.');
-                })
-                .catch((error) => {
-                  console.error('Error updating event:', error);
-                  setSubmitting(false);
-                  toast.error('Update Failed, Try again!');
-                });
-              handleCloseEdit();
-            }}
-          >
-            {({ isSubmitting, setFieldValue, values }) => (
-              <Form style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      name="name"
-                      label="Event Name"
-                      fullWidth
-                      required
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="name"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      name="description"
-                      label="Description"
-                      multiline
-                      rows={4}
-                      fullWidth
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="description"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Event Date"
-                        value={dayjs(values.date)}
-                        onChange={(newValue) => {
-                          setFieldValue('date', newValue);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            fullWidth
-                            required
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                          />
-                        )}
-                      />
-                    </LocalizationProvider>
-                    <ErrorMessage
-                      name="date"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <FormControl fullWidth required variant="outlined">
-                      <InputLabel shrink htmlFor="personInCharge">
-                        Person In Charge
-                      </InputLabel>
-                      <Field
-                        as={Select}
-                        name="personInCharge"
-                        id="personInCharge"
-                        label="Person In Charge"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      >
-                        {/* Add your person in charge options here */}
-                        <MenuItem value={1}>Person 1</MenuItem>
-                        <MenuItem value={2}>Person 2</MenuItem>
-                      </Field>
-                      <ErrorMessage
-                        name="personInCharge"
-                        component="div"
-                        style={{ color: 'red', fontSize: '0.8rem' }}
-                      />
-                    </FormControl>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      type="text"
-                      name="tickera_api"
-                      label="Tickera API"
-                      fullWidth
-                      variant="outlined"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                    <ErrorMessage
-                      name="tickera_api"
-                      component="div"
-                      style={{ color: 'red', fontSize: '0.8rem' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <FormControl fullWidth required variant="outlined">
-                      <InputLabel shrink htmlFor="status">
-                        Event Status
-                      </InputLabel>
-                      <Field
-                        as={Select}
-                        name="status"
-                        id="status"
-                        label="Event Status"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      >
-                        {Object.values(EventStatus).map((status) => (
-                          <MenuItem key={status} value={status}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </MenuItem>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="status"
-                        component="div"
-                        style={{ color: 'red', fontSize: '0.8rem' }}
-                      />
-                    </FormControl>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button
-                        onClick={handleCloseEdit}
-                        disabled={isSubmitting}
-                        variant="contained"
-                        sx={{
-                          borderRadius: 6,
-                          backgroundColor: '#f0f0f0',
-                          height: '36px',
-                          padding: '0 16px',
-                          color: '#555',
-                          '&:hover': {
-                            backgroundColor: '#d0d0d0',
-                          },
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        disabled={isSubmitting}
-                        sx={{
-                          borderRadius: 6,
-                          color: 'white',
-                          height: '36px',
-                          padding: '0 16px',
-                          backgroundColor: '#1976d2',
-                          '&:hover': {
-                            backgroundColor: '#115293',
-                          },
-                        }}
-                      >
-                        Update Event
-                      </Button>
-                    </Stack>
-                  </Grid>
-                </Grid>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+        selectedEvent={selectedEvent}
+        onEventUpdated={handleEventUpdated}
+      />{' '}
+      */
     </Card>
   );
 };

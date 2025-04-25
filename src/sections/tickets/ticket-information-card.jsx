@@ -47,7 +47,7 @@ const defaultAttendee = {
 };
 
 const TicketInformationCard = () => {
-  const collapse = useBoolean();
+  const collapse = useBoolean(true);
   const anotherCollapse = useBoolean();
   const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
@@ -452,7 +452,7 @@ const TicketInformationCard = () => {
       elevation={0}
       sx={{
         borderRadius: 2,
-        border: '1px solid',
+        border: '2px solid',
         borderColor: 'divider',
         mb: 2.5,
         overflow: 'visible',

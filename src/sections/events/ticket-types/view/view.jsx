@@ -249,6 +249,23 @@ export default function TicketTypeView({ data }) {
     }
   }, [ticketTypesData]);
 
+  // Check for event filter from sessionStorage when component mounts
+  useEffect(() => {
+    const storedEventFilter = sessionStorage.getItem('ticketTypeEventFilter');
+    if (storedEventFilter) {
+      try {
+        const eventFilter = JSON.parse(storedEventFilter);
+        if (eventFilter.length > 0) {
+          handleFilters('eventName', eventFilter);
+        }
+        // Remove the stored filter to avoid applying it on subsequent visits
+        sessionStorage.removeItem('ticketTypeEventFilter');
+      } catch (error) {
+        console.error('Error parsing stored event filter:', error);
+      }
+    }
+  }, [handleFilters]);
+
   if (eventsLoading || isLoading)
     return (
       <Box

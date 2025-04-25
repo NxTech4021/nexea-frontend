@@ -15,13 +15,17 @@ import {
   Alert,
   Button,
   Dialog,
+  Select,
   Divider,
   Tooltip,
+  MenuItem,
   ListItem,
   Snackbar,
   Container,
   Typography,
+  InputLabel,
   IconButton,
+  FormControl,
   CardContent,
   DialogTitle,
   DialogActions,
@@ -85,9 +89,12 @@ const getStatusConfig = (status) => {
 
 const OrderDetails = ({ orderId }) => {
   const router = useRouter();
-  const { data: order, isLoading } = useSWR(`${endpoints.order.root}/${orderId}`, fetcher);
+  const { data: order, isLoading, mutate } = useSWR(`${endpoints.order.root}/${orderId}`, fetcher);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
+  const [statusChangeOpen, setStatusChangeOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -104,6 +111,49 @@ const OrderDetails = ({ orderId }) => {
 
   const handleCloseResendDialog = () => {
     setResendDialogOpen(false);
+  };
+
+  const handleOpenStatusChange = () => {
+    setNewStatus(order.status?.toLowerCase() || '');
+    setStatusChangeOpen(true);
+  };
+
+  const handleCloseStatusChange = () => {
+    setStatusChangeOpen(false);
+  };
+
+  const handleStatusChange = (event) => {
+    setNewStatus(event.target.value);
+  };
+
+  const handleUpdateStatus = async () => {
+    try {
+      setUpdatingStatus(true);
+      const response = await axiosInstance.patch(`${endpoints.order.root}/${orderId}/status`, {
+        status: newStatus,
+      });
+      
+      if (response.data.success) {
+        setSnackbar({
+          open: true,
+          message: 'Order status has been updated successfully!',
+          severity: 'success',
+        });
+        mutate(); // Refresh order data
+        handleCloseStatusChange();
+      } else {
+        throw new Error(response.data.message || 'Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || error.message || 'Failed to update order status. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   const handleResendConfirmationEmail = async () => {
@@ -322,7 +372,7 @@ const OrderDetails = ({ orderId }) => {
                     Purchase Date
                   </Typography>
                   <Typography variant="subtitle1">
-                    {dayjs(order.createdAt).format('MMM D, YYYY')}
+                    {dayjs(order.createdAt).format('MMM D, YYYY, h:mm A')}
                   </Typography>
                 </Stack>
               </Grid>
@@ -549,12 +599,22 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Payment Status
-            </Typography>
-            <Box
-              sx={{
-                p: 2,
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Payment Status
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Iconify icon="eva:edit-fill" />}
+                onClick={handleOpenStatusChange}
+              >
+                Change Status
+              </Button>
+            </Box>
+            <Box 
+              sx={{ 
+                p: 2, 
                 borderRadius: 1.5,
                 bgcolor: getStatusConfig(order.status).bgColor,
                 display: 'flex',
@@ -616,16 +676,33 @@ const OrderDetails = ({ orderId }) => {
               <Button fullWidth variant="outlined" startIcon={<Iconify icon="eva:printer-fill" />}>
                 Print Order Details
               </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                color="info"
-                startIcon={<Iconify icon="eva:email-fill" />}
-                onClick={handleOpenResendDialog}
-                disabled={resendingEmail}
-              >
-                {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
-              </Button>
+
+              {order.status && order.status.toLowerCase() === 'pending' ? (
+                <Tooltip title="Resend only available for Paid orders">
+                  <span style={{ width: '100%', cursor: 'not-allowed' }}>
+                    <Button 
+                      fullWidth 
+                      variant="outlined" 
+                      color="info" 
+                      startIcon={<Iconify icon="eva:email-fill" />}
+                      disabled
+                    >
+                      Resend Confirmation Email
+                    </Button>
+                  </span>
+                </Tooltip>
+              ) : (
+                <Button 
+                  fullWidth 
+                  variant="outlined" 
+                  color="info" 
+                  startIcon={<Iconify icon="eva:email-fill" />}
+                  onClick={handleOpenResendDialog}
+                  disabled={resendingEmail}
+                >
+                  {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
+                </Button>
+              )}
             </Stack>
           </Paper>
         </Grid>
@@ -795,6 +872,120 @@ const OrderDetails = ({ orderId }) => {
             }}
           >
             {resendingEmail ? 'Sending...' : 'Resend Email'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Status Change Dialog */}
+      <Dialog
+        open={statusChangeOpen}
+        onClose={handleCloseStatusChange}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            background: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
+                : 'linear-gradient(to bottom, #1a202c, #2d3748)',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            py: 2.5,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'rgba(245, 247, 250, 0.85)'
+                : 'rgba(26, 32, 44, 0.85)',
+          }}
+        >
+          <Iconify icon="eva:edit-fill" width={28} height={28} sx={{ color: 'primary.main' }} />
+          <Typography variant="h6">Change Payment Status</Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2, px: 3 }}>
+          {order && (
+            <>
+              <Typography variant="body1" sx={{ mb: 3, mt: 2 }}>
+                 <b>#{order.orderNumber}</b>
+              </Typography>
+              
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel id="status-select-label">Payment Status</InputLabel>
+                <Select
+                  labelId="status-select-label"
+                  id="status-select"
+                  value={newStatus}
+                  label="Payment Status"
+                  onChange={handleStatusChange}
+                >
+                  <MenuItem value="paid">Paid</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="failed">Failed</MenuItem>
+                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <Typography variant="body2" color="#ffa100" sx={{ mt: -1 }}>
+                Note: Use this option to update the payment status of an order. 
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
+            borderTop: '1px solid',
+            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleCloseStatusChange}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
+              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
+              borderWidth: '1.5px',
+              '&:hover': {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
+                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleUpdateStatus}
+            disabled={updatingStatus}
+            variant="contained"
+            color="primary"
+            startIcon={updatingStatus ? <CircularProgress size={20} thickness={4} /> : <Iconify icon="eva:save-fill" />}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: 'none',
+              },
+            }}
+          >
+            {updatingStatus ? 'Updating...' : 'Update Status'}
           </Button>
         </DialogActions>
       </Dialog>
