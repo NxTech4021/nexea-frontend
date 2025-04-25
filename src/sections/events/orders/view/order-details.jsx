@@ -680,7 +680,9 @@ const OrderDetails = ({ orderId }) => {
                 Print Order Details
               </Button>
 
-              {order.status && order.status.toLowerCase() === 'pending' ? (
+              {order.status && (order.status.toLowerCase() === 'pending' || 
+                order.status.toLowerCase() === 'failed' || 
+                order.status.toLowerCase() === 'cancelled') ? (
                 <Tooltip title="Resend only available for Paid orders">
                   <span style={{ width: '100%', cursor: 'not-allowed' }}>
                     <Button

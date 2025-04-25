@@ -624,7 +624,7 @@ const EventLists = ({ query }) => {
                         textTransform: 'capitalize',
                       }}
                     >
-                      {event.status}
+                      {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
                     </Typography>
                   </Box>
                 </Box>
@@ -1149,7 +1149,7 @@ const EventLists = ({ query }) => {
                             }}
                           />
                         </ListItemIcon>
-                        {status}
+                        {status.charAt(0) + status.slice(1).toLowerCase()}
                       </MenuItem>
                     );
                   })}
@@ -1220,7 +1220,7 @@ const EventLists = ({ query }) => {
                         },
                       }}
                     >
-                      {status}
+                      {status.charAt(0) + status.slice(1).toLowerCase()}
                     </Button>
                   );
                 })}
