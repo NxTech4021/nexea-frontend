@@ -160,25 +160,27 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             eventLogo: selectedEvent?.eventSetting?.eventLogo,
           }}
           onSubmit={(values, { setSubmitting }) => {
-            // Create start datetime (combining date + start time)
-            const combinedDateTime =
-              values.date && values.time
-                ? dayjs(values.date)
-                    .hour(values.time.hour())
-                    .minute(values.time.minute())
-                    .second(0)
-                    .format()
-                : values.date;
-
-            // Create end datetime (combining end date + end time)
-            const combinedEndDateTime =
-              values.endDate && values.endTime
-                ? dayjs(values.endDate)
-                    .hour(values.endTime.hour())
-                    .minute(values.endTime.minute())
-                    .second(0)
-                    .format()
-                : values.endDate;
+            // Get date parts from date objects
+            const startDate = dayjs(values.date).format('YYYY-MM-DD');
+            const endDate = dayjs(values.endDate).format('YYYY-MM-DD');
+            
+            // Get time parts using 24-hour format (HH:mm)
+            const startTime = dayjs(values.time).format('HH:mm');
+            const endTime = dayjs(values.endTime).format('HH:mm');
+            
+            console.log('Edit time values:', {
+              startTime: `${dayjs(values.time).format('hh:mm A')} -> ${startTime}`,
+              endTime: `${dayjs(values.endTime).format('hh:mm A')} -> ${endTime}`,
+            });
+            
+            // Format the date-time strings in ISO-like format
+            const combinedDateTime = `${startDate}T${startTime}`;
+            const combinedEndDateTime = `${endDate}T${endTime}`;
+            
+            console.log('Edit formatted dates:', {
+              startDateTime: combinedDateTime,
+              endDateTime: combinedEndDateTime
+            });
 
             const dataToSend = {
               ...values,
@@ -615,6 +617,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         onChange={(newValue) => {
                           setFieldValue('time', newValue);
                         }}
+                        ampm
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -689,6 +692,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         onChange={(newValue) => {
                           setFieldValue('endTime', newValue);
                         }}
+                        ampm
                         slotProps={{
                           textField: {
                             fullWidth: true,
