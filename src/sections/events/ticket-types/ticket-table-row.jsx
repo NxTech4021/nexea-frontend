@@ -1779,7 +1779,7 @@ export default function TicketTableRow({
             </CardContent>
           </Card>
 
-          <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
+          {/* <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
             <Typography variant="subtitle2" gutterBottom>
               Order Limits
             </Typography>
@@ -1813,7 +1813,7 @@ export default function TicketTableRow({
                 </Stack>
               </Grid>
             </Grid>
-          </Box>
+          </Box> */}
 
           {/* Add Ons Section */}
           {row.addOns && row.addOns.length > 0 && (
