@@ -441,7 +441,7 @@ const EventCreateDialog = ({ open, onClose }) => {
           {activeStep === 1 && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
-                <InputLabel>Event Logo</InputLabel>
+                <InputLabel required>Event Logo</InputLabel>
                 <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
               </Stack>
             </Box>
