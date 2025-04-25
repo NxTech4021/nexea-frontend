@@ -13,6 +13,11 @@ import {
   Container,
   TableBody,
   TableContainer,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -61,13 +66,22 @@ const TABLE_HEAD = [
 
 const AddOnView = () => {
   const table = useTable();
+  const create = useBoolean();
 
   const [filters, setFilters] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    price: '',
+    quantity: '',
+    description: '',
+  });
 
-  useSWR(endpoints.ticketType.addOn.root, fetcher, { onSuccess: (data) => setTableData(data) });
+  useSWR(endpoints.ticketType.addOn.root, fetcher, { onSuccess: setTableData });
 
-  const create = useBoolean();
+  const denseHeight = table.dense ? 56 : 76;
+  const canReset = !isEqual(defaultFilters, filters);
 
   const dataFiltered = applyFilter({
     inputData: tableData || [],
@@ -75,58 +89,34 @@ const AddOnView = () => {
     filters,
   });
 
-  const dataInPage = dataFiltered?.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
-  );
-
-  const denseHeight = table.dense ? 56 : 56 + 20;
-  const canReset = !isEqual(defaultFilters, filters);
   const notFound = (!dataFiltered?.length && canReset) || !dataFiltered?.length;
 
-  const handleFilters = useCallback(
-    (name, value) => {
-      table.onResetPage();
+  const handleFilters = useCallback((name, value) => {
+    table.onResetPage();
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  }, [table]);
 
-      setFilters((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    },
-    [table]
-  );
+  const handleResetFilters = useCallback(() => setFilters(defaultFilters), []);
+  const handleFilterStatus = useCallback((e, newValue) => handleFilters('status', newValue), [handleFilters]);
 
-  const handleResetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-  }, []);
+  const handleEditRow = (row) => {
+    setEditForm(row);
+    setEditDialogOpen(true);
+  };
 
-  const handleFilterStatus = useCallback(
-    (event, newValue) => {
-      handleFilters('status', newValue);
-    },
-    [handleFilters]
-  );
+  const handleEditChange = (field) => (e) => setEditForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleEditSubmit = () => {
+    console.log('Saving changes:', editForm);
+    setEditDialogOpen(false);
+  };
+  const handleCloseEdit = () => setEditDialogOpen(false);
 
-  const handleDeleteRow = useCallback(async (id) => {
-    console.log(id);
-  }, []);
-
-  const handleDeleteRows = useCallback(() => {
-    console.log('Deleted');
-  }, []);
+  const handleDeleteRow = useCallback((id) => console.log(id), []);
+  const handleDeleteRows = useCallback(() => console.log('Deleted'), []);
 
   return (
     <Container maxWidth="xl">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: { xs: 'left', sm: 'center' },
-          mb: { xs: 3, md: 5 },
-          gap: 1,
-        }}
-      >
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'left', sm: 'center' }} mb={{ xs: 3, md: 5 }} gap={1}>
         <CustomBreadcrumbs
           heading="Add Ons"
           links={[
@@ -136,72 +126,34 @@ const AddOnView = () => {
             { name: 'List' },
           ]}
         />
-
-        <Button
-          variant="contained"
-          onClick={create.onTrue}
-          startIcon={<Iconify icon="icon-park-solid:add-web" />}
-        >
+        <Button variant="contained" onClick={create.onTrue} startIcon={<Iconify icon="icon-park-solid:add-web" />}>
           Create New Add On
         </Button>
       </Box>
 
       <Card>
-        <Tabs
-          value={filters.status}
-          onChange={handleFilterStatus}
-          sx={{
-            px: 2.5,
-            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-          }}
-        >
+        <Tabs value={filters.status} onChange={handleFilterStatus} sx={{ px: 2.5, boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}` }}>
           {STATUS_OPTIONS.map((tab) => (
             <Tab
               key={tab.value}
-              iconPosition="end"
               value={tab.value}
               label={tab.label}
-              icon={
-                <Label
-                  variant={
-                    ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
-                  }
-                  color={(tab.value && 'success') || (!tab.value && 'error') || 'default'}
-                >
-                  {[true, false].includes(tab.value)
-                    ? tableData.filter((item) => item.isActive === tab.value).length
-                    : tableData.length}
-                </Label>
-              }
+              iconPosition="end"
+              icon={<Label variant={tab.value === filters.status || tab.value === 'all' ? 'filled' : 'soft'} color={tab.value ? 'success' : 'default'}>
+                {[true, false].includes(tab.value) ? tableData.filter((item) => item.isActive === tab.value).length : tableData.length}
+              </Label>}
             />
           ))}
         </Tabs>
 
         <AddOnTableToolbar filters={filters} onFilters={handleFilters} />
 
-        {/* {canReset && (
-          <AddOnFiltersResult
-            filters={filters}
-            onFilters={handleFilters}
-            //
-            onResetFilters={handleResetFilters}
-            //
-            results={dataFiltered.length}
-            sx={{ p: 2.5, pt: 0 }}
-          />
-        )} */}
-
         <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
           <TableSelectedAction
             dense={table.dense}
             numSelected={table.selected.length}
             rowCount={dataFiltered.length}
-            onSelectAllRows={(checked) =>
-              table.onSelectAllRows(
-                checked,
-                dataFiltered.map((row) => row.id)
-              )
-            }
+            onSelectAllRows={(checked) => table.onSelectAllRows(checked, dataFiltered.map((row) => row.id))}
             // action={
             //   <Tooltip title="Delete">
             //     <IconButton color="primary" onClick={confirm.onTrue}>
@@ -220,19 +172,10 @@ const AddOnView = () => {
                 rowCount={dataFiltered.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
+                onSelectAllRows={(checked) => table.onSelectAllRows(checked, dataFiltered.map((row) => row.id))}
               />
               <TableBody>
-                {dataFiltered
-                  ?.slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
+                {dataFiltered.slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                   .map((row) => (
                     <AddOnTableRow
                       key={row.id}
@@ -240,15 +183,11 @@ const AddOnView = () => {
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
                       onDeleteRow={() => handleDeleteRow(row.id)}
-                      //   onViewDetails={handleViewDetails}
+                      onEditRow={() => handleEditRow(row)}
                     />
                   ))}
 
-                <TableEmptyRows
-                  height={denseHeight}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                />
-
+                <TableEmptyRows height={denseHeight} emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)} />
                 <TableNoData notFound={notFound} />
               </TableBody>
             </Table>
@@ -261,13 +200,26 @@ const AddOnView = () => {
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           onRowsPerPageChange={table.onChangeRowsPerPage}
-          //
           dense={table.dense}
           onChangeDense={table.onChangeDense}
         />
       </Card>
 
       <CreateAddOnDialog onClose={create.onFalse} open={create.value} />
+
+      <Dialog open={editDialogOpen} onClose={handleCloseEdit}>
+        <DialogTitle>Edit Add-On</DialogTitle>
+        <DialogContent>
+          <TextField margin="dense" label="Name" fullWidth value={editForm.name} onChange={handleEditChange('name')} />
+          <TextField margin="dense" label="Price" fullWidth value={editForm.price} onChange={handleEditChange('price')} />
+          <TextField margin="dense" label="Quantity" fullWidth value={editForm.quantity} onChange={handleEditChange('quantity')} />
+          <TextField margin="dense" label="Description" fullWidth value={editForm.description} onChange={handleEditChange('description')} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit}>Cancel</Button>
+          <Button variant="contained" onClick={handleEditSubmit}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
@@ -275,6 +227,17 @@ const AddOnView = () => {
 export default AddOnView;
 
 function applyFilter({ inputData, comparator, filters }) {
+  let { title, status } = filters;
+  let filtered = [...inputData];
+
+  if (title) {
+    filtered = filtered.filter((item) => item?.title?.toLowerCase().includes(title.toLowerCase()));
+  }
+
+  if (status !== 'all') {
+    filtered = filtered.filter((item) => item.status === status);
+  }
+
   //   const { title, status, eventName } = filters;
 
   //   const stabilizedThis = inputData?.map((el, index) => [el, index]);
@@ -302,4 +265,5 @@ function applyFilter({ inputData, comparator, filters }) {
   //   }
 
   return inputData;
+  return filtered.sort(comparator);
 }

@@ -32,7 +32,7 @@ export const dataMapping = {
   speaker: 'Speaker',
 };
 
-export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails }) {
+export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow, onViewDetails, onEditRow }) {
   const { name, price, description, createdAt, quantity } = row;
 
   const confirm = useBoolean();
@@ -41,6 +41,26 @@ export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow,
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: name,
+    price: price,
+    quantity: quantity,
+    description: description || '',
+  });
+
+  const handleEditChange = (field) => (event) => {
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: field === 'price' || field === 'quantity' ? Number(event.target.value) : event.target.value,
+    }));
+  };
+  
+
+  const handleEditSubmit = () => {
+    console.log('Edited Add-On:', editForm);
+    setEditDialogOpen(false);
+  };
+  
 
   const handleViewDetails = () => {
     setSelectedTicket(row);
@@ -96,6 +116,13 @@ export default function AddOnTableRow({ row, selected, onSelectRow, onDeleteRow,
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+
+        <Tooltip title="Edit" placement="top" arrow>
+            <IconButton onClick={onEditRow} sx={{ color: 'primary.main' }}>
+              <Iconify icon="solar:pen-bold" />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title="View Details" placement="top" arrow>
             <IconButton onClick={handleViewDetails}>
               <Iconify icon="solar:eye-bold" />
@@ -199,4 +226,5 @@ AddOnTableRow.propTypes = {
   row: PropTypes.object,
   selected: PropTypes.bool,
   onViewDetails: PropTypes.func,
+  onEditRow: PropTypes.func,
 };
