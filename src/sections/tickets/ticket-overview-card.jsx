@@ -184,7 +184,7 @@ const TicketOverviewCard = () => {
                   sx={{
                     p: 2,
                     borderRadius: 1,
-                    bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                    bgcolor: (theme) => theme.palette.background.neutral,
                     border: '1px solid',
                     borderColor: 'divider',
                   }}
@@ -389,7 +389,7 @@ const TicketOverviewCard = () => {
               sx={{
                 p: 2,
                 borderRadius: 1,
-                bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                bgcolor: (theme) => theme.palette.background.neutral,
                 border: '1px solid',
                 borderColor: 'divider',
               }}
