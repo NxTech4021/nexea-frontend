@@ -106,7 +106,7 @@ export default function OrderView() {
     const storedEventFilter = sessionStorage.getItem('orderEventFilter');
     if (storedEventFilter && data?.length) {
       // Check if the stored event name exists in available options
-      const eventExists = data.some(order => order.event.name === storedEventFilter);
+      const eventExists = data.some((order) => order.event.name === storedEventFilter);
       if (eventExists) {
         setEventFilter(storedEventFilter);
       }
@@ -117,7 +117,7 @@ export default function OrderView() {
 
   const eventOptions = useMemo(() => {
     if (!data?.length) return ['All'];
-    
+
     const uniqueEvents = [...new Set(data.map((order) => order.event.name))];
     return ['All', ...uniqueEvents];
   }, [data]);
@@ -190,8 +190,10 @@ export default function OrderView() {
 
     try {
       setResendingEmail(true);
-      const response = await axiosInstance.post(endpoints.order.payment.resendConfirmation(selectedOrder.id));
-      
+      const response = await axiosInstance.post(
+        endpoints.order.payment.resendConfirmation(selectedOrder.id)
+      );
+
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -599,9 +601,9 @@ export default function OrderView() {
                           spacing={1}
                         >
                           <Box sx={{ width: '15%' }}>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
+                            <Typography
+                              variant="body2"
+                              sx={{
                                 fontWeight: 600,
                                 color: 'grey.600',
                                 p: 0.75,
@@ -665,14 +667,15 @@ export default function OrderView() {
                                   fontWeight: 600,
                                 }}
                               >
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)} {/* added this because prisma's status is in lowercase, temporary solution */}
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}{' '}
+                                {/* added this because prisma's status is in lowercase, temporary solution */}
                               </Typography>
                             </Box>
                           </Box>
 
                           <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
                             <Tooltip title="View Order Details">
-                              <IconButton 
+                              <IconButton
                                 size="small"
                                 onClick={() => {
                                   router.push(paths.dashboard.order.details(order.id));
@@ -685,7 +688,7 @@ export default function OrderView() {
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Resend Confirmation Email">
-                              <IconButton 
+                              <IconButton
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -937,16 +940,17 @@ export default function OrderView() {
           {selectedOrder && (
             <>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Are you sure you want to resend the confirmation email for order <b>#{selectedOrder.orderNumber}</b>?
+                Are you sure you want to resend the confirmation email for order{' '}
+                <b>#{selectedOrder.orderNumber}</b>?
               </Typography>
-              
+
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Emails will be sent to the following addresses:
               </Typography>
-              
+
               <List
                 sx={{
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                  bgcolor: (theme) => theme.palette.background.neutral,
                   borderRadius: 1,
                   mb: 2,
                   py: 0,
@@ -955,21 +959,37 @@ export default function OrderView() {
               >
                 <ListItem>
                   <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {selectedOrder.buyerEmail} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({selectedOrder.buyerName})</Typography>
+                    {selectedOrder.buyerEmail}{' '}
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      ({selectedOrder.buyerName})
+                    </Typography>
                   </Typography>
                 </ListItem>
-                
-                {selectedOrder.attendees && selectedOrder.attendees.length > 0 && (
+
+                {selectedOrder.attendees &&
+                  selectedOrder.attendees.length > 0 &&
                   selectedOrder.attendees.map((attendee) => (
                     <ListItem key={attendee.id}>
                       <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                        {attendee.email} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>({attendee.firstName} {attendee.lastName})</Typography>
+                        {attendee.email}{' '}
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ ml: 1 }}
+                        >
+                          ({attendee.firstName} {attendee.lastName})
+                        </Typography>
                       </Typography>
                     </ListItem>
-                  ))
-                )}
+                  ))}
               </List>
-              
+
               <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
                 Note: This action will send emails to all the addresses listed above.
               </Typography>
@@ -1010,7 +1030,13 @@ export default function OrderView() {
             disabled={resendingEmail}
             variant="contained"
             color="info"
-            startIcon={resendingEmail ? <CircularProgress size={20} thickness={4} /> : <Iconify icon="eva:email-fill" />}
+            startIcon={
+              resendingEmail ? (
+                <CircularProgress size={20} thickness={4} />
+              ) : (
+                <Iconify icon="eva:email-fill" />
+              )
+            }
             sx={{
               borderRadius: 2,
               fontWeight: 600,

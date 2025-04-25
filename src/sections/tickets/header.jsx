@@ -47,6 +47,8 @@ const TickerPurchaseHeader = () => {
   const timeOut = useBoolean();
   const extend = useBoolean();
 
+  console.log(eventData);
+
   const handleRemoveCart = useCallback(async () => {
     if (!cartData) return;
     localStorage.removeItem('buyer');
@@ -163,11 +165,12 @@ const TickerPurchaseHeader = () => {
           ) : (
             <Image src="/assets/nexea.png" width={120} />
           )}
+
           {!mdDown && (
             <Stack flexGrow={1}>
               <ListItemText
                 primary={eventData?.name}
-                secondary={dayjs(eventData?.date).format('LLL')}
+                secondary={`${dayjs(eventData?.date).format('LLL')}`}
                 sx={{ textAlign: 'center' }}
                 slotProps={{
                   secondary: {

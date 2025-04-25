@@ -778,7 +778,7 @@ const OrderDetails = ({ orderId }) => {
 
               <List
                 sx={{
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.6),
+                  bgcolor: (theme) => theme.palette.background.neutral,
                   borderRadius: 1,
                   mb: 2,
                   py: 0,
