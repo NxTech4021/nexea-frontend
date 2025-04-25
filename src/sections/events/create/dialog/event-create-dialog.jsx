@@ -86,7 +86,8 @@ const schema = yup.object().shape({
   endTime: yup.date().required('End time is required'),
   // themeColor: yup.string().required('Theme color is required'),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
-  eventLogo: yup.object().required('Logo is required.'),
+  // Changed eventLogo to be optional
+  eventLogo: yup.object().nullable(),
 });
 
 const EventCreateDialog = ({ open, onClose }) => {
@@ -172,10 +173,20 @@ const EventCreateDialog = ({ open, onClose }) => {
     }
 
     try {
-      // Format the startDateTime and endDateTime for submission
-      const startDateTimeFormatted = `${dayjs(eventData.eventDate).format('YYYY-MM-DD')}T${dayjs(eventData.startTime).format('HH:mm')}`;
-      const endDateTimeFormatted = `${dayjs(eventData.endDate).format('YYYY-MM-DD')}T${dayjs(eventData.endTime).format('HH:mm')}`;
-
+      const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
+      const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
+      
+      const startTime = dayjs(eventData.startTime).format('HH:mm');
+      const endTime = dayjs(eventData.endTime).format('HH:mm');
+      
+      console.log('Time values:', {
+        startTime: `${dayjs(eventData.startTime).format('hh:mm A')} -> ${startTime}`,
+        endTime: `${dayjs(eventData.endTime).format('hh:mm A')} -> ${endTime}`,
+      });
+      
+      const startDateTimeFormatted = `${startDate}T${startTime}`;
+      const endDateTimeFormatted = `${endDate}T${endTime}`;
+      
       const formattedData = {
         ...eventData,
         date: startDateTimeFormatted,
@@ -190,7 +201,11 @@ const EventCreateDialog = ({ open, onClose }) => {
       // Prepare FormData for file upload and event data
       const formData = new FormData();
       formData.append('data', JSON.stringify(formattedData));
-      formData.append('eventLogo', eventData.eventLogo?.file);
+      
+      // Only append eventLogo if it exists
+      if (eventData.eventLogo?.file) {
+        formData.append('eventLogo', eventData.eventLogo?.file);
+      }
 
       // Send the request to create the event
       const res = await axiosInstance.post(endpoints.events.create, formData, {
@@ -376,6 +391,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                           <TimePicker
                             value={field.value}
                             onChange={(newValue) => field.onChange(newValue)}
+                            ampm
                             slotProps={{
                               textField: {
                                 fullWidth: true,
@@ -403,6 +419,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                             value={field.value}
                             onChange={(newValue) => field.onChange(newValue)}
                             minTime={startTimeValue} // Ensure the end time can't be before start time
+                            ampm
                             slotProps={{
                               textField: {
                                 fullWidth: true,
@@ -424,7 +441,7 @@ const EventCreateDialog = ({ open, onClose }) => {
           {activeStep === 1 && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
-                <InputLabel required>Event Logo</InputLabel>
+                <InputLabel>Event Logo</InputLabel>
                 <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
               </Stack>
             </Box>
