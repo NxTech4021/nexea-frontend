@@ -1543,6 +1543,20 @@ acorn@^8.9.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.14.0.tgz#063e2c70cac5fb4f6467f0b11152e04c682795b0"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
 
+add-to-calendar-button-react@^2.8.9:
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/add-to-calendar-button-react/-/add-to-calendar-button-react-2.8.9.tgz#57f8abafc56bf7d083cdc58163cfa6beef9a6b98"
+  integrity sha512-GsWAZwR8RzUO6prC8ngT9QkzaqWGYMyUuea/Xj47hH78rpHs0LieP+BB0BpFC4SjFuPiaSpznyodB6qwfW5xcw==
+  dependencies:
+    add-to-calendar-button "^2.8.9"
+
+add-to-calendar-button@^2.8.9:
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/add-to-calendar-button/-/add-to-calendar-button-2.8.9.tgz#df1d303b7f105739e43cccb95fe92bfe37811f5d"
+  integrity sha512-l3a74NzFfkxHikmJwYk8e5lfZdWE3thHtTAQtOcecD4nMVQyfhwpfoqGrJzXIHGdFiOUNpb6ykemUWKI/cILHg==
+  dependencies:
+    timezones-ical-library "^1.9.1"
+
 ajv@8.12.0:
   version "8.12.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
@@ -4879,6 +4893,11 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==
+
+timezones-ical-library@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/timezones-ical-library/-/timezones-ical-library-1.9.1.tgz#36021944c3d45d809dac5ad7e71a9db07266cc47"
+  integrity sha512-OBC7oPoQi6JZn6u/2xQcFTMbe1BLjPrv+QUh5jHfYmg0QTR5HnuhwsBqHfvScNTHqTrDxqlXofXzSm2hFDC1Ow==
 
 tiny-case@^1.0.3:
   version "1.0.3"
