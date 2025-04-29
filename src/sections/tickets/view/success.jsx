@@ -1,6 +1,6 @@
 import useSWR from 'swr';
-import React from 'react';
 import dayjs from 'dayjs';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 import {
@@ -33,6 +33,10 @@ const SuccessPayment = () => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
+
+  useEffect(() => {
+    localStorage.removeItem('attendees');
+  }, []);
 
   if (!orderId || !data) {
     return (

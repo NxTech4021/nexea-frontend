@@ -124,16 +124,18 @@ export default function OrderView() {
 
   const filteredOrders =
     !!data?.length &&
-    data.filter(
-      (order) =>
-        (tab === 'All' || order.status === tab.toLowerCase()) &&
-        (eventFilter === 'All' || order.event.name === eventFilter) &&
-        (order.id.toLowerCase().includes(search.toLowerCase()) ||
-          order.event.name.toLowerCase().includes(search.toLowerCase()) ||
-          order.attendee.name.toLowerCase().includes(search.toLowerCase()) ||
-          order.discountCode.code.toLowerCase().includes(search.toLowerCase()) ||
-          order.status.toLowerCase().includes(search.toLowerCase()))
-    );
+    data
+      .sort((a, b) => (dayjs(a.createdAt).isBefore(dayjs(b.createdAt), 'date') ? 1 : -1))
+      .filter(
+        (order) =>
+          (tab === 'All' || order.status === tab.toLowerCase()) &&
+          (eventFilter === 'All' || order.event.name === eventFilter) &&
+          (order.id.toLowerCase().includes(search.toLowerCase()) ||
+            order.event.name.toLowerCase().includes(search.toLowerCase()) ||
+            order.attendee.name.toLowerCase().includes(search.toLowerCase()) ||
+            order.discountCode.code.toLowerCase().includes(search.toLowerCase()) ||
+            order.status.toLowerCase().includes(search.toLowerCase()))
+      );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

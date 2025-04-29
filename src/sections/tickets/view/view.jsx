@@ -142,9 +142,10 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       window.location.href = res.data.paymentUrl || res.data.url;
     } catch (error) {
       toast.error(error?.message);
-    } finally {
-      localStorage.removeItem('attendees');
     }
+    // finally {
+    //   localStorage.removeItem('attendees');
+    // }
   });
 
   const handleCheckout = useCallback(async () => {
