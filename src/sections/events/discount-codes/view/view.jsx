@@ -25,7 +25,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 // import mockDiscountCodes from 'src/_mock/_discountCodes';
 import { useGetAllTicketTypes } from 'src/api/ticket-type';
-import { useGetAllDiscountCode } from 'src/api/discount-code';
+import { useGetAllDiscountCode, deleteDiscountCode} from 'src/api/discount-code';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -72,7 +72,7 @@ export default function DiscountCodeView() {
   const [editingDiscountCode, setEditingDiscountCode] = useState(null);
   const denseHeight = table.dense ? 56 : 76;
   const { data, isLoading } = useGetAllTicketTypes();
-  const { discountCodes, discountCodesIsLoading } = useGetAllDiscountCode();
+  const { discountCodes, discountCodesIsLoading, refetchDiscountCodes } = useGetAllDiscountCode();
 
   const [filters, setFilters] = useState(defaultFilters);
   const confirm = useBoolean();
@@ -123,6 +123,8 @@ export default function DiscountCodeView() {
   const handleDeleteRow = useCallback(
     async (id) => {
       try {
+        await deleteDiscountCode(id)
+        await refetchDiscountCodes();
         const updatedData = tableData.filter((row) => row.id !== id);
         setTableData(updatedData);
         enqueueSnackbar('Successfully deleted Discount Code', { variant: 'success' });
@@ -133,16 +135,32 @@ export default function DiscountCodeView() {
     [tableData]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    // enqueueSnackbar('Delete success!');
-    setTableData(deleteRows);
+  // const handleDeleteRows = useCallback(() => {
+  //   const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+  //   // enqueueSnackbar('Delete success!');
+  //   setTableData(deleteRows);
 
-    table.onUpdatePageDeleteRows({
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered, dataInPage, table, tableData]);
+  //   table.onUpdatePageDeleteRows({
+  //     totalRowsInPage: dataInPage.length,
+  //     totalRowsFiltered: dataFiltered.length,
+  //   });
+  // }, [dataFiltered, dataInPage, table, tableData]);
+  
+  const handleDeleteRows = useCallback(
+    async () => {
+      try {
+        await Promise.all(table.selected.map((id) => deleteDiscountCode(id)));
+        await refetchDiscountCodes();
+        const updatedData = tableData.filter((row) => !table.selected.includes(row.id));
+        setTableData(updatedData);
+        // table.onClearSelected();
+        enqueueSnackbar('Successfully deleted selected Discount Codes', { variant: 'success' });
+      } catch (error) {
+        enqueueSnackbar(error?.message || 'Failed to delete Discount Codes', { variant: 'error' });
+      }
+    },
+    [table.selected, refetchDiscountCodes, tableData, table]
+  );
 
   const handleSave = useCallback(
     async (editedData) => {
