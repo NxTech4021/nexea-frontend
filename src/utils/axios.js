@@ -4,7 +4,7 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({ baseURL: HOST_API, withCredentials: true });
 
 // axiosInstance.defaults.withCredentials = true
 
@@ -12,6 +12,8 @@ axiosInstance.interceptors.response.use(
   (res) => res,
   (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')
 );
+
+
 
 export default axiosInstance;
 export { axiosInstance };
