@@ -515,8 +515,8 @@ const EventLists = ({ query }) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
 
-          const VITE_BASE_URL = "http://localhost:81";
-          console.log("events", event)
+          const VITE_BASE_URL = 'http://localhost:81';
+          console.log('events', event);
           return (
             <Stack
               key={event.id}
@@ -640,7 +640,6 @@ const EventLists = ({ query }) => {
                     {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
                   </Typography>
                 </Stack>
-
 
                 {/* Event Manager */}
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
@@ -1286,7 +1285,7 @@ const EventLists = ({ query }) => {
         </Grid>
       </Grid>
 
-      {!!data && data.events.length > ITEMS_PER_PAGE && (
+      {!!data && data.events?.length > ITEMS_PER_PAGE && (
         <Pagination
           count={Math.ceil(data.events.length / ITEMS_PER_PAGE)}
           page={currentPage}

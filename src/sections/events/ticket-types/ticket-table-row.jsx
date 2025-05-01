@@ -1371,6 +1371,7 @@ export default function TicketTableRow({
             height: 'calc(100% - 76px)',
             overflow: 'auto',
             scrollbarWidth: 'thin',
+            bgcolor: (theme) => theme.palette.background.default,
             '&::-webkit-scrollbar': {
               width: 8,
             },

@@ -1,7 +1,8 @@
 import useSWR from 'swr';
-import React from 'react';
 import dayjs from 'dayjs';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { AddToCalendarButton } from 'add-to-calendar-button-react';
 
 import {
   Box,
@@ -33,6 +34,10 @@ const SuccessPayment = () => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
+
+  useEffect(() => {
+    localStorage.removeItem('attendees');
+  }, []);
 
   if (!orderId || !data) {
     return (
@@ -158,14 +163,25 @@ const SuccessPayment = () => {
         </TableContainer>
       </Box>
 
-      <Box mt={5} textAlign="center">
+      <Stack mt={5} direction="row" spacing={1} justifyContent="center">
         <Button
           variant="outlined"
           onClick={() => navigate(paths.dashboard.tickets.root(data?.event?.id))}
         >
           Continue shopping
         </Button>
-      </Box>
+
+        <AddToCalendarButton
+          size="3"
+          name={data?.event?.name || ''}
+          options={['Apple', 'Google', 'Yahoo', 'Outlook.com', 'iCal']}
+          startDate={dayjs(data?.event?.date).format('YYYY-MM-DD')}
+          endDate={dayjs(data?.event?.endDate).format('YYYY-MM-DD')}
+          startTime={dayjs(data?.event?.date).format('HH:mm')}
+          endTime={dayjs(data?.event?.endDate).format('HH:mm')}
+          timeZone="Asia/Kuala_Lumpur"
+        />
+      </Stack>
     </Container>
   );
 };
