@@ -21,11 +21,23 @@ import Iconify from 'src/components/iconify';
 import { useAddOnsStore } from '../hooks/use-add-on';
 
 const AddOn = ({ addOn }) => {
-  const { data, isLoading } = useSWR(endpoints.ticketType.addOn.root, fetcher);
+  const { data, isLoading, mutate } = useSWR(endpoints.ticketType.addOn.root, fetcher);
 
   const { setSelectedAddOns } = useAddOnsStore();
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
-
+  const handleCreateClick = () => {
+    console.log('Create button clicked');
+    
+    // New: Check if we're in edit mode (passed from parent)
+    if (typeof addOn?.onTrue === 'function') {
+      console.log('Calling onTrue()');
+      addOn.onTrue();
+    } else {
+      // Fallback for create flow
+      console.log('Using default creation handler');
+      // Add your default creation logic here or emit an event
+    }
+  };
   if (isLoading) {
     return (
       <Box
@@ -132,11 +144,22 @@ const AddOn = ({ addOn }) => {
             height: 200,
             position: 'relative',
             overflow: 'hidden',
+            '&:active': { // Add this to verify clicks
+        backgroundColor: 'action.selected',
+        transform: 'scale(0.98)'
+      }
           }}
-          onClick={() => {
-            // setSelectedAddOns(item);
-            addOn.onTrue();
-          }}
+          onClick={handleCreateClick}
+          // onClick={() => {
+          //   // setSelectedAddOns(item);
+          //   // addOn.onTrue();
+          //   if (addOn?.onTrue) {
+          //     addOn.onTrue();
+          //   } else {
+          //     console.warn('Add-on creation handler not available');
+          //     // Optionally show a user-friendly message
+          //   }
+          // }}
         >
           <Box position="absolute">
             <Iconify icon="material-symbols:add-rounded" width={20} />

@@ -40,13 +40,15 @@ import {
   // ListItemText,
   CircularProgress,
   FormControlLabel,
+  InputAdornment,
+  ListItemText,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { axiosInstance } from 'src/utils/axios';
-
+import { endpoints } from 'src/utils/axios';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
@@ -55,6 +57,8 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 
 import AddOn from './components/addOn';
 import { useAddOnsStore } from './hooks/use-add-on';
+import FormProvider from 'src/components/hook-form';
+import { mutate } from 'swr';
 // ----------------------------------------------------------------------
 
 export const dataMapping = {
@@ -142,6 +146,179 @@ const RenderSelectField = ({
     </FormControl>
   </Stack>
 );
+// since cannot render the add on component in edit ticket dialog 
+const AddOnDialog = ({ open, onClose, onSave }) => {
+  const [newAddOn, setNewAddOn] = useState({
+    name: '',
+    price: null,
+    description: '',
+    quantity: null,
+  });
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const smDown = useResponsive('down', 'sm');
+
+  const handleChange = (field) => (event) => {
+    setNewAddOn((prev) => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handlePriceChange = (values) => {
+    setNewAddOn((prev) => ({
+      ...prev,
+      price: values.value,
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      
+      if (!newAddOn.name || !newAddOn.price) {
+        enqueueSnackbar('Name and price are required', { variant: 'error' });
+        return;
+      }
+  
+      const payload = {
+        name: newAddOn.name,
+        price: parseFloat(newAddOn.price),
+        description: newAddOn.description,
+        quantity: newAddOn.quantity ? parseInt(newAddOn.quantity, 10) : null,
+      };
+  
+      const response = await axiosInstance.post(endpoints.ticketType.addOn.root, payload);
+      
+      enqueueSnackbar('Add-on created successfully!', { variant: 'success' });
+      
+      // 1. Refresh the add-ons list
+      mutate(endpoints.ticketType.addOn.root);
+      
+      // 2. Add the new add-on to selected add-ons if needed
+      if (typeof onSave === 'function') {
+        onSave(response.data);
+      }
+      
+      onClose();
+      setNewAddOn({
+        name: '',
+        price: null,
+        description: '',
+        quantity: null,
+      });
+    } catch (error) {
+      console.error('Failed to create add-on:', error);
+      enqueueSnackbar(
+        error.response?.data?.message || 'Failed to create add-on',
+        { variant: 'error' }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      fullScreen={smDown}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        sx: {
+          width: '-webkit-fill-available',
+          borderRadius: 1,
+          scrollbarWidth: 'none',
+        },
+      }}
+    >
+      <DialogTitle>
+        <ListItemText
+          primary="Create Add On Item"
+          secondary="You can create and manage ticket add-ons like after-party access or merch for users to select during checkout."
+          primaryTypographyProps={{ variant: 'h5' }}
+        />
+      </DialogTitle>
+      <DialogContent>
+        <Stack direction="row" spacing={2}>
+          <Stack width={1}>
+            <InputLabel required>Title</InputLabel>
+            <TextField
+              name="name"
+              value={newAddOn.name}
+              onChange={handleChange('name')}
+              placeholder="Title"
+              fullWidth
+            />
+          </Stack>
+          <Stack width={1}>
+            <InputLabel required>Quantity</InputLabel>
+            <TextField
+              name="quantity"
+              type="number"
+              value={newAddOn.quantity || ''}
+              onChange={handleChange('quantity')}
+              placeholder="Quantity"
+              fullWidth
+              onKeyDown={(e) => {
+                if (e.key === '-' || e.key === 'e') {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </Stack>
+          <Stack width={1} spacing={1}>
+            <InputLabel required>Price</InputLabel>
+            <NumericFormat
+              customInput={TextField}
+              thousandSeparator
+              prefix="RM "
+              decimalScale={2}
+              fixedDecimalScale
+              allowNegative={false}
+              value={newAddOn.price}
+              onValueChange={handlePriceChange}
+              placeholder="Price (RM)"
+              variant="outlined"
+              fullWidth
+            />
+          </Stack>
+        </Stack>
+        <Stack width={1} mt={2}>
+          <InputLabel>Description</InputLabel>
+          <TextField
+            name="description"
+            value={newAddOn.description}
+            onChange={handleChange('description')}
+            placeholder="Add on description"
+            multiline
+            rows={3}
+            fullWidth
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} variant="outlined" sx={{ fontWeight: 400 }}>
+          Cancel
+        </Button>
+        <LoadingButton
+          loading={loading}
+          onClick={handleSave}
+          variant="contained"
+          sx={{ fontWeight: 400 }}
+        >
+          Submit
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+AddOnDialog.propTypes = {
+  open: PropTypes.bool,
+  onClose: PropTypes.func,
+  onSave: PropTypes.func,
+};
 
 export default function TicketTableRow({
   row,
@@ -180,11 +357,16 @@ export default function TicketTableRow({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [editedTicket, setEditedTicket] = useState({});
+  const [addOnDialogOpen, setAddOnDialogOpen] = useState(false);
 
   // Get addOns state and management functions
+  const addOn = useBoolean(false);
   const { setSelectedAddOns } = useAddOnsStore();
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
+  useEffect(() => {
+    console.log('AddOn state:', addOn.value); // Should log false initially
+  }, [addOn.value]);
   // Use useEffect to automatically update title when type or category changes
   useEffect(() => {
     const isNewTicketForm = !editedTicket.id;
@@ -223,6 +405,8 @@ export default function TicketTableRow({
   const handleEditClick = () => {
     // Reset step when opening
     setActiveStep(0);
+     // Reset addOn state when opening dialog
+  addOn.onFalse();
 
     // Initialize requirement from ticketTypeRequirement or requirement
     const initialRequirement = {
@@ -294,9 +478,15 @@ export default function TicketTableRow({
   const handleSaveEdit = async () => {
     try {
       setLoading(true);
-
-      // Only send fields that may have changed or are required by backend
-      // This prevents unintended overrides
+  
+      // Format the add-ons correctly for the API
+      const formattedAddOns = selectedAddOns.map(addon => ({
+        id: addon.id,
+        name: addon.name,
+        price: addon.price,
+        // include other required fields
+      }));
+  
       const updatedTicket = {
         id: editedTicket.id,
         title: editedTicket.title,
@@ -304,62 +494,49 @@ export default function TicketTableRow({
         quantity: parseInt(editedTicket.quantity || 0, 10),
         isActive: editedTicket.isActive,
         description: editedTicket.description,
-        selectedAddOns,
+        addOns: formattedAddOns, // Use formatted add-ons
+        type: editedTicket.type,
+        category: editedTicket.category,
+        requirement: {
+          minimumTicketPerOrder: editedTicket.requirement?.minimumTicketPerOrder
+            ? parseInt(editedTicket.requirement.minimumTicketPerOrder, 10)
+            : null,
+          maximumTicketPerOrder: editedTicket.requirement?.maximumTicketPerOrder
+            ? parseInt(editedTicket.requirement.maximumTicketPerOrder, 10)
+            : null,
+        },
       };
-
-      // Only include these fields if they were explicitly changed
-      if (editedTicket.type !== row.type) {
-        updatedTicket.type = editedTicket.type;
-      }
-
-      if (editedTicket.category !== row.category) {
-        updatedTicket.category = editedTicket.category;
-      }
-
-      // Include requirement changes if they exist
-      if (editedTicket.requirement) {
-        updatedTicket.requirement = {
-          minimumTicketPerOrder:
-            editedTicket.requirement.minimumTicketPerOrder !== ''
-              ? parseInt(editedTicket.requirement.minimumTicketPerOrder, 10)
-              : null,
-          maximumTicketPerOrder:
-            editedTicket.requirement.maximumTicketPerOrder !== ''
-              ? parseInt(editedTicket.requirement.maximumTicketPerOrder, 10)
-              : null,
-        };
-      }
-
+  
+      // Debug: log the payload
+      console.log('Sending update payload:', updatedTicket);
+  
       if (
-        updatedTicket?.requirement?.minimumTicketPerOrder >=
-        updatedTicket?.requirement?.maximumTicketPerOrder
+        updatedTicket.requirement?.minimumTicketPerOrder >=
+        updatedTicket.requirement?.maximumTicketPerOrder
       ) {
         toast.error('Minimum tickets must be less than the maximum tickets.');
         return;
       }
-
+  
       const response = await axiosInstance.put(
         `/api/ticket-type/${updatedTicket.id}`,
         updatedTicket
       );
-
+  
       setEditDialogOpen(false);
       enqueueSnackbar('Ticket updated successfully!', { variant: 'success' });
-
+  
       if (typeof onEditSuccess === 'function') {
         onEditSuccess(response.data);
       }
     } catch (error) {
       console.error('Failed to update ticket:', error);
-
       if (error.response) {
         console.log('Error status:', error.response.status);
         console.log('Error data:', error.response.data);
         enqueueSnackbar(
           `Failed to update ticket: ${error.response.data.message || error.message}`,
-          {
-            variant: 'error',
-          }
+          { variant: 'error' }
         );
       } else {
         enqueueSnackbar(`Failed to update ticket: ${error.message}`, { variant: 'error' });
@@ -1184,7 +1361,24 @@ export default function TicketTableRow({
           )}
 
           {/* Step 2: Add Ons */}
-          {activeStep === 1 && <AddOn />}
+          {activeStep === 1 && 
+          // <AddOn addOn={addOn}/>
+          ( <>
+            <AddOn 
+              addOn={{
+                onTrue: () => setAddOnDialogOpen(true)
+              }}
+            />
+            <AddOnDialog
+              open={addOnDialogOpen}
+              onClose={() => setAddOnDialogOpen(false)}
+              onSave={(newAddOn) => {
+                // Add the new add-on to the selected add-ons
+                setSelectedAddOns(newAddOn);
+              }}
+            />
+          </>)
+          }
         </DialogContent>
 
         <DialogActions
