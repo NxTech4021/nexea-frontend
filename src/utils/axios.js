@@ -76,7 +76,7 @@ export const endpoints = {
     upload: '/api/attendee/upload',
     update: '/api/attendee/update',
     checkIn: '/api/attendee/checkInAttendee',
-    list: '/api/attendees',
+    list: '/api/attendee/',
     event: {
       list: '/api/attendee/event',
     },
