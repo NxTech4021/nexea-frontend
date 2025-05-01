@@ -20,8 +20,9 @@ import EventListsEventListsDashboard from './list-events';
 
 export default function Dashboard() {
   const settings = useSettingsContext();
-  const { totalAttendees } = useGetAttendees();
-  const { totalEvents } = useGetEvents();
+
+  const { data } = useGetAttendees();
+  const { data: eventData } = useGetEvents();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -31,7 +32,11 @@ export default function Dashboard() {
           <AnalyticsWidget
             title="Total Attendees"
             num={
-              <CountUp start={0} end={totalAttendees} formattingFn={(e) => formatLargeNumber(e)} />
+              <CountUp
+                start={0}
+                end={data?.length || 0}
+                formattingFn={(e) => formatLargeNumber(e)}
+              />
             }
             color="success"
             icon="heroicons:users-16-solid"
@@ -40,7 +45,13 @@ export default function Dashboard() {
         <Grid item xs={12} md={6} lg={3}>
           <AnalyticsWidget
             title="Total Events"
-            num={<CountUp start={0} end={totalEvents} formattingFn={(e) => formatLargeNumber(e)} />}
+            num={
+              <CountUp
+                start={0}
+                end={eventData?.events?.length || 0}
+                formattingFn={(e) => formatLargeNumber(e)}
+              />
+            }
             color="info"
             icon="mdi:events"
           />

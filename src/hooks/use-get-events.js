@@ -1,25 +1,14 @@
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
+import { useMemo } from 'react';
 
-import { endpoints, axiosInstance } from 'src/utils/axios';
+import { fetcher, endpoints } from 'src/utils/axios';
 
 const useGetEvents = () => {
-  const [totalEvents, setTotalEvents] = useState(0);
+  const { data, isLoading, mutate } = useSWR(endpoints.events.list, fetcher);
 
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        console.log('Fetching total events...');
-        const response = await axiosInstance.get(endpoints.events.list);
-        setTotalEvents(response.data.events.length);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
+  const memoizedValue = useMemo(() => ({ data, isLoading, mutate }), [data, isLoading, mutate]);
 
-    getEvents();
-  }, []); // Run only once on component mount
-
-  return { totalEvents };
+  return memoizedValue;
 };
 
 export default useGetEvents;
