@@ -25,7 +25,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 // import mockDiscountCodes from 'src/_mock/_discountCodes';
 import { useGetAllTicketTypes } from 'src/api/ticket-type';
-import { useGetAllDiscountCode, deleteDiscountCode} from 'src/api/discount-code';
+import { deleteDiscountCode, useGetAllDiscountCode } from 'src/api/discount-code';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -123,7 +123,7 @@ export default function DiscountCodeView() {
   const handleDeleteRow = useCallback(
     async (id) => {
       try {
-        await deleteDiscountCode(id)
+        await deleteDiscountCode(id);
         await refetchDiscountCodes();
         const updatedData = tableData.filter((row) => row.id !== id);
         setTableData(updatedData);
@@ -132,7 +132,7 @@ export default function DiscountCodeView() {
         enqueueSnackbar(error?.message || 'Failed to delete Discount Code', { variant: 'error' });
       }
     },
-    [tableData]
+    [tableData, refetchDiscountCodes]
   );
 
   // const handleDeleteRows = useCallback(() => {
@@ -145,22 +145,19 @@ export default function DiscountCodeView() {
   //     totalRowsFiltered: dataFiltered.length,
   //   });
   // }, [dataFiltered, dataInPage, table, tableData]);
-  
-  const handleDeleteRows = useCallback(
-    async () => {
-      try {
-        await Promise.all(table.selected.map((id) => deleteDiscountCode(id)));
-        await refetchDiscountCodes();
-        const updatedData = tableData.filter((row) => !table.selected.includes(row.id));
-        setTableData(updatedData);
-        // table.onClearSelected();
-        enqueueSnackbar('Successfully deleted selected Discount Codes', { variant: 'success' });
-      } catch (error) {
-        enqueueSnackbar(error?.message || 'Failed to delete Discount Codes', { variant: 'error' });
-      }
-    },
-    [table.selected, refetchDiscountCodes, tableData, table]
-  );
+
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      await Promise.all(table.selected.map((id) => deleteDiscountCode(id)));
+      await refetchDiscountCodes();
+      const updatedData = tableData.filter((row) => !table.selected.includes(row.id));
+      setTableData(updatedData);
+      // table.onClearSelected();
+      enqueueSnackbar('Successfully deleted selected Discount Codes', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar(error?.message || 'Failed to delete Discount Codes', { variant: 'error' });
+    }
+  }, [refetchDiscountCodes, tableData, table]);
 
   const handleSave = useCallback(
     async (editedData) => {

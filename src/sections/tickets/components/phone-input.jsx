@@ -61,7 +61,7 @@ export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) 
     const styleElement = document.createElement('style');
     styleElement.innerHTML = phoneInputStyles;
     document.head.appendChild(styleElement);
-    
+
     // Clean up when component unmounts
     return () => {
       if (document.head.contains(styleElement)) {
@@ -77,13 +77,13 @@ export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) 
       render={({ field, fieldState: { error } }) => (
         <Box sx={{ width: '100%' }}>
           {label && (
-            <Typography 
-              variant="body2" 
-              component="label" 
-              htmlFor={name} 
-              sx={{ 
-                mb: 0.75, 
-                display: 'block', 
+            <Typography
+              variant="body2"
+              component="label"
+              htmlFor={name}
+              sx={{
+                mb: 0.75,
+                display: 'block',
                 fontSize: '0.85rem',
                 fontWeight: 500,
                 color: error ? 'error.main' : 'text.secondary',
@@ -111,14 +111,14 @@ export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) 
             {...other}
           />
           {error && (
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: 'error.main',
                 marginLeft: 2,
                 marginTop: 0.5,
                 display: 'block',
-                fontSize: '0.75rem'
+                fontSize: '0.75rem',
               }}
             >
               {error.message}
@@ -135,4 +135,4 @@ PhoneInputCustom.propTypes = {
   label: PropTypes.string,
   readOnly: PropTypes.bool,
   disabled: PropTypes.bool,
-}; 
+};

@@ -80,7 +80,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
       initialValues={initialValues}
       onSubmit={onSubmit}
       validationSchema={schema}
-      validateOnBlur={true}
+      validateOnBlur
       validateOnChange={false}
     >
       {({ isSubmitting }) => (
@@ -217,7 +217,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                   />
                 )}
               </Field>
-            </Grid>*/}
+            </Grid> */}
             <Grid item xs={6}>
               <Field fullWidth name="phoneNumber">
                 {({ field, form: { errors } }) => (
