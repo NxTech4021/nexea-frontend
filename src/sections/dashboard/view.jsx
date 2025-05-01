@@ -24,6 +24,8 @@ export default function Dashboard() {
   const { data } = useGetAttendees();
   const { data: eventData } = useGetEvents();
 
+  console.log(eventData);
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Typography variant="h4">Dashboard</Typography>

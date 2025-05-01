@@ -97,6 +97,7 @@ export function AuthProvider({ children }) {
         });
       }
     } catch (error) {
+      console.log('test');
       dispatch({
         type: 'INITIAL',
         payload: {

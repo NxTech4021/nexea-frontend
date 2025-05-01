@@ -895,7 +895,7 @@ const TicketInformationCard = () => {
     <Box
       sx={{
         height: 1,
-        borderRadius: 3,
+        // borderRadius: 3,
         overflow: 'hidden',
         p: { xs: 2, md: 3 },
         bgcolor: 'background.paper',
