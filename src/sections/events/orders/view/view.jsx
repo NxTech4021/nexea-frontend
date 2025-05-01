@@ -189,6 +189,17 @@ export default function OrderView() {
 
   const handleResendConfirmationEmail = async () => {
     if (!selectedOrder) return;
+    
+    // Check if order status is paid
+    if (selectedOrder.status !== 'paid') {
+      setSnackbar({
+        open: true,
+        message: 'Only paid orders can have confirmation emails resent.',
+        severity: 'warning',
+      });
+      handleCloseResendDialog();
+      return;
+    }
 
     try {
       setResendingEmail(true);
@@ -586,125 +597,130 @@ export default function OrderView() {
                       }
 
                       return (
-                        <Stack
-                          key={order.id}
-                          direction="row"
-                          alignItems="center"
-                          sx={{
-                            px: 3,
-                            py: 1.5,
-                            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-                            transition: 'all 0.2s ease-in-out',
-                            cursor: 'pointer',
-                            '&:hover': {
-                              bgcolor: 'background.neutral',
-                            },
-                          }}
-                          spacing={1}
-                        >
-                          <Box sx={{ width: '15%' }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 600,
-                                color: 'grey.600',
-                                p: 0.75,
-                                borderRadius: 1,
-                                bgcolor: (theme) => alpha(theme.palette.grey[600], 0.08),
-                                display: 'inline-flex',
-                                fontSize: '0.8125rem',
-                                fontFamily: 'monospace',
-                                letterSpacing: '0.25px',
-                              }}
-                            >
-                              {order.orderNumber}
-                            </Typography>
-                          </Box>
-
-                          <Typography variant="body2" sx={{ width: '20%' }}>
-                            {order.event.name}
-                          </Typography>
-
-                          <Typography variant="body2" sx={{ width: '20%' }}>
-                            {order.buyerName}
-                          </Typography>
-
-                          <Typography variant="body2" sx={{ width: '15%' }}>
-                            {order?.discountCode?.code || 'N/A'}
-                          </Typography>
-
-                          <Typography variant="body2" sx={{ width: '15%' }}>
-                            {dayjs(order.createdAt).format('LL')}
-                          </Typography>
-
-                          <Typography variant="body2" sx={{ width: '15%' }}>
-                            RM {order.totalAmount.toFixed(2)}
-                          </Typography>
-
-                          <Box sx={{ width: '15%' }}>
-                            <Box
-                              sx={{
-                                py: 0.5,
-                                px: 1,
-                                borderRadius: 1,
-                                width: 'fit-content',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.5,
-                                bgcolor: statusConfig.bgColor,
-                              }}
-                            >
-                              <Iconify
-                                icon={statusConfig.icon}
-                                sx={{
-                                  width: 16,
-                                  height: 16,
-                                  color: statusConfig.color,
-                                }}
-                              />
+                        <Tooltip title="View Order Details" arrow followCursor>
+                          <Stack
+                            key={order.id}
+                            direction="row"
+                            alignItems="center"
+                            onClick={() => router.push(paths.dashboard.order.details(order.id))}
+                            sx={{
+                              px: 3,
+                              py: 1.5,
+                              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+                              transition: 'all 0.2s ease-in-out',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                bgcolor: 'background.neutral',
+                              },
+                            }}
+                            spacing={1}
+                          >
+                            <Box sx={{ width: '15%' }}>
                               <Typography
-                                variant="caption"
+                                variant="body2"
                                 sx={{
-                                  color: statusConfig.color,
                                   fontWeight: 600,
+                                  color: 'grey.600',
+                                  p: 0.75,
+                                  borderRadius: 1,
+                                  bgcolor: (theme) => alpha(theme.palette.grey[600], 0.08),
+                                  display: 'inline-flex',
+                                  fontSize: '0.8125rem',
+                                  fontFamily: 'monospace',
+                                  letterSpacing: '0.25px',
                                 }}
                               >
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}{' '}
-                                {/* added this because prisma's status is in lowercase, temporary solution */}
+                                {order.orderNumber}
                               </Typography>
                             </Box>
-                          </Box>
 
-                          <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
-                            <Tooltip title="View Order Details">
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  router.push(paths.dashboard.order.details(order.id));
-                                }}
+                            <Typography variant="body2" sx={{ width: '20%' }}>
+                              {order.event.name}
+                            </Typography>
+
+                            <Typography variant="body2" sx={{ width: '20%' }}>
+                              {order.buyerName}
+                            </Typography>
+
+                            <Typography variant="body2" sx={{ width: '15%' }}>
+                              {order?.discountCode?.code || 'N/A'}
+                            </Typography>
+
+                            <Typography variant="body2" sx={{ width: '15%' }}>
+                              {dayjs(order.createdAt).format('LL')}
+                            </Typography>
+
+                            <Typography variant="body2" sx={{ width: '15%' }}>
+                              RM {order.totalAmount.toFixed(2)}
+                            </Typography>
+
+                            <Box sx={{ width: '15%' }}>
+                              <Box
                                 sx={{
-                                  color: 'primary.main',
+                                  py: 0.5,
+                                  px: 1,
+                                  borderRadius: 1,
+                                  width: 'fit-content',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 0.5,
+                                  bgcolor: statusConfig.bgColor,
                                 }}
                               >
-                                <Iconify icon="eva:info-outline" width={20} height={20} />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Resend Confirmation Email">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenResendDialog(order);
-                                }}
-                                sx={{
-                                  color: 'info.main',
-                                }}
-                              >
-                                <Iconify icon="eva:email-outline" width={20} height={20} />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </Stack>
+                                <Iconify
+                                  icon={statusConfig.icon}
+                                  sx={{
+                                    width: 16,
+                                    height: 16,
+                                    color: statusConfig.color,
+                                  }}
+                                />
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: statusConfig.color,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}{' '}
+                                  {/* added this because prisma's status is in lowercase, temporary solution */}
+                                </Typography>
+                              </Box>
+                            </Box>
+
+                            <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
+                              <Tooltip title="View Order Details">
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(paths.dashboard.order.details(order.id));
+                                  }}
+                                  sx={{
+                                    color: 'primary.main',
+                                  }}
+                                >
+                                  <Iconify icon="eva:info-outline" width={20} height={20} />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title={order.status !== 'paid' ? "Resend only available for Paid orders" : "Resend Confirmation Email"}>
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenResendDialog(order);
+                                  }}
+                                  sx={{
+                                    color: 'info.main',
+                                  }}
+                                  disabled={order.status !== 'paid'}
+                                >
+                                  <Iconify icon="eva:email-outline" width={20} height={20} />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </Stack>
+                        </Tooltip>
                       );
                     })}
                 </Stack>

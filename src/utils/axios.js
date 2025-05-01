@@ -72,10 +72,11 @@ export const endpoints = {
   attendee: {
     root: '/api/attendee/',
     create: '/api/attendee/create',
+    manualadd: '/api/attendee/manual',
     upload: '/api/attendee/upload',
     update: '/api/attendee/update',
     checkIn: '/api/attendee/checkInAttendee',
-    list: '/api/attendees',
+    list: '/api/attendee/',
     event: {
       list: '/api/attendee/event',
     },

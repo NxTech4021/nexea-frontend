@@ -429,5 +429,4 @@ EditTicketDialog.propTypes = {
   onClose: PropTypes.func,
   ticket: PropTypes.object,
   onEditSuccess: PropTypes.func,
-  addOn: PropTypes.object,
-  }; 
+}; 

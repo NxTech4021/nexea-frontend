@@ -6,12 +6,7 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
-import {
-  Stack,
-  Button,
-  Divider,
-  Typography,
-} from '@mui/material';
+import { Stack, Button, Divider, Typography } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -30,8 +25,6 @@ const EventListsDashboard = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
-  // const popover = usePopover();
-
   const handleClick = () => {
     router.push('/dashboard/events');
   };
@@ -49,21 +42,21 @@ const EventListsDashboard = () => {
 
   useEffect(() => {
     fetchEvent();
-  }, [events, status]);
+  }, []);
 
   // Function to format the date in a concise way
   const formatEventDate = (date) => {
     const today = dayjs();
     const eventDate = dayjs(date);
-    
+
     if (eventDate.isSame(today, 'day')) {
       return `Today, ${eventDate.format('h:mm A')}`;
     }
-    
+
     if (eventDate.isSame(today.add(1, 'day'), 'day')) {
       return `Tomorrow, ${eventDate.format('h:mm A')}`;
     }
-    
+
     return eventDate.format('MMM D, YYYY');
   };
 
@@ -90,7 +83,7 @@ const EventListsDashboard = () => {
           <Typography variant="h6" fontWeight={600}>
             Active Events
           </Typography>
-          
+
           <Button
             variant="text"
             color="primary"
@@ -128,52 +121,52 @@ const EventListsDashboard = () => {
                   },
                 }}
               >
-                <Stack direction="row" spacing={1.5} alignItems="center" >
-                  <Box 
-                    sx={{ 
-                      width: 8, 
-                      height: 8, 
-                      borderRadius: '50%', 
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
                       bgcolor: 'success.main',
                       flexShrink: 0,
-                    }} 
+                    }}
                   />
-                  
+
                   <Typography variant="subtitle2" fontWeight={500} className="event-name">
                     {event.name}
                   </Typography>
-                  
-                  <Typography 
-                    variant="caption" 
+
+                  <Typography
+                    variant="caption"
                     className="event-date"
-                    sx={{ 
+                    sx={{
                       color: 'text.secondary',
                       display: 'inline-flex',
                       alignItems: 'center',
                     }}
                   >
-                    <Iconify 
-                      icon="eva:clock-outline" 
-                      width={14} 
-                      sx={{ mr: 0.5, color: 'text.disabled' }} 
+                    <Iconify
+                      icon="eva:clock-outline"
+                      width={14}
+                      sx={{ mr: 0.5, color: 'text.disabled' }}
                     />
                     {formatEventDate(event.date)}
                   </Typography>
                 </Stack>
-                
+
                 <Stack direction="row" spacing={0.8} alignItems="center">
-                  <Iconify 
-                    icon="mdi:qrcode-scan" 
-                    sx={{ 
+                  <Iconify
+                    icon="mdi:qrcode-scan"
+                    sx={{
                       color: 'text.disabled',
                       width: 14,
                       height: 14,
-                    }} 
+                    }}
                   />
-                  <Typography 
-                    variant="caption" 
+                  <Typography
+                    variant="caption"
                     className="scan-text"
-                    sx={{ 
+                    sx={{
                       color: 'text.disabled',
                       fontSize: '0.8rem',
                       fontWeight: 600,
@@ -181,41 +174,41 @@ const EventListsDashboard = () => {
                   >
                     Click to scan QR
                   </Typography>
-                  <Iconify 
-                    icon="eva:arrow-ios-forward-fill" 
-                    sx={{ 
+                  <Iconify
+                    icon="eva:arrow-ios-forward-fill"
+                    sx={{
                       color: 'text.disabled',
                       width: 16,
                       height: 16,
-                    }} 
+                    }}
                   />
                 </Stack>
               </Box>
             ))}
           </Box>
         ) : (
-          <Box 
-            sx={{ 
-              py: 4, 
-              px: 3, 
-              display: 'flex', 
+          <Box
+            sx={{
+              py: 4,
+              px: 3,
+              display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
             }}
           >
-            <Iconify 
-              icon="eva:calendar-outline" 
-              width={40} 
+            <Iconify
+              icon="eva:calendar-outline"
+              width={40}
               height={40}
-              sx={{ 
+              sx={{
                 color: 'text.disabled',
                 opacity: 0.6,
                 mb: 1.5,
-              }} 
+              }}
             />
-            
+
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               No active events at the moment
             </Typography>

@@ -41,15 +41,16 @@ const initialValues = {
   ticketCode: '',
   ticketID: '',
   ticketType: '',
-  buyerFirstName: '',
-  buyerLastName: '',
-  buyerEmail: '',
+  // buyerFirstName: '',
+  // buyerLastName: '',
+  // buyerEmail: '',
   checkedIn: 'No',
 };
 
 // eslint-disable-next-line react/prop-types
 const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
   const onSubmit = async (values, { resetForm }) => {
+    // console.log("submit clicked", values)
     try {
       await axiosInstance.post(endpoints.attendee.create, {
         // Add/remove /api if it doesnt work
@@ -57,7 +58,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
         lastName: values.lastName,
         name: values.name,
         email: values.email,
-        buyerEmail: values.buyerEmail,
+        // buyerEmail: values.buyerEmail,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
         checkedIn: true,
@@ -79,7 +80,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
       initialValues={initialValues}
       onSubmit={onSubmit}
       validationSchema={schema}
-      validateOnBlur={false}
+      validateOnBlur={true}
       validateOnChange={false}
     >
       {({ isSubmitting }) => (
@@ -130,7 +131,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                 )}
               </Field>
             </Grid>
-            <Grid item xs={4}>
+            {/* <Grid item xs={4}>
               <Field
                 fullWidth
                 label="Order Number"
@@ -167,8 +168,13 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
               />
             </Grid>
             <Grid item xs={4}>
-              <Field fullWidth label="Ticket ID" id="ticketID" name="ticketID" as={TextField} />
-            </Grid>
+              <Field 
+              fullWidth 
+              label="Ticket ID" 
+              id="ticketID" 
+              name="ticketID" 
+              as={TextField} />
+            </Grid> */}
             <Grid item xs={4}>
               <Field
                 fullWidth
@@ -178,7 +184,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                 as={TextField}
               />
             </Grid>
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <Field
                 fullWidth
                 label="Buyer First Name"
@@ -211,7 +217,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                   />
                 )}
               </Field>
-            </Grid>
+            </Grid>*/}
             <Grid item xs={6}>
               <Field fullWidth name="phoneNumber">
                 {({ field, form: { errors } }) => (
@@ -226,7 +232,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                   />
                 )}
               </Field>
-            </Grid>
+            </Grid> 
 
             <Grid item xs={6}>
               <Field fullWidth name="companyName">

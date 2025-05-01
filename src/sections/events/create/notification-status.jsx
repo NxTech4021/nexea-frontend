@@ -13,7 +13,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcru
 import NotificationListItem from './notification-list-item';
 
 const NotificationStatus = ({ id }) => {
-  const { attendees } = useGetAttendees(id);
+  const { data: attendees } = useGetAttendees(id);
 
   return (
     <Container maxWidth="lg">

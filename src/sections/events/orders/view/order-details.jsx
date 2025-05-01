@@ -563,10 +563,10 @@ const OrderDetails = ({ orderId }) => {
                 </Typography>
               </Box>
 
-              {order.discountCode && (
+              {order.discountCode && order.discountAmount || order.discountAmount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body1">
-                    Discount ({order.discountCode?.code || 'N/A'})
+                    Discount {/* ({order.discountCode?.code || 'N/A'}) */}
                   </Typography>
                   <Typography variant="body1" color="error.main">
                     -{formatCurrency(order.discountAmount || 0)}
@@ -574,12 +574,12 @@ const OrderDetails = ({ orderId }) => {
                 </Box>
               )}
 
-              {order.tax && order.tax > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body1">Tax</Typography>
-                  <Typography variant="body1">{formatCurrency(order.tax)}</Typography>
-                </Box>
-              )}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body1">SST</Typography>
+                <Typography variant="body1">
+                  {order.totalAmount > 0 ? formatCurrency(order.tax || 0) : formatCurrency(0)}
+                </Typography>
+              </Box>
 
               <Divider sx={{ my: 1 }} />
 

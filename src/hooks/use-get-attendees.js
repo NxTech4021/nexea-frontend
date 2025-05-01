@@ -1,40 +1,17 @@
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
+import { useMemo } from 'react';
 
-import { endpoints, axiosInstance } from 'src/utils/axios';
+import { fetcher, endpoints } from 'src/utils/axios';
 
 const useGetAttendees = (id) => {
-  const [totalAttendees, setTotalAttendees] = useState(0);
-  const [attendees, setAttendees] = useState();
+  const { data, isLoading, mutate } = useSWR(
+    !id ? endpoints.attendee.list : `${endpoints.attendee.event.list}/${id}`,
+    fetcher
+  );
 
-  useEffect(() => {
-    const getAttendees = async () => {
-      try {
-        const response = await axiosInstance.get(endpoints.attendee.list);
+  const memoizedValue = useMemo(() => ({ data, isLoading, mutate }), [data, isLoading, mutate]);
 
-        setTotalAttendees(response.data.length);
-      } catch (error) {
-        console.error('Error fetching attendees:', error);
-      }
-    };
-
-    const getAttendeesByEventId = async () => {
-      try {
-        const response = await axiosInstance.get(`${endpoints.attendee.event.list}/${id}`);
-        setAttendees(response.data);
-        setTotalAttendees(response.data.length);
-      } catch (error) {
-        console.error('Error fetching attendees:', error);
-      }
-    };
-
-    if (id) {
-      getAttendeesByEventId();
-    } else {
-      getAttendees();
-    }
-  }, [id]); // Run only once on component mount
-
-  return { totalAttendees, attendees };
+  return memoizedValue;
 };
 
 export default useGetAttendees;
