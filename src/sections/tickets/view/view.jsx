@@ -141,12 +141,17 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       const res = await axiosInstance.post('/api/cart/continuePayment', data);
       window.location.href = res.data.paymentUrl || res.data.url;
     } catch (error) {
-      toast.error(error?.message);
+      // toast.error(error?.message);
+      toast.error(error?.response?.data?.message || error?.message || 'Something went wrong! Please try again');
+    } finally {
+      localStorage.removeItem('attendees');
     }
-    // finally {
-    //   localStorage.removeItem('attendees');
-    // }
-  });
+  },
+  (formErrors) => { 
+    toast.error('Missing fields! Please fill in all required fields.');
+    console.warn('Validation Errors:', formErrors);
+  }
+);
 
   const handleCheckout = useCallback(async () => {
     try {
