@@ -50,7 +50,7 @@ const Page = () => {
   return (
     <>
       <Helmet>
-        <title>Event</title>
+        <title>Buy Tickets</title>
       </Helmet>
 
       <TicketPurchaseView eventIdParams={eventId} />

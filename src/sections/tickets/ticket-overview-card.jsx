@@ -594,7 +594,7 @@ const TicketOverviewCard = () => {
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Iconify icon="lets-icons:check-fill" color="success.main" width={16} />
                         <Typography variant="body2" color="success.main" fontWeight={500}>
-                          Discount code applied
+                          Discount code applied!
                         </Typography>
                       </Stack>
                       <Stack
@@ -625,9 +625,9 @@ const TicketOverviewCard = () => {
                           </IconButton>
                         </Stack>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography variant="body2" fontWeight={500}>
+                          {/* <Typography variant="body2" fontWeight={500}>
                             Type: {cartData.discount.type}
-                          </Typography>
+                          </Typography> */}
                         </Stack>
                         <Typography variant="body2" color="error.main" fontWeight={600}>
                           -{' '}

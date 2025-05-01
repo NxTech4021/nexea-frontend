@@ -1,6 +1,8 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
+import 'react-phone-number-input/style.css';
+// import PhoneInput from 'react-phone-number-input';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
@@ -36,6 +38,7 @@ import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
 import useGetCartData from './hooks/use-get-cart';
 import { TextFieldCustom } from './components/text-field';
+import { PhoneInputCustom } from './components/phone-input';
 
 const defaultAttendee = {
   firstName: '',
@@ -189,6 +192,27 @@ const TicketInformationCard = () => {
     setValue(name, value, { shouldValidate: true });
   };
 
+  const onChangePhoneNumberBuyer = (value) => {
+    const attendees = getValues('attendees');
+    const index = attendees.findIndex((i) => i.isForbuyer);
+
+    if (index !== -1) {
+      const updatedAttendee = { ...attendees[index] };
+      updatedAttendee.phoneNumber = value || '';
+      update(index, { ...updatedAttendee, ticket: updatedAttendee.ticket });
+    }
+
+    const buyerData = JSON.parse(localStorage.getItem('buyer')) || {};
+    
+    const buyerInfo = {
+      ...buyerData,
+      phoneNumber: value || '',
+    };
+
+    localStorage.setItem('buyer', JSON.stringify(buyerInfo));
+    setValue('buyer.phoneNumber', value || '', { shouldValidate: true });
+  };
+
   const copyCompanyName = () => {
     const companyName = getValues('buyer.company');
     fields.forEach((field, index) => {
@@ -303,11 +327,9 @@ const TicketInformationCard = () => {
               onChange={onChangeInputBuyer}
             />
             <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
-            <TextFieldCustom
-              name="buyer.phoneNumber"
-              label="Phone Number"
-              inputMode="decimal"
-              onChange={onChangeInputBuyer}
+            <PhoneInputCustom 
+              name="buyer.phoneNumber" 
+              label="Phone Number" 
             />
             <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
               <TextFieldCustom
@@ -709,17 +731,10 @@ const TicketInformationCard = () => {
                         }
                       }
                     />
-                    <TextFieldCustom
+                    <PhoneInputCustom
                       name={`attendees.${index}.phoneNumber`}
                       label="Phone Number"
-                      inputMode="decimal"
-                      slotProps={
-                        getValues(`attendees.${index}.isForbuyer`) && {
-                          input: {
-                            readOnly: true,
-                          },
-                        }
-                      }
+                      readOnly={getValues(`attendees.${index}.isForbuyer`)}
                     />
                     <TextFieldCustom
                       name={`attendees.${index}.company`}
