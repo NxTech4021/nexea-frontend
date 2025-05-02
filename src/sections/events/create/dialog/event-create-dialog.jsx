@@ -63,7 +63,7 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
             <MenuItem disabled value="">
               <em>Select an option</em>
             </MenuItem>
-            {options.map((option) => (
+            {options?.map((option) => (
               <MenuItem key={option.id} value={option.id}>
                 {!option?.department
                   ? `${option.fullName}`
@@ -175,18 +175,18 @@ const EventCreateDialog = ({ open, onClose }) => {
     try {
       const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
       const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
-      
+
       const startTime = dayjs(eventData.startTime).format('HH:mm');
       const endTime = dayjs(eventData.endTime).format('HH:mm');
-      
+
       console.log('Time values:', {
         startTime: `${dayjs(eventData.startTime).format('hh:mm A')} -> ${startTime}`,
         endTime: `${dayjs(eventData.endTime).format('hh:mm A')} -> ${endTime}`,
       });
-      
+
       const startDateTimeFormatted = `${startDate}T${startTime}`;
       const endDateTimeFormatted = `${endDate}T${endTime}`;
-      
+
       const formattedData = {
         ...eventData,
         date: startDateTimeFormatted,
@@ -201,7 +201,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       // Prepare FormData for file upload and event data
       const formData = new FormData();
       formData.append('data', JSON.stringify(formattedData));
-      
+
       // Only append eventLogo if it exists
       if (eventData.eventLogo?.file) {
         formData.append('eventLogo', eventData.eventLogo?.file);
