@@ -42,6 +42,7 @@ const Profile = () => {
   const theme = useTheme();
   const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
+  console.log(user);
 
   const validationSchema = yup.object({
     email: yup
@@ -50,14 +51,12 @@ const Profile = () => {
       .required('Email is required'),
     name: yup.string('Enter your name').required('Name is required'),
     department: yup.string('Enter your department').required('Department is required'),
-    address: yup.string('Enter your address').required('Address is required'),
   });
 
   const initialValues = {
-    name: user?.name || '',
+    name: user?.fullName || '',
     email: user?.email || '',
     department: user?.department || '',
-    address: user?.address || '',
   };
 
   const [image, setImage] = useState();
@@ -172,7 +171,7 @@ const Profile = () => {
                   )}
                 </Field>
               </Grid>
-              <Grid item xs={12} sm={6} md={6} lg={6}>
+              {/* <Grid item xs={12} sm={6} md={6} lg={6}>
                 <Field name="address">
                   {({ field, form: { errors, touched } }) => (
                     <TextField
@@ -185,7 +184,7 @@ const Profile = () => {
                     />
                   )}
                 </Field>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} sm={12} md={12} lg={12} sx={{ textAlign: 'end' }}>
                 <LoadingButton type="submit" variant="contained" disabled={!dirty && !url}>
                   Save Changes
