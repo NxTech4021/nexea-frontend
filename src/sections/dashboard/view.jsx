@@ -24,8 +24,6 @@ export default function Dashboard() {
   const { data } = useGetAttendees();
   const { data: eventData } = useGetEvents();
 
-  console.log(eventData);
-
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Typography variant="h4">Dashboard</Typography>
@@ -36,7 +34,7 @@ export default function Dashboard() {
             num={
               <CountUp
                 start={0}
-                end={data?.length || 0}
+                end={data?.attendees?.length || 0}
                 formattingFn={(e) => formatLargeNumber(e)}
               />
             }
