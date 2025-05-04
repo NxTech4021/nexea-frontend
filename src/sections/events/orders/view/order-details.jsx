@@ -563,16 +563,17 @@ const OrderDetails = ({ orderId }) => {
                 </Typography>
               </Box>
 
-              {order.discountCode && order.discountAmount || order.discountAmount > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body1">
-                    Discount {/* ({order.discountCode?.code || 'N/A'}) */}
-                  </Typography>
-                  <Typography variant="body1" color="error.main">
-                    -{formatCurrency(order.discountAmount || 0)}
-                  </Typography>
-                </Box>
-              )}
+              {(order.discountCode && order.discountAmount) ||
+                (order.discountAmount > 0 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body1">
+                      Discount {/* ({order.discountCode?.code || 'N/A'}) */}
+                    </Typography>
+                    <Typography variant="body1" color="error.main">
+                      -{formatCurrency(order.discountAmount || 0)}
+                    </Typography>
+                  </Box>
+                ))}
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body1">SST</Typography>
@@ -680,8 +681,9 @@ const OrderDetails = ({ orderId }) => {
                 Print Order Details
               </Button>
 
-              {order.status && (order.status.toLowerCase() === 'pending' || 
-                order.status.toLowerCase() === 'failed' || 
+              {order.status &&
+              (order.status.toLowerCase() === 'pending' ||
+                order.status.toLowerCase() === 'failed' ||
                 order.status.toLowerCase() === 'cancelled') ? (
                 <Tooltip title="Resend only available for Paid orders">
                   <span style={{ width: '100%', cursor: 'not-allowed' }}>

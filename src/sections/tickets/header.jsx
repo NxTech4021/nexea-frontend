@@ -47,8 +47,6 @@ const TickerPurchaseHeader = () => {
   const timeOut = useBoolean();
   const extend = useBoolean();
 
-  console.log(eventData);
-
   const handleRemoveCart = useCallback(async () => {
     if (!cartData) return;
     localStorage.removeItem('buyer');

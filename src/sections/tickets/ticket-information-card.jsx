@@ -1,4 +1,3 @@
-import useSWR from 'swr';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import 'react-phone-number-input/style.css';
@@ -30,7 +29,8 @@ import { useSearchParams } from 'src/routes/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
+import { useCartStore } from 'src/utils/store';
+import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -61,15 +61,21 @@ const TicketInformationCard = () => {
   const searchParams = useSearchParams();
   const isOverflow = useBoolean();
   const [activeFieldId, setActiveFieldId] = useState(null);
-  const { cartMutate } = useGetCartData();
+  // const { cartMutate } = useGetCartData();
+  const { tickets } = useCartStore();
+  const [calculatedSST, setCalculatedSST] = useState(null);
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
-  const { data, isLoading: cartLoading, mutate } = useSWR(`/api/cart/${cartSessionId}`, fetcher);
+  // const { data, isLoading: cartLoading, mutate } = useSWR(`/api/cart/${cartSessionId}`, fetcher);
+  const { data: cartData, cartMutate, cartLoading, eventData } = useGetCartData();
 
-  const isCartExpired = useMemo(() => dayjs(data?.expiryDate).isBefore(dayjs(), 'date'), [data]);
+  const isCartExpired = useMemo(
+    () => dayjs(cartData?.expiryDate).isBefore(dayjs(), 'date'),
+    [cartData]
+  );
 
-  const ticketTypes = useMemo(() => data?.cartItem, [data]);
+  const ticketTypes = useMemo(() => cartData?.cartItem, [cartData]);
 
   const theme = useTheme();
 
@@ -82,16 +88,29 @@ const TicketInformationCard = () => {
     try {
       const res = await axiosInstance.post('/api/cart/redeemDiscountCode', { discountCode });
       toast.success(res?.data?.message);
-      mutate();
+      cartMutate();
+      setDiscountCode('');
     } catch (error) {
       toast.error(error);
     }
   };
 
-  const subTotal = useMemo(
-    () => data?.cartItem?.reduce((acc, sum) => acc + sum.quantity * sum.ticketType.price, 0),
-    [data]
-  );
+  const subTotal = useMemo(() => cartData?.orderSummary?.subtotal || 0, [cartData]);
+
+  const total = useMemo(() => {
+    if (!cartData && tickets?.length) {
+      return tickets.reduce((acc, cur) => {
+        const ticketSubtotal = cur.subTotal || 0;
+        const addOnsTotal = (cur?.addOns || []).reduce(
+          (a, b) => a + (b.price || 0) * (b.selectedQuantity || 0),
+          0
+        );
+        return acc + ticketSubtotal + addOnsTotal;
+      }, 0);
+    }
+
+    return (cartData?.orderSummary?.totalPrice || 0) + calculatedSST || 0;
+  }, [cartData, tickets, calculatedSST]);
 
   const { watch, control, setValue, getValues } = useFormContext();
 
@@ -203,7 +222,7 @@ const TicketInformationCard = () => {
     }
 
     const buyerData = JSON.parse(localStorage.getItem('buyer')) || {};
-    
+
     const buyerInfo = {
       ...buyerData,
       phoneNumber: value || '',
@@ -234,9 +253,10 @@ const TicketInformationCard = () => {
     }
 
     try {
-      const ticket = data.cartItem.find((a) => a.ticketType.id === item);
+      const ticket = cartData.cartItem.find((a) => a.ticketType.id === item);
       const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
-      mutate(`/api/cart/${cartSessionId}`);
+      cartMutate();
+      // mutate(`/api/cart/${cartSessionId}`);
       cartMutate();
       toast.success(res?.data?.message);
     } catch (error) {
@@ -253,6 +273,16 @@ const TicketInformationCard = () => {
     return requiredFields.every(
       (field) => attendeeValues && attendeeValues[field] && attendeeValues[field].trim() !== ''
     );
+  };
+
+  const removeDiscountCode = async () => {
+    try {
+      const res = await axiosInstance.patch(endpoints.discount.remove);
+      cartMutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error(error?.message || 'Error removing code');
+    }
   };
 
   const buyerInfo = (
@@ -327,10 +357,7 @@ const TicketInformationCard = () => {
               onChange={onChangeInputBuyer}
             />
             <TextFieldCustom name="buyer.email" label="Email" onChange={onChangeInputBuyer} />
-            <PhoneInputCustom 
-              name="buyer.phoneNumber" 
-              label="Phone Number" 
-            />
+            <PhoneInputCustom name="buyer.phoneNumber" label="Phone Number" />
             <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
               <TextFieldCustom
                 name="buyer.company"
@@ -764,7 +791,7 @@ const TicketInformationCard = () => {
   };
 
   useEffect(() => {
-    if (!data?.cartItem?.length) return;
+    if (!cartData?.cartItem?.length) return;
 
     // Load existing attendees from localStorage
     const storedAttendees = localStorage.getItem('attendees');
@@ -775,7 +802,7 @@ const TicketInformationCard = () => {
     }
 
     // Generate attendee list based on ticket quantity
-    const result = data.cartItem.flatMap((item) => {
+    const result = cartData.cartItem.flatMap((item) => {
       const addOns =
         item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
 
@@ -787,8 +814,8 @@ const TicketInformationCard = () => {
     });
 
     setValue('attendees', result);
-    localStorage.setItem('attendees', JSON.stringify(result)); // Cache the data
-  }, [data, setValue, cartSessionId]);
+    localStorage.setItem('attendees', JSON.stringify(result)); // Cache the cartData
+  }, [cartData, setValue, cartSessionId]);
 
   useEffect(() => {
     const subscription = watch((values) => {
@@ -855,6 +882,19 @@ const TicketInformationCard = () => {
       parent.removeEventListener('scroll', checkActiveSection);
     };
   }, [fields]);
+
+  useEffect(() => {
+    const sst = eventData?.eventSetting?.sst || null;
+    const taxablePrice = subTotal - (cartData?.orderSummary?.discount || 0);
+
+    const sstPrice = parseFloat(((taxablePrice * sst) / 100).toFixed(2));
+
+    if (cartData?.orderSummary?.totalPrice === 0) {
+      setCalculatedSST(0);
+    } else {
+      setCalculatedSST(sstPrice);
+    }
+  }, [eventData, subTotal, cartData]);
 
   useLayoutEffect(() => {
     if (!boxRef.current) return;
@@ -1103,7 +1143,7 @@ const TicketInformationCard = () => {
                     }}
                   >
                     <Stack spacing={2}>
-                      {data?.cartItem.map((item) => (
+                      {cartData?.cartItem.map((item) => (
                         <Stack
                           key={item.id}
                           direction="row"
@@ -1128,7 +1168,7 @@ const TicketInformationCard = () => {
                   </Card>
 
                   <Stack spacing={2.5}>
-                    {data && (
+                    {/* {cartData && (
                       <Card
                         elevation={0}
                         sx={{
@@ -1180,7 +1220,7 @@ const TicketInformationCard = () => {
                             </Button>
                           </Stack>
 
-                          {!!data.discount && (
+                          {!!cartData.discount && (
                             <Stack spacing={1} sx={{ mt: 1 }}>
                               <Stack direction="row" spacing={1} alignItems="center">
                                 <Iconify
@@ -1207,10 +1247,123 @@ const TicketInformationCard = () => {
                                 }}
                               >
                                 <Typography variant="body2" fontWeight={500}>
-                                  {data.discount.code}
+                                  {cartData.discount.code}
                                 </Typography>
                                 <Typography variant="body2" color="error" fontWeight={500}>
-                                  - {data.discount.value}
+                                  - {cartData.discount.value}
+                                </Typography>
+                              </Stack>
+                            </Stack>
+                          )}
+                        </Stack>
+                      </Card>
+                    )} */}
+                    {cartData && (
+                      <Card
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Stack spacing={1.5}>
+                          <Typography variant="subtitle2" mb={0.5}>
+                            Discount Code
+                          </Typography>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            spacing={1}
+                          >
+                            <TextField
+                              size="small"
+                              fullWidth
+                              placeholder="Enter Discount Code"
+                              value={discountCode}
+                              onChange={(e) =>
+                                setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                              }
+                              InputProps={{
+                                sx: { borderRadius: 1.5 },
+                              }}
+                            />
+
+                            <Button
+                              variant="contained"
+                              size="medium"
+                              onClick={handleRedeemDiscount}
+                              sx={{
+                                height: 40,
+                                borderRadius: 1.5,
+                                px: 2,
+                                bgcolor: theme.palette.mode === 'dark' ? '#fff' : '#000',
+                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                '&:hover': {
+                                  bgcolor: theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                                },
+                              }}
+                            >
+                              Apply
+                            </Button>
+                          </Stack>
+
+                          {!!cartData.discount && (
+                            <Stack spacing={1} sx={{ mt: 1 }}>
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                <Iconify
+                                  icon="lets-icons:check-fill"
+                                  color="success.main"
+                                  width={16}
+                                />
+                                <Typography variant="body2" color="success.main" fontWeight={500}>
+                                  Discount code applied!
+                                </Typography>
+                              </Stack>
+                              <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                sx={{
+                                  p: 1.5,
+                                  borderRadius: 1.5,
+                                  bgcolor: alpha(theme.palette.success.lighter, 0.5),
+                                }}
+                              >
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {cartData.discount.code}
+                                  </Typography>
+                                  <IconButton
+                                    size="small"
+                                    onClick={removeDiscountCode}
+                                    sx={{
+                                      bgcolor: alpha(theme.palette.error.main, 0.1),
+                                      '&:hover': {
+                                        bgcolor: alpha(theme.palette.error.main, 0.2),
+                                      },
+                                    }}
+                                  >
+                                    <Iconify
+                                      icon="mdi:trash-outline"
+                                      width={14}
+                                      color="error.main"
+                                    />
+                                  </IconButton>
+                                </Stack>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  {/* <Typography variant="body2" fontWeight={500}>
+                                                Type: {cartData.discount.type}
+                                              </Typography> */}
+                                </Stack>
+                                <Typography variant="body2" color="error.main" fontWeight={600}>
+                                  -{' '}
+                                  {Intl.NumberFormat('en-MY', {
+                                    style: 'currency',
+                                    currency: 'MYR',
+                                  }).format(cartData.orderSummary.discount)}
                                 </Typography>
                               </Stack>
                             </Stack>
@@ -1239,7 +1392,7 @@ const TicketInformationCard = () => {
                           </Typography>
                         </Stack>
 
-                        {data && (
+                        {cartData && (
                           <Stack direction="row" alignItems="center" justifyContent="space-between">
                             <Typography color="text.secondary">Discount:</Typography>
                             <Typography fontWeight={500} color="error.main">
@@ -1247,7 +1400,7 @@ const TicketInformationCard = () => {
                               {Intl.NumberFormat('en-MY', {
                                 style: 'currency',
                                 currency: 'MYR',
-                              }).format(data?.orderSummary?.discount)}
+                              }).format(cartData?.orderSummary?.discount)}
                             </Typography>
                           </Stack>
                         )}
@@ -1258,7 +1411,7 @@ const TicketInformationCard = () => {
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
                               currency: 'MYR',
-                            }).format(0.1)}
+                            }).format(calculatedSST)}
                           </Typography>
                         </Stack>
 
@@ -1270,11 +1423,7 @@ const TicketInformationCard = () => {
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
                               currency: 'MYR',
-                            }).format(
-                              data?.orderSummary?.totalPrice
-                                ? data.orderSummary.totalPrice + 0.1
-                                : subTotal + 0.1
-                            )}
+                            }).format(total)}
                           </Typography>
                         </Stack>
                       </Stack>
@@ -1314,7 +1463,7 @@ const TicketInformationCard = () => {
               <Stack direction="row" alignItems="center" spacing={1.5}>
                 <Typography variant="subtitle1" fontWeight={600} color="text.primary">
                   {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    data?.orderSummary?.totalPrice ? data.orderSummary.totalPrice + 0.1 : 0
+                    total || 0
                   )}
                 </Typography>
                 <Iconify

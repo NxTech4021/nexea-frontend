@@ -561,7 +561,7 @@ const TicketSelectionCard = () => {
                       ))}
                   </Stack>
                   <Stack spacing={2}>
-                    <Stack
+                    {/* <Stack
                       direction="row"
                       alignItems="center"
                       gap={10}
@@ -580,7 +580,7 @@ const TicketSelectionCard = () => {
                           currency: 'MYR',
                         }).format(0.1)}
                       </Typography>
-                    </Stack>
+                    </Stack> */}
                     <Divider />
                     <Stack
                       direction="row"
@@ -599,7 +599,7 @@ const TicketSelectionCard = () => {
                         {Intl.NumberFormat('en-MY', {
                           style: 'currency',
                           currency: 'MYR',
-                        }).format(subTotal && subTotal + 0.1)}
+                        }).format(subTotal || 0)}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -639,7 +639,7 @@ const TicketSelectionCard = () => {
                     letterSpacing={-0.7}
                   >
                     {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                      subTotal && subTotal + 0.1
+                      subTotal || 0
                     )}
                   </Typography>
                 )}
