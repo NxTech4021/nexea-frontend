@@ -676,9 +676,9 @@ const OrderDetails = ({ orderId }) => {
               Order Actions
             </Typography>
             <Stack spacing={2}>
-              <Button fullWidth variant="outlined" startIcon={<Iconify icon="eva:printer-fill" />}>
+              {/* <Button fullWidth variant="outlined" startIcon={<Iconify icon="eva:printer-fill" />}>
                 Print Order Details
-              </Button>
+              </Button> */}
 
               {order.status && (order.status.toLowerCase() === 'pending' || 
                 order.status.toLowerCase() === 'failed' || 

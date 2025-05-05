@@ -595,7 +595,7 @@ export default function OrderView() {
                       }
 
                       return (
-                        <Tooltip title="View Order Details" arrow followCursor>
+                        <Tooltip title="View Order Details" arrow>
                           <Stack
                             key={order.id}
                             direction="row"
@@ -687,7 +687,7 @@ export default function OrderView() {
                             </Box>
 
                             <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
-                              <Tooltip title="View Order Details">
+                              <Tooltip title="View More Details">
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
