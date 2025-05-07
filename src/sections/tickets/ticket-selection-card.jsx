@@ -120,10 +120,10 @@ const TicketSelectionCard = () => {
         size={{ xs: 12, md: 4 }}
       >
         <Grid2 size={12}>
-          <Stack spacing={2.5}>
+          <Stack spacing={1}>
             <ListItemText
               primary={ticket.title}
-              secondary={ticket.description}
+              // secondary={ticket.description}
               slotProps={{
                 primary: {
                   fontWeight: 600,
@@ -131,15 +131,30 @@ const TicketSelectionCard = () => {
                   fontSize: 20,
                   color: '#00000',
                 },
-                secondary: {
-                  variant: 'caption',
-                  fontWeight: 500,
-                  fontSize: 14,
-                  letterSpacing: -0.9,
-                  color: '#606060',
-                  maxWidth: 300,
-                  whiteSpace: 'pretty',
-                },
+                // secondary: {
+                //   variant: 'caption',
+                //   fontWeight: 500,
+                //   fontSize: 14,
+                //   letterSpacing: -0.9,
+                //   color: '#606060',
+                //   maxWidth: 300,
+                //   whiteSpace: 'pretty',
+                // },
+              }}
+            />
+            <Typography
+              component="div"
+              dangerouslySetInnerHTML={{
+                __html: ticket.description.replace(/\n/g, '<br />'),
+              }}
+              sx={{
+                variant: 'caption',
+                fontWeight: 500,
+                fontSize: 14,
+                letterSpacing: -0.9,
+                color: '#606060',
+                maxWidth: 300,
+                whiteSpace: 'pretty',
               }}
             />
           </Stack>
