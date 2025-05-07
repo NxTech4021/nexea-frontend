@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import ReactPixel from 'react-facebook-pixel';
 
-const pixelId = process.env.VITE_PIXEL_ID || '1213108609599419'; // Replace with your real Pixel ID
+const pixelId = import.meta.env.VITE_PIXEL_ID || '1213108609599419'; // Replace with your real Pixel ID
 
 console.log(pixelId);
 
