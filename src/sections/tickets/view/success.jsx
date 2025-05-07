@@ -37,7 +37,11 @@ const SuccessPayment = () => {
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
 
-  useMetaPixel('Purchase', { value: data?.totalAmount || 0, currency: 'MYR' }, true);
+  useMetaPixel(
+    'Purchase',
+    { value: data?.totalAmount || 0, currency: 'MYR', eventName: data?.event?.name || '' },
+    true
+  );
 
   useEffect(() => {
     localStorage.removeItem('attendees');
