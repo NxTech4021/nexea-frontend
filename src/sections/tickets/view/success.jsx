@@ -23,6 +23,8 @@ import {
 import { paths } from 'src/routes/paths';
 import { useSearchParams } from 'src/routes/hooks';
 
+import { useMetaPixel } from 'src/hooks/use-track-page';
+
 import { fetcher } from 'src/utils/axios';
 
 import Label from 'src/components/label';
@@ -34,6 +36,8 @@ const SuccessPayment = () => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
+
+  useMetaPixel('Purchase', { value: data?.totalAmount || 0, currency: 'MYR' }, true);
 
   useEffect(() => {
     localStorage.removeItem('attendees');
