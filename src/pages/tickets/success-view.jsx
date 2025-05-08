@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title>Success</title>
+        <title>Order Success</title>
       </Helmet>
 
       <SuccessPayment />
