@@ -39,7 +39,14 @@ const SuccessPayment = () => {
 
   useMetaPixel(
     'Purchase',
-    { value: data?.totalAmount || 0, currency: 'MYR', eventName: data?.event?.name || '' },
+    {
+      value: data?.totalAmount || 0,
+      currency: 'MYR',
+      eventName: data?.event?.name || '',
+      name: data?.buyerName || '',
+      email: data?.buyerEmail || '',
+      phoneNumber: data?.buyerPhoneNumber || '',
+    },
     true
   );
 
