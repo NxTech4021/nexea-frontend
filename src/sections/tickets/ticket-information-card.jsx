@@ -22,6 +22,7 @@ import {
   IconButton,
   ListItemText,
   CircularProgress,
+  Checkbox,
 } from '@mui/material';
 
 import { useSearchParams } from 'src/routes/hooks';
@@ -39,6 +40,7 @@ import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 import useGetCartData from './hooks/use-get-cart';
 import { TextFieldCustom } from './components/text-field';
 import { PhoneInputCustom } from './components/phone-input';
+import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 const defaultAttendee = {
   firstName: '',
@@ -64,6 +66,7 @@ const TicketInformationCard = () => {
   // const { cartMutate } = useGetCartData();
   const { tickets } = useCartStore();
   const [calculatedSST, setCalculatedSST] = useState(null);
+  const [resourceConfirmations, setResourceConfirmations] = useState({});
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
@@ -112,6 +115,11 @@ const TicketInformationCard = () => {
     return (cartData?.orderSummary?.totalPrice || 0) + calculatedSST || 0;
   }, [cartData, tickets, calculatedSST]);
 
+  const allResourcesConfirmed = useMemo(() => {
+      if (!cartData?.event?.campResources?.length) return true;
+      return cartData.event.campResources.every((resource) => resourceConfirmations[resource.id]);
+    }, [cartData?.event?.campResources, resourceConfirmations]);
+  
   const { watch, control, setValue, getValues } = useFormContext();
 
   const buyer = watch('buyer.isAnAttendee');
@@ -1480,6 +1488,65 @@ const TicketInformationCard = () => {
                 />
               </Stack>
             </Box>
+{cartData?.event?.campResources?.length > 0 && (
+  <Card
+    elevation={0}
+    sx={{ 
+      p: 0.5, 
+      borderRadius: 1,
+      border: 'none',
+      boxShadow: 'none'
+    }}
+  >
+    <Stack spacing={1}>
+      {cartData.event.campResources.map((resource) => (
+        <Box 
+          key={resource.id} 
+          sx={{ 
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <Checkbox
+            size="small"
+            checked={resourceConfirmations[resource.id] || false}
+            onChange={(e) =>
+              setResourceConfirmations((prev) => ({
+                ...prev,
+                [resource.id]: e.target.checked,
+              }))
+            }
+            sx={{ 
+              p: 0,
+              mr: 1
+            }}
+          />
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center'
+          }}>
+            <MarkdownContent 
+              content={resource.content} 
+              sx={{ 
+                '& p': { 
+                  m: 0,
+                  fontSize: '0.875rem',
+                  color: 'text.primary',
+                  fontWeight: 400,
+                  lineHeight: 1.5
+                },
+                '& a': {
+                  color: 'primary.main',
+                  textDecoration: 'none'
+                }
+              }}
+            />
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  </Card>
+)}
 
             <LoadingButton
               size="large"
@@ -1489,6 +1556,7 @@ const TicketInformationCard = () => {
               // loading={loading.value}
               // onClick={handleCheckout}
               // disabled={!totalTicketsQuantitySelected}
+              disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
               startIcon={
                 <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
               }
@@ -1503,7 +1571,9 @@ const TicketInformationCard = () => {
                 transition: 'all 0.2s',
               }}
             >
-              Proceed to Payment
+              {!allResourcesConfirmed
+                  ? 'Proceed to Payment'
+                  : 'Proceed to Payment'}
             </LoadingButton>
           </>
         </Box>
