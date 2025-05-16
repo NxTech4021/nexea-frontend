@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
   IconButton,
+  Checkbox,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -25,6 +26,7 @@ import { endpoints, axiosInstance } from 'src/utils/axios';
 import Iconify from 'src/components/iconify';
 
 import useGetCartData from './hooks/use-get-cart';
+import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 const shortenString = (text, length) => {
   if (text.length > length) {
@@ -40,6 +42,7 @@ const TicketOverviewCard = () => {
   const { data: cartData, cartMutate, handleCheckout, eventData } = useGetCartData();
   const collapse = useBoolean(true); // Default to open in mobile view
   const [calculatedSST, setCalculatedSST] = useState(null);
+  const [resourceConfirmations, setResourceConfirmations] = useState({});
 
   const {
     formState: { isSubmitting },
@@ -79,6 +82,10 @@ const TicketOverviewCard = () => {
     const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
     return ticketsTotal;
   }, [tickets]);
+  const allResourcesConfirmed = useMemo(() => {
+    if (!cartData?.event?.campResources?.length) return true;
+    return cartData.event.campResources.every((resource) => resourceConfirmations[resource.id]);
+  }, [cartData?.event?.campResources, resourceConfirmations]);
 
   const handleRedeemDiscount = async () => {
     if (!discountCode) {
@@ -707,7 +714,53 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Stack>
             </Card>
-
+            {cartData?.event?.campResources?.length > 0 && (
+              <Card
+                elevation={0}
+                sx={{
+                  p: 0.5,
+                  borderRadius: 1,
+                  border: 'none',
+                  boxShadow: 'none',
+                }}
+              >
+                <Stack spacing={0}>
+                  {cartData.event.campResources.map((resource) => (
+                    <Box key={resource.id}>
+                      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: -3 }}>
+                        <Checkbox
+                          size="small"
+                          checked={resourceConfirmations[resource.id] || false}
+                          onChange={(e) =>
+                            setResourceConfirmations((prev) => ({
+                              ...prev,
+                              [resource.id]: e.target.checked,
+                            }))
+                          }
+                          sx={{ p: 0, mr: 0.5 }}
+                        />
+                        <Box sx={{ flex: 'none', display: 'flex', alignItems: 'center' }}>
+                          <MarkdownContent
+                            content={resource.content}
+                            spacing={0.5}
+                            sx={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              '& p': {
+                                m: 0,
+                                display: 'inline',
+                                fontSize: '0.875rem',
+                              },
+                            }}
+                          />
+                        </Box>
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+              </Card>
+            )}
             {cartData ? (
               <LoadingButton
                 variant="contained"
@@ -715,7 +768,7 @@ const TicketOverviewCard = () => {
                 startIcon={<Iconify icon="fluent:payment-16-filled" width={20} />}
                 type="submit"
                 loading={isSubmitting}
-                disabled={!cartData?.cartItem?.length}
+                disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
                 sx={{
                   borderRadius: 1,
                   py: 1.5,
@@ -732,7 +785,10 @@ const TicketOverviewCard = () => {
                   mt: 'auto',
                 }}
               >
-                Proceed to Payment
+                {!allResourcesConfirmed
+                  ? 'Proceed to Payment'
+                  : 'Proceed to Payment'}
+                {/* Proceed to Payment */}
               </LoadingButton>
             ) : (
               <LoadingButton
