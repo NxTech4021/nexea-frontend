@@ -1287,6 +1287,36 @@ const TicketInformationCard = () => {
                       </Stack>
                     </Stack>
                   </Card>
+
+                  <LoadingButton
+                    size="large"
+                    variant="contained"
+                    fullWidth
+                    type="submit"
+                    // loading={loading.value}
+                    // onClick={handleCheckout}
+                    // disabled={!totalTicketsQuantitySelected}
+                    disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
+                    startIcon={
+                      <Iconify
+                        icon="material-symbols-light:shopping-cart-checkout-rounded"
+                        width={22}
+                      />
+                    }
+                    sx={{
+                      borderRadius: 1,
+                      py: 1.5,
+                      mt: 2.5,
+                      bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
+                      '&:hover': {
+                        bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
+                        transform: 'translateY(-2px)',
+                      },
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
+                  </LoadingButton>
                 </Stack>
               </Stack>
             </Box>
