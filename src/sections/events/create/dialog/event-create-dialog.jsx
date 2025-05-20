@@ -231,7 +231,7 @@ const RichTextEditor = ({ value, onChange }) => {
 
 // All steps for the stepper
 const eventSteps = ['Event Information', 'Settings'];
-const campSteps = ['Event Information', 'Camp Resources', 'Settings'];
+// const campSteps = ['Event Information', 'Camp Resources', 'Settings'];
 
 const RenderSelectField = ({ name, control, label, options, required }) => (
   <Stack width={1} spacing={1}>
@@ -280,17 +280,17 @@ const schema = yup.object().shape({
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
   eventLogo: yup.object().nullable(),
   // Camp resources fields - rich text content
-  campResources: yup.array().when('eventType', {
-    is: 'camp',
-    then: () =>
-      yup.array().of(
-        yup.object().shape({
-          title: yup.string().required('Title is required'),
-          content: yup.string().required('Content is required'),
-        })
-      ),
-    otherwise: () => yup.array(),
-  }),
+  // campResources: yup.array().when('eventType', {
+  //   is: 'camp',
+  //   then: () =>
+  //     yup.array().of(
+  //       yup.object().shape({
+  //         title: yup.string().required('Title is required'),
+  //         content: yup.string().required('Content is required'),
+  //       })
+  //     ),
+  //   otherwise: () => yup.array(),
+  // }),
 });
 
 const EventCreateDialog = ({ open, onClose }) => {
@@ -342,7 +342,9 @@ const EventCreateDialog = ({ open, onClose }) => {
   const startTimeValue = watch('startTime'); // Watch for startTime changes
 
   // Define steps based on event type
-  const steps = eventType === 'camp' ? campSteps : eventSteps;
+  // const steps = eventType === 'camp' ? campSteps : eventSteps;
+
+  const steps = eventSteps;
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
@@ -416,9 +418,9 @@ const EventCreateDialog = ({ open, onClose }) => {
       delete formattedData.eventDate;
 
       // If event type is not camp, remove the campResources field
-      if (formattedData.eventType !== 'camp') {
-        delete formattedData.campResources;
-      }
+      // if (formattedData.eventType !== 'camp') {
+      //   delete formattedData.campResources;
+      // }
 
       // Prepare FormData for file upload and event data
       const formData = new FormData();
@@ -682,7 +684,7 @@ const EventCreateDialog = ({ open, onClose }) => {
             </Box>
           )}
 
-          {/* Camp Resources Step - Only shown for Camp event type */}
+          {/* Camp Resources Step - Only shown for Camp event type
           {activeStep === 1 && eventType === 'camp' && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5} width={1}>
               <Typography variant="h6" gutterBottom>
@@ -746,10 +748,12 @@ const EventCreateDialog = ({ open, onClose }) => {
                 Add Resource
               </Button>
             </Box>
-          )}
+          )} */}
 
           {/* Settings Step */}
-          {activeStep === (eventType === 'camp' ? 2 : 1) && (
+          {
+          // activeStep === (eventType === 'camp' ? 2 : 1) && ( //comented out for now since we are not using camp resouces
+          activeStep === 1 && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
                 <InputLabel>Event Logo</InputLabel>

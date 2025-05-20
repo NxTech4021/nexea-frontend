@@ -1300,9 +1300,43 @@ const TicketInformationCard = () => {
                     boxShadow: 'none',
                     mt: 2,
                   }}
-                >
-                  <Stack spacing={1}>
-                    {cartData.event.campResources.map((resource) => (
+                />
+              </Stack>
+            </Box>
+            {/* {cartData?.event?.campResources?.length > 0 && (
+              <Card
+                elevation={0}
+                sx={{
+                  p: 0.5,
+                  borderRadius: 1,
+                  border: 'none',
+                  boxShadow: 'none',
+                }}
+              >
+                <Stack spacing={1}>
+                  {cartData.event.campResources.map((resource) => (
+                    <Box
+                      key={resource.id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Checkbox
+                        size="small"
+                        checked={resourceConfirmations[resource.id] || false}
+                        onChange={(e) =>
+                          setResourceConfirmations((prev) => ({
+                            ...prev,
+                            [resource.id]: e.target.checked,
+                          }))
+                        }
+                        sx={{
+                          p: 0,
+                          mr: 1,
+                        }}
+                      />
+
                       <Box
                         key={resource.id}
                         sx={{
@@ -1348,43 +1382,60 @@ const TicketInformationCard = () => {
                           />
                         </Box>
                       </Box>
-                    ))}
-                  </Stack>
-                </Card>
-              )}
-
-              <LoadingButton
-                size="large"
-                variant="contained"
-                fullWidth
-                type="submit"
-                // loading={loading.value}
-                // onClick={handleCheckout}
-                // disabled={!totalTicketsQuantitySelected}
-                disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
-                startIcon={
-                  <Iconify
-                    icon="material-symbols-light:shopping-cart-checkout-rounded"
-                    width={22}
-                  />
-                }
-                sx={{
-                  borderRadius: 1,
-                  py: 1.5,
-                  mt: 2.5,
-                  bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
-                  '&:hover': {
-                    bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
-                    transform: 'translateY(-2px)',
-                  },
-                  transition: 'all 0.2s',
-                }}
-              >
-                {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
-              </LoadingButton>
-            </Box>
-          </Card>
-        )}
+                    </Box>
+                  ))}
+                </Stack>
+              </Card>
+            )} */}
+            {/* Add this before the LoadingButton */}
+{cartData?.event?.eventType === 'camp' && (
+  <Card
+    elevation={0}
+    sx={{
+      p: 2,
+      mb: 2,
+      borderRadius: 2,
+      border: '1px solid',
+      borderColor: 'divider',
+    }}
+  >
+    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+      <Checkbox
+        size="small"
+        checked={resourceConfirmations['insurance'] || false}
+        onChange={(e) =>
+          setResourceConfirmations((prev) => ({
+            ...prev,
+            insurance: e.target.checked,
+          }))
+        }
+        sx={{
+          p: 0.5,
+          mt: 0.25,
+          color: 'text.secondary',
+          '&.Mui-checked': {
+            color: 'primary.main',
+          },
+        }}
+      />
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+          fontSize: '0.875rem',
+          lineHeight: 1.6,
+        }}
+      >
+        I acknowledge and agree that Public Liability and Group Personal Accident (GPA) insurance 
+        coverage is arranged by NEXEA and/or its designated third-party insurer solely for the 
+        benefit of registered ticket holders, and is strictly limited to the official duration 
+        of the camp. This coverage expressly excludes any incidents occurring during travel to 
+        and from the event or outside the scheduled camp activities. NEXEA shall not be held 
+        liable for any claims arising beyond the scope and period of this coverage
+      </Typography>
+    </Stack>
+  </Card>
+)}
 
         <IconButton
           size="small"
