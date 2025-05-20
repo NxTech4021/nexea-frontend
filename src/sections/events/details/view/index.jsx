@@ -52,7 +52,9 @@ const EventDetails = ({ id }) => {
   const totalRevenue = useMemo(() => {
     const orders = data?.order || [];
 
-    const totalSolds = orders.reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
+    const totalSolds = orders
+      .filter((a) => a?.status === 'paid')
+      .reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
 
     return totalSolds;
   }, [data]);
