@@ -23,6 +23,7 @@ import {
   IconButton,
   ListItemText,
   CircularProgress,
+  keyframes,
 } from '@mui/material';
 
 import { useSearchParams } from 'src/routes/hooks';
@@ -51,9 +52,17 @@ const defaultAttendee = {
   isForbuyer: false,
 };
 
+const bouncing = keyframes`
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+`;
+
 const TicketInformationCard = () => {
   const collapse = useBoolean(true);
-  const anotherCollapse = useBoolean();
   const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
   const mdDown = useResponsive('down', 'md');
@@ -839,9 +848,10 @@ const TicketInformationCard = () => {
 
     const handleScroll = () => {
       if (!ref.current) return;
-      // checkOverflow();
+
       const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      if (scrollTop + clientHeight >= scrollHeight) {
+
+      if (scrollTop + clientHeight + 0.5 >= scrollHeight) {
         isOverflow.onFalse();
       } else {
         isOverflow.onTrue();
@@ -910,7 +920,7 @@ const TicketInformationCard = () => {
 
     const handleClick = (event) => {
       if (!overviewBox.contains(event.target)) {
-        anotherCollapse.onFalse();
+        // No longer needed, removing reference to anotherCollapse
       }
     };
 
@@ -920,7 +930,7 @@ const TicketInformationCard = () => {
     return () => {
       document.removeEventListener('click', handleClick);
     };
-  }, [anotherCollapse]);
+  }, []);
 
   if (cartLoading) {
     return (
@@ -962,6 +972,7 @@ const TicketInformationCard = () => {
         overflow: 'hidden',
         p: { xs: 2, md: 3 },
         bgcolor: 'background.paper',
+        // bgcolor: 'beige',
         boxShadow: `0 0 24px ${alpha(theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.black, 0.05)}`,
       }}
     >
@@ -970,8 +981,8 @@ const TicketInformationCard = () => {
         <ListItemText
           primary="Billing Information"
           secondary="Personal and contact information of the buyer."
-          primaryTypographyProps={{ variant: 'h5', fontWeight: 600 }}
-          secondaryTypographyProps={{ variant: 'body2', mt: 0.5 }}
+          primaryTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
+          secondaryTypographyProps={{ variant: 'caption' }}
         />
       </Stack>
 
@@ -979,9 +990,12 @@ const TicketInformationCard = () => {
         ref={ref}
         flexGrow={1}
         sx={{
-          px: { xs: 1, md: 2 },
+          // bgcolor: 'beige',
+          // px: { xs: 1, md: 2 },
+          // height: '100%',
+          height: 1,
           my: 2,
-          height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
+          // height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
@@ -1026,464 +1040,265 @@ const TicketInformationCard = () => {
 
         {attendeeinfo}
 
-        <IconButton
-          size="small"
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            display: isOverflow.value ? 'flex' : 'none',
-            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.800',
-            color: 'common.white',
-            boxShadow: `0 8px 16px 0 ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.3 : 0.1)}`,
-            transition: 'all 0.2s',
-            '&.MuiIconButton-root': {
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.900',
-                transform: 'translateY(-2px)',
-              },
-            },
-            zIndex: 999,
-          }}
-          onClick={scrollToTop}
-        >
-          <Iconify icon="raphael:arrowup" width={22} />
-        </IconButton>
-      </Box>
-
-      {fields?.length && (
-        <Stack sx={{ position: 'absolute', top: 100, left: -100 }}>
-          {fields.map((field, index) => (
-            <Typography
-              key={index}
-              variant="caption"
-              color="text.secondary"
+        {mdDown && (
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: 2,
+              border: '2px solid',
+              borderColor: 'divider',
+              mb: 2.5,
+              overflow: 'visible',
+              mt: 3,
+            }}
+          >
+            <Stack
+              direction="row"
+              spacing={1.5}
+              alignItems="center"
               sx={{
-                cursor: 'pointer',
-                ...(activeFieldId === field.id && {
-                  position: 'relative',
-                  left: 4,
-                  color: 'text.primary',
-                  fontWeight: 600,
-                }),
-                '&:hover': {
-                  color: 'text.primary',
-                },
-              }}
-              onClick={(e) => {
-                const s = document.getElementById(field.id);
-
-                if (s) {
-                  s.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  setActiveFieldId(field.id);
-                }
+                borderRadius: '16px 16px 0 0',
+                p: 2,
+                bgcolor: alpha(
+                  theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
+                  0.5
+                ),
               }}
             >
-              {field.isForbuyer ? "Buyer's Ticket" : `Attendee ${index + 1}`}
-            </Typography>
-          ))}
-        </Stack>
-      )}
+              <Iconify icon="mdi:receipt-text-outline" width={20} color="text.primary" />
+              <Typography variant="subtitle1" fontWeight={500}>
+                Order Summary
+              </Typography>
+            </Stack>
 
-      {mdDown && (
-        <Box
-          ref={boxRef}
-          p={2.5}
-          mt="auto"
-          sx={{
-            position: 'sticky',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            bgcolor: 'background.paper',
-            borderTop: 1,
-            borderColor: 'divider',
-            boxShadow: `0 -4px 12px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.15 : 0.05)}`,
-            zIndex: 9,
-            marginTop: 3,
-          }}
-        >
-          <>
-            <Collapse in={anotherCollapse.value} timeout="auto">
-              <Box
+            <Box sx={{ p: 2 }}>
+              <Stack
                 sx={{
-                  maxHeight: '45vh',
-                  overflowY: 'auto',
-                  mb: 2.5,
-                  '&::-webkit-scrollbar': {
-                    width: '6px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: alpha(theme.palette.text.primary, 0.2),
-                    borderRadius: '10px',
+                  '& .MuiTypography-root': {
+                    fontSize: 14,
                   },
                 }}
-                position="relative"
+                width={1}
+                spacing={2.5}
+                flexShrink={2}
+                flex={1}
+                justifyContent="space-between"
               >
-                <Typography variant="h6" sx={{ mb: 2, mt: 1 }}>
-                  Order Summary
-                </Typography>
-                <Stack
+                <Card
+                  elevation={0}
                   sx={{
-                    '& .MuiTypography-root': {
-                      fontSize: 14,
-                    },
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: alpha(
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.background.neutral
+                        : theme.palette.background.neutral,
+                      theme.palette.mode === 'dark' ? 0.3 : 0.6
+                    ),
+                    border: '1px solid',
+                    borderColor: 'divider',
                   }}
-                  width={1}
-                  spacing={2.5}
-                  flexShrink={2}
-                  flex={1}
-                  justifyContent="space-between"
                 >
+                  <Stack spacing={2}>
+                    {cartData?.cartItem.map((item) => (
+                      <Stack
+                        key={item.id}
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
+                          <Typography
+                            sx={{ fontWeight: 500 }}
+                          >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                        </Stack>
+                        <Typography sx={{ fontWeight: 600 }}>
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(item.quantity * item.ticketType.price)}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Card>
+
+                <Stack spacing={2.5}>
+                  {cartData && (
+                    <Card
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Stack spacing={1.5}>
+                        <Typography variant="subtitle2" mb={0.5}>
+                          Discount Code
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          spacing={1}
+                        >
+                          <TextField
+                            size="small"
+                            fullWidth
+                            placeholder="Enter Discount Code"
+                            value={discountCode}
+                            onChange={(e) =>
+                              setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
+                            }
+                            InputProps={{
+                              sx: { borderRadius: 1 },
+                            }}
+                          />
+
+                          <Button
+                            variant="contained"
+                            size="medium"
+                            onClick={handleRedeemDiscount}
+                            sx={{
+                              height: 40,
+                              borderRadius: 1,
+                              px: 2,
+                              bgcolor: theme.palette.mode === 'dark' ? '#fff' : '#000',
+                              color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                              '&:hover': {
+                                bgcolor: theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
+                              },
+                            }}
+                          >
+                            Apply
+                          </Button>
+                        </Stack>
+
+                        {!!cartData.discount && (
+                          <Stack spacing={1} sx={{ mt: 1 }}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Iconify
+                                icon="lets-icons:check-fill"
+                                color="success.main"
+                                width={16}
+                              />
+                              <Typography variant="body2" color="success.main" fontWeight={500}>
+                                Discount code applied!
+                              </Typography>
+                            </Stack>
+                            <Stack
+                              direction="row"
+                              justifyContent="space-between"
+                              alignItems="center"
+                              sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                bgcolor: alpha(theme.palette.success.lighter, 0.5),
+                              }}
+                            >
+                              <Stack direction="row" alignItems="center" spacing={1}>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {cartData.discount.code}
+                                </Typography>
+                                <IconButton
+                                  size="small"
+                                  onClick={removeDiscountCode}
+                                  sx={{
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': {
+                                      bgcolor: alpha(theme.palette.error.main, 0.2),
+                                    },
+                                  }}
+                                >
+                                  <Iconify icon="mdi:trash-outline" width={14} color="error.main" />
+                                </IconButton>
+                              </Stack>
+                              <Stack direction="row" alignItems="center" spacing={1} />
+                              <Typography variant="body2" color="error.main" fontWeight={600}>
+                                -{' '}
+                                {Intl.NumberFormat('en-MY', {
+                                  style: 'currency',
+                                  currency: 'MYR',
+                                }).format(cartData.orderSummary.discount)}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                        )}
+                      </Stack>
+                    </Card>
+                  )}
+
                   <Card
                     elevation={0}
                     sx={{
                       p: 2,
                       borderRadius: 2,
-                      bgcolor: alpha(
-                        theme.palette.mode === 'dark'
-                          ? theme.palette.background.neutral
-                          : theme.palette.background.neutral,
-                        theme.palette.mode === 'dark' ? 0.3 : 0.6
-                      ),
                       border: '1px solid',
                       borderColor: 'divider',
                     }}
                   >
                     <Stack spacing={2}>
-                      {cartData?.cartItem.map((item) => (
-                        <Stack
-                          key={item.id}
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Stack direction="row" alignItems="center" spacing={1}>
-                            <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
-                            <Typography
-                              sx={{ fontWeight: 500 }}
-                            >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
-                          </Stack>
-                          <Typography sx={{ fontWeight: 600 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography color="text.secondary">Subtotal:</Typography>
+                        <Typography fontWeight={500}>
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(subTotal)}
+                        </Typography>
+                      </Stack>
+
+                      {cartData && (
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                          <Typography color="text.secondary">Discount:</Typography>
+                          <Typography fontWeight={500} color="error.main">
+                            -{' '}
                             {Intl.NumberFormat('en-MY', {
                               style: 'currency',
                               currency: 'MYR',
-                            }).format(item.quantity * item.ticketType.price)}
+                            }).format(cartData?.orderSummary?.discount)}
                           </Typography>
                         </Stack>
-                      ))}
+                      )}
+
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography color="text.secondary">SST:</Typography>
+                        <Typography fontWeight={500}>
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(calculatedSST)}
+                        </Typography>
+                      </Stack>
+
+                      <Divider />
+
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="subtitle1">Total:</Typography>
+                        <Typography variant="h6" color="text.primary">
+                          {Intl.NumberFormat('en-MY', {
+                            style: 'currency',
+                            currency: 'MYR',
+                          }).format(total)}
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </Card>
-
-                  <Stack spacing={2.5}>
-                    {/* {cartData && (
-                      <Card
-                        elevation={0}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                        }}
-                      >
-                        <Stack spacing={1.5}>
-                          <Typography variant="subtitle2" mb={0.5}>
-                            Discount Code
-                          </Typography>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={1}
-                          >
-                            <TextField
-                              size="small"
-                              fullWidth
-                              placeholder="Enter Discount Code"
-                              value={discountCode}
-                              onChange={(e) =>
-                                setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
-                              }
-                              InputProps={{
-                                sx: { borderRadius: 1.5 },
-                              }}
-                            />
-                            <Button
-                              variant="contained"
-                              size="medium"
-                              onClick={handleRedeemDiscount}
-                              sx={{
-                                height: 40,
-                                borderRadius: 1.5,
-                                px: 2,
-                                bgcolor:
-                                  theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
-                                '&:hover': {
-                                  bgcolor:
-                                    theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
-                                },
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          </Stack>
-
-                          {!!cartData.discount && (
-                            <Stack spacing={1} sx={{ mt: 1 }}>
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Iconify
-                                  icon="lets-icons:check-fill"
-                                  color="success.main"
-                                  width={16}
-                                />
-                                <Typography variant="body2" color="success.main" fontWeight={500}>
-                                  Discount code applied
-                                </Typography>
-                              </Stack>
-                              <Stack
-                                direction="row"
-                                justifyContent="space-between"
-                                sx={{
-                                  p: 1.5,
-                                  borderRadius: 1.5,
-                                  bgcolor: alpha(
-                                    theme.palette.mode === 'dark'
-                                      ? theme.palette.success.dark
-                                      : theme.palette.success.lighter,
-                                    theme.palette.mode === 'dark' ? 0.2 : 0.5
-                                  ),
-                                }}
-                              >
-                                <Typography variant="body2" fontWeight={500}>
-                                  {cartData.discount.code}
-                                </Typography>
-                                <Typography variant="body2" color="error" fontWeight={500}>
-                                  - {cartData.discount.value}
-                                </Typography>
-                              </Stack>
-                            </Stack>
-                          )}
-                        </Stack>
-                      </Card>
-                    )} */}
-                    {cartData && (
-                      <Card
-                        elevation={0}
-                        sx={{
-                          p: 2,
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                        }}
-                      >
-                        <Stack spacing={1.5}>
-                          <Typography variant="subtitle2" mb={0.5}>
-                            Discount Code
-                          </Typography>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={1}
-                          >
-                            <TextField
-                              size="small"
-                              fullWidth
-                              placeholder="Enter Discount Code"
-                              value={discountCode}
-                              onChange={(e) =>
-                                setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
-                              }
-                              InputProps={{
-                                sx: { borderRadius: 1.5 },
-                              }}
-                            />
-
-                            <Button
-                              variant="contained"
-                              size="medium"
-                              onClick={handleRedeemDiscount}
-                              sx={{
-                                height: 40,
-                                borderRadius: 1.5,
-                                px: 2,
-                                bgcolor: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                '&:hover': {
-                                  bgcolor: theme.palette.mode === 'dark' ? '#f5f5f5' : '#333',
-                                },
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          </Stack>
-
-                          {!!cartData.discount && (
-                            <Stack spacing={1} sx={{ mt: 1 }}>
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Iconify
-                                  icon="lets-icons:check-fill"
-                                  color="success.main"
-                                  width={16}
-                                />
-                                <Typography variant="body2" color="success.main" fontWeight={500}>
-                                  Discount code applied!
-                                </Typography>
-                              </Stack>
-                              <Stack
-                                direction="row"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                sx={{
-                                  p: 1.5,
-                                  borderRadius: 1.5,
-                                  bgcolor: alpha(theme.palette.success.lighter, 0.5),
-                                }}
-                              >
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Typography variant="body2" fontWeight={500}>
-                                    {cartData.discount.code}
-                                  </Typography>
-                                  <IconButton
-                                    size="small"
-                                    onClick={removeDiscountCode}
-                                    sx={{
-                                      bgcolor: alpha(theme.palette.error.main, 0.1),
-                                      '&:hover': {
-                                        bgcolor: alpha(theme.palette.error.main, 0.2),
-                                      },
-                                    }}
-                                  >
-                                    <Iconify
-                                      icon="mdi:trash-outline"
-                                      width={14}
-                                      color="error.main"
-                                    />
-                                  </IconButton>
-                                </Stack>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                  {/* <Typography variant="body2" fontWeight={500}>
-                                                Type: {cartData.discount.type}
-                                              </Typography> */}
-                                </Stack>
-                                <Typography variant="body2" color="error.main" fontWeight={600}>
-                                  -{' '}
-                                  {Intl.NumberFormat('en-MY', {
-                                    style: 'currency',
-                                    currency: 'MYR',
-                                  }).format(cartData.orderSummary.discount)}
-                                </Typography>
-                              </Stack>
-                            </Stack>
-                          )}
-                        </Stack>
-                      </Card>
-                    )}
-
-                    <Card
-                      elevation={0}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      <Stack spacing={2}>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between">
-                          <Typography color="text.secondary">Subtotal:</Typography>
-                          <Typography fontWeight={500}>
-                            {Intl.NumberFormat('en-MY', {
-                              style: 'currency',
-                              currency: 'MYR',
-                            }).format(subTotal)}
-                          </Typography>
-                        </Stack>
-
-                        {cartData && (
-                          <Stack direction="row" alignItems="center" justifyContent="space-between">
-                            <Typography color="text.secondary">Discount:</Typography>
-                            <Typography fontWeight={500} color="error.main">
-                              -{' '}
-                              {Intl.NumberFormat('en-MY', {
-                                style: 'currency',
-                                currency: 'MYR',
-                              }).format(cartData?.orderSummary?.discount)}
-                            </Typography>
-                          </Stack>
-                        )}
-
-                        <Stack direction="row" alignItems="center" justifyContent="space-between">
-                          <Typography color="text.secondary">SST:</Typography>
-                          <Typography fontWeight={500}>
-                            {Intl.NumberFormat('en-MY', {
-                              style: 'currency',
-                              currency: 'MYR',
-                            }).format(calculatedSST)}
-                          </Typography>
-                        </Stack>
-
-                        <Divider />
-
-                        <Stack direction="row" alignItems="center" justifyContent="space-between">
-                          <Typography variant="subtitle1">Total:</Typography>
-                          <Typography variant="h6" color="text.primary">
-                            {Intl.NumberFormat('en-MY', {
-                              style: 'currency',
-                              currency: 'MYR',
-                            }).format(total)}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-                    </Card>
-                  </Stack>
                 </Stack>
-              </Box>
-            </Collapse>
+              </Stack>
 
-            <Box
-              onClick={() => anotherCollapse.onToggle()}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                mb: 2,
-                p: 1.5,
-                borderRadius: 2,
-                bgcolor: alpha(
-                  theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
-                  0.5
-                ),
-                '&:hover': {
-                  bgcolor: alpha(
-                    theme.palette.mode === 'dark'
-                      ? theme.palette.grey[700]
-                      : theme.palette.grey[300],
-                    0.5
-                  ),
-                },
-              }}
-            >
-              <Typography variant="subtitle1">
-                {anotherCollapse.value ? 'Hide Order Summary' : 'View Order Summary'}
-              </Typography>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    total || 0
-                  )}
-                </Typography>
-                <Iconify
-                  icon={
-                    anotherCollapse.value
-                      ? 'iconamoon:arrow-up-2-bold'
-                      : 'iconamoon:arrow-down-2-bold'
-                  }
-                  width={20}
+              {cartData?.event?.campResources?.length > 0 && (
+                <Card
+                  elevation={0}
                   sx={{
-                    transition: 'transform 0.2s ease',
-                    transform: anotherCollapse.value ? 'rotate(0deg)' : 'rotate(0deg)',
+                    p: 0.5,
+                    borderRadius: 1,
+                    border: 'none',
+                    boxShadow: 'none',
+                    mt: 2,
                   }}
                 />
               </Stack>
@@ -1521,28 +1336,51 @@ const TicketInformationCard = () => {
                           mr: 1,
                         }}
                       />
+
                       <Box
+                        key={resource.id}
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
                         }}
                       >
-                        <MarkdownContent
-                          content={resource.content}
+                        <Checkbox
+                          size="small"
+                          checked={resourceConfirmations[resource.id] || false}
+                          onChange={(e) =>
+                            setResourceConfirmations((prev) => ({
+                              ...prev,
+                              [resource.id]: e.target.checked,
+                            }))
+                          }
                           sx={{
-                            '& p': {
-                              m: 0,
-                              fontSize: '0.875rem',
-                              color: 'text.primary',
-                              fontWeight: 400,
-                              lineHeight: 1.5,
-                            },
-                            '& a': {
-                              color: 'primary.main',
-                              textDecoration: 'none',
-                            },
+                            p: 0,
+                            mr: 1,
                           }}
                         />
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <MarkdownContent
+                            content={resource.content}
+                            sx={{
+                              '& p': {
+                                m: 0,
+                                fontSize: '0.875rem',
+                                color: 'text.primary',
+                                fontWeight: 400,
+                                lineHeight: 1.5,
+                              },
+                              '& a': {
+                                color: 'primary.main',
+                                textDecoration: 'none',
+                              },
+                            }}
+                          />
+                        </Box>
                       </Box>
                     </Box>
                   ))}
@@ -1599,33 +1437,63 @@ const TicketInformationCard = () => {
   </Card>
 )}
 
-            <LoadingButton
-              size="large"
-              variant="contained"
-              fullWidth
-              type="submit"
-              // loading={loading.value}
-              // onClick={handleCheckout}
-              // disabled={!totalTicketsQuantitySelected}
-              disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
-              startIcon={
-                <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
-              }
+        <IconButton
+          size="small"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            display: isOverflow.value ? 'flex' : 'none',
+            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.800',
+            color: 'common.white',
+            boxShadow: `0 8px 16px 0 ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.3 : 0.1)}`,
+            transition: 'all 0.2s',
+            '&.MuiIconButton-root': {
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.900',
+                transform: 'translateY(-2px)',
+              },
+            },
+            zIndex: 999,
+            animation: `${bouncing} 1s linear infinite`,
+          }}
+        >
+          <Iconify icon="raphael:arrowup" width={22} sx={{ transform: 'rotate(180deg)' }} />
+        </IconButton>
+      </Box>
+
+      {fields?.length && (
+        <Stack sx={{ position: 'absolute', top: 100, left: -100 }}>
+          {fields.map((field, index) => (
+            <Typography
+              key={index}
+              variant="caption"
+              color="text.secondary"
               sx={{
-                borderRadius: 2,
-                py: 1.5,
-                bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
+                cursor: 'pointer',
+                ...(activeFieldId === field.id && {
+                  position: 'relative',
+                  left: 4,
+                  color: 'text.primary',
+                  fontWeight: 600,
+                }),
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
-                  transform: 'translateY(-2px)',
+                  color: 'text.primary',
                 },
-                transition: 'all 0.2s',
+              }}
+              onClick={(e) => {
+                const s = document.getElementById(field.id);
+
+                if (s) {
+                  s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setActiveFieldId(field.id);
+                }
               }}
             >
-              {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
-            </LoadingButton>
-          </>
-        </Box>
+              {field.isForbuyer ? "Buyer's Ticket" : `Attendee ${index + 1}`}
+            </Typography>
+          ))}
+        </Stack>
       )}
     </Box>
   );

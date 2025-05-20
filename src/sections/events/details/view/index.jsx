@@ -9,9 +9,9 @@ import {
   Card,
   Stack,
   Container,
+  Typography,
   CardContent,
   CircularProgress,
-  Typography,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -30,8 +30,6 @@ import CheckInAnalytics from '../analytics/checkIn-analytics';
 
 const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
-
-  console.log(data);
 
   const router = useRouter();
 
@@ -62,6 +60,23 @@ const EventDetails = ({ id }) => {
 
     return totalSolds;
   }, [data]);
+
+  const orders = data?.order?.flatMap((a) => a.attendees) || [];
+
+  const grouped = orders?.reduce((acc, entry) => {
+    const title = entry.ticket?.ticketType?.title;
+    if (!title) return acc;
+
+    if (!acc[title]) {
+      acc[title] = {
+        title,
+        quantity: 1,
+      };
+    } else {
+      acc[title].quantity += 1;
+    }
+    return acc;
+  }, {});
 
   if (error) return router.back();
   if (isLoading)
@@ -160,7 +175,7 @@ const EventDetails = ({ id }) => {
           </Card>
         </Grid>
         <Grid item size={{ xs: 12, md: 6 }}>
-          <TicketInformation />
+          <TicketInformation tickets={Object.values(grouped) || []} />
         </Grid>
       </Grid>
     </Container>
