@@ -1,8 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactApexChart from 'react-apexcharts';
 
 import { Box, Card, useTheme, Typography, CardContent } from '@mui/material';
-import PropTypes from 'prop-types';
 
 const ticketData = [
   {

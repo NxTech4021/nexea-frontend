@@ -19,11 +19,11 @@ import {
   Collapse,
   Checkbox,
   TextField,
+  keyframes,
   Typography,
   IconButton,
   ListItemText,
   CircularProgress,
-  keyframes,
 } from '@mui/material';
 
 import { useSearchParams } from 'src/routes/hooks';
@@ -37,7 +37,6 @@ import { endpoints, axiosInstance } from 'src/utils/axios';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
-import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 import useGetCartData from './hooks/use-get-cart';
 import { TextFieldCustom } from './components/text-field';

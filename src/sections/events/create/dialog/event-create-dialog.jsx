@@ -11,10 +11,8 @@ import { useForm, Controller, useFieldArray } from 'react-hook-form';
 
 import { LoadingButton } from '@mui/lab';
 // Import icons
-import AddIcon from '@mui/icons-material/Add';
 import LinkIcon from '@mui/icons-material/Link';
 import TitleIcon from '@mui/icons-material/Title';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
