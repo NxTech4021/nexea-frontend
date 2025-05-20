@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 import React, { useState, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import { LoadingButton } from '@mui/lab';
@@ -31,7 +31,22 @@ import {
   DialogContent,
   DialogActions,
   FormHelperText,
+  IconButton,
+  Paper,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
+
+// Import icons
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import LinkIcon from '@mui/icons-material/Link';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import TitleIcon from '@mui/icons-material/Title';
+import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -39,9 +54,184 @@ import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 
-import FormProvider, { RHFUpload, RHFTextField, RHFDatePicker } from 'src/components/hook-form';
+import FormProvider, { RHFUpload, RHFTextField, RHFDatePicker, RHFSelect } from 'src/components/hook-form';
 
-const steps = ['Event Information', 'Settings'];
+// Rich text editor for camp resources
+const RichTextEditor = ({ value, onChange }) => {
+  const [text, setText] = useState(value || '');
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [isChecked, setIsChecked] = useState(false); // Default to dense preview
+  const textAreaRef = React.useRef(null);
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+    onChange(e.target.value);
+  };
+
+  const saveSelection = () => {
+    if (textAreaRef.current) {
+      setSelection({
+        start: textAreaRef.current.selectionStart,
+        end: textAreaRef.current.selectionEnd
+      });
+    }
+  };
+
+const insertFormat = (format) => {
+    if (textAreaRef.current) {
+      const textarea = textAreaRef.current;
+      const { start, end } = selection;
+      const selectedText = text.substring(start, end);
+      
+      let newText = text;
+      let newCursorPos = end;
+
+      switch (format) {
+        case 'bold':
+          newText = text.substring(0, start) + `**${selectedText}**` + text.substring(end);
+          newCursorPos = end + 4;
+          break;
+        case 'italic':
+          newText = text.substring(0, start) + `_${selectedText}_` + text.substring(end);
+          newCursorPos = end + 2;
+          break;
+        case 'link':
+          const url = prompt('Enter URL:', 'https://');
+          if (url) {
+            newText = text.substring(0, start) + `[${selectedText}](${url})` + text.substring(end);
+            newCursorPos = end + url.length + 4;
+          }
+          break;
+        case 'list':
+          const lines = selectedText ? selectedText.split('\n') : [''];
+          const bulletList = lines.map(line => `- ${line}`).join('\n');
+          newText = text.substring(0, start) + bulletList + text.substring(end);
+          newCursorPos = start + bulletList.length;
+          break;
+        case 'numbered':
+          const numberedLines = selectedText ? selectedText.split('\n') : [''];
+          const numberedList = numberedLines.map((line, i) => `${i + 1}. ${line}`).join('\n');
+          newText = text.substring(0, start) + numberedList + text.substring(end);
+          newCursorPos = start + numberedList.length;
+          break;
+        case 'heading':
+          newText = text.substring(0, start) + `## ${selectedText}` + text.substring(end);
+          newCursorPos = end + 3;
+          break;
+        default:
+          break;
+      }
+
+      setText(newText);
+      onChange(newText);
+      
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    }
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <IconButton size="small" onClick={() => insertFormat('bold')} title="Bold">
+            <FormatBoldIcon />
+          </IconButton>
+          <IconButton size="small" onClick={() => insertFormat('italic')} title="Italic">
+            <FormatItalicIcon />
+          </IconButton>
+          <IconButton size="small" onClick={() => insertFormat('link')} title="Insert Link">
+            <LinkIcon />
+          </IconButton>
+          <IconButton size="small" onClick={() => insertFormat('list')} title="Bullet List">
+            <FormatListBulletedIcon />
+          </IconButton>
+          <IconButton size="small" onClick={() => insertFormat('numbered')} title="Numbered List">
+            <FormatListNumberedIcon />
+          </IconButton>
+          <IconButton size="small" onClick={() => insertFormat('heading')} title="Heading">
+            <TitleIcon />
+          </IconButton>
+        </Box>
+      </Paper>
+      <textarea
+        ref={textAreaRef}
+        value={text}
+        onChange={handleTextChange}
+        onSelect={saveSelection}
+        style={{ 
+          width: '100%', 
+          minHeight: '150px',
+          padding: '12px',
+          borderRadius: '4px',
+          border: '1px solid #ccc',
+          fontFamily: 'inherit'
+        }}
+      />
+ {/* Preview section */}
+{text && (
+  <Box mt={1.5}>
+    <Paper 
+      variant="outlined" 
+      sx={{ 
+        p: 1.2,
+        '& p': { 
+          m: 0,
+          mb: 1,
+          fontSize: '0.875rem',
+          '&:last-child': { mb: 0 }
+        },
+        '& ul, & ol': {
+          m: 0,
+          mb: 1,
+          pl: 2.5,
+          '&:last-child': { mb: 0 }
+        },
+        '& li': {
+          mb: 0.5,
+          fontSize: '0.875rem',
+          '&:last-child': { mb: 0 }
+        },
+        '& h2': {
+          fontSize: '1rem',
+          m: 0,
+          mb: 1
+        }
+      }}
+    >
+      <Stack direction="row" spacing={1} alignItems="flex-start">
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={isChecked}
+              onChange={(e) => setIsChecked(e.target.checked)}
+            />
+          }
+          sx={{ 
+            m: 0,
+            alignItems: 'flex-start',
+            '& .MuiCheckbox-root': {
+              pt: 0
+            }
+          }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <MarkdownContent content={text} />
+        </Box>
+      </Stack>
+    </Paper>
+  </Box>
+)}
+    </Box>
+  );
+};
+
+// All steps for the stepper
+const eventSteps = ['Event Information', 'Settings'];
+const campSteps = ['Event Information', 'Camp Resources', 'Settings'];
 
 const RenderSelectField = ({ name, control, label, options, required }) => (
   <Stack width={1} spacing={1}>
@@ -78,16 +268,28 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
   </Stack>
 );
 
+// Updated schema to include the new fields
 const schema = yup.object().shape({
+  eventType: yup.string().required('Event type is required'),
   eventName: yup.string().required('Event name is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
+  endDate: yup.date().required('End date is required'),
   startTime: yup.date().required('Start time is required'),
   endTime: yup.date().required('End time is required'),
-  // themeColor: yup.string().required('Theme color is required'),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
-  // Changed eventLogo to be optional
   eventLogo: yup.object().nullable(),
+  // Camp resources fields - rich text content
+  campResources: yup.array().when('eventType', {
+    is: 'camp',
+    then: () => yup.array().of(
+      yup.object().shape({
+        title: yup.string().required('Title is required'),
+        content: yup.string().required('Content is required')
+      })
+    ),
+    otherwise: () => yup.array()
+  }),
 });
 
 const EventCreateDialog = ({ open, onClose }) => {
@@ -104,6 +306,7 @@ const EventCreateDialog = ({ open, onClose }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
+      eventType: 'event', // Default event type
       eventName: '',
       personInCharge: '',
       eventDate: null,
@@ -113,6 +316,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       themeColor: '',
       sst: '',
       eventLogo: null,
+      campResources: [{ title: '', content: '' }], // Default empty camp resource
     },
     mode: 'onChange',
   });
@@ -126,6 +330,18 @@ const EventCreateDialog = ({ open, onClose }) => {
     watch,
     formState: { errors, isSubmitting },
   } = methods;
+
+  // Use field array to manage dynamic camp resource fields
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'campResources',
+  });
+
+  const eventType = watch('eventType'); // Watch for eventType changes
+  const startTimeValue = watch('startTime'); // Watch for startTime changes
+  
+  // Define steps based on event type
+  const steps = eventType === 'camp' ? campSteps : eventSteps;
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
@@ -198,6 +414,11 @@ const EventCreateDialog = ({ open, onClose }) => {
       delete formattedData.endTime;
       delete formattedData.eventDate;
 
+      // If event type is not camp, remove the campResources field
+      if (formattedData.eventType !== 'camp') {
+        delete formattedData.campResources;
+      }
+
       // Prepare FormData for file upload and event data
       const formData = new FormData();
       formData.append('data', JSON.stringify(formattedData));
@@ -214,7 +435,6 @@ const EventCreateDialog = ({ open, onClose }) => {
 
       // On success, refresh the data and display success message
       mutate();
-      // enqueueSnackbar(res?.data?.message);
       enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
 
       handleCancel();
@@ -223,8 +443,6 @@ const EventCreateDialog = ({ open, onClose }) => {
       enqueueSnackbar(error?.message, { variant: 'error' });
     }
   });
-
-  const startTimeValue = watch('startTime'); // Watch for startTime changes
 
   return (
     <Dialog
@@ -329,8 +547,31 @@ const EventCreateDialog = ({ open, onClose }) => {
             })}
           </Stepper>
 
+          {/* Event Information Step */}
           {activeStep === 0 && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
+              {/* Event Type Selection */}
+              <Stack width={1} spacing={1}>
+                <InputLabel required>Event Type</InputLabel>
+                <Controller
+                  name="eventType"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <FormControl fullWidth error={!!fieldState.error}>
+                      <Select
+                        {...field}
+                        displayEmpty
+                        MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+                      >
+                        <MenuItem value="event">Event</MenuItem>
+                        <MenuItem value="camp">Camp</MenuItem>
+                      </Select>
+                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                    </FormControl>
+                  )}
+                />
+              </Stack>
+
               <Stack width={1}>
                 <InputLabel required>Event Name</InputLabel>
                 <RHFTextField
@@ -438,10 +679,82 @@ const EventCreateDialog = ({ open, onClose }) => {
             </Box>
           )}
 
-          {activeStep === 1 && (
+          {/* Camp Resources Step - Only shown for Camp event type */}
+          {activeStep === 1 && eventType === 'camp' && (
+            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5} width={1}>
+              <Typography variant="h6" gutterBottom>
+                Camp Resources
+              </Typography>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Add resources for camp participants. You can use formatting tools to make your content more engaging.
+              </Typography>
+
+              {fields.map((field, index) => (
+                <Paper 
+                  key={field.id} 
+                  variant="outlined" 
+                  sx={{ p: 2, mb: 2, width: '100%' }}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="subtitle1" fontWeight="600">
+                      Resource #{index + 1}
+                    </Typography>
+                    <IconButton
+                      color="error"
+                      onClick={() => fields.length > 1 && remove(index)}
+                      disabled={fields.length <= 1}
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
+                  
+                  <Box mb={2}>
+                    <InputLabel required>Title</InputLabel>
+                    <RHFTextField
+                      name={`campResources.${index}.title`}
+                      placeholder="Resource title"
+                      fullWidth
+                    />
+                  </Box>
+                  
+                  <Box>
+                    <InputLabel required>Content</InputLabel>
+                    <Controller
+                      name={`campResources.${index}.content`}
+                      control={control}
+                      render={({ field }) => (
+                        <RichTextEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                    {errors?.campResources?.[index]?.content && (
+                      <FormHelperText error>
+                        {errors.campResources[index].content.message}
+                      </FormHelperText>
+                    )}
+                  </Box>
+                </Paper>
+              ))}
+              
+              <Button
+                startIcon={<AddIcon />}
+                onClick={() => append({ title: '', content: '' })}
+                variant="outlined"
+                sx={{ mt: 1 }}
+              >
+                Add Resource
+              </Button>
+            </Box>
+          )}
+
+          {/* Settings Step */}
+          {(activeStep === (eventType === 'camp' ? 2 : 1)) && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
-                <InputLabel required>Event Logo</InputLabel>
+                <InputLabel>Event Logo</InputLabel>
                 <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
               </Stack>
             </Box>
