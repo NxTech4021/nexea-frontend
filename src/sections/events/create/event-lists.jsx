@@ -21,6 +21,7 @@ import {
   Tooltip,
   MenuItem,
   Skeleton,
+  Collapse,
   TextField,
   Typography,
   IconButton,
@@ -679,207 +680,150 @@ const EventLists = ({ query }) => {
               </Stack>
 
               {/* Expanded Actions Row */}
-              {isExpanded && (
+              <Collapse in={isExpanded} timeout={250} unmountOnExit>
                 <Stack
                   direction="row"
                   sx={{
-                    // bgcolor: theme.palette.mode === 'light' ? 'grey.800' : 'grey.100',
                     borderTop: '1px solid',
                     borderColor: 'divider',
-                    height: 50,
-                    position: 'relative',
-                    overflow: 'auto',
+                    minHeight: 48,
+                    px: 2,
+                    bgcolor: 'background.paper',
                   }}
+                  alignItems="center"
+                  spacing={1}
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      width: 'fit-content',
-                      maxWidth: '95%',
+                  <Button
+                    onClick={() => {
+                      setOpenEdit(true);
+                      setSelectedEvent(event);
+                      setExpandedRow(null);
                     }}
+                    startIcon={<Iconify icon="eva:edit-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="Edit Event"
                   >
-                    <Box
-                      onClick={() => {
-                        setOpenEdit(true);
-                        setSelectedEvent(event);
-                        setExpandedRow(null);
-                      }}
-                      sx={{
-                        minWidth: { xs: '100px', sm: '120px' },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        height: '100%',
-                        px: 1.5,
-                        // color: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.light',
-                        '&:hover': {
-                          bgcolor:
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(71, 130, 218, 0.08)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                        },
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Iconify icon="eva:edit-fill" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>
-                          Edit Event
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    <Divider orientation="vertical" flexItem />
-
-                    <Box
-                      onClick={() => {
-                        ticketDialog.onTrue();
-                        setSelectedEvent(event);
-                        setExpandedRow(null);
-                      }}
-                      sx={{
-                        minWidth: { xs: '120px', sm: '140px' },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        height: '100%',
-                        px: 1.5,
-                        // color: theme.palette.mode === 'dark' ? 'info.dark' : 'info.light',
-                        '&:hover': {
-                          bgcolor:
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(24, 144, 255, 0.08)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                        },
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Iconify icon="mdi:ticket" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>
-                          Manage Tickets
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    <Divider orientation="vertical" flexItem />
-
-                    <Box
-                      onClick={() => {
-                        setOpenCSV(true);
-                        setSelectedEvent(event);
-                        setExpandedRow(null);
-                      }}
-                      sx={{
-                        minWidth: { xs: '100px', sm: '120px' },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        height: '100%',
-                        px: 1.5,
-                        color: theme.palette.mode === 'dark' ? 'success.dark' : 'success.light',
-                        '&:hover': {
-                          bgcolor:
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(84, 214, 44, 0.08)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                        },
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Iconify icon="mdi:file-upload" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>
-                          Upload CSV
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    <Divider orientation="vertical" flexItem />
-
-                    <Box
-                      onClick={() => {
-                        const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
-                        navigator.clipboard
-                          .writeText(eventLink)
-                          .then(() => {
-                            enqueueSnackbar('Link copied!', {
-                              variant: 'success',
-                            });
-                          })
-                          .catch((error) => {
-                            console.error('Error copying link: ', error);
-                            enqueueSnackbar('Failed to copy link', {
-                              variant: 'error',
-                            });
-                          });
-                      }}
-                      sx={{
-                        minWidth: { xs: '90px', sm: '110px' },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        height: '100%',
-                        px: 1.5,
-                        color: theme.palette.mode === 'dark' ? 'warning.dark' : 'warning.light',
-                        '&:hover': {
-                          bgcolor:
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(255, 171, 0, 0.08)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                        },
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Iconify icon="mdi:content-copy" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>
-                          Copy Cart Link
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    <Divider orientation="vertical" flexItem />
-
-                    <Box
-                      onClick={() => {
-                        setOpenDelete(true);
-                        setSelectedEvent(event);
-                        setExpandedRow(null);
-                      }}
-                      sx={{
-                        minWidth: { xs: '80px', sm: '100px' },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        height: '100%',
-                        px: 1.5,
-                        color: theme.palette.mode === 'dark' ? 'error.dark' : 'error.light',
-                        '&:hover': {
-                          bgcolor:
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(255, 86, 48, 0.08)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                        },
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    >
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Iconify icon="eva:trash-2-outline" width={20} height={20} />
-                        <Typography variant="body2" fontWeight={500}>
-                          Delete
-                        </Typography>
-                      </Stack>
-                    </Box>
-                  </Box>
+                    Edit
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      ticketDialog.onTrue();
+                      setSelectedEvent(event);
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:pricetags-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="Manage Tickets"
+                  >
+                    Tickets
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setOpenCSV(true);
+                      setSelectedEvent(event);
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:cloud-upload-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="Upload CSV"
+                  >
+                    Upload CSV
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
+                      navigator.clipboard
+                        .writeText(eventLink)
+                        .then(() => {
+                          enqueueSnackbar('Cart link copied!', { variant: 'success' });
+                        })
+                        .catch((error) => {
+                          console.error('Error copying link: ', error);
+                          enqueueSnackbar('Failed to copy link', { variant: 'error' });
+                        });
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:copy-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="Copy Cart Link"
+                  >
+                    Copy Link
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setOpenDelete(true);
+                      setSelectedEvent(event);
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:trash-2-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'error.main',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        color: 'error.dark',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="Delete Event"
+                  >
+                    Delete
+                  </Button>
                 </Stack>
-              )}
+              </Collapse>
             </Stack>
           );
         })}

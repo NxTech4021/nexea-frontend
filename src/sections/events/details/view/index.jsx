@@ -9,9 +9,9 @@ import {
   Card,
   Stack,
   Container,
+  Typography,
   CardContent,
   CircularProgress,
-  Typography,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
