@@ -63,20 +63,22 @@ const EventDetails = ({ id }) => {
 
   const orders = data?.order?.flatMap((a) => a.attendees) || [];
 
-  const grouped = orders?.reduce((acc, entry) => {
-    const title = entry.ticket?.ticketType?.title;
-    if (!title) return acc;
+  const grouped = orders
+    ?.filter((a) => a?.status === 'paid')
+    ?.reduce((acc, entry) => {
+      const title = entry.ticket?.ticketType?.title;
+      if (!title) return acc;
 
-    if (!acc[title]) {
-      acc[title] = {
-        title,
-        quantity: 1,
-      };
-    } else {
-      acc[title].quantity += 1;
-    }
-    return acc;
-  }, {});
+      if (!acc[title]) {
+        acc[title] = {
+          title,
+          quantity: 1,
+        };
+      } else {
+        acc[title].quantity += 1;
+      }
+      return acc;
+    }, {});
 
   if (error) return router.back();
   if (isLoading)
