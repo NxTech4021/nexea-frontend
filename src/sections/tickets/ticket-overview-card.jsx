@@ -10,11 +10,10 @@ import {
   Stack,
   Button,
   Divider,
-  Collapse,
+  Checkbox,
   TextField,
   Typography,
   IconButton,
-  Checkbox,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -24,9 +23,9 @@ import { useCartStore } from 'src/utils/store';
 import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
+import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 import useGetCartData from './hooks/use-get-cart';
-import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 const shortenString = (text, length) => {
   if (text.length > length) {
@@ -785,9 +784,7 @@ const TicketOverviewCard = () => {
                   mt: 'auto',
                 }}
               >
-                {!allResourcesConfirmed
-                  ? 'Proceed to Payment'
-                  : 'Proceed to Payment'}
+                {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
                 {/* Proceed to Payment */}
               </LoadingButton>
             ) : (

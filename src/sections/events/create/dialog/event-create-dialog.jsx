@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable react/prop-types */
 import useSWR from 'swr';
 import dayjs from 'dayjs';
@@ -71,39 +72,39 @@ const RichTextEditor = ({ value, onChange }) => {
     if (textAreaRef.current) {
       setSelection({
         start: textAreaRef.current.selectionStart,
-        end: textAreaRef.current.selectionEnd
+        end: textAreaRef.current.selectionEnd,
       });
     }
   };
 
-const insertFormat = (format) => {
+  const insertFormat = (format) => {
     if (textAreaRef.current) {
       const textarea = textAreaRef.current;
       const { start, end } = selection;
       const selectedText = text.substring(start, end);
-      
+
       let newText = text;
       let newCursorPos = end;
 
       switch (format) {
         case 'bold':
-          newText = `${text.substring(0, start)  }**${selectedText}**${  text.substring(end)}`;
+          newText = `${text.substring(0, start)}**${selectedText}**${text.substring(end)}`;
           newCursorPos = end + 4;
           break;
         case 'italic':
-          newText = `${text.substring(0, start)  }_${selectedText}_${  text.substring(end)}`;
+          newText = `${text.substring(0, start)}_${selectedText}_${text.substring(end)}`;
           newCursorPos = end + 2;
           break;
         case 'link':
           const url = prompt('Enter URL:', 'https://');
           if (url) {
-            newText = `${text.substring(0, start)  }[${selectedText}](${url})${  text.substring(end)}`;
+            newText = `${text.substring(0, start)}[${selectedText}](${url})${text.substring(end)}`;
             newCursorPos = end + url.length + 4;
           }
           break;
         case 'list':
           const lines = selectedText ? selectedText.split('\n') : [''];
-          const bulletList = lines.map(line => `- ${line}`).join('\n');
+          const bulletList = lines.map((line) => `- ${line}`).join('\n');
           newText = text.substring(0, start) + bulletList + text.substring(end);
           newCursorPos = start + bulletList.length;
           break;
@@ -114,7 +115,7 @@ const insertFormat = (format) => {
           newCursorPos = start + numberedList.length;
           break;
         case 'heading':
-          newText = `${text.substring(0, start)  }## ${selectedText}${  text.substring(end)}`;
+          newText = `${text.substring(0, start)}## ${selectedText}${text.substring(end)}`;
           newCursorPos = end + 3;
           break;
         default:
@@ -123,7 +124,7 @@ const insertFormat = (format) => {
 
       setText(newText);
       onChange(newText);
-      
+
       setTimeout(() => {
         textarea.focus();
         textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -160,70 +161,70 @@ const insertFormat = (format) => {
         value={text}
         onChange={handleTextChange}
         onSelect={saveSelection}
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           minHeight: '150px',
           padding: '12px',
           borderRadius: '4px',
           border: '1px solid #ccc',
-          fontFamily: 'inherit'
+          fontFamily: 'inherit',
         }}
       />
- {/* Preview section */}
-{text && (
-  <Box mt={1.5}>
-    <Paper 
-      variant="outlined" 
-      sx={{ 
-        p: 1.2,
-        '& p': { 
-          m: 0,
-          mb: 1,
-          fontSize: '0.875rem',
-          '&:last-child': { mb: 0 }
-        },
-        '& ul, & ol': {
-          m: 0,
-          mb: 1,
-          pl: 2.5,
-          '&:last-child': { mb: 0 }
-        },
-        '& li': {
-          mb: 0.5,
-          fontSize: '0.875rem',
-          '&:last-child': { mb: 0 }
-        },
-        '& h2': {
-          fontSize: '1rem',
-          m: 0,
-          mb: 1
-        }
-      }}
-    >
-      <Stack direction="row" spacing={1} alignItems="flex-start">
-        <FormControlLabel
-          control={
-            <Checkbox
-              size="small"
-              checked={isChecked}
-              onChange={(e) => setIsChecked(e.target.checked)}
-            />
-          }
-          sx={{ 
-            m: 0,
-            alignItems: 'flex-start',
-            '& .MuiCheckbox-root': {
-              pt: 0
-            }
-          }}
-        />
-        <Box sx={{ flex: 1 }}>
-          <MarkdownContent content={text} />
+      {/* Preview section */}
+      {text && (
+        <Box mt={1.5}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 1.2,
+              '& p': {
+                m: 0,
+                mb: 1,
+                fontSize: '0.875rem',
+                '&:last-child': { mb: 0 },
+              },
+              '& ul, & ol': {
+                m: 0,
+                mb: 1,
+                pl: 2.5,
+                '&:last-child': { mb: 0 },
+              },
+              '& li': {
+                mb: 0.5,
+                fontSize: '0.875rem',
+                '&:last-child': { mb: 0 },
+              },
+              '& h2': {
+                fontSize: '1rem',
+                m: 0,
+                mb: 1,
+              },
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="flex-start">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                  />
+                }
+                sx={{
+                  m: 0,
+                  alignItems: 'flex-start',
+                  '& .MuiCheckbox-root': {
+                    pt: 0,
+                  },
+                }}
+              />
+              <Box sx={{ flex: 1 }}>
+                <MarkdownContent content={text} />
+              </Box>
+            </Stack>
+          </Paper>
         </Box>
-      </Stack>
-    </Paper>
-  </Box>
-)}
+      )}
     </Box>
   );
 };
@@ -281,13 +282,14 @@ const schema = yup.object().shape({
   // Camp resources fields - rich text content
   campResources: yup.array().when('eventType', {
     is: 'camp',
-    then: () => yup.array().of(
-      yup.object().shape({
-        title: yup.string().required('Title is required'),
-        content: yup.string().required('Content is required')
-      })
-    ),
-    otherwise: () => yup.array()
+    then: () =>
+      yup.array().of(
+        yup.object().shape({
+          title: yup.string().required('Title is required'),
+          content: yup.string().required('Content is required'),
+        })
+      ),
+    otherwise: () => yup.array(),
   }),
 });
 
@@ -338,7 +340,7 @@ const EventCreateDialog = ({ open, onClose }) => {
 
   const eventType = watch('eventType'); // Watch for eventType changes
   const startTimeValue = watch('startTime'); // Watch for startTime changes
-  
+
   // Define steps based on event type
   const steps = eventType === 'camp' ? campSteps : eventSteps;
 
@@ -565,7 +567,9 @@ const EventCreateDialog = ({ open, onClose }) => {
                         <MenuItem value="event">Event</MenuItem>
                         <MenuItem value="camp">Camp</MenuItem>
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </FormControl>
                   )}
                 />
@@ -685,15 +689,12 @@ const EventCreateDialog = ({ open, onClose }) => {
                 Camp Resources
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                Add resources for camp participants. You can use formatting tools to make your content more engaging.
+                Add resources for camp participants. You can use formatting tools to make your
+                content more engaging.
               </Typography>
 
               {fields.map((field, index) => (
-                <Paper 
-                  key={field.id} 
-                  variant="outlined" 
-                  sx={{ p: 2, mb: 2, width: '100%' }}
-                >
+                <Paper key={field.id} variant="outlined" sx={{ p: 2, mb: 2, width: '100%' }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                     <Typography variant="subtitle1" fontWeight="600">
                       Resource #{index + 1}
@@ -707,7 +708,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                       <DeleteIcon />
                     </IconButton>
                   </Stack>
-                  
+
                   <Box mb={2}>
                     <InputLabel required>Title</InputLabel>
                     <RHFTextField
@@ -716,17 +717,15 @@ const EventCreateDialog = ({ open, onClose }) => {
                       fullWidth
                     />
                   </Box>
-                  
+
                   <Box>
                     <InputLabel required>Content</InputLabel>
                     <Controller
                       name={`campResources.${index}.content`}
                       control={control}
+                      // eslint-disable-next-line no-shadow
                       render={({ field }) => (
-                        <RichTextEditor
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
+                        <RichTextEditor value={field.value} onChange={field.onChange} />
                       )}
                     />
                     {errors?.campResources?.[index]?.content && (
@@ -737,7 +736,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                   </Box>
                 </Paper>
               ))}
-              
+
               <Button
                 startIcon={<AddIcon />}
                 onClick={() => append({ title: '', content: '' })}
@@ -750,7 +749,7 @@ const EventCreateDialog = ({ open, onClose }) => {
           )}
 
           {/* Settings Step */}
-          {(activeStep === (eventType === 'camp' ? 2 : 1)) && (
+          {activeStep === (eventType === 'camp' ? 2 : 1) && (
             <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
               <Stack width={1}>
                 <InputLabel>Event Logo</InputLabel>

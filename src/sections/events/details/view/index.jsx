@@ -19,13 +19,14 @@ import { useRouter } from 'src/routes/hooks';
 
 import { useGetAllEvents } from 'src/api/event';
 
+import Iconify from 'src/components/iconify';
+
 import EventInformation from '../event-information';
 import TicketInformation from '../ticket-information';
 import AttendeeInformation from '../attendee-information';
 import OrderAnalytics from '../analytics/order-analytics';
 import TicketAnalytics from '../analytics/ticket-analytics';
 import CheckInAnalytics from '../analytics/checkIn-analytics';
-import Iconify from 'src/components/iconify';
 
 const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
