@@ -4,7 +4,7 @@ import QrCodeIcon from '@mui/icons-material/QrCode';
 
 import { paths } from 'src/routes/paths';
 
-import Iconify from 'src/components/iconify';
+// import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -41,7 +41,12 @@ const ICONS = {
   menuItem: icon('ic_menu_item'),
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
-  dashboard: icon('ic_dashboard'),
+  dashboard: icon('ic_dashboardv2'),
+  events: icon('ic_events'),
+  ticket: icon('ic_ticket'),
+  discount: icon('ic_discount'),
+  orders: icon('ic_orders'),
+  addOn: icon('ic_add_on'),
   qr: <QrCodeIcon />,
 };
 
@@ -62,27 +67,30 @@ export function useNavData() {
           {
             title: 'Events',
             path: paths.dashboard.events.root,
-            icon: <Iconify icon="material-symbols:campaign" width={22} />,
+            // icon: <Iconify icon="material-symbols:campaign" width={22} />,
+            icon: ICONS.events,
           },
           {
             title: 'Ticket Types',
             path: paths.dashboard.ticketType.root,
-            icon: <Iconify icon="f7:tickets-fill" width={22} />,
-            children: [
-              {
-                title: 'Tickets',
-                path: paths.dashboard.ticketType.root,
-              },
-              {
-                title: 'Settings',
-                path: paths.dashboard.ticketType.settings,
-              },
-            ],
+            // icon: <Iconify icon="f7:tickets-fill" width={22} />,
+            icon: ICONS.ticket,
+            // children: [
+            //   {
+            //     title: 'Tickets',
+            //     path: paths.dashboard.ticketType.root,
+            //   },
+            //   // {
+            //   //   title: 'Settings',
+            //   //   path: paths.dashboard.ticketType.settings,
+            //   // },
+            // ],
           },
           {
             title: 'Ticket Add Ons',
             path: paths.dashboard.addOn.root,
-            icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
+            // icon: <Iconify icon="material-symbols:add-circle-outline" width={22} />,
+            icon: ICONS.addOn,
 
             // children: [
             //   {
@@ -94,12 +102,14 @@ export function useNavData() {
           {
             title: 'Discount Codes',
             path: paths.dashboard.discountCode.root,
-            icon: <Iconify icon="tabler:discount-filled" width={22} />,
+            // icon: <Iconify icon="tabler:discount-filled" width={22} />,
+            icon: ICONS.discount,
           },
           {
             title: 'Orders',
             path: paths.dashboard.order.root,
-            icon: <Iconify icon="lets-icons:order-fill" width={22} />,
+            // icon: <Iconify icon="lets-icons:order-fill" width={22} />,
+            icon: ICONS.orders,
           },
 
           // {

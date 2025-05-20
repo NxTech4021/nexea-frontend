@@ -2,6 +2,7 @@ import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 import { Box, Card, useTheme, Typography, CardContent } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const ticketData = [
   {
@@ -30,15 +31,28 @@ const ticketData = [
   },
 ];
 
-const TicketInformation = () => {
+const colors = [
+  '#DAF7A6',
+  '#FFC300',
+  '#FF5733',
+  '#C70039',
+  '#900C3F',
+  '#581845',
+  '#1e8449',
+  '#5b2c6f',
+  '#922b21',
+  '#873600',
+];
+
+const TicketInformation = ({ tickets }) => {
   const theme = useTheme();
 
   const chartOptions = {
     chart: {
       type: 'donut',
     },
-    labels: ticketData.map((item) => item.label),
-    colors: ticketData.map((item) => item.color),
+    labels: tickets?.map((item) => item.title),
+    colors: tickets?.map((_, index) => colors[index]),
     plotOptions: {
       pie: {
         donut: {
@@ -47,12 +61,12 @@ const TicketInformation = () => {
             show: true,
             total: {
               show: true,
-              label: 'Total',
+              label: 'Total Sold',
               color: theme.palette.text.secondary,
               fontSize: '16px',
               fontWeight: theme.typography.fontWeightBold,
               formatter() {
-                return ticketData.reduce((sum, item) => sum + item.count, 0).toLocaleString();
+                return tickets.reduce((sum, item) => sum + item.quantity, 0).toLocaleString();
               },
             },
             value: {
@@ -93,14 +107,16 @@ const TicketInformation = () => {
                   <div style="width: 8px; 
                              height: 8px; 
                              border-radius: 50%; 
-                             background: ${ticketData[seriesIndex].color}">
+                             background: ${colors[seriesIndex]}">
                   </div>
                   ${w.globals.labels[seriesIndex]}: <b>${series[seriesIndex].toLocaleString()}</b>
                 </div>`,
     },
   };
 
-  const series = ticketData.map((item) => item.count);
+  const series = tickets.map((item) => item?.quantity || 0);
+
+  // console.log(tickets);
 
   return (
     <Card sx={{ border: 1, borderColor: theme.palette.divider, borderRadius: 2 }}>
@@ -120,3 +136,7 @@ const TicketInformation = () => {
 };
 
 export default TicketInformation;
+
+TicketInformation.propTypes = {
+  tickets: PropTypes.array,
+};

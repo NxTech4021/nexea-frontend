@@ -279,7 +279,7 @@ const TicketSelectionCard = () => {
               Add Ons :
             </Typography>
 
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} overflow="auto" sx={{ scrollbarWidth: 'thin' }}>
               {ticket.addOns.map((item) => (
                 <Box
                   key={item.id}
@@ -442,6 +442,7 @@ const TicketSelectionCard = () => {
           }
         />
       </Box>
+
       <Box
         ref={ref}
         flexGrow={1}

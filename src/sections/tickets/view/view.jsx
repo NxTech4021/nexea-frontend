@@ -325,7 +325,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
               </Grid>
             </Grid>
           ) : (
-            <Box height={`calc(100vh - ${76}px)`} px={1}>
+            <Box height={`calc(100vh - ${76}px)`}>
               {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
             </Box>
           )}
