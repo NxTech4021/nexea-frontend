@@ -164,7 +164,10 @@ const EventDetails = ({ id }) => {
         <Grid item size={{ xs: 12 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
             <TicketAnalytics tickets={totalTicketsSold} eventName={data.name} />
-            <OrderAnalytics orders={data.order} eventName={data.name} />
+            <OrderAnalytics
+              orders={data.order?.filter((a) => a?.status === 'paid') || []}
+              eventName={data.name}
+            />
             <CheckInAnalytics checkedIns={totalCheckedIn} id={id} />
           </Stack>
         </Grid>
