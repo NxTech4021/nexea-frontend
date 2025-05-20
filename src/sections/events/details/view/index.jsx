@@ -160,7 +160,7 @@ const EventDetails = ({ id }) => {
           </Card>
         </Grid>
         <Grid item size={{ xs: 12, md: 6 }}>
-          <TicketInformation />
+          <TicketInformation tickets={data?.ticketType || []} />
         </Grid>
       </Grid>
     </Container>
