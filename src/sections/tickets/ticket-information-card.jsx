@@ -53,7 +53,6 @@ const defaultAttendee = {
 
 const TicketInformationCard = () => {
   const collapse = useBoolean(true);
-  const anotherCollapse = useBoolean();
   const [collapseAttendees, setCollapseAttendees] = useState([]);
   const ref = useRef();
   const mdDown = useResponsive('down', 'md');
@@ -910,7 +909,7 @@ const TicketInformationCard = () => {
 
     const handleClick = (event) => {
       if (!overviewBox.contains(event.target)) {
-        anotherCollapse.onFalse();
+        // No longer needed, removing reference to anotherCollapse
       }
     };
 
@@ -920,7 +919,7 @@ const TicketInformationCard = () => {
     return () => {
       document.removeEventListener('click', handleClick);
     };
-  }, [anotherCollapse]);
+  }, []);
 
   if (cartLoading) {
     return (
@@ -960,7 +959,7 @@ const TicketInformationCard = () => {
         height: 1,
         // borderRadius: 3,
         overflow: 'hidden',
-        p: { xs: 2, md: 3 },
+        p: { xs: 2, md: 3},
         bgcolor: 'background.paper',
         boxShadow: `0 0 24px ${alpha(theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.black, 0.05)}`,
       }}
@@ -980,8 +979,9 @@ const TicketInformationCard = () => {
         flexGrow={1}
         sx={{
           px: { xs: 1, md: 2 },
+          height: '100%',
           my: 2,
-          height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
+          // height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',
@@ -1024,105 +1024,40 @@ const TicketInformationCard = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {attendeeinfo}
+                {attendeeinfo}
 
-        <IconButton
-          size="small"
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            display: isOverflow.value ? 'flex' : 'none',
-            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.800',
-            color: 'common.white',
-            boxShadow: `0 8px 16px 0 ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.3 : 0.1)}`,
-            transition: 'all 0.2s',
-            '&.MuiIconButton-root': {
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.900',
-                transform: 'translateY(-2px)',
-              },
-            },
-            zIndex: 999,
-          }}
-          onClick={scrollToTop}
-        >
-          <Iconify icon="raphael:arrowup" width={22} />
-        </IconButton>
-      </Box>
-
-      {fields?.length && (
-        <Stack sx={{ position: 'absolute', top: 100, left: -100 }}>
-          {fields.map((field, index) => (
-            <Typography
-              key={index}
-              variant="caption"
-              color="text.secondary"
+            {mdDown && (
+            <Card
+              elevation={0}
               sx={{
-                cursor: 'pointer',
-                ...(activeFieldId === field.id && {
-                  position: 'relative',
-                  left: 4,
-                  color: 'text.primary',
-                  fontWeight: 600,
-                }),
-                '&:hover': {
-                  color: 'text.primary',
-                },
-              }}
-              onClick={(e) => {
-                const s = document.getElementById(field.id);
-
-                if (s) {
-                  s.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  setActiveFieldId(field.id);
-                }
+                borderRadius: 2,
+                border: '2px solid',
+                borderColor: 'divider',
+                mb: 2.5,
+                overflow: 'visible',
+                mt: 3,
               }}
             >
-              {field.isForbuyer ? "Buyer's Ticket" : `Attendee ${index + 1}`}
-            </Typography>
-          ))}
-        </Stack>
-      )}
-
-      {mdDown && (
-        <Box
-          ref={boxRef}
-          p={2.5}
-          mt="auto"
-          sx={{
-            position: 'sticky',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            bgcolor: 'background.paper',
-            borderTop: 1,
-            borderColor: 'divider',
-            boxShadow: `0 -4px 12px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.15 : 0.05)}`,
-            zIndex: 9,
-            marginTop: 3,
-          }}
-        >
-          <>
-            <Collapse in={anotherCollapse.value} timeout="auto">
-              <Box
+              <Stack
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
                 sx={{
-                  maxHeight: '45vh',
-                  overflowY: 'auto',
-                  mb: 2.5,
-                  '&::-webkit-scrollbar': {
-                    width: '6px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: alpha(theme.palette.text.primary, 0.2),
-                    borderRadius: '10px',
-                  },
+                  borderRadius: '16px 16px 0 0',
+                  p: 2,
+                  bgcolor: alpha(
+                    theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
+                    0.5
+                  ),
                 }}
-                position="relative"
               >
-                <Typography variant="h6" sx={{ mb: 2, mt: 1 }}>
+                <Iconify icon="mdi:receipt-text-outline" width={20} color="text.primary" />
+                <Typography variant="subtitle1" fontWeight={500}>
                   Order Summary
                 </Typography>
+              </Stack>
+
+              <Box sx={{ p: 2 }}>
                 <Stack
                   sx={{
                     '& .MuiTypography-root': {
@@ -1176,96 +1111,6 @@ const TicketInformationCard = () => {
                   </Card>
 
                   <Stack spacing={2.5}>
-                    {/* {cartData && (
-                      <Card
-                        elevation={0}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                        }}
-                      >
-                        <Stack spacing={1.5}>
-                          <Typography variant="subtitle2" mb={0.5}>
-                            Discount Code
-                          </Typography>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={1}
-                          >
-                            <TextField
-                              size="small"
-                              fullWidth
-                              placeholder="Enter Discount Code"
-                              value={discountCode}
-                              onChange={(e) =>
-                                setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
-                              }
-                              InputProps={{
-                                sx: { borderRadius: 1.5 },
-                              }}
-                            />
-                            <Button
-                              variant="contained"
-                              size="medium"
-                              onClick={handleRedeemDiscount}
-                              sx={{
-                                height: 40,
-                                borderRadius: 1.5,
-                                px: 2,
-                                bgcolor:
-                                  theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
-                                '&:hover': {
-                                  bgcolor:
-                                    theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
-                                },
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          </Stack>
-
-                          {!!cartData.discount && (
-                            <Stack spacing={1} sx={{ mt: 1 }}>
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Iconify
-                                  icon="lets-icons:check-fill"
-                                  color="success.main"
-                                  width={16}
-                                />
-                                <Typography variant="body2" color="success.main" fontWeight={500}>
-                                  Discount code applied
-                                </Typography>
-                              </Stack>
-                              <Stack
-                                direction="row"
-                                justifyContent="space-between"
-                                sx={{
-                                  p: 1.5,
-                                  borderRadius: 1.5,
-                                  bgcolor: alpha(
-                                    theme.palette.mode === 'dark'
-                                      ? theme.palette.success.dark
-                                      : theme.palette.success.lighter,
-                                    theme.palette.mode === 'dark' ? 0.2 : 0.5
-                                  ),
-                                }}
-                              >
-                                <Typography variant="body2" fontWeight={500}>
-                                  {cartData.discount.code}
-                                </Typography>
-                                <Typography variant="body2" color="error" fontWeight={500}>
-                                  - {cartData.discount.value}
-                                </Typography>
-                              </Stack>
-                            </Stack>
-                          )}
-                        </Stack>
-                      </Card>
-                    )} */}
                     {cartData && (
                       <Card
                         elevation={0}
@@ -1295,7 +1140,7 @@ const TicketInformationCard = () => {
                                 setDiscountCode(e.target.value.toUpperCase().split(' ').join(''))
                               }
                               InputProps={{
-                                sx: { borderRadius: 1.5 },
+                                sx: { borderRadius: 1 },
                               }}
                             />
 
@@ -1305,7 +1150,7 @@ const TicketInformationCard = () => {
                               onClick={handleRedeemDiscount}
                               sx={{
                                 height: 40,
-                                borderRadius: 1.5,
+                                borderRadius: 1,
                                 px: 2,
                                 bgcolor: theme.palette.mode === 'dark' ? '#fff' : '#000',
                                 color: theme.palette.mode === 'dark' ? '#000' : '#fff',
@@ -1361,11 +1206,7 @@ const TicketInformationCard = () => {
                                     />
                                   </IconButton>
                                 </Stack>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                  {/* <Typography variant="body2" fontWeight={500}>
-                                                Type: {cartData.discount.type}
-                                              </Typography> */}
-                                </Stack>
+                                <Stack direction="row" alignItems="center" spacing={1} />
                                 <Typography variant="body2" color="error.main" fontWeight={600}>
                                   -{' '}
                                   {Intl.NumberFormat('en-MY', {
@@ -1438,146 +1279,159 @@ const TicketInformationCard = () => {
                     </Card>
                   </Stack>
                 </Stack>
-              </Box>
-            </Collapse>
-
-            <Box
-              onClick={() => anotherCollapse.onToggle()}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                mb: 2,
-                p: 1.5,
-                borderRadius: 2,
-                bgcolor: alpha(
-                  theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
-                  0.5
-                ),
-                '&:hover': {
-                  bgcolor: alpha(
-                    theme.palette.mode === 'dark'
-                      ? theme.palette.grey[700]
-                      : theme.palette.grey[300],
-                    0.5
-                  ),
-                },
-              }}
-            >
-              <Typography variant="subtitle1">
-                {anotherCollapse.value ? 'Hide Order Summary' : 'View Order Summary'}
-              </Typography>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                  {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                    total || 0
-                  )}
-                </Typography>
-                <Iconify
-                  icon={
-                    anotherCollapse.value
-                      ? 'iconamoon:arrow-up-2-bold'
-                      : 'iconamoon:arrow-down-2-bold'
-                  }
-                  width={20}
-                  sx={{
-                    transition: 'transform 0.2s ease',
-                    transform: anotherCollapse.value ? 'rotate(0deg)' : 'rotate(0deg)',
-                  }}
-                />
-              </Stack>
-            </Box>
-            {cartData?.event?.campResources?.length > 0 && (
-              <Card
-                elevation={0}
-                sx={{
-                  p: 0.5,
-                  borderRadius: 1,
-                  border: 'none',
-                  boxShadow: 'none',
-                }}
-              >
-                <Stack spacing={1}>
-                  {cartData.event.campResources.map((resource) => (
-                    <Box
-                      key={resource.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Checkbox
-                        size="small"
-                        checked={resourceConfirmations[resource.id] || false}
-                        onChange={(e) =>
-                          setResourceConfirmations((prev) => ({
-                            ...prev,
-                            [resource.id]: e.target.checked,
-                          }))
-                        }
-                        sx={{
-                          p: 0,
-                          mr: 1,
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <MarkdownContent
-                          content={resource.content}
+                
+                {cartData?.event?.campResources?.length > 0 && (
+                  <Card
+                    elevation={0}
+                    sx={{
+                      p: 0.5,
+                      borderRadius: 1,
+                      border: 'none',
+                      boxShadow: 'none',
+                      mt: 2,
+                    }}
+                  >
+                    <Stack spacing={1}>
+                      {cartData.event.campResources.map((resource) => (
+                        <Box
+                          key={resource.id}
                           sx={{
-                            '& p': {
-                              m: 0,
-                              fontSize: '0.875rem',
-                              color: 'text.primary',
-                              fontWeight: 400,
-                              lineHeight: 1.5,
-                            },
-                            '& a': {
-                              color: 'primary.main',
-                              textDecoration: 'none',
-                            },
+                            display: 'flex',
+                            alignItems: 'center',
                           }}
-                        />
-                      </Box>
-                    </Box>
-                  ))}
-                </Stack>
-              </Card>
-            )}
+                        >
+                          <Checkbox
+                            size="small"
+                            checked={resourceConfirmations[resource.id] || false}
+                            onChange={(e) =>
+                              setResourceConfirmations((prev) => ({
+                                ...prev,
+                                [resource.id]: e.target.checked,
+                              }))
+                            }
+                            sx={{
+                              p: 0,
+                              mr: 1,
+                            }}
+                          />
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <MarkdownContent
+                              content={resource.content}
+                              sx={{
+                                '& p': {
+                                  m: 0,
+                                  fontSize: '0.875rem',
+                                  color: 'text.primary',
+                                  fontWeight: 400,
+                                  lineHeight: 1.5,
+                                },
+                                '& a': {
+                                  color: 'primary.main',
+                                  textDecoration: 'none',
+                                },
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Card>
+                )}
+                
+                <LoadingButton
+                  size="large"
+                  variant="contained"
+                  fullWidth
+                  type="submit"
+                  // loading={loading.value}
+                  // onClick={handleCheckout}
+                  // disabled={!totalTicketsQuantitySelected}
+                  disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
+                  startIcon={
+                    <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
+                  }
+                  sx={{
+                    borderRadius: 1,
+                    py: 1.5,
+                    mt: 2.5,
+                    bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
+                    '&:hover': {
+                      bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
+                </LoadingButton>
+              </Box>
+            </Card>
+          )}
+        
+        <IconButton
+          size="small"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            display: isOverflow.value ? 'flex' : 'none',
+            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.800',
+            color: 'common.white',
+            boxShadow: `0 8px 16px 0 ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.3 : 0.1)}`,
+            transition: 'all 0.2s',
+            '&.MuiIconButton-root': {
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.900',
+                transform: 'translateY(-2px)',
+              },
+            },
+            zIndex: 999,
+          }}
+          onClick={scrollToTop}
+        >
+          <Iconify icon="raphael:arrowup" width={22} />
+        </IconButton>
+      </Box>
 
-            <LoadingButton
-              size="large"
-              variant="contained"
-              fullWidth
-              type="submit"
-              // loading={loading.value}
-              // onClick={handleCheckout}
-              // disabled={!totalTicketsQuantitySelected}
-              disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
-              startIcon={
-                <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
-              }
+      {fields?.length && (
+        <Stack sx={{ position: 'absolute', top: 100, left: -100 }}>
+          {fields.map((field, index) => (
+            <Typography
+              key={index}
+              variant="caption"
+              color="text.secondary"
               sx={{
-                borderRadius: 2,
-                py: 1.5,
-                bgcolor: theme.palette.mode === 'dark' ? 'primary.main' : 'grey.800',
+                cursor: 'pointer',
+                ...(activeFieldId === field.id && {
+                  position: 'relative',
+                  left: 4,
+                  color: 'text.primary',
+                  fontWeight: 600,
+                }),
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'grey.900',
-                  transform: 'translateY(-2px)',
+                  color: 'text.primary',
                 },
-                transition: 'all 0.2s',
+              }}
+              onClick={(e) => {
+                const s = document.getElementById(field.id);
+
+                if (s) {
+                  s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setActiveFieldId(field.id);
+                }
               }}
             >
-              {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
-            </LoadingButton>
-          </>
-        </Box>
+              {field.isForbuyer ? "Buyer's Ticket" : `Attendee ${index + 1}`}
+            </Typography>
+          ))}
+        </Stack>
       )}
+
     </Box>
   );
 };

@@ -70,14 +70,11 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
         elevation: 0,
         sx: {
           ...(smUp && {
-            borderRadius: 3,
+            borderRadius: 2,
             border: '1px solid',
             borderColor: 'divider',
           }),
-          background: (theme) =>
-            theme.palette.mode === 'light'
-              ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
-              : 'linear-gradient(to bottom, #1a202c, #2d3748)',
+          background: (theme) => theme.palette.background.paper,
         },
       }}
     >
@@ -87,29 +84,25 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
           display: 'flex',
           alignItems: 'center',
           py: 3,
-          px: 4,
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'light' ? 'rgba(245, 247, 250, 0.85)' : 'rgba(26, 32, 44, 0.85)',
+          px: 3,
         }}
       >
         <Avatar
           alt="Event"
           src="/logo/nexea.png"
           sx={{
-            width: 58,
-            height: 58,
-            marginRight: 2.5,
-            border: (theme) => `3px solid ${theme.palette.background.paper}`,
-            backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#f0f4f8' : '#2d3748'),
+            width: 48,
+            height: 48,
+            marginRight: 2,
+            border: (theme) => `1px solid ${theme.palette.divider}`,
           }}
         />
         <Box>
           <Typography
             variant="h5"
-            fontWeight="700"
+            fontWeight="600"
             sx={{
-              color: (theme) => theme.palette.text.primary,
-              letterSpacing: '-0.3px',
+              letterSpacing: '-0.2px',
               mb: 0.5,
             }}
           >
@@ -127,8 +120,8 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             <Box
               component="span"
               sx={{
-                width: 8,
-                height: 8,
+                width: 6,
+                height: 6,
                 borderRadius: '50%',
                 backgroundColor: '#34c759',
                 display: 'inline-block',
@@ -140,12 +133,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
         </Box>
       </DialogTitle>
       <Divider />
-      <DialogContent
-        sx={{
-          p: 4,
-          backgroundColor: (theme) => theme.palette.background.paper,
-        }}
-      >
+      <DialogContent sx={{ p: 3 }}>
         <Formik
           initialValues={{
             name: selectedEvent?.name,
@@ -228,17 +216,16 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
 
             return (
               <Form>
-                <Grid container spacing={3.5}>
+                <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Typography
                       component="label"
                       htmlFor="name"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Event Name{' '}
@@ -257,26 +244,9 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
+                          borderRadius: 1,
                           '& .MuiInputBase-input': {
-                            color: (theme) => theme.palette.text.primary,
+                            padding: '12px 16px',
                           },
                         },
                       }}
@@ -285,10 +255,10 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="name"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
@@ -299,10 +269,9 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       htmlFor="description"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Description
@@ -319,27 +288,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
-                          '& .MuiInputBase-input': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
+                          borderRadius: 1,
                         },
                       }}
                     />
@@ -347,10 +296,10 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="description"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
@@ -361,10 +310,9 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       htmlFor="date"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Event Date{' '}
@@ -385,33 +333,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             placeholder: 'Select date',
                             sx: {
                               '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: (theme) =>
-                                  theme.palette.mode === 'light'
-                                    ? '#f8fafc'
-                                    : 'rgba(45, 55, 72, 0.5)',
-                                color: (theme) => theme.palette.text.primary,
-                                transition: 'all 0.2s',
-                                '&:hover': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#f0f5fa'
-                                      : 'rgba(45, 55, 72, 0.8)',
-                                },
-                                '&.Mui-focused': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#fff'
-                                      : 'rgba(45, 55, 72, 0.9)',
-                                  '& fieldset': {
-                                    borderColor: (theme) =>
-                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                                    borderWidth: '1.5px',
-                                  },
-                                },
-                                '& .MuiInputBase-input': {
-                                  color: (theme) => theme.palette.text.primary,
-                                },
+                                borderRadius: 1,
                               },
                             },
                           },
@@ -422,10 +344,10 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="date"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
@@ -435,10 +357,9 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       htmlFor="endDate"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       End Date{' '}
@@ -460,33 +381,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             placeholder: 'Select end date',
                             sx: {
                               '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: (theme) =>
-                                  theme.palette.mode === 'light'
-                                    ? '#f8fafc'
-                                    : 'rgba(45, 55, 72, 0.5)',
-                                color: (theme) => theme.palette.text.primary,
-                                transition: 'all 0.2s',
-                                '&:hover': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#f0f5fa'
-                                      : 'rgba(45, 55, 72, 0.8)',
-                                },
-                                '&.Mui-focused': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#fff'
-                                      : 'rgba(45, 55, 72, 0.9)',
-                                  '& fieldset': {
-                                    borderColor: (theme) =>
-                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                                    borderWidth: '1.5px',
-                                  },
-                                },
-                                '& .MuiInputBase-input': {
-                                  color: (theme) => theme.palette.text.primary,
-                                },
+                                borderRadius: 1,
                               },
                             },
                           },
@@ -497,100 +392,10 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="endDate"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography
-                      component="label"
-                      htmlFor="personInCharge"
-                      sx={{
-                        display: 'block',
-                        mb: 1,
-                        fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
-                      }}
-                    >
-                      Person In Charge{' '}
-                      <Box component="span" sx={{ color: '#e53e3e' }}>
-                        *
-                      </Box>
-                    </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
-                          '& .MuiSelect-select': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
-                        },
-                      }}
-                    >
-                      <Field
-                        as={Select}
-                        name="personInCharge"
-                        id="personInCharge"
-                        variant="outlined"
-                        displayEmpty
-                        placeholder="Select person in charge"
-                        renderValue={(selected) => {
-                          if (!selected) {
-                            return <em style={{ opacity: 0.6 }}>Select person in charge</em>;
-                          }
-
-                          const selectedUser = usersData?.find((user) => user.id === selected);
-                          return selectedUser ? selectedUser.fullName : '';
-                        }}
-                        sx={{
-                          '& .MuiMenuItem-root': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
-                        }}
-                      >
-                        {loadingUsers ? (
-                          <MenuItem disabled>Loading users...</MenuItem>
-                        ) : (
-                          usersData?.map((user) => (
-                            <MenuItem key={user.id} value={user.id}>
-                              {user.fullName}
-                            </MenuItem>
-                          ))
-                        )}
-                      </Field>
-                    </FormControl>
-                    <ErrorMessage
-                      name="personInCharge"
-                      component={Typography}
-                      sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
-                        fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
@@ -600,10 +405,9 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       htmlFor="time"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Start Time{' '}
@@ -625,33 +429,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             placeholder: 'Select time',
                             sx: {
                               '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: (theme) =>
-                                  theme.palette.mode === 'light'
-                                    ? '#f8fafc'
-                                    : 'rgba(45, 55, 72, 0.5)',
-                                color: (theme) => theme.palette.text.primary,
-                                transition: 'all 0.2s',
-                                '&:hover': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#f0f5fa'
-                                      : 'rgba(45, 55, 72, 0.8)',
-                                },
-                                '&.Mui-focused': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#fff'
-                                      : 'rgba(45, 55, 72, 0.9)',
-                                  '& fieldset': {
-                                    borderColor: (theme) =>
-                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                                    borderWidth: '1.5px',
-                                  },
-                                },
-                                '& .MuiInputBase-input': {
-                                  color: (theme) => theme.palette.text.primary,
-                                },
+                                borderRadius: 1,
                               },
                             },
                           },
@@ -662,23 +440,22 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="time"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography
                       component="label"
-                      htmlFor="time"
+                      htmlFor="endTime"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       End Time{' '}
@@ -700,33 +477,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             placeholder: 'Select time',
                             sx: {
                               '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: (theme) =>
-                                  theme.palette.mode === 'light'
-                                    ? '#f8fafc'
-                                    : 'rgba(45, 55, 72, 0.5)',
-                                color: (theme) => theme.palette.text.primary,
-                                transition: 'all 0.2s',
-                                '&:hover': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#f0f5fa'
-                                      : 'rgba(45, 55, 72, 0.8)',
-                                },
-                                '&.Mui-focused': {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.mode === 'light'
-                                      ? '#fff'
-                                      : 'rgba(45, 55, 72, 0.9)',
-                                  '& fieldset': {
-                                    borderColor: (theme) =>
-                                      theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                                    borderWidth: '1.5px',
-                                  },
-                                },
-                                '& .MuiInputBase-input': {
-                                  color: (theme) => theme.palette.text.primary,
-                                },
+                                borderRadius: 1,
                               },
                             },
                           },
@@ -734,26 +485,87 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       />
                     </LocalizationProvider>
                     <ErrorMessage
-                      name="time"
+                      name="endTime"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography
                       component="label"
-                      htmlFor="tickera_api"
+                      htmlFor="personInCharge"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Person In Charge{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <FormControl
+                      fullWidth
+                      required
+                      variant="outlined"
+                    >
+                      <Field
+                        as={Select}
+                        name="personInCharge"
+                        id="personInCharge"
+                        variant="outlined"
+                        displayEmpty
+                        placeholder="Select person in charge"
+                        renderValue={(selected) => {
+                          if (!selected) {
+                            return <em style={{ opacity: 0.6 }}>Select person in charge</em>;
+                          }
+
+                          const selectedUser = usersData?.find((user) => user.id === selected);
+                          return selectedUser ? selectedUser.fullName : '';
+                        }}
+                        sx={{
+                          borderRadius: 1,
+                        }}
+                      >
+                        {loadingUsers ? (
+                          <MenuItem disabled>Loading users...</MenuItem>
+                        ) : (
+                          usersData?.map((user) => (
+                            <MenuItem key={user.id} value={user.id}>
+                              {user.fullName}
+                            </MenuItem>
+                          ))
+                        )}
+                      </Field>
+                    </FormControl>
+                    <ErrorMessage
+                      name="personInCharge"
+                      component={Typography}
+                      sx={{
+                        color: '#e53e3e',
+                        fontSize: '0.75rem',
+                        mt: 0.5,
+                        ml: 1,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography
+                      component="label"
+                      htmlFor="sst"
+                      sx={{
+                        display: 'block',
+                        mb: 0.75,
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
                       }}
                     >
                       SST{' '}
@@ -777,52 +589,30 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
-                          '& .MuiInputBase-input': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
+                          borderRadius: 1,
                         },
                       }}
                     />
                     <ErrorMessage
-                      name="tickera_api"
+                      name="sst"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
-
                   <Grid item xs={12} sm={6}>
                     <Typography
                       component="label"
                       htmlFor="status"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Event Status{' '}
@@ -834,31 +624,6 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       fullWidth
                       required
                       variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
-                          '& .MuiSelect-select': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
-                        },
-                      }}
                     >
                       <Field
                         as={Select}
@@ -868,9 +633,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         displayEmpty
                         placeholder="Select status"
                         sx={{
-                          '& .MuiMenuItem-root': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
+                          borderRadius: 1,
                         }}
                       >
                         {Object.values(EventStatus).map((status) => (
@@ -884,24 +647,22 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       name="status"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
-
-                  <Grid item xs={12} sm={12}>
+                  <Grid item xs={12}>
                     <Typography
                       component="label"
-                      htmlFor="status"
+                      htmlFor="eventLogo"
                       sx={{
                         display: 'block',
-                        mb: 1,
+                        mb: 0.75,
                         fontWeight: 500,
-                        color: (theme) => theme.palette.text.primary,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                       }}
                     >
                       Event Logo{' '}
@@ -909,112 +670,60 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(45, 55, 72, 0.5)',
-                          color: (theme) => theme.palette.text.primary,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f0f5fa' : 'rgba(45, 55, 72, 0.8)',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#fff' : 'rgba(45, 55, 72, 0.9)',
-                            '& fieldset': {
-                              borderColor: (theme) =>
-                                theme.palette.mode === 'light' ? '#64b5f6' : '#90cdf4',
-                              borderWidth: '1.5px',
-                            },
-                          },
-                          '& .MuiSelect-select': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
-                        },
-                      }}
+                    <Field
+                      name="eventLogo"
+                      id="eventLogo"
                     >
-                      <Field
-                        name="eventLogo"
-                        id="eventLogo"
-                        variant="outlined"
-                        displayEmpty
-                        placeholder="Select status"
-                        sx={{
-                          '& .MuiMenuItem-root': {
-                            color: (theme) => theme.palette.text.primary,
-                          },
-                        }}
-                      >
-                        {({ field, form }) => (
-                          <div>
-                            <Upload
-                              accept={{ 'image/*': [] }}
-                              file={
-                                !!field.value &&
-                                (typeof field?.value === 'string'
-                                  ? field?.value
-                                  : URL.createObjectURL(field?.value))
-                              }
-                              error={!!form.errors.image}
-                              helperText={
-                                !!form.errors.image && (
-                                  <FormHelperText error={!!form.errors.image} sx={{ px: 2 }}>
-                                    {form.errors.image}
-                                  </FormHelperText>
-                                )
-                              }
-                              onDrop={(e) => {
-                                setFieldValue('eventLogo', e[0]); // Set the selected file in Formik state
-                              }}
-                            />
-                          </div>
-                        )}
-                      </Field>
-                    </FormControl>
+                      {({ field, form }) => (
+                        <Upload
+                          accept={{ 'image/*': [] }}
+                          file={
+                            !!field.value &&
+                            (typeof field?.value === 'string'
+                              ? field?.value
+                              : URL.createObjectURL(field?.value))
+                          }
+                          error={!!form.errors.image}
+                          helperText={
+                            !!form.errors.image && (
+                              <FormHelperText error={!!form.errors.image} sx={{ px: 2 }}>
+                                {form.errors.image}
+                              </FormHelperText>
+                            )
+                          }
+                          onDrop={(e) => {
+                            setFieldValue('eventLogo', e[0]); // Set the selected file in Formik state
+                          }}
+                        />
+                      )}
+                    </Field>
                     <ErrorMessage
-                      name="status"
+                      name="eventLogo"
                       component={Typography}
                       sx={{
-                        color: (theme) => (theme.palette.mode === 'light' ? '#e53e3e' : '#fc8181'),
+                        color: '#e53e3e',
                         fontSize: '0.75rem',
-                        mt: 0.75,
-                        ml: 1.5,
+                        mt: 0.5,
+                        ml: 1,
                       }}
                     />
                   </Grid>
 
                   <Grid item xs={12}>
-                    <Divider sx={{ my: 1 }} />
-                    <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
                       <Button
                         onClick={onClose}
                         disabled={isSubmitting}
                         variant="outlined"
                         sx={{
-                          borderRadius: 4,
-                          height: '46px',
-                          padding: '0 24px',
-                          fontWeight: 600,
-                          borderColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568',
-                          color: (theme) =>
-                            theme.palette.mode === 'light' ? '#64748b' : '#a0aec0',
-                          borderWidth: '1.5px',
-                          letterSpacing: '0.3px',
+                          borderRadius: 1,
+                          py: 1,
+                          px: 3,
+                          fontWeight: 500,
+                          borderColor: 'divider',
                           textTransform: 'none',
-                          fontSize: '0.95rem',
-                          '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
-                            borderColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#cbd5e1' : '#718096',
-                          },
+                          fontSize: '0.9rem',
                         }}
                       >
                         Cancel
@@ -1024,32 +733,20 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         variant="contained"
                         disabled={isSubmitting || !formHasChanged}
                         sx={{
-                          borderRadius: 4,
-                          height: '46px',
-                          padding: '0 28px',
-                          fontWeight: 600,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'light' ? '#38bdf8' : '#3182ce',
-                          color: 'white',
+                          borderRadius: 1,
+                          py: 1,
+                          px: 3,
+                          fontWeight: 500,
+                          backgroundColor: '#000',
+                          color: (theme) => theme.palette.primary.contrastText,
                           textTransform: 'none',
-                          fontSize: '0.95rem',
-                          letterSpacing: '0.3px',
+                          fontSize: '0.9rem',
                           boxShadow: 'none',
-                          transition: 'all 0.2s',
                           '&:hover': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light' ? '#0ea5e9' : '#2b6cb0',
                             boxShadow: 'none',
                           },
                           '&.Mui-disabled': {
-                            backgroundColor: (theme) =>
-                              theme.palette.mode === 'light'
-                                ? 'rgba(56, 189, 248, 0.5)'
-                                : 'rgba(49, 130, 206, 0.5)',
-                            color: (theme) =>
-                              theme.palette.mode === 'light'
-                                ? 'rgba(255, 255, 255, 0.8)'
-                                : 'rgba(226, 232, 240, 0.7)',
+                            opacity: 0.7,
                           },
                         }}
                       >
