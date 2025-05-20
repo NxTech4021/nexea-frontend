@@ -4,7 +4,15 @@ import React, { useMemo } from 'react';
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Box, Card, Stack, Container, CardContent, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Card,
+  Stack,
+  Container,
+  CardContent,
+  CircularProgress,
+  Typography,
+} from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -17,6 +25,7 @@ import AttendeeInformation from '../attendee-information';
 import OrderAnalytics from '../analytics/order-analytics';
 import TicketAnalytics from '../analytics/ticket-analytics';
 import CheckInAnalytics from '../analytics/checkIn-analytics';
+import Iconify from 'src/components/iconify';
 
 const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
@@ -29,6 +38,22 @@ const EventDetails = ({ id }) => {
     const attendeesData = orders.flatMap((order) => order.attendees);
 
     return attendeesData.filter((item) => item.status === 'checkedIn')?.length || 0;
+  }, [data]);
+
+  const totalTicketsSold = useMemo(() => {
+    const tickets = data?.ticketType || [];
+
+    const totalSolds = tickets.reduce((acc, cur) => acc + (cur?.sold ?? 0), 0);
+
+    return totalSolds;
+  }, [data]);
+
+  const totalRevenue = useMemo(() => {
+    const orders = data?.order || [];
+
+    const totalSolds = orders.reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
+
+    return totalSolds;
   }, [data]);
 
   if (error) return router.back();
@@ -68,8 +93,53 @@ const EventDetails = ({ id }) => {
 
       <Grid container spacing={2} mt={2}>
         <Grid item size={{ xs: 12 }}>
+          <Card
+            sx={{
+              border: 1,
+              borderColor: (theme) => theme.palette.divider,
+              borderRadius: 2,
+              width: 1,
+            }}
+          >
+            <CardContent sx={{ position: 'relative' }}>
+              <Iconify
+                icon="tdesign:money"
+                width={100}
+                sx={{
+                  position: 'absolute',
+                  right: -30,
+                  color: '#EBEBEB',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                }}
+              />
+
+              <Box sx={{ cursor: 'pointer' }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography
+                    className="hover-text"
+                    variant="subtitle2"
+                    color="text.secondary"
+                    sx={{ fontWeight: 600 }}
+                  >
+                    Total Revenue
+                  </Typography>
+                  {/* <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" /> */}
+                </Stack>
+                <Typography variant="h2">
+                  {new Intl.NumberFormat('en-MY', {
+                    minimumFractionDigits: 2,
+                    style: 'currency',
+                    currency: 'MYR',
+                  }).format(totalRevenue || 0)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item size={{ xs: 12 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
-            <TicketAnalytics tickets={data.ticketType} eventName={data.name} />
+            <TicketAnalytics tickets={totalTicketsSold} eventName={data.name} />
             <OrderAnalytics orders={data.order} eventName={data.name} />
             <CheckInAnalytics checkedIns={totalCheckedIn} id={id} />
           </Stack>

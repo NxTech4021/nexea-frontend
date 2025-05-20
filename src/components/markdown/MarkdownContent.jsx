@@ -1,7 +1,9 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
+
 import { styled } from '@mui/material/styles';
 
 const MarkdownWrapper = styled('div')(({ theme }) => ({
@@ -34,17 +36,16 @@ const MarkdownWrapper = styled('div')(({ theme }) => ({
   },
 }));
 
-const MarkdownContent = ({ content }) => {
-  return (
-    <MarkdownWrapper>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-      >
-        {content}
-      </ReactMarkdown>
-    </MarkdownWrapper>
-  );
-};
+const MarkdownContent = ({ content }) => (
+  <MarkdownWrapper>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+      {content}
+    </ReactMarkdown>
+  </MarkdownWrapper>
+);
 
 export default MarkdownContent;
+
+MarkdownContent.propTypes = {
+  content: PropTypes.any,
+};

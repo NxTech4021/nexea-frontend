@@ -5,17 +5,27 @@ import * as yup from 'yup';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 import React, { useState, useCallback } from 'react';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 
 import { LoadingButton } from '@mui/lab';
+// Import icons
+import AddIcon from '@mui/icons-material/Add';
+import LinkIcon from '@mui/icons-material/Link';
+import TitleIcon from '@mui/icons-material/Title';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Step,
   Stack,
+  Paper,
   Dialog,
   Select,
   Button,
@@ -23,30 +33,18 @@ import {
   Divider,
   Stepper,
   MenuItem,
+  Checkbox,
   StepLabel,
   InputLabel,
   Typography,
+  IconButton,
   DialogTitle,
   FormControl,
   DialogContent,
   DialogActions,
   FormHelperText,
-  IconButton,
-  Paper,
   FormControlLabel,
-  Checkbox,
 } from '@mui/material';
-
-// Import icons
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import LinkIcon from '@mui/icons-material/Link';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
-import TitleIcon from '@mui/icons-material/Title';
-import MarkdownContent from 'src/components/markdown/MarkdownContent';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -54,7 +52,8 @@ import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import { useGetAllEvents } from 'src/api/event';
 
-import FormProvider, { RHFUpload, RHFTextField, RHFDatePicker, RHFSelect } from 'src/components/hook-form';
+import MarkdownContent from 'src/components/markdown/MarkdownContent';
+import FormProvider, { RHFUpload, RHFTextField, RHFDatePicker } from 'src/components/hook-form';
 
 // Rich text editor for camp resources
 const RichTextEditor = ({ value, onChange }) => {
@@ -88,17 +87,17 @@ const insertFormat = (format) => {
 
       switch (format) {
         case 'bold':
-          newText = text.substring(0, start) + `**${selectedText}**` + text.substring(end);
+          newText = `${text.substring(0, start)  }**${selectedText}**${  text.substring(end)}`;
           newCursorPos = end + 4;
           break;
         case 'italic':
-          newText = text.substring(0, start) + `_${selectedText}_` + text.substring(end);
+          newText = `${text.substring(0, start)  }_${selectedText}_${  text.substring(end)}`;
           newCursorPos = end + 2;
           break;
         case 'link':
           const url = prompt('Enter URL:', 'https://');
           if (url) {
-            newText = text.substring(0, start) + `[${selectedText}](${url})` + text.substring(end);
+            newText = `${text.substring(0, start)  }[${selectedText}](${url})${  text.substring(end)}`;
             newCursorPos = end + url.length + 4;
           }
           break;
@@ -115,7 +114,7 @@ const insertFormat = (format) => {
           newCursorPos = start + numberedList.length;
           break;
         case 'heading':
-          newText = text.substring(0, start) + `## ${selectedText}` + text.substring(end);
+          newText = `${text.substring(0, start)  }## ${selectedText}${  text.substring(end)}`;
           newCursorPos = end + 3;
           break;
         default:

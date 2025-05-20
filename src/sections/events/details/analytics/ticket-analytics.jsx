@@ -26,20 +26,20 @@ const TicketAnalytics = ({ tickets, eventName }) => {
         borderColor: (theme) => theme.palette.divider,
         borderRadius: 2,
         width: 1,
-        '&:hover': {
-          cursor: 'pointer',
-          border: '2px solid',
-          borderColor: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
-          '& .hover-text': {
-            textDecoration: 'underline',
-            color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
-          },
-          '& .hover-icon': {
-            color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
-          },
-        },
+        // '&:hover': {
+        //   cursor: 'pointer',
+        //   border: '2px solid',
+        //   borderColor: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
+        //   '& .hover-text': {
+        //     textDecoration: 'underline',
+        //     color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
+        //   },
+        //   '& .hover-icon': {
+        //     color: (theme) => (theme.palette.mode === 'dark' ? 'white' : 'black'),
+        //   },
+        // },
       }}
-      onClick={handleClick}
+      // onClick={handleClick}
     >
       <CardContent sx={{ position: 'relative' }}>
         <Iconify
@@ -62,11 +62,11 @@ const TicketAnalytics = ({ tickets, eventName }) => {
               color="text.secondary"
               sx={{ fontWeight: 600 }}
             >
-              Total Tickets
+              Total Tickets Sold
             </Typography>
             <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" />
           </Stack>
-          <Typography variant="h2">{tickets?.length || 0}</Typography>
+          <Typography variant="h2">{tickets || 0}</Typography>
         </Box>
       </CardContent>
     </Card>

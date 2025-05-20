@@ -189,7 +189,7 @@ export default function OrderView() {
 
   const handleResendConfirmationEmail = async () => {
     if (!selectedOrder) return;
-    
+
     // Check if order status is paid
     if (selectedOrder.status !== 'paid') {
       setSnackbar({
@@ -703,7 +703,13 @@ export default function OrderView() {
                                   <Iconify icon="eva:info-outline" width={20} height={20} />
                                 </IconButton>
                               </Tooltip>
-                              <Tooltip title={order.status !== 'paid' ? "Resend only available for Paid orders" : "Resend Confirmation Email"}>
+                              <Tooltip
+                                title={
+                                  order.status !== 'paid'
+                                    ? 'Resend only available for Paid orders'
+                                    : 'Resend Confirmation Email'
+                                }
+                              >
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
