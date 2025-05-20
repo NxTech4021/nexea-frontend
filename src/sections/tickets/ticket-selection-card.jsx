@@ -673,7 +673,7 @@ const TicketSelectionCard = () => {
               <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
             }
           >
-            Check out
+            Next
           </LoadingButton>
         </Box>
       )}

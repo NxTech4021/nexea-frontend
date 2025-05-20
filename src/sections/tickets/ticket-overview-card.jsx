@@ -818,7 +818,7 @@ const TicketOverviewCard = () => {
                   mt: 'auto',
                 }}
               >
-                Check Out
+                Next
               </LoadingButton>
             )}
           </Stack>
