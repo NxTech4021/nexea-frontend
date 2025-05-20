@@ -51,7 +51,7 @@ const TicketInformation = ({ tickets }) => {
     chart: {
       type: 'donut',
     },
-    labels: tickets?.filter((a) => a?.sold > 0).map((item) => item.title),
+    labels: tickets?.map((item) => item.title),
     colors: tickets?.map((_, index) => colors[index]),
     plotOptions: {
       pie: {
@@ -66,7 +66,7 @@ const TicketInformation = ({ tickets }) => {
               fontSize: '16px',
               fontWeight: theme.typography.fontWeightBold,
               formatter() {
-                return tickets.reduce((sum, item) => sum + item.sold, 0).toLocaleString();
+                return tickets.reduce((sum, item) => sum + item.quantity, 0).toLocaleString();
               },
             },
             value: {
@@ -114,9 +114,9 @@ const TicketInformation = ({ tickets }) => {
     },
   };
 
-  const series = tickets?.filter((a) => a?.sold > 0)?.map((item) => item?.sold || 0);
+  const series = tickets.map((item) => item?.quantity || 0);
 
-  console.log(tickets);
+  // console.log(tickets);
 
   return (
     <Card sx={{ border: 1, borderColor: theme.palette.divider, borderRadius: 2 }}>
