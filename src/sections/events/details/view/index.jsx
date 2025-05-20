@@ -31,6 +31,8 @@ import CheckInAnalytics from '../analytics/checkIn-analytics';
 const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
 
+  console.log(data);
+
   const router = useRouter();
 
   const totalCheckedIn = useMemo(() => {
@@ -42,9 +44,11 @@ const EventDetails = ({ id }) => {
   }, [data]);
 
   const totalTicketsSold = useMemo(() => {
-    const tickets = data?.ticketType || [];
+    const orders = data?.order || [];
 
-    const totalSolds = tickets.reduce((acc, cur) => acc + (cur?.sold ?? 0), 0);
+    const totalSolds = orders
+      .filter((a) => a?.status === 'paid')
+      .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
 
     return totalSolds;
   }, [data]);
