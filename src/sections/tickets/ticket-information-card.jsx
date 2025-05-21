@@ -1083,45 +1083,97 @@ const TicketInformationCard = () => {
                 flex={1}
                 justifyContent="space-between"
               >
-                <Card
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: alpha(
-                      theme.palette.mode === 'dark'
-                        ? theme.palette.background.neutral
-                        : theme.palette.background.neutral,
-                      theme.palette.mode === 'dark' ? 0.3 : 0.6
-                    ),
-                    border: '1px solid',
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Stack spacing={2}>
-                    {cartData?.cartItem.map((item) => (
-                      <Stack
-                        key={item.id}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
-                          <Typography
-                            sx={{ fontWeight: 500 }}
-                          >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                                  <Card
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: alpha(
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.background.neutral
+                          : theme.palette.background.neutral,
+                        theme.palette.mode === 'dark' ? 0.3 : 0.6
+                      ),
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      {cartData?.cartItem.map((item) => (
+                        <Stack key={item.id}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
+                              <Typography
+                                sx={{ fontWeight: 500 }}
+                              >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                            </Stack>
+                            <Typography sx={{ fontWeight: 600 }}>
+                              {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(item.quantity * item.ticketType.price)}
+                            </Typography>
+                          </Stack>
+                          {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
+                            <Stack
+                              ml={4}
+                              mt={1}
+                              spacing={1}
+                              sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                bgcolor: alpha(
+                                  theme.palette.background.neutral,
+                                  0.5
+                                ),
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  fontWeight: 600,
+                                  color: 'text.secondary',
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Add Ons:
+                              </Typography>
+                              {item?.cartAddOn?.map((a) => (
+                                <Stack
+                                  key={a.id}
+                                  direction="row"
+                                  alignItems="center"
+                                  justifyContent="space-between"
+                                  sx={{ pl: 1 }}
+                                >
+                                  <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Iconify icon="mdi:plus-circle-outline" width={14} />
+                                    <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>
+                                      {`${a.quantity} × ${a.addOn.name}`}
+                                    </Typography>
+                                  </Stack>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+                                  >
+                                    {Intl.NumberFormat('en-MY', {
+                                      style: 'currency',
+                                      currency: 'MYR',
+                                    }).format(a.quantity * a.addOn.price)}
+                                  </Typography>
+                                </Stack>
+                              ))}
+                            </Stack>
+                          )}
                         </Stack>
-                        <Typography sx={{ fontWeight: 600 }}>
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(item.quantity * item.ticketType.price)}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </Card>
+                      ))}
+                    </Stack>
+                  </Card>
 
                 <Stack spacing={2.5}>
                   {cartData && (

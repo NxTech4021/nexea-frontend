@@ -526,31 +526,32 @@ const EventLists = ({ query }) => {
               }}
             >
               {/* Regular Row */}
-              <Stack
-                direction="row"
-                alignItems="center"
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
-                  // color: getTextColor(isExpanded, theme.palette.mode),
-                  // '&:hover': {
-                  //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .MuiTypography-root:not(.status-text)': {
-                  //   color: getTextColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
-                  //   color: getIconColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .event-secondary-text': {
-                  //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
-                  // },
-                }}
-                onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
-              >
+              <Tooltip title={!isExpanded ? "View Event Details" : ""} arrow placement="top">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
+                    // color: getTextColor(isExpanded, theme.palette.mode),
+                    // '&:hover': {
+                    //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .MuiTypography-root:not(.status-text)': {
+                    //   color: getTextColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
+                    //   color: getIconColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .event-secondary-text': {
+                    //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
+                    // },
+                  }}
+                  onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
+                >
                 {/* Event Details */}
                 <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
                   <Box
@@ -677,7 +678,8 @@ const EventLists = ({ query }) => {
                     <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
                   </IconButton>
                 </Box>
-              </Stack>
+                </Stack>
+              </Tooltip>
 
               {/* Expanded Actions Row */}
               <Collapse in={isExpanded} timeout={250} unmountOnExit>
@@ -693,6 +695,29 @@ const EventLists = ({ query }) => {
                   alignItems="center"
                   spacing={1}
                 >
+                  <Button
+                    onClick={() => {
+                      router.push(paths.dashboard.events.details(event.id));
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:alert-circle-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="View Event Details"
+                  >
+                    Details
+                  </Button>
                   <Button
                     onClick={() => {
                       setOpenEdit(true);
