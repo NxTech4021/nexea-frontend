@@ -1083,45 +1083,97 @@ const TicketInformationCard = () => {
                 flex={1}
                 justifyContent="space-between"
               >
-                <Card
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: alpha(
-                      theme.palette.mode === 'dark'
-                        ? theme.palette.background.neutral
-                        : theme.palette.background.neutral,
-                      theme.palette.mode === 'dark' ? 0.3 : 0.6
-                    ),
-                    border: '1px solid',
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Stack spacing={2}>
-                    {cartData?.cartItem.map((item) => (
-                      <Stack
-                        key={item.id}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
-                          <Typography
-                            sx={{ fontWeight: 500 }}
-                          >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                                  <Card
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: alpha(
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.background.neutral
+                          : theme.palette.background.neutral,
+                        theme.palette.mode === 'dark' ? 0.3 : 0.6
+                      ),
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      {cartData?.cartItem.map((item) => (
+                        <Stack key={item.id}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
+                              <Typography
+                                sx={{ fontWeight: 500 }}
+                              >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
+                            </Stack>
+                            <Typography sx={{ fontWeight: 600 }}>
+                              {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(item.quantity * item.ticketType.price)}
+                            </Typography>
+                          </Stack>
+                          {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
+                            <Stack
+                              ml={4}
+                              mt={1}
+                              spacing={1}
+                              sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                bgcolor: alpha(
+                                  theme.palette.background.neutral,
+                                  0.5
+                                ),
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  fontWeight: 600,
+                                  color: 'text.secondary',
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Add Ons:
+                              </Typography>
+                              {item?.cartAddOn?.map((a) => (
+                                <Stack
+                                  key={a.id}
+                                  direction="row"
+                                  alignItems="center"
+                                  justifyContent="space-between"
+                                  sx={{ pl: 1 }}
+                                >
+                                  <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Iconify icon="mdi:plus-circle-outline" width={14} />
+                                    <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>
+                                      {`${a.quantity} × ${a.addOn.name}`}
+                                    </Typography>
+                                  </Stack>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+                                  >
+                                    {Intl.NumberFormat('en-MY', {
+                                      style: 'currency',
+                                      currency: 'MYR',
+                                    }).format(a.quantity * a.addOn.price)}
+                                  </Typography>
+                                </Stack>
+                              ))}
+                            </Stack>
+                          )}
                         </Stack>
-                        <Typography sx={{ fontWeight: 600 }}>
-                          {Intl.NumberFormat('en-MY', {
-                            style: 'currency',
-                            currency: 'MYR',
-                          }).format(item.quantity * item.ticketType.price)}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </Card>
+                      ))}
+                    </Stack>
+                  </Card>
 
                 <Stack spacing={2.5}>
                   {cartData && (
@@ -1286,6 +1338,77 @@ const TicketInformationCard = () => {
                       </Stack>
                     </Stack>
                   </Card>
+                  {cartData?.event?.eventType === 'camp' && (
+                    <Stack spacing={2}>
+                      {/* Refund Policy */}
+                      <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                        <Checkbox
+                          size="small"
+                          checked={resourceConfirmations.refundPolicy || false}
+                          onChange={(e) =>
+                            setResourceConfirmations((prev) => ({
+                              ...prev,
+                              refundPolicy: e.target.checked,
+                            }))
+                          }
+                          sx={{
+                            p: 0.5,
+                            color: 'text.secondary',
+                            '&.Mui-checked': {
+                              color: 'primary.main',
+                            },
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.7rem',
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          I acknowledge that the payment made for this event is non-refundable.
+                        </Typography>
+                      </Stack>
+                      {/* Insurance Policy */}
+                      <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                        <Checkbox
+                          size="small"
+                          checked={resourceConfirmations.insurance || false}
+                          onChange={(e) =>
+                            setResourceConfirmations((prev) => ({
+                              ...prev,
+                              insurance: e.target.checked,
+                            }))
+                          }
+                          sx={{
+                            p: 0.5,
+                            color: 'text.secondary',
+                            '&.Mui-checked': {
+                              color: 'primary.main',
+                            },
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.7rem',
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          I acknowledge and agree that Public Liability and Group Personal Accident
+                          (GPA) insurance coverage is arranged by NEXEA and/or its designated
+                          third-party insurer solely for the benefit of registered ticket holders,
+                          and is strictly limited to the official duration of the camp. This
+                          coverage expressly excludes any incidents occurring during travel to and
+                          from the event or outside the scheduled camp activities. NEXEA shall not
+                          be held liable for any claims arising beyond the scope and period of this
+                          coverage
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  )}
 
                   <LoadingButton
                     size="large"
@@ -1295,7 +1418,12 @@ const TicketInformationCard = () => {
                     // loading={loading.value}
                     // onClick={handleCheckout}
                     // disabled={!totalTicketsQuantitySelected}
-                    disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
+                    // disabled={!cartData?.cartItem?.length || !allResourcesConfirmed}
+                    disabled={
+                      !cartData?.cartItem?.length ||
+                      (cartData?.event?.eventType === 'camp' &&
+                        (!resourceConfirmations.insurance || !resourceConfirmations.refundPolicy))
+                    }
                     startIcon={
                       <Iconify
                         icon="material-symbols-light:shopping-cart-checkout-rounded"
@@ -1314,62 +1442,15 @@ const TicketInformationCard = () => {
                       transition: 'all 0.2s',
                     }}
                   >
-                    {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'}
+                    {/* {!allResourcesConfirmed ? 'Proceed to Payment' : 'Proceed to Payment'} */}
+                    {cartData?.event?.eventType === 'camp' &&
+                    (!resourceConfirmations.insurance || !resourceConfirmations.refundPolicy)
+                      ? 'Proceed to Payment'
+                      : 'Proceed to Payment'}
                   </LoadingButton>
                 </Stack>
               </Stack>
             </Box>
-          </Card>
-        )}
-
-        {cartData?.event?.eventType === 'camp' && (
-          <Card
-            elevation={0}
-            sx={{
-              p: 2,
-              mb: 2,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            <Stack direction="row" spacing={1.5} alignItems="flex-start">
-              <Checkbox
-                size="small"
-                // eslint-disable-next-line dot-notation
-                checked={resourceConfirmations['insurance'] || false}
-                onChange={(e) =>
-                  setResourceConfirmations((prev) => ({
-                    ...prev,
-                    insurance: e.target.checked,
-                  }))
-                }
-                sx={{
-                  p: 0.5,
-                  mt: 0.25,
-                  color: 'text.secondary',
-                  '&.Mui-checked': {
-                    color: 'primary.main',
-                  },
-                }}
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                  fontSize: '0.875rem',
-                  lineHeight: 1.6,
-                }}
-              >
-                I acknowledge and agree that Public Liability and Group Personal Accident (GPA)
-                insurance coverage is arranged by NEXEA and/or its designated third-party insurer
-                solely for the benefit of registered ticket holders, and is strictly limited to the
-                official duration of the camp. This coverage expressly excludes any incidents
-                occurring during travel to and from the event or outside the scheduled camp
-                activities. NEXEA shall not be held liable for any claims arising beyond the scope
-                and period of this coverage
-              </Typography>
-            </Stack>
           </Card>
         )}
 
