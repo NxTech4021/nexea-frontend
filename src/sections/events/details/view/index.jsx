@@ -65,6 +65,8 @@ const EventDetails = ({ id }) => {
 
   const grouped = orders?.reduce((acc, entry) => {
     const title = entry.ticket?.ticketType?.title;
+    const addOn = entry.ticket?.ticketAddOn?.addOn?.name;
+
     if (!title) return acc;
 
     if (!acc[title]) {
@@ -75,6 +77,18 @@ const EventDetails = ({ id }) => {
     } else {
       acc[title].quantity += 1;
     }
+
+    if (addOn) {
+      if (!acc.addOn) {
+        acc.addOn = {
+          title: `${addOn} (Add On)`,
+          quantity: 1,
+        };
+      } else {
+        acc.addOn.quantity += 1;
+      }
+    }
+
     return acc;
   }, {});
 
