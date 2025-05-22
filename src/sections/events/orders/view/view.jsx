@@ -273,7 +273,7 @@ export default function OrderView() {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Stack
-                direction="row"
+                direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
                 sx={{
                   mb: 2,
@@ -300,18 +300,33 @@ export default function OrderView() {
                   }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      height: 40,
+                      height: { xs: 45, sm: 40 },
                     },
+                    flexGrow: 1,
                   }}
                 />
-
+ <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' },
+            width: { xs: '100%', sm: 'auto' },
+          }}
+        ></Box>
                 <Select
                   value={eventFilter}
                   onChange={(e) => setEventFilter(e.target.value)}
                   sx={{
-                    minWidth: 200,
-                    height: 40,
-                  }}
+              minWidth: { xs: '100%', sm: 200 },
+              height: { xs: 45, sm: 40 },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  maxHeight: 250,
+                },
+              },
+            }}
                 >
                   {eventOptions.map((event) => (
                     <MenuItem key={event} value={event}>
@@ -325,10 +340,12 @@ export default function OrderView() {
                   color="info"
                   onClick={handleClickOpen}
                   sx={{
-                    minWidth: 'fit-content',
-                    height: 40,
-                    fontWeight: 550,
-                  }}
+              minWidth: 'fit-content',
+              height: { xs: 45, sm: 40 },
+              fontWeight: 550,
+              width: { xs: '100%', sm: 'auto' },
+            }}
+            startIcon={<Iconify icon="eva:plus-fill" />}
                 >
                   Create Order
                 </Button>
@@ -348,6 +365,7 @@ export default function OrderView() {
                   '& .MuiButton-root': {
                     fontSize: '0.875rem',
                     fontWeight: 450,
+                    
                   },
                 }}
               >
