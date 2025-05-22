@@ -118,6 +118,9 @@ const EventInformation = ({ event }) => {
     // This will refresh the data using your SWR hook
     mutate();
   };
+  const isDefaultTime = (date) => {
+  return dayjs(date).format('HH:mm') === '00:00';
+};
   return (
     <Card
       sx={{
@@ -214,10 +217,25 @@ const EventInformation = ({ event }) => {
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
               {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
             </Typography> */}
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+            {/* <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
               {dayjs(event.date).format('LL')} | {dayjs(event.date).format('hh:mm A')} -{' '}
               {dayjs(event.endDate).format('LL')} | {dayjs(event.endDate).format('hh:mm A')}
-            </Typography>
+            </Typography> */}
+<Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
+  {dayjs(event.date).format('LL')}
+  {!(isDefaultTime(event.date) && isDefaultTime(event.endDate)) && (
+    <>
+      {' | '}
+      {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+    </>
+  )}
+  {dayjs(event.date).format('LL') !== dayjs(event.endDate).format('LL') && (
+    <>
+      {' - '}
+      {dayjs(event.endDate).format('LL')}
+    </>
+  )}
+</Typography>
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
               {items[3].content}
             </Typography>
