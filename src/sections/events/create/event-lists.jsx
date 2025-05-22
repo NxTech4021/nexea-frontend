@@ -257,7 +257,21 @@ const EventLists = ({ query }) => {
               {/* Left side - Avatar and Event Info */}
               <Grid item xs={12} sm={8}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar alt={event.name} src="/logo/nexea.png" sx={{ width: 48, height: 48 }} />
+                  <Avatar 
+                    alt={event.name} 
+                    src={event.eventSetting?.eventLogo || "/logo/nexea.png"} 
+                    sx={{ 
+                      width: 48, 
+                      height: 48,
+                      bgcolor: 'background.neutral',
+                      '& img': {
+                        objectFit: 'contain',
+                        width: '70%',
+                        height: '70%',
+                        margin: 'auto'
+                      }
+                    }} 
+                  />
                   <Stack spacing={0.75}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       {event.name}
@@ -566,8 +580,18 @@ const EventLists = ({ query }) => {
                   >
                     <Avatar
                       alt={event.name}
-                      src="/logo/nexea.png"
-                      sx={{ width: '100%', height: '100%' }}
+                      src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
+                      sx={{ 
+                        width: '100%', 
+                        height: '100%',
+                        bgcolor: 'background.neutral',
+                        '& img': {
+                          objectFit: 'contain',
+                          width: '70%',
+                          height: '70%',
+                          margin: 'auto'
+                        }
+                      }}
                     />
                   </Box>
                   <Stack spacing={0.25}>
@@ -1399,11 +1423,48 @@ const EventLists = ({ query }) => {
         fullWidth
       >
         <DialogTitle id="upload-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
-          />
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              marginRight: 2,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'background.neutral',
+              overflow: 'hidden',
+            }}
+          >
+            {selectedEvent?.eventSetting?.eventLogo ? (
+              <Box
+                component="img"
+                src={selectedEvent.eventSetting.eventLogo}
+                alt={selectedEvent?.name || 'Event'}
+                sx={{
+                  width: '80%',
+                  height: '80%',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <Avatar
+                alt={selectedEvent?.name || 'Event'}
+                src={selectedEvent?.eventSetting?.eventLogo || "/logo/nexea.png"}
+                sx={{ 
+                  width: '100%', 
+                  height: '100%',
+                  bgcolor: 'background.neutral',
+                  '& img': {
+                    objectFit: 'contain',
+                    width: '70%',
+                    height: '70%',
+                    margin: 'auto'
+                  }
+                }}
+              />
+            )}
+          </Box>
           <Box>
             <Typography variant="h6">{selectedEvent?.name}</Typography>
             <Typography variant="subtitle1">Upload Attendees</Typography>

@@ -231,7 +231,14 @@ const OrderDetails = ({ orderId }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
         <Tooltip title="Back to Orders">
           <IconButton
-            onClick={() => router.push(paths.dashboard.order.root)}
+            onClick={() => {
+              if (order?.event?.id) {
+                router.push(paths.dashboard.order.event(order.event.id));
+              } else {
+                // Fallback to general orders page if no event ID
+                router.push(paths.dashboard.order.root);
+              }
+            }}
             sx={{
               width: 40,
               height: 40,

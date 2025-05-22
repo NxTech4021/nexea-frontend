@@ -18,9 +18,11 @@ import {
   DialogTitle,
   DialogContent,
   CircularProgress,
+  Paper,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
+import { useTheme } from '@mui/material/styles';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -37,6 +39,16 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcru
 export default function EventAttendee() {
   const { id } = useParams();
   const settings = useSettingsContext();
+  const theme = useTheme();
+  
+  // Theme-aware colors
+  const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';
+  const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
+  const headerBgColor = theme.palette.mode === 'light' ? '#f8f8f8' : '#333';
+  const paperBgColor = theme.palette.mode === 'light' ? '#fff' : '#1e1e1e';
+  const hoverBgColor = theme.palette.mode === 'light' ? '#f8f9fa' : '#2c2c2c';
+  const secondaryTextColor = theme.palette.mode === 'light' ? '#666' : '#aaa';
+  
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
@@ -136,6 +148,61 @@ export default function EventAttendee() {
       valueGetter: (value, row) => `${row.ticket.ticketCode || ''}`,
     },
     {
+      field: 'orderStatus',
+      headerName: 'Order Type',
+      width: 150,
+      valueGetter: (value, row) => {
+        // Check if the order is free (paid with 0 amount)
+        if (row.order.status === 'paid' && Number(row.order.totalAmount) === 0) {
+          return 'free';
+        }
+        return `${row.order.status || ''}`;
+      },
+      renderCell: (params) => {
+        const status = params.value;
+        let color;
+        
+        switch (status) {
+          case 'paid':
+            color = 'success';
+            break;
+          case 'pending':
+            color = 'warning';
+            break;
+          case 'cancelled':
+            color = 'error';
+            break;
+          case 'failed':
+            color = 'error';
+            break;
+          case 'free':
+            color = 'info';
+            break;
+          default:
+            color = 'default';
+        }
+        
+        let displayText = 'Unknown';
+        if (status === 'free') {
+          displayText = 'Free';
+        } else if (status) {
+          displayText = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+        
+        return (
+          <Label size="small" color={color}>
+            {displayText}
+          </Label>
+        );
+      },
+    },
+    {
+      field: 'discountCode',
+      headerName: 'Discount Code',
+      width: 150,
+      valueGetter: (value, row) => (row.order.discountCode ? row.order.discountCode.code : 'None'),
+    },
+    {
       field: 'status',
       headerName: 'Checked In',
       width: 150,
@@ -144,7 +211,6 @@ export default function EventAttendee() {
       renderCell: (params) =>
         params.value === 'pending' ? (
           <Tooltip title="Click to edit status">
-            {/* <Iconify icon="mdi:pencil" width={16} height={16} color="#6c6c6c" /> */}
             <Label size="small" color="warning">
               Pending
             </Label>
@@ -154,46 +220,6 @@ export default function EventAttendee() {
             Checked In
           </Label>
         ),
-      // renderEditCell: (params) => {
-      //   const handleChange = async (e) => {
-      //     await params.api.setEditCellValue({
-      //       id: params.id,
-      //       field: params.field,
-      //       value: e.target.value,
-      //     });
-
-      //     params.api.stopCellEditMode({ id: params.id, field: params.field });
-      //   };
-
-      //   const isDisabled = params.value === 'checkedIn';
-
-      //   return (
-      //     <Select
-      //       value={params.value || ''}
-      //       onChange={handleChange}
-      //       size="small"
-      //       fullWidth
-      //       displayEmpty
-      //       disabled={isDisabled}
-      //       sx={{ height: 1 }}
-      //       renderValue={(selected) => {
-      //         // if (!selected) {
-      //         //   return <em>Select status</em>;
-      //         // }
-      //         if (selected === 'checkedIn') {
-      //           return (
-      //             <Chip label="Checked In" size="small" color="success" sx={{ width: '100%' }} />
-      //           );
-      //         }
-      //         return selected;
-      //       }}
-      //     >
-      //       <MenuItem value="checkedIn">
-      //         <Chip label="Checked In" size="small" color="success" sx={{ width: '100%' }} />
-      //       </MenuItem>
-      //     </Select>
-      //   );
-      // },
       renderEditCell: (params) => (
         <Checkbox
           checked={params.value === 'checkedIn'}
@@ -207,19 +233,6 @@ export default function EventAttendee() {
         />
       ),
     },
-    //       renderEditCell: (params) => (
-    //         <Checkbox
-    //           checked={params.value === 'checkedIn'}
-    //           onChange={(e) => {
-    //             params.api.setEditCellValue({
-    //               id: params.id,
-    //               field: params.field,
-    //               value: e.target.checked ? 'checkedIn' : 'pending',
-    //             });
-    //           }}
-    //         />
-    //       ),
-    //     },
   ];
 
   if (isLoading) {
@@ -255,20 +268,40 @@ export default function EventAttendee() {
             variant="contained"
             startIcon={<Iconify icon="material-symbols:add" />}
             onClick={dialog.onTrue}
+            sx={{
+              borderRadius: 1,
+              fontWeight: 600,
+              boxShadow: 'none',
+              bgcolor: theme.palette.mode === 'light' ? '#111' : '#eee',
+              color: theme.palette.mode === 'light' ? '#fff' : '#111',
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'light' ? '#222' : '#ddd',
+                boxShadow: 'none',
+              },
+            }}
           >
             New Attendee
           </Button>
         }
+        sx={{ mb: 3 }}
       />
 
-      <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          border: `1px solid ${borderColor}`, 
+          borderRadius: 2, 
+          overflow: 'hidden',
+          bgcolor: paperBgColor
+        }}
+      >
         <DataGrid
           editMode="row"
           apiRef={apiRef}
-          rows={data?.attendees || []} // Filtered attendees based on selected event
+          rows={data?.attendees || []}
           columns={columns}
           pagination
-          pageSize={5}
+          pageSize={10}
           checkboxSelection
           disableSelectionOnClick
           selectionModel={selectedRows}
@@ -288,12 +321,71 @@ export default function EventAttendee() {
               showQuickFilter: true,
             },
           }}
+          sx={{
+            '& .MuiDataGrid-root': {
+              border: 'none',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#f3f3f3' : '#333'}`,
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: headerBgColor,
+              borderBottom: 'none',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              color: textColor,
+              fontWeight: 600,
+              fontSize: '0.875rem',
+            },
+            '& .MuiDataGrid-virtualScroller': {
+              backgroundColor: paperBgColor,
+            },
+            '& .MuiDataGrid-footerContainer': {
+              borderTop: `1px solid ${theme.palette.mode === 'light' ? '#f3f3f3' : '#333'}`,
+              backgroundColor: paperBgColor,
+            },
+            '& .MuiDataGrid-toolbarContainer': {
+              padding: '8px 16px',
+              backgroundColor: paperBgColor,
+              borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#f3f3f3' : '#333'}`,
+            },
+            '& .MuiButton-root': {
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 1,
+            },
+            '& .MuiFormControl-root': {
+              minWidth: 120,
+            },
+            '& .MuiTablePagination-root': {
+              color: secondaryTextColor,
+            },
+            '& .MuiIconButton-root': {
+              color: secondaryTextColor,
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: hoverBgColor,
+            },
+          }}
         />
-      </Box>
+      </Paper>
 
-      <Dialog open={dialog.value} onClose={dialog.onFalse}>
-        <DialogTitle> Add Attendee Information</DialogTitle>
-        <DialogContent sx={{ py: 4 }}>
+      <Dialog 
+        open={dialog.value} 
+        onClose={dialog.onFalse}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: paperBgColor,
+          },
+        }}
+      >
+        <DialogTitle sx={{ px: 3, py: 2, color: textColor }}> Add Attendee Information</DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
           <CreateAttendeeForm dialog={dialog} selectedEventId={event?.id} />
         </DialogContent>
       </Dialog>
