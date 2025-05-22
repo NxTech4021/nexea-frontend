@@ -228,6 +228,10 @@ const EventLists = ({ query }) => {
   //   );
   // }, [filteredEvents, currentPage]);
 
+// Helper function to check if time is 00:00
+const isDefaultTime = (date) => {
+  return dayjs(date).format('HH:mm') === '00:00';
+};
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
   };
@@ -632,7 +636,7 @@ const EventLists = ({ query }) => {
                   </Box>
                 </Box>
 
-                {/* Date & Time */}
+                {/* Date & Time
                 <Stack spacing={0.5} sx={{ width: '20%' }}>
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Typography variant="body2">{fDate(event.date)}</Typography>
@@ -640,7 +644,18 @@ const EventLists = ({ query }) => {
                   <Typography variant="caption" className="event-secondary-text">
                     {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
                   </Typography>
-                </Stack>
+                </Stack> */}
+{/* Date & Time */}
+<Stack spacing={0.5} sx={{ width: '20%' }}>
+  <Stack direction="row" alignItems="center" spacing={1}>
+    <Typography variant="body2">{fDate(event.date)}</Typography>
+  </Stack>
+  {!(isDefaultTime(event.date) && isDefaultTime(event.endDate)) && (
+    <Typography variant="caption" className="event-secondary-text">
+      {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+    </Typography>
+  )}
+</Stack>
 
                 {/* Event Manager */}
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
