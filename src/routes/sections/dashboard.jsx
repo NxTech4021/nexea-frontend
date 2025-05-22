@@ -87,6 +87,7 @@ export const dashboardRoutes = [
       },
       { path: 'discount-code', element: <DiscountCodeView /> },
       { path: 'order', element: <OrderView /> },
+      { path: 'order/event/:eventId', element: <OrderView /> },
       { path: 'order/:id', element: <OrderDetailsPage /> },
       {
         path: 'templates',
