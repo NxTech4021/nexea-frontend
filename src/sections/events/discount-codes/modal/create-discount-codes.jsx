@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as yup from 'yup';
 import { mutate } from 'swr';
 import PropTypes from 'prop-types';
@@ -107,7 +107,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
       name: discountCode?.code || '',
       type: discountCode?.type || '',
       value: discountCode?.value || null,
-      availability: discountCode?.ticketType || [],
+      availability: discountCode?.ticketType?.concat(discountCode?.addOn || []) || [],
       limit: discountCode?.limit || 0,
       expirationDate: dayjs(discountCode?.expirationDate) || null,
     },
@@ -115,19 +115,18 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
     reValidateMode: 'onChange',
   });
 
+  const availableTickets = useMemo(() => {
+    const addOns = ticketTypes
+      .flatMap((ticket) => ticket?.addOns || [])
+      .filter(Boolean)
+      .map((a) => ({ ...a, type: 'addOn' })); // remove any falsy values
+
+    return [...ticketTypes, ...addOns];
+  }, [ticketTypes]);
+
   const { control, handleSubmit, reset, isSubmitting, watch, setValue } = methods;
 
   const discountType = watch('type');
-
-  // const testDiscountValue = useCallback(
-  //   (val) => {
-  //     if (discountType === 'percentage' && val > 100) {
-  //       return false;
-  //     }
-  //     return true;
-  //   },
-  //   [discountType]
-  // );
 
   const onSubmit = handleSubmit(async (value) => {
     try {
@@ -200,9 +199,14 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
               <RHFAutocomplete
                 name="availability"
                 multiple
-                options={[{ id: 'all', title: 'Select all', event: { name: '' } }, ...ticketTypes]}
+                options={[
+                  { id: 'all', title: 'Select all', event: { name: '' } },
+                  ...availableTickets,
+                ]}
                 getOptionLabel={(option) =>
-                  option.id === 'all' ? 'Select all' : `${option.title} ( ${option.event.name} )`
+                  option.id === 'all'
+                    ? 'Select all'
+                    : `${option.title || option.name} ( ${option.event?.name ?? 'Add On'} )`
                 }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect

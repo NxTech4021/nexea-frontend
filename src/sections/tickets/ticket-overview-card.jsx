@@ -80,6 +80,7 @@ const TicketOverviewCard = () => {
     const ticketsTotal = tickets.reduce((acc, cur) => acc + cur.selectedQuantity, 0);
     return ticketsTotal;
   }, [tickets]);
+
   const allResourcesConfirmed = useMemo(() => {
     if (!cartData?.event?.campResources?.length) return true;
     return cartData.event.campResources.every((resource) => resourceConfirmations[resource.id]);
@@ -123,241 +124,6 @@ const TicketOverviewCard = () => {
       setCalculatedSST(sstPrice);
     }
   }, [eventData, subTotal, cartData]);
-
-  // if (mdDown) {
-  //   return (
-  //     <Card
-  //       elevation={2}
-  //       sx={{
-  //         position: 'sticky',
-  //         bottom: 0,
-  //         left: 0,
-  //         right: 0,
-  //         zIndex: 10,
-  //         borderRadius: '16px 16px 0 0',
-  //         overflow: 'hidden',
-  //         borderTop: 1,
-  //         borderColor: 'divider',
-  //         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-  //         pb: 2,
-  //       }}
-  //     >
-  //       <Collapse in={collapse.value} timeout="auto">
-  //         <Box
-  //           sx={{
-  //             maxHeight: '50vh',
-  //             overflowY: 'auto',
-  //             p: 2.5,
-  //             pb: 1.5,
-  //             '&::-webkit-scrollbar': {
-  //               width: '6px',
-  //             },
-  //             '&::-webkit-scrollbar-thumb': {
-  //               background: (theme) => alpha(theme.palette.text.primary, 0.2),
-  //               borderRadius: '10px',
-  //             },
-  //           }}
-  //         >
-  //           {!totalTicketsQuantitySelected ? (
-  //             <Stack
-  //               direction="row"
-  //               spacing={1.5}
-  //               alignItems="center"
-  //               justifyContent="center"
-  //               sx={{
-  //                 py: 4,
-  //                 px: 2,
-  //                 borderRadius: 2,
-  //                 bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
-  //               }}
-  //             >
-  //               <Iconify
-  //                 icon="solar:cart-large-minimalistic-outline"
-  //                 width={24}
-  //                 color="text.secondary"
-  //               />
-  //               <Typography color="text.secondary" fontWeight={500}>
-  //                 No tickets selected
-  //               </Typography>
-  //             </Stack>
-  //           ) : (
-  //             <Stack spacing={2.5}>
-  //               <Typography variant="h6">Order Summary</Typography>
-
-  //               <Card
-  //                 elevation={0}
-  //                 sx={{
-  //                   p: 2,
-  //                   borderRadius: 1,
-  //                   bgcolor: (theme) => theme.palette.background.neutral,
-  //                   border: '1px solid',
-  //                   borderColor: 'divider',
-  //                 }}
-  //               >
-  //                 <Stack spacing={2}>
-  //                   {tickets
-  //                     .filter((ticket) => ticket.selectedQuantity > 0)
-  //                     .map((ticket) => (
-  //                       <Stack
-  //                         key={ticket.id}
-  //                         direction="row"
-  //                         alignItems="center"
-  //                         justifyContent="space-between"
-  //                       >
-  //                         <Stack direction="row" alignItems="center" spacing={1}>
-  //                           <Iconify icon="mdi:ticket-outline" width={16} />
-  //                           <Typography
-  //                             sx={{ fontWeight: 500 }}
-  //                           >{`${ticket.selectedQuantity} × ${ticket.title}`}</Typography>
-  //                         </Stack>
-  //                         <Typography sx={{ fontWeight: 600 }}>
-  //                           {Intl.NumberFormat('en-MY', {
-  //                             style: 'currency',
-  //                             currency: 'MYR',
-  //                           }).format(ticket.subTotal)}
-  //                         </Typography>
-  //                       </Stack>
-  //                     ))}
-  //                 </Stack>
-  //               </Card>
-
-  //               <Card
-  //                 elevation={0}
-  //                 sx={{
-  //                   p: 2,
-  //                   borderRadius: 1,
-  //                   border: '1px solid',
-  //                   borderColor: 'divider',
-  //                 }}
-  //               >
-  //                 <Stack spacing={2}>
-  //                   <Stack direction="row" alignItems="center" justifyContent="space-between">
-  //                     <Typography color="text.secondary">SST:</Typography>
-  //                     <Typography fontWeight={500}>
-  //                       {Intl.NumberFormat('en-MY', {
-  //                         style: 'currency',
-  //                         currency: 'MYR',
-  //                       }).format(calculatedSST)}
-  //                     </Typography>
-  //                   </Stack>
-
-  //                   <Divider />
-
-  //                   <Stack direction="row" alignItems="center" justifyContent="space-between">
-  //                     <Typography variant="subtitle1">Total:</Typography>
-  //                     <Typography
-  //                       variant="h6"
-  //                       color={(theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800')}
-  //                     >
-  //                       {Intl.NumberFormat('en-MY', {
-  //                         style: 'currency',
-  //                         currency: 'MYR',
-  //                       }).format(total)}
-  //                     </Typography>
-  //                   </Stack>
-  //                 </Stack>
-  //               </Card>
-  //             </Stack>
-  //           )}
-  //         </Box>
-  //       </Collapse>
-
-  //       <Box
-  //         onClick={() => collapse.onToggle()}
-  //         sx={{
-  //           display: 'flex',
-  //           alignItems: 'center',
-  //           justifyContent: 'space-between',
-  //           cursor: 'pointer',
-  //           mx: 2.5,
-  //           my: 1.5,
-  //           p: 1.5,
-  //           borderRadius: 2,
-  //           bgcolor: (theme) => alpha(theme.palette.grey[200], 0.5),
-  //           '&:hover': {
-  //             bgcolor: (theme) => alpha(theme.palette.grey[300], 0.5),
-  //           },
-  //         }}
-  //       >
-  //         <Typography variant="subtitle1">
-  //           {collapse.value ? 'Hide Order Summary' : 'View Order Summary'}
-  //         </Typography>
-  //         <Stack direction="row" alignItems="center" spacing={1.5}>
-  //           <Typography
-  //             variant="subtitle1"
-  //             fontWeight={600}
-  //             color={(theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800')}
-  //           >
-  //             {Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-  //               total || 0
-  //             )}
-  //           </Typography>
-  //           <Iconify
-  //             icon={collapse.value ? 'iconamoon:arrow-up-2-bold' : 'iconamoon:arrow-down-2-bold'}
-  //             width={20}
-  //             sx={{
-  //               transition: 'transform 0.2s ease',
-  //               transform: collapse.value ? 'rotate(0deg)' : 'rotate(0deg)',
-  //             }}
-  //           />
-  //         </Stack>
-  //       </Box>
-
-  //       <Box sx={{ px: 2.5 }}>
-  //         {cartData ? (
-  //           <LoadingButton
-  //             variant="contained"
-  //             fullWidth
-  //             size="large"
-  //             startIcon={<Iconify icon="fluent:payment-16-filled" width={20} />}
-  //             sx={{
-  //               borderRadius: 2,
-  //               py: 1.5,
-  //               bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
-  //               color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
-  //               '&:hover': {
-  //                 bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
-  //                 transform: 'translateY(-2px)',
-  //               },
-  //               transition: 'all 0.2s',
-  //               '& .MuiSvgIcon-root': {
-  //                 color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
-  //               },
-  //             }}
-  //           >
-  //             Proceed to payment
-  //           </LoadingButton>
-  //         ) : (
-  //           <LoadingButton
-  //             variant="contained"
-  //             size="large"
-  //             fullWidth
-  //             onClick={handleCheckout}
-  //             startIcon={
-  //               <Iconify icon="material-symbols-light:shopping-cart-checkout-rounded" width={22} />
-  //             }
-  //             sx={{
-  //               borderRadius: 2,
-  //               py: 1.5,
-  //               bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#000'),
-  //               color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
-  //               '&:hover': {
-  //                 bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#f5f5f5' : '#333'),
-  //                 transform: 'translateY(-2px)',
-  //               },
-  //               transition: 'all 0.2s',
-  //               '& .MuiSvgIcon-root': {
-  //                 color: (theme) => (theme.palette.mode === 'dark' ? '#000' : '#fff'),
-  //               },
-  //             }}
-  //           >
-  //             Check Out
-  //           </LoadingButton>
-  //         )}
-  //       </Box>
-  //     </Card>
-  //   );
-  // }
 
   return (
     <Card
@@ -759,6 +525,7 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Card>
             )}
+
             {cartData?.event?.eventType === 'camp' && (
               <Stack spacing={2}>
                 {/* Refund Policy */}
@@ -829,6 +596,7 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Stack>
             )}
+
             {cartData ? (
               <LoadingButton
                 variant="contained"
