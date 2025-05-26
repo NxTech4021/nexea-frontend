@@ -1,14 +1,18 @@
 /* eslint-disable no-unneeded-ternary */
+import useSWR from 'swr';
 import { toast } from 'sonner';
 import QrScanner from 'qr-scanner';
+import styled from '@emotion/styled';
 import { useParams } from 'react-router';
 import { useTheme } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
-import { Box, Modal, Button, Container, TextField, Typography } from '@mui/material';
+import { Box, Chip, Modal, alpha, Stack, Button, Container, TextField, Typography } from '@mui/material';
 
-import { endpoints, axiosInstance } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
+
+import Iconify from 'src/components/iconify';
 
 const AttendanceStatus = {
   present: 'Yes',
@@ -19,6 +23,86 @@ const LANYARD_COLOR = {
   Startups: 'Green',
 };
 
+const TabsWrapper = styled('div')(({ theme }) => ({
+  position: 'relative',
+  backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[900], 0.7) : '#f2f5f7',
+  borderRadius: 14,
+  padding: '8px',
+  display: 'flex',
+  width: '100%',
+  minWidth: 400,
+  marginBottom: 16,
+  marginTop: 10,
+  border:
+    theme.palette.mode === 'dark' ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` : 'none',
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    minWidth: 'unset',
+    height: 200,
+  },
+}));
+
+const TabButton = styled(Button)(({ theme, selected }) => {
+  let textColor;
+  if (selected) {
+    textColor = theme.palette.mode === 'dark' ? '#ffffff' : '#000000';
+  } else {
+    textColor = theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.5) : '#68737f';
+  }
+
+  const hoverColor = theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary;
+
+  return {
+    position: 'relative',
+    width: '50%',
+    padding: '12px 20px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    color: textColor,
+    zIndex: 1,
+    transition: 'color 0.3s ease',
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: hoverColor,
+    },
+    justifyContent: 'flex-start',
+    paddingLeft: '32px',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+      height: '50%',
+    },
+  };
+});
+
+const SliderIndicator = styled('div')(({ activeTab, theme }) => ({
+  position: 'absolute',
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? alpha(theme.palette.grey[800], 0.9)
+      : theme.palette.background.paper,
+  boxShadow:
+    theme.palette.mode === 'dark'
+      ? `0 0 8px 2px ${alpha(theme.palette.common.black, 0.5)}`
+      : '0 2px 8px rgba(0, 0, 0, 0.05)',
+  borderRadius: 10,
+  transition: 'all 0.3s ease',
+  border:
+    theme.palette.mode === 'dark' ? `1px solid ${alpha(theme.palette.common.white, 0.1)}` : 'none',
+  zIndex: 0,
+  [theme.breakpoints.up('sm')]: {
+    left: activeTab === 0 ? '8px' : 'calc(50% + 4px)',
+    width: 'calc(50% - 12px)',
+    height: 'calc(100% - 16px)',
+    top: '8px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    left: '8px',
+    width: 'calc(100% - 16px)',
+    height: 'calc(50% - 12px)',
+    top: activeTab === 0 ? '8px' : 'calc(50% + 4px)',
+  },
+}));
+
 const QrReader = () => {
   const theme = useTheme();
   const { eventId } = useParams();
@@ -27,7 +111,7 @@ const QrReader = () => {
   const qrBoxRef = useRef(null);
 
   const [cameraOn, setCameraOn] = useState(false);
-
+  const [activeTab, setActiveTab] = useState(0);
   const [scannedResult, setScannedResult] = useState('');
   // const [scannedName, setScannedName] = useState('');
   // const [scannedEmail, setScannedEmail] = useState('');
@@ -48,21 +132,27 @@ const QrReader = () => {
   // const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [openModalEmail, setOpenModalEmail] = useState(false);
   const [ticketMatch, setTicketMatch] = useState(null);
-  const [attendeesData, setAttendeesData] = useState([]);
   const [cameraScannerActive, setCameraScannerActive] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [event, setEvent] = useState({});
+
+  // Use SWR for real-time data fetching
+  const { data, isLoading, error, mutate } = useSWR(
+    `${endpoints.attendee.root}?eventId=${eventId}`,
+    fetcher
+  );
+
+  const attendeesData = useMemo(() => data?.attendees || [], [data]);
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${endpoints.attendee.root}?eventId=${eventId}`);
       const attendees = response?.data?.attendees || [];
       const ticketCode = attendees.map((obj) => obj.ticket.ticketCode);
-      setAttendeesData(attendees);
       return { ticketCode };
-    } catch (error) {
-      console.error('Error fetching attendees:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error fetching attendees:', err);
+      throw err;
     }
   }, [eventId]);
 
@@ -86,14 +176,15 @@ const QrReader = () => {
     async (id) => {
       try {
         const response = await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
-
         toast.success(`${response.data.attendee.firstName} successfully checked in`);
-        await fetchTicketDatabase();
-      } catch (error) {
-        console.error('Error updating attendance:', error);
+        // Refresh the attendees data after successful check-in
+        mutate();
+      } catch (err) {
+        console.error('Error updating attendance:', err);
+        toast.error('Failed to update attendance');
       }
     },
-    [fetchTicketDatabase]
+    [mutate]
   );
 
   // eslint-disable-next-line no-shadow
@@ -114,7 +205,7 @@ const QrReader = () => {
         },
         { headers: { 'content-type': 'application/json' } }
       );
-      await fetchTicketDatabase();
+      mutate();
       setScannedAttendee((prev) => ({
         ...prev,
         email: '',
@@ -123,8 +214,8 @@ const QrReader = () => {
         phoneNumber: '',
         ticketType: '',
       }));
-    } catch (error) {
-      console.error('Error updating email:', error);
+    } catch (err) {
+      console.error('Error updating email:', err);
     }
   };
 
@@ -197,10 +288,10 @@ const QrReader = () => {
       } else {
         return toast.error('QR does not match any ticket in the database');
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
       return toast.error('Error updating attendance:');
-      // console.error('Error updating attendance:', error);
+      // console.error('Error updating attendance:', err);
     }
   }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
@@ -232,9 +323,9 @@ const QrReader = () => {
         }
         toast.warn('Ticket ID not found.');
         return setTicketMatch(false);
-      } catch (error) {
-        console.error('Error checking ticket ID:', error);
-        return error;
+      } catch (err) {
+        console.error('Error checking ticket ID:', err);
+        return err;
       }
     };
 
@@ -284,9 +375,9 @@ const QrReader = () => {
   useEffect(() => {
     const getEvent = async () => {
       try {
-        const data = await axiosInstance.get(`${endpoints.events.event}/${eventId}`);
-        setEvent(data);
-      } catch (error) {
+        const eventData = await axiosInstance.get(`${endpoints.events.event}/${eventId}`);
+        setEvent(eventData);
+      } catch (err) {
         toast.error('Error fetching event in QR page');
       }
     };
@@ -294,106 +385,329 @@ const QrReader = () => {
     getEvent();
   }, [eventId]);
 
+  const checkedInCount = attendeesData?.filter(
+    (attendee) => attendee.status === 'checkedIn'
+  ).length;
+
+  const notCheckedInCount = attendeesData?.filter(
+    (attendee) => attendee.status === 'pending'
+  ).length;
+
+  const filteredAttendees = attendeesData?.filter(
+    (attendee) =>
+      (activeTab === 0 && attendee.status === 'pending') ||
+      (activeTab === 1 && attendee.status === 'checkedIn')
+  );
+
   return (
     <Container maxWidth="lg">
-      <Box
-        sx={{
-          height: '85vh',
-          bgcolor: '#cfe8fc',
-          position: 'relative',
-          borderRadius: 2,
-          width: '100%',
-        }}
+      <Stack 
+        direction={{ xs: 'column', md: 'row' }} 
+        spacing={{ xs: 3, md: 2 }} 
+        sx={{ mb: 3 }}
       >
-        {cameraScannerActive && (
-          <Box
-            sx={{
-              width: '100%',
-              height: '100%',
-              margin: 'auto',
-              textAlign: 'center',
-              position: 'relative',
-            }}
-          >
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video
-              ref={videoRef}
-              autoPlay
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: 10,
-              }}
-            />
-            <Box ref={qrBoxRef}>
-              <img
-                src="/test.svg"
-                alt="qr"
-                width={256}
-                height={256}
-                style={{
-                  position: 'absolute',
-                  fill: 'none',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translateX(-50%) translateY(-50%)',
-                }}
-              />
-            </Box>
-          </Box>
-        )}
-
-        {!cameraScannerActive && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translateX(-50%) translateY(-50%)',
-            }}
-          >
-            <Button
-              onClick={handleCamera}
-              variant="contained"
-              color="primary"
-              style={{ marginBottom: '20px' }}
-            >
-              Scan QR
-            </Button>
-          </Box>
-        )}
-      </Box>
-
-      {/* Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail */
-      /* <Modal
-        open={openModalConfirm}
-        onClose={handleCloseModalConfirm}
-        aria-labelledby="modal-email-title"
-        aria-describedby="modal-email-description"
-      >
+        {/* QR Scanner Section */}
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: '#f0f0f0',
-            boxShadow: 24,
-            p: 2,
-            borderRadius: '8px',
-            textAlign: 'center',
+            height: { xs: '40vh', md: '85vh' },
+            bgcolor: '#cfe8fc',
+            position: 'relative',
+            borderRadius: 2,
+            width: { xs: '100%', md: '50%' },
           }}
         >
-          <Typography id="modal-email-title" variant="h6" component="h6">
-            Attendance Update Form
-          </Typography>
-          <Typography id="modal-email-title" sx={{ mt: 2, margin: '10px' }}>
-            {scannedName} {scannedEmail}
-          </Typography>
+          {cameraScannerActive && (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                margin: 'auto',
+                textAlign: 'center',
+                position: 'relative',
+              }}
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: 10,
+                }}
+              >
+                <track kind="captions" label="QR Scanner Feed" />
+              </video>
+              <Box ref={qrBoxRef}>
+                <img
+                  src="/test.svg"
+                  alt="qr"
+                  width={256}
+                  height={256}
+                  style={{
+                    position: 'absolute',
+                    fill: 'none',
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translateX(-50%) translateY(-50%)',
+                    maxWidth: '80%',
+                    maxHeight: '80%',
+                    width: 'auto',
+                    height: 'auto',
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+
+          {!cameraScannerActive && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translateX(-50%) translateY(-50%)',
+                textAlign: 'center'
+              }}
+            >
+              <Button
+                onClick={handleCamera}
+                variant="contained"
+                startIcon={<Iconify icon="eva:camera-outline" width={22} />}
+                sx={{
+                  height: { xs: 40, md: 48 },
+                  borderRadius: 1.5,
+                  fontWeight: 600,
+                  boxShadow: 'none',
+                  bgcolor: theme.palette.mode === 'light' ? '#111' : '#fff',
+                  color: theme.palette.mode === 'light' ? '#fff' : '#111',
+                  px: 3,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    bgcolor: theme.palette.mode === 'light' ? '#222' : '#f9f9f9',
+                  },
+                }}
+              >
+                Scan QR
+              </Button>
+            </Box>
+          )}
         </Box>
-      </Modal> */}
+
+        {/* Vertical Divider - Only show on desktop */}
+        <Box
+          sx={{
+            width: '1px',
+            bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+            my: 2,
+            display: { xs: 'none', md: 'block' },
+          }}
+        />
+
+        {/* Attendee List Section */}
+        <Box 
+          sx={{ 
+            width: { xs: '100%', md: '50%' },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: { xs: 'auto', md: '85vh' },
+          }}
+        >
+          <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: '600px' } }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Total Attendees
+                </Typography>
+                <Typography
+                  variant="h6"
+                  style={{
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold',
+                    marginBottom: '16px',
+                    marginTop: '2px',
+                  }}
+                >
+                  {attendeesData?.length}
+                </Typography>
+              </div>
+            </div>
+
+            <TabsWrapper>
+              <SliderIndicator activeTab={activeTab} />
+              <TabButton selected={activeTab === 0} onClick={() => setActiveTab(0)} disableRipple>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ea3323',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src="/assets/userNotCheckedIn.svg"
+                      alt="NotCheckedIn"
+                      style={{ height: '30px' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>
+                      Not Checked In
+                    </span>
+                    <Typography variant="body2" style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+                      {notCheckedInCount}
+                    </Typography>
+                  </div>
+                </Stack>
+              </TabButton>
+
+              <TabButton selected={activeTab === 1} onClick={() => setActiveTab(1)} disableRipple>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#7cd640',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img src="/assets/userCheckedIn.svg" alt="CheckedIn" style={{ height: '30px' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{ marginBottom: '-3px', fontWeight: '550', fontSize: '14px' }}>
+                      Checked In
+                    </span>
+                    <Typography variant="body2" style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+                      {checkedInCount}
+                    </Typography>
+                  </div>
+                </Stack>
+              </TabButton>
+            </TabsWrapper>
+
+            <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 2, bgcolor: theme.palette.background.paper, overflow: 'hidden' }}>
+              <Stack 
+                direction="row" 
+                alignItems="center" 
+                sx={{ 
+                  px: 2, 
+                  py: 1.5, 
+                  bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12), 
+                  display: { xs: 'none', md: 'flex' } 
+                }}
+              >
+                <Typography sx={{ width: '30%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Name</Typography>
+                <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Company</Typography>
+                <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Ticket Type</Typography>
+              </Stack>
+
+              <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
+                {filteredAttendees.map((attendee, index) => (
+                  <Stack 
+                    key={index} 
+                    direction={{ xs: 'column', md: 'row' }} 
+                    alignItems={{ xs: 'flex-start', md: 'center' }} 
+                    sx={{ 
+                      p: 2, 
+                      borderBottom: `1px solid ${theme.palette.divider}`, 
+                      cursor: 'pointer', 
+                      '&:hover': { 
+                        bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12)
+                      } 
+                    }}
+                  >
+                    {/* Mobile layout - Card style */}
+                    <Box 
+                      sx={{ 
+                        display: { xs: 'flex', md: 'none' }, 
+                        flexDirection: 'column', 
+                        width: '100%',
+                        mb: 1
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Name:</Typography>
+                        <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                          {`${attendee.firstName} ${attendee.lastName}`}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Company:</Typography>
+                        <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                          {attendee.companyName}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Ticket Type:</Typography>
+                        <Chip 
+                          label={attendee.ticket.ticketType.title} 
+                          size="small"
+                          sx={{ 
+                            height: 24,
+                            fontSize: '0.75rem',
+                            borderRadius: 1
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    {/* Desktop layout - row style */}
+                    <Typography 
+                      sx={{ 
+                        width: '30%', 
+                        color: theme.palette.text.primary, 
+                        fontSize: 13, 
+                        display: { xs: 'none', md: 'block' } 
+                      }}
+                    >
+                      {`${attendee.firstName} ${attendee.lastName}`}
+                    </Typography>
+                    <Typography 
+                      sx={{ 
+                        width: '35%', 
+                        color: theme.palette.text.primary, 
+                        fontSize: 13, 
+                        display: { xs: 'none', md: 'block' } 
+                      }}
+                    >
+                      {attendee.companyName}
+                    </Typography>
+                    <Box 
+                      sx={{ 
+                        width: '35%', 
+                        display: { xs: 'none', md: 'flex' }
+                      }}
+                    >
+                      <Chip 
+                        label={attendee.ticket.ticketType.title} 
+                        size="small"
+                        sx={{ 
+                          height: 24,
+                          fontSize: '0.75rem',
+                          borderRadius: 1
+                        }}
+                      />
+                    </Box>
+                  </Stack>
+                ))}
+              </Stack>
+            </Box>
+          </Box>
+        </Box>
+      </Stack>
+
+      {/* Your existing Modal */}
       <Modal
         open={openModalEmail}
         aria-labelledby="modal-email-title"
