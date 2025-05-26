@@ -153,10 +153,6 @@ export default function OrderView() {
   exportToCSV(flattened, 'event_orders.csv');
 };
 
-
-console.log("events", eventOrders
-
-)
   // Check for event filter from sessionStorage or URL parameter when component mounts
   useEffect(() => {
     if (eventId && eventData?.events) {
