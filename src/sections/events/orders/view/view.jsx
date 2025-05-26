@@ -251,7 +251,8 @@ export default function OrderView() {
   // Revenue chart data for selected event
   const revenueChart = useMemo(() => {
     if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
-    // Group by date (YYYY-MM-DD)
+    
+    // Group by date (YYYY-MM-DD) and only include dates with revenue
     const map = {};
     eventOrders.forEach((order) => {
       if (order.status === 'paid') {
@@ -259,22 +260,39 @@ export default function OrderView() {
         map[date] = (map[date] || 0) + (order.totalAmount || 0);
       }
     });
+
+    // Sort dates and format for display
     const categories = Object.keys(map).sort();
     const series = categories.map((date) => map[date]);
-    return { series, categories };
+    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
+
+    return { 
+      series, 
+      categories: formattedCategories,
+      rawDates: categories 
+    };
   }, [eventOrders, selectedEvent]);
 
   // Add order count chart data
   const orderCountChart = useMemo(() => {
     if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
+
+    // Group by date (YYYY-MM-DD) and only include dates with orders
     const map = {};
     eventOrders.forEach((order) => {
-      const date = dayjs(order.createdAt).format('YYYY-MM-DD');
-      map[date] = (map[date] || 0) + 1;
+      // Include only paid orders and free orders
+      if (order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)) {
+        const date = dayjs(order.createdAt).format('YYYY-MM-DD');
+        map[date] = (map[date] || 0) + 1;
+      }
     });
+
+    // Sort dates and format for display
     const categories = Object.keys(map).sort();
     const series = categories.map((date) => map[date]);
-    return { series, categories };
+    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
+
+    return { series, categories: formattedCategories };
   }, [eventOrders, selectedEvent]);
 
   // Update eventOrders and totalRevenue when selectedEvent or data changes
@@ -526,62 +544,188 @@ export default function OrderView() {
             <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
               {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(totalRevenue)}
             </Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
               <ReactApexChart
                 options={{
-                  chart: { type: 'area', height: 90, toolbar: { show: false } },
-                  xaxis: { categories: revenueChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  stroke: { curve: 'smooth', width: 2 },
-                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
-                  grid: { show: false },
+                  chart: { 
+                    type: 'area',
+                    height: 140,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    animations: {
+                      enabled: true,
+                      easing: 'easeinout',
+                      speed: 800,
+                    },
+                    parentHeightOffset: 0
+                  },
+                  xaxis: { 
+                    categories: revenueChart.categories,
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      rotate: -45,
+                      rotateAlways: false,
+                      hideOverlappingLabels: true,
+                      offsetY: 2
+                    },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                  },
+                  yaxis: { 
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      formatter: (value) => `RM ${value.toFixed(0)}`,
+                      offsetX: -2
+                    },
+                    tickAmount: 4,
+                    min: 0,
+                    forceNiceScale: true
+                  },
+                  grid: { 
+                    show: true,
+                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
+                    strokeDashArray: 3,
+                    xaxis: { lines: { show: false } },
+                    padding: {
+                      top: 0,
+                      right: 15,
+                      bottom: 0,
+                      left: 5
+                    }
+                  },
                   dataLabels: { enabled: false },
                   tooltip: { 
-                    enabled: true, 
+                    enabled: true,
+                    shared: true,
+                    intersect: false,
                     y: { formatter: (val) => `RM ${val.toFixed(2)}` },
                     theme: theme.palette.mode,
                     style: {
                       fontSize: '12px',
                       fontFamily: theme.typography.fontFamily,
-                    },
+                    }
                   },
-                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                  colors: [theme.palette.primary.main],
+                  markers: {
+                    size: 0,
+                    strokeColors: theme.palette.background.paper,
+                    strokeWidth: 2,
+                    hover: { size: 6 }
+                  },
+                  stroke: { 
+                    curve: 'smooth', 
+                    width: 2,
+                    lineCap: 'round'
+                  },
                 }}
                 series={[{ name: 'Revenue', data: revenueChart.series }]}
                 type="area"
-                height={90}
+                height={140}
               />
             </Box>
           </CardContent>
         </Card>
         <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
           <CardContent sx={{ p: 2 }}>
-            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders</Typography>
-            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>{eventOrders.length}</Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders (Paid & Free)</Typography>
+            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
+              {eventOrders.filter(order => 
+                order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)
+              ).length}
+            </Typography>
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
               <ReactApexChart
                 options={{
-                  chart: { type: 'area', height: 90, toolbar: { show: false } },
-                  xaxis: { categories: orderCountChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  stroke: { curve: 'smooth', width: 2 },
-                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
-                  grid: { show: false },
+                  chart: { 
+                    type: 'area',
+                    height: 140,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    animations: {
+                      enabled: true,
+                      easing: 'easeinout',
+                      speed: 800,
+                    },
+                    parentHeightOffset: 0
+                  },
+                  xaxis: { 
+                    categories: orderCountChart.categories,
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      rotate: -45,
+                      rotateAlways: false,
+                      hideOverlappingLabels: true,
+                      offsetY: 2
+                    },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                  },
+                  yaxis: { 
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      formatter: (value) => Math.round(value),
+                      offsetX: -2
+                    },
+                    tickAmount: 4,
+                    min: 0,
+                    forceNiceScale: true
+                  },
+                  grid: { 
+                    show: true,
+                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
+                    strokeDashArray: 3,
+                    xaxis: { lines: { show: false } },
+                    padding: {
+                      top: 0,
+                      right: 15,
+                      bottom: 0,
+                      left: 5
+                    }
+                  },
                   dataLabels: { enabled: false },
                   tooltip: { 
-                    enabled: true, 
-                    y: { formatter: (val) => `${val} orders` },
+                    enabled: true,
+                    shared: true,
+                    intersect: false,
+                    y: { formatter: (val) => `${Math.round(val)} orders` },
                     theme: theme.palette.mode,
                     style: {
                       fontSize: '12px',
                       fontFamily: theme.typography.fontFamily,
-                    },
+                    }
                   },
-                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                  colors: [theme.palette.primary.main],
+                  markers: {
+                    size: 0,
+                    strokeColors: theme.palette.background.paper,
+                    strokeWidth: 2,
+                    hover: { size: 6 }
+                  },
+                  stroke: { 
+                    curve: 'smooth', 
+                    width: 2,
+                    lineCap: 'round'
+                  },
                 }}
-                series={[{ name: 'Orders', data: orderCountChart.series }]}
+                series={[{ name: 'Confirmed Orders', data: orderCountChart.series }]}
                 type="area"
-                height={90}
+                height={140}
               />
             </Box>
           </CardContent>
