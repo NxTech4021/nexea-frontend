@@ -10,11 +10,12 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
-  Chip,
+  // Chip,
   // Grid,
   Stack,
   // Dialog,
-  // Avatar,
+  alpha,
+  Avatar,
   // Select,
   // Button,
   Divider,
@@ -45,21 +46,21 @@ const getStatusConfig = (status) => {
   switch (status) {
     case 'ACTIVE':
       return {
-        color: '#229A16',
-        bgColor: '#E9FCD4',
-        icon: 'eva:checkmark-circle-2-fill',
+        color: '#36B37E',
+        bgColor: alpha('#36B37E', 0.1),
+        icon: 'eva:radio-button-on-outline',
       };
     case 'INACTIVE':
       return {
-        color: '#B72136',
-        bgColor: '#FFE7D9',
-        icon: 'ic:outline-block',
+        color: '#FF5630',
+        bgColor: alpha('#FF5630', 0.1),
+        icon: 'eva:radio-button-off-outline',
       };
     default:
       return {
         color: '#637381',
-        bgColor: '#F4F6F8',
-        icon: 'mdi:help-circle',
+        bgColor: alpha('#637381', 0.1),
+        icon: 'eva:question-mark-circle-outline',
       };
   }
 };
@@ -75,7 +76,7 @@ const borderAnimation = keyframes`
 
 const EventInformation = ({ event }) => {
   const [countdown, setCountdown] = useState('');
-  const [eventStatus, setEventStatus] = useState('');
+  // const [eventStatus, setEventStatus] = useState('');
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { mutate } = useGetAllEvents(event.id);
@@ -92,10 +93,10 @@ const EventInformation = ({ event }) => {
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
         setCountdown(`${days}D : ${hours}H : ${minutes}M : ${seconds}S`);
-        setEventStatus('');
+        // setEventStatus('');
       } else {
         setCountdown('');
-        setEventStatus('Event has ended.');
+        // setEventStatus('Event Ended');
       }
     };
 
@@ -199,38 +200,119 @@ const EventInformation = ({ event }) => {
       <Divider />
       <CardContent>
         <Box display="flex" justifyContent="space-between" sx={{ p: 0.5 }}>
-          <Box>
-            <img
-              src="/assets/nexea.png"
-              alt="Nexea Logo"
-              style={{ width: '80px', marginBottom: '4px' }}
-            />
-            <Typography variant="h6" sx={{ color: 'white', mb: 1, fontSize: '1.1rem' }}>
-              {items[0].content}
-            </Typography>
-            <Stack spacing={0.5}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 14, height: 14 }} />
-                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
-                  {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 14, height: 14 }} />
-                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
-                  {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 14, height: 14 }} />
-                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
-                  {items[3].content}
-                </Typography>
-              </Box>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Box
+              sx={{
+                width: { xs: 64, sm: 80 },
+                height: { xs: 64, sm: 80 },
+                borderRadius: 1.5,
+                overflow: 'hidden',
+                position: 'relative',
+                bgcolor: 'background.neutral',
+              }}
+            >
+              <Avatar
+                alt={event.name}
+                src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  bgcolor: 'background.neutral',
+                  '& img': {
+                    objectFit: 'contain',
+                    width: '70%',
+                    height: '70%',
+                    margin: 'auto',
+                  },
+                }}
+              />
+            </Box>
+            <Stack spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="h6" sx={{ 
+                color: 'white', 
+                fontSize: { xs: '1rem', sm: '1.1rem' },
+                display: 'flex',
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 1 }
+              }}>
+                <Box sx={{ 
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {items[0].content}
+                </Box>
+                <Box
+                  sx={{
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    fontSize: { xs: 11, sm: 12 },
+                    fontWeight: 600,
+                    color: getStatusConfig(event.status).color,
+                    bgcolor: getStatusConfig(event.status).bgColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    alignSelf: { xs: 'flex-start', sm: 'center' },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      bgcolor: getStatusConfig(event.status).color,
+                    }}
+                  />
+                  {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                </Box>
+              </Typography>
+
+              <Stack spacing={0.5}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: { xs: 12, sm: 14 }, height: { xs: 12, sm: 14 } }} />
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'white', 
+                    fontWeight: 'normal', 
+                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: { xs: 12, sm: 14 }, height: { xs: 12, sm: 14 } }} />
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'white', 
+                    fontWeight: 'normal', 
+                    fontSize: { xs: '0.75rem', sm: '0.85rem' }
+                  }}>
+                    {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Iconify icon="eva:person-outline" sx={{ color: 'white', width: { xs: 12, sm: 14 }, height: { xs: 12, sm: 14 } }} />
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'white', 
+                    fontWeight: 'normal', 
+                    fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {items[3].content}
+                  </Typography>
+                </Box>
+              </Stack>
             </Stack>
-          </Box>
-          <Stack alignItems="center" justifyContent="center" spacing={0.75}>
-            <Chip
+          </Stack>
+          <Stack alignItems="center" justifyContent="center" spacing={0.75} sx={{ mt: { xs: 2, sm: 0 } }}>
+            {/* <Chip
               icon={<Iconify icon={getStatusConfig(event.status).icon} width={16} height={16} />}
               label={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
               sx={{
@@ -245,19 +327,49 @@ const EventInformation = ({ event }) => {
                   backgroundColor: getStatusConfig(event.status).bgColor,
                 },
               }}
-            />
-            {eventStatus ? (
-              <Typography
-                variant="subtitle2"
-                sx={{ color: 'red', fontWeight: 'bold', marginTop: 1 }}
+            /> */}
+
+            {/* {eventStatus ? (
+              <Box
+                sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  fontSize: { xs: 11, sm: 12 },
+                  fontWeight: 600,
+                  color: '#FF5630',
+                  bgcolor: alpha('#FF5630', 0.1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
               >
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: '#FF5630',
+                  }}
+                />
                 {eventStatus}
-              </Typography>
-            ) : (
+              </Box>
+            ) : ( */}
+
+            {countdown && (
               <Typography
                 variant="h6"
-                sx={{ color: 'white', fontWeight: 'bold', marginTop: 1, fontFamily: 'monospace' }}
+                sx={{
+                  color: 'white',
+                  fontWeight: 500,
+                  fontSize: { xs: '0.75rem', sm: '1rem' },
+                  letterSpacing: 0.5,
+                  fontFamily: '"Roboto Mono", monospace',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
               >
+                <Iconify icon="eva:clock-outline" width={16} height={16} sx={{ opacity: 1, mr: 1 }} />
                 {countdown}
               </Typography>
             )}
