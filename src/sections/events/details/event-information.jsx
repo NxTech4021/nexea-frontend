@@ -95,7 +95,7 @@ const EventInformation = ({ event }) => {
         setEventStatus('');
       } else {
         setCountdown('');
-        setEventStatus('Event Ended');
+        setEventStatus('Event has ended.');
       }
     };
 
@@ -198,31 +198,38 @@ const EventInformation = ({ event }) => {
       </Box>
       <Divider />
       <CardContent>
-        <Box display="flex" justifyContent="space-between" sx={{ p: 0.8 }}>
+        <Box display="flex" justifyContent="space-between" sx={{ p: 0.5 }}>
           <Box>
             <img
               src="/assets/nexea.png"
               alt="Nexea Logo"
-              style={{ width: '90px', marginBottom: '8px' }}
+              style={{ width: '80px', marginBottom: '4px' }}
             />
-            <Typography variant="h6" sx={{ color: 'white', marginBottom: '14px' }}>
+            <Typography variant="h6" sx={{ color: 'white', mb: 1, fontSize: '1.1rem' }}>
               {items[0].content}
             </Typography>
-            {/* <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
-            </Typography> */}
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {dayjs(event.date).format('LL')} | {dayjs(event.date).format('hh:mm A')} -{' '}
-              {dayjs(event.endDate).format('LL')} | {dayjs(event.endDate).format('hh:mm A')}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal' }}>
-              {items[3].content}
-            </Typography>
+            <Stack spacing={0.5}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
+                  {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
+                  {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'normal', fontSize: '0.85rem' }}>
+                  {items[3].content}
+                </Typography>
+              </Box>
+            </Stack>
           </Box>
-          <Stack alignItems="center" justifyContent="center">
+          <Stack alignItems="center" justifyContent="center" spacing={0.75}>
             <Chip
               icon={<Iconify icon={getStatusConfig(event.status).icon} width={16} height={16} />}
               label={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
@@ -247,7 +254,10 @@ const EventInformation = ({ event }) => {
                 {eventStatus}
               </Typography>
             ) : (
-              <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold', marginTop: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{ color: 'white', fontWeight: 'bold', marginTop: 1, fontFamily: 'monospace' }}
+              >
                 {countdown}
               </Typography>
             )}
@@ -261,7 +271,6 @@ const EventInformation = ({ event }) => {
         selectedEvent={selectedEvent}
         onEventUpdated={handleEventUpdated}
       />{' '}
-      */
     </Card>
   );
 };

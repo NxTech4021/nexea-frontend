@@ -2,14 +2,15 @@ import PropTypes from 'prop-types';
 import React, { useMemo } from 'react';
 
 import Grid from '@mui/material/Grid2';
-import Button from '@mui/material/Button';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Box, Card, Stack, Container, CardContent, CircularProgress } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Box, Card, Stack, Tooltip, Container, IconButton, CardContent, CircularProgress } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useGetAllEvents } from 'src/api/event';
+
+import Iconify from 'src/components/iconify';
 
 import EventInformation from '../event-information';
 import TicketInformation from '../ticket-information';
@@ -23,6 +24,7 @@ const EventDetails = ({ id }) => {
   const { data, isLoading, error } = useGetAllEvents(id);
 
   const router = useRouter();
+  const theme = useTheme();
 
   const totalCheckedIn = useMemo(() => {
     const orders = data?.order || [];
@@ -36,23 +38,29 @@ const EventDetails = ({ id }) => {
     const orders = data?.order?.filter((a) => a?.status === 'paid') || [];
     const attendees = orders?.flatMap((a) => a?.attendees) || [];
 
-    const totalSolds = attendees.reduce((acc, cur) => {
-      if (cur?.ticket) {
-        acc += 1;
-      }
+    // const totalSolds = attendees.reduce((acc, cur) => {
+    //   if (cur?.ticket) {
+    //     acc += 1;
+    //   }
+    const regularTickets = attendees.filter(cur => cur?.ticket).length;
+    const addOnTickets = attendees.filter(cur => cur?.ticket?.ticketAddOn).length;
 
-      if (cur?.ticket?.ticketAddOn) {
-        acc += 1;
-      }
+  //   if (cur?.ticket?.ticketAddOn) {
+  //     acc += 1;
+  //   }
 
-      return acc;
-    }, 0);
+  //   return acc;
+  // }, 0);
 
-    // const totalSolds = orders
-    //   .filter((a) => a?.status === 'paid')
-    //   .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
+  // // const totalSolds = orders
+  // //   .filter((a) => a?.status === 'paid')
+  // //   .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
 
-    return totalSolds;
+  // return totalSolds;
+    return {
+      regularTickets,
+      addOnTickets,
+    };
   }, [data]);
 
   const totalRevenue = useMemo(() => {
@@ -110,7 +118,7 @@ const EventDetails = ({ id }) => {
           thickness={7}
           size={25}
           sx={{
-            color: (theme) => theme.palette.common.black,
+            color: theme.palette.common.black,
             strokeLinecap: 'round',
           }}
         />
@@ -119,13 +127,23 @@ const EventDetails = ({ id }) => {
 
   return (
     <Container maxWidth="xl">
-      <Button
-        variant="text"
-        startIcon={<ArrowBackIcon />}
-        onClick={() => router.push(paths.dashboard.events.root)}
-      >
-        Events
-      </Button>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+        <Tooltip title="Back to Events">
+          <IconButton
+            onClick={() => router.push(paths.dashboard.events.root)}
+            sx={{
+              width: 40,
+              height: 40,
+              color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white',
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'light' ? 'grey.100' : 'grey.800',
+              },
+            }}
+          >
+            <Iconify icon="eva:arrow-back-fill" width={20} height={20} />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
       <Grid item size={{ xs: 12, md: 6 }}>
         <EventInformation event={data} />
@@ -137,10 +155,15 @@ const EventDetails = ({ id }) => {
         </Grid> */}
         <Grid item size={{ xs: 12 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
-            <TicketAnalytics tickets={totalTicketsSold} eventName={data.name} />
+            <TicketAnalytics 
+              tickets={totalTicketsSold.regularTickets} 
+              addOns={totalTicketsSold.addOnTickets} 
+              eventName={data.name} 
+            />
            <OrderAnalytics
               orders={data.order?.filter((a) => a?.status === 'paid') || []}
               eventName={data.name}
+              eventId={id}
             />
             {/* <CheckInAnalytics checkedIns={totalCheckedIn} id={id} /> */}
             <TotalRevenue totalRevenue={totalRevenue} />
@@ -149,7 +172,7 @@ const EventDetails = ({ id }) => {
         </Grid>
 
         <Grid item size={{ xs: 12, md: 6 }}>
-          <Card sx={{ border: 1, borderColor: (theme) => theme.palette.divider, borderRadius: 2 }}>
+          <Card sx={{ border: 1, borderColor: theme.palette.divider, borderRadius: 2 }}>
             <CardContent>
               <AttendeeInformation id={id} />
             </CardContent>
