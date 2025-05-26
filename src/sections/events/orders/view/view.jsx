@@ -306,7 +306,6 @@ export default function OrderView() {
     return sorted;
   }, [eventOrders, priceSort]);
 
-  // handle price sort toggle to avoid nested ternary
   const handlePriceSortToggle = () => {
     setPriceSort((prev) => {
       if (prev === 'desc') return 'asc';
@@ -337,6 +336,31 @@ export default function OrderView() {
         <Typography variant="h5" sx={{ mb: 2, color: textColor, fontWeight: 700, fontSize: 22 }}>
           Select an Event
         </Typography>
+        
+        {/* Status Legend */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, px: 0.5 }}>
+          {[
+            { status: 'Active', color: '#4caf50' },
+            { status: 'Upcoming', color: '#0288d1' },
+            { status: 'Past', color: '#616161' },
+          ].map((item) => (
+            <Box key={item.status} sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: item.color,
+                  mr: 0.75,
+                }}
+              />
+              <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
+                {item.status}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        
         <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, overflow: 'hidden', bgcolor: cardBgColor }}>
           {(eventData?.events || []).map((event) => (
             <Box
@@ -356,8 +380,118 @@ export default function OrderView() {
             >
               <Avatar src={event.eventSetting?.eventLogo || "/logo/nexea.png"}  alt={event.name} sx={{ width: 28, height: 28, mr: 1.5 }} />
               <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600, fontSize: 15 }}>{event.name}</Typography>
-                <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>{event.date ? dayjs(event.date).format('LLL') : ''}</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600, fontSize: 15 }}>{event.name}</Typography>
+                  {(() => {
+                    // Calculate event status (upcoming, active, past)
+                    const now = dayjs();
+                    const startDate = event.date ? dayjs(event.date) : null;
+                    
+                    let endDate = null;
+                    if (event.endDate) {
+                      endDate = dayjs(event.endDate);
+                    } else if (startDate) {
+                      endDate = startDate.add(1, 'day');
+                    }
+                    
+                    let status = 'unknown';
+                    let statusColor = '#999';
+                    
+                    if (startDate && endDate) {
+                      if (now.isBefore(startDate)) {
+                        status = 'upcoming';
+                        statusColor = '#0288d1'; // blue
+                      } else if (now.isAfter(endDate)) {
+                        status = 'past';
+                        statusColor = '#616161'; // gray
+                      } else {
+                        status = 'active';
+                        statusColor = '#4caf50'; // green
+                      }
+                    }
+                    
+                    return (
+                      <Tooltip title={`Event is ${status}`}>
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: statusColor,
+                            ml: 0.75,
+                          }}
+                        />
+                      </Tooltip>
+                    );
+                  })()}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify icon="eva:shopping-cart-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
+                      {data?.filter(order => order.event?.id === event.id).length || 0}
+                    </Typography>
+                    {(() => {
+                      // Calculate order trend (last 7 days vs previous 7 days)
+                      const allOrders = data?.filter(order => order.event?.id === event.id) || [];
+                      const last7Days = allOrders.filter(order => 
+                        dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
+                      );
+                      const prev7Days = allOrders.filter(order => 
+                        dayjs(order.createdAt).isAfter(dayjs().subtract(14, 'days')) && 
+                        dayjs(order.createdAt).isBefore(dayjs().subtract(7, 'days'))
+                      );
+                      
+                      // Only show trend if we have sufficient data
+                      if (last7Days.length > 0 || prev7Days.length > 0) {
+                        const trend = last7Days.length - prev7Days.length;
+                        
+                        let trendColor = '#9e9e9e';
+                        let trendIcon = 'eva:minus-fill';
+                        
+                        if (trend > 0) {
+                          trendColor = '#4caf50';
+                          trendIcon = 'eva:trending-up-fill';
+                        } else if (trend < 0) {
+                          trendColor = '#f44336';
+                          trendIcon = 'eva:trending-down-fill';
+                        }
+                        
+                        let trendText = 'same';
+                        if (trend > 0) {
+                          trendText = 'more';
+                        } else if (trend < 0) {
+                          trendText = 'fewer';
+                        }
+                        
+                        return (
+                          <Tooltip title={`${Math.abs(trend)} ${trendText} orders compared to previous 7 days`}>
+                            <Box sx={{ display: 'inline-flex', alignItems: 'center', ml: 0.5 }}>
+                              <Iconify icon={trendIcon} width={10} height={10} sx={{ color: trendColor }} />
+                            </Box>
+                          </Tooltip>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify icon="eva:credit-card-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
+                      {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+                        data?.filter(order => order.event?.id === event.id && order.status === 'paid')
+                          .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify icon="eva:people-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
+                      {data?.filter(order => order.event?.id === event.id)
+                        .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
               <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ color: iconColor }} />
             </Box>
