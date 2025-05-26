@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom';
 import ReactApexChart from 'react-apexcharts';
 import React, { useMemo, useState, useEffect } from 'react';
-
+import { exportToCSV } from 'src/utils/exportcsv';
 import { alpha, useTheme } from '@mui/material/styles';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -128,6 +128,30 @@ export default function OrderView() {
 
   const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
   const { data: eventData, isLoading: loadingEvents } = useGetAllEvents();
+
+
+  // For exporting into CSV 
+ const handleExportCSV = () => {
+  if (!eventOrders.length) return;
+
+  const flattened = eventOrders.map(order => ({
+    OrderNumber: order.orderNumber,
+    BuyerName: order.buyerName,
+    BuyerEmail: order.buyerEmail,
+    BuyerPhone: order.buyerPhoneNumber,
+    EventName: order.event?.name || '',
+    Status: order.status,
+    DiscountCode: order.discountCode || '',
+    DiscountAmount: order.discountAmount,
+    TotalAmount: order.totalAmount,
+    OrderDate: dayjs(order.createdAt).format('DD-MM-YYYY'),
+    AttendeeCount: order.attendees?.length || 0, // optional summary info
+  }));
+
+  // Example CSV export logic (adjust based on your actual export library)
+  exportToCSV(flattened, 'event_orders.csv');
+};
+
 
   // Check for event filter from sessionStorage or URL parameter when component mounts
   useEffect(() => {
@@ -983,6 +1007,38 @@ export default function OrderView() {
             );
           })}
         </Box>
+
+    {/* Download CSV Button */}
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={handleExportCSV}
+        startIcon={
+          <Iconify
+            icon="eva:download-outline"
+            width={18}
+            height={18}
+            sx={{ color: textColor }}
+          />
+        }
+        sx={{
+          textTransform: 'none',
+          fontWeight: 600,
+          color: textColor,
+          bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
+          borderColor: 'transparent',
+          borderRadius: 1,
+          px: 2,
+          mt: { xs: 1, sm: 0 },
+          '&:hover': {
+            bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#444',
+            borderColor: borderColor,
+          },
+        }}
+      >
+        Export
+      </Button>
+
       </Box>
       {/* Orders Table */}
       <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, bgcolor: cardBgColor, overflow: 'hidden' }}>
