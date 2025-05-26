@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Box, Card, Stack, Typography, CardContent } from '@mui/material';
+import { Box, Card, Stack, Tooltip, Typography, IconButton, CardContent } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -66,7 +66,15 @@ const TicketAnalytics = ({ tickets, eventName }) => {
             </Typography>
             <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" />
           </Stack>
-          <Typography variant="h2">{tickets || 0}</Typography>
+
+          <Stack alignItems="start" direction="row" spacing={1}>
+            <Typography variant="h2">{tickets || 0}</Typography>
+            <Tooltip title="Including Add On Tickets">
+              <IconButton>
+                <Iconify icon="material-symbols:info-outline-rounded" width={16} />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Box>
       </CardContent>
     </Card>

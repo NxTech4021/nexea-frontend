@@ -4,14 +4,7 @@ import React, { useMemo } from 'react';
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import {
-  Box,
-  Card,
-  Stack,
-  Container,
-  CardContent,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Card, Stack, Container, CardContent, CircularProgress } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -40,11 +33,24 @@ const EventDetails = ({ id }) => {
   }, [data]);
 
   const totalTicketsSold = useMemo(() => {
-    const orders = data?.order || [];
+    const orders = data?.order?.filter((a) => a?.status === 'paid') || [];
+    const attendees = orders?.flatMap((a) => a?.attendees) || [];
 
-    const totalSolds = orders
-      .filter((a) => a?.status === 'paid')
-      .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
+    const totalSolds = attendees.reduce((acc, cur) => {
+      if (cur?.ticket) {
+        acc += 1;
+      }
+
+      if (cur?.ticket?.ticketAddOn) {
+        acc += 1;
+      }
+
+      return acc;
+    }, 0);
+
+    // const totalSolds = orders
+    //   .filter((a) => a?.status === 'paid')
+    //   .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
 
     return totalSolds;
   }, [data]);
@@ -132,9 +138,13 @@ const EventDetails = ({ id }) => {
         <Grid item size={{ xs: 12 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
             <TicketAnalytics tickets={totalTicketsSold} eventName={data.name} />
-            <OrderAnalytics orders={data.order} eventName={data.name} eventId={id} />
+           <OrderAnalytics
+              orders={data.order?.filter((a) => a?.status === 'paid') || []}
+              eventName={data.name}
+            />
             {/* <CheckInAnalytics checkedIns={totalCheckedIn} id={id} /> */}
             <TotalRevenue totalRevenue={totalRevenue} />
+
           </Stack>
         </Grid>
 

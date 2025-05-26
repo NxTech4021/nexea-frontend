@@ -257,20 +257,20 @@ const EventLists = ({ query }) => {
               {/* Left side - Avatar and Event Info */}
               <Grid item xs={12} sm={8}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar 
-                    alt={event.name} 
-                    src={event.eventSetting?.eventLogo || "/logo/nexea.png"} 
-                    sx={{ 
-                      width: 48, 
+                  <Avatar
+                    alt={event.name}
+                    src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                    sx={{
+                      width: 48,
                       height: 48,
                       bgcolor: 'background.neutral',
                       '& img': {
                         objectFit: 'contain',
                         width: '70%',
                         height: '70%',
-                        margin: 'auto'
-                      }
-                    }} 
+                        margin: 'auto',
+                      },
+                    }}
                   />
                   <Stack spacing={0.75}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -530,8 +530,12 @@ const EventLists = ({ query }) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
 
-          const VITE_BASE_URL = 'http://localhost:81';
-          console.log('events', event);
+          const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
+
+          const attendees = orders?.flatMap((a) => a?.attendees)?.length || 0;
+
+          // const VITE_BASE_URL = 'http://localhost:81';
+
           return (
             <Stack
               key={event.id}
@@ -540,7 +544,7 @@ const EventLists = ({ query }) => {
               }}
             >
               {/* Regular Row */}
-              <Tooltip title={!isExpanded ? "View Event Details" : ""} arrow placement="top">
+              <Tooltip title={!isExpanded ? 'View Event Details' : ''} arrow placement="top">
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -564,144 +568,146 @@ const EventLists = ({ query }) => {
                     //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
                     // },
                   }}
-                  onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
+                  onClick={() =>
+                    !isExpanded && router.push(paths.dashboard.events.details(event.id))
+                  }
                 >
-                {/* Event Details */}
-                <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 1.5,
-                      overflow: 'hidden',
-                      position: 'relative',
-                      bgcolor: 'background.neutral',
-                    }}
-                  >
-                    <Avatar
-                      alt={event.name}
-                      src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
-                      sx={{ 
-                        width: '100%', 
-                        height: '100%',
-                        bgcolor: 'background.neutral',
-                        '& img': {
-                          objectFit: 'contain',
-                          width: '70%',
-                          height: '70%',
-                          margin: 'auto'
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Stack spacing={0.25}>
-                    <Typography
-                      variant="subtitle2"
-                      noWrap
+                  {/* Event Details */}
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
+                    <Box
                       sx={{
-                        fontWeight: '500',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                        },
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1.5,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        bgcolor: 'background.neutral',
                       }}
                     >
-                      {event.name}
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Iconify
-                        icon="mdi:account-group"
-                        sx={{ width: 14, height: 14 }}
-                        className="event-secondary-text"
+                      <Avatar
+                        alt={event.name}
+                        src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: 'background.neutral',
+                          '& img': {
+                            objectFit: 'contain',
+                            width: '70%',
+                            height: '70%',
+                            margin: 'auto',
+                          },
+                        }}
                       />
-                      <Typography variant="caption" className="event-secondary-text">
-                        {event.attendeeCount || 0} Attendees
+                    </Box>
+                    <Stack spacing={0.25}>
+                      <Typography
+                        variant="subtitle2"
+                        noWrap
+                        sx={{
+                          fontWeight: '500',
+                          '&:hover': {
+                            textDecoration: 'underline',
+                          },
+                        }}
+                      >
+                        {event.name}
                       </Typography>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Iconify
+                          icon="mdi:account-group"
+                          sx={{ width: 14, height: 14 }}
+                          className="event-secondary-text"
+                        />
+                        <Typography variant="caption" className="event-secondary-text">
+                          {attendees} Attendees
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
 
-                {/* Status - Preserving original colors */}
-                <Box sx={{ width: '15%' }}>
-                  <Box
-                    sx={{
-                      py: 0.5,
-                      px: 1,
-                      borderRadius: 1,
-                      width: 'fit-content',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5,
-                      bgcolor: statusConfig.bgColor,
-                    }}
-                  >
-                    <Iconify
-                      icon={statusConfig.icon}
-                      className="status-icon"
+                  {/* Status - Preserving original colors */}
+                  <Box sx={{ width: '15%' }}>
+                    <Box
                       sx={{
-                        width: 16,
-                        height: 16,
-                        color: statusConfig.color,
-                      }}
-                    />
-                    <Typography
-                      variant="caption"
-                      className="status-text"
-                      sx={{
-                        color: statusConfig.color,
-                        fontWeight: 600,
-                        textTransform: 'capitalize',
+                        py: 0.5,
+                        px: 1,
+                        borderRadius: 1,
+                        width: 'fit-content',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        bgcolor: statusConfig.bgColor,
                       }}
                     >
-                      {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
-                    </Typography>
+                      <Iconify
+                        icon={statusConfig.icon}
+                        className="status-icon"
+                        sx={{
+                          width: 16,
+                          height: 16,
+                          color: statusConfig.color,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        className="status-text"
+                        sx={{
+                          color: statusConfig.color,
+                          fontWeight: 600,
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
 
-                {/* Date & Time */}
-                <Stack spacing={0.5} sx={{ width: '20%' }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="body2">{fDate(event.date)}</Typography>
+                  {/* Date & Time */}
+                  <Stack spacing={0.5} sx={{ width: '20%' }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography variant="body2">{fDate(event.date)}</Typography>
+                    </Stack>
+                    <Typography variant="caption" className="event-secondary-text">
+                      {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+                    </Typography>
                   </Stack>
-                  <Typography variant="caption" className="event-secondary-text">
-                    {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
-                  </Typography>
-                </Stack>
 
-                {/* Event Manager */}
-                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
-                  <Avatar
-                    alt={event.personInCharge.fullName}
-                    src={event.personInCharge.avatar || ''}
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      fontSize: '0.75rem',
-                      bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
-                    }}
-                  >
-                    {event.personInCharge.fullName.charAt(0)}
-                  </Avatar>
-                  <Typography variant="body2" noWrap>
-                    {event.personInCharge.fullName}
-                  </Typography>
-                </Stack>
+                  {/* Event Manager */}
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
+                    <Avatar
+                      alt={event.personInCharge.fullName}
+                      src={event.personInCharge.avatar || ''}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        fontSize: '0.75rem',
+                        bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
+                      }}
+                    >
+                      {event.personInCharge.fullName.charAt(0)}
+                    </Avatar>
+                    <Typography variant="body2" noWrap>
+                      {event.personInCharge.fullName}
+                    </Typography>
+                  </Stack>
 
-                {/* Action Button */}
-                <Box sx={{ width: '5%', textAlign: 'right' }}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedRow(isExpanded ? null : event.id);
-                    }}
-                    sx={{
-                      transform: isExpanded ? 'rotate(180deg)' : 'none',
-                      transition: 'transform 0.2s ease-in-out',
-                      // color: getExpandedIconColor(isExpanded, theme.palette.mode),
-                    }}
-                  >
-                    <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
-                  </IconButton>
-                </Box>
+                  {/* Action Button */}
+                  <Box sx={{ width: '5%', textAlign: 'right' }}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedRow(isExpanded ? null : event.id);
+                      }}
+                      sx={{
+                        transform: isExpanded ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.2s ease-in-out',
+                        // color: getExpandedIconColor(isExpanded, theme.palette.mode),
+                      }}
+                    >
+                      <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
+                    </IconButton>
+                  </Box>
                 </Stack>
               </Tooltip>
 
@@ -1450,17 +1456,17 @@ const EventLists = ({ query }) => {
             ) : (
               <Avatar
                 alt={selectedEvent?.name || 'Event'}
-                src={selectedEvent?.eventSetting?.eventLogo || "/logo/nexea.png"}
-                sx={{ 
-                  width: '100%', 
+                src={selectedEvent?.eventSetting?.eventLogo || '/logo/nexea.png'}
+                sx={{
+                  width: '100%',
                   height: '100%',
                   bgcolor: 'background.neutral',
                   '& img': {
                     objectFit: 'contain',
                     width: '70%',
                     height: '70%',
-                    margin: 'auto'
-                  }
+                    margin: 'auto',
+                  },
                 }}
               />
             )}
