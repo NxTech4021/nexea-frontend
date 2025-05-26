@@ -4,32 +4,32 @@ import ReactApexChart from 'react-apexcharts';
 
 import { Box, Card, useTheme, Typography, CardContent } from '@mui/material';
 
-const ticketData = [
-  {
-    label: 'Startups',
-    value: 72.72,
-    count: 145,
-    color: '#2196f3',
-  },
-  {
-    label: 'Investors',
-    value: 16.38,
-    count: 34,
-    color: '#ff9800',
-  },
-  {
-    label: 'Speakers',
-    value: 3.83,
-    count: 8,
-    color: '#4caf50',
-  },
-  {
-    label: 'General',
-    value: 2.42,
-    count: 5,
-    color: '#f44336',
-  },
-];
+// const ticketData = [
+//   {
+//     label: 'Startups',
+//     value: 72.72,
+//     count: 145,
+//     color: '#2196f3',
+//   },
+//   {
+//     label: 'Investors',
+//     value: 16.38,
+//     count: 34,
+//     color: '#ff9800',
+//   },
+//   {
+//     label: 'Speakers',
+//     value: 3.83,
+//     count: 8,
+//     color: '#4caf50',
+//   },
+//   {
+//     label: 'General',
+//     value: 2.42,
+//     count: 5,
+//     color: '#f44336',
+//   },
+// ];
 
 const colors = [
   '#DAF7A6',
@@ -123,7 +123,7 @@ const TicketInformation = ({ tickets }) => {
       <CardContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', mb: 1 }}>
           <Typography variant="subtitle2" color="text.secondary">
-            Ticket Distribution
+            Sales by Ticket Type
           </Typography>
         </Box>
 

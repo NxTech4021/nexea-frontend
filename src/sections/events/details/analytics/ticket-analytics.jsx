@@ -62,7 +62,7 @@ const TicketAnalytics = ({ tickets, eventName }) => {
               color="text.secondary"
               sx={{ fontWeight: 600 }}
             >
-              Total Tickets Sold
+              Cumulative Tickets Sold
             </Typography>
             <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" />
           </Stack>
