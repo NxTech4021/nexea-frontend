@@ -141,11 +141,12 @@ export default function OrderView() {
     BuyerPhone: order.buyerPhoneNumber,
     EventName: order.event?.name || '',
     Status: order.status,
-    DiscountCode: order.discountCode || '',
+    DiscountCode: order.discountCode?.code || '',    
+    DiscountType: order.discountCode?.type || '',  
     DiscountAmount: order.discountAmount,
     TotalAmount: order.totalAmount,
     OrderDate: dayjs(order.createdAt).format('DD-MM-YYYY'),
-    AttendeeCount: order.attendees?.length || 0, // optional summary info
+    AttendeeCount: order.attendees?.length || 0,
   }));
 
   // Example CSV export logic (adjust based on your actual export library)
@@ -153,6 +154,9 @@ export default function OrderView() {
 };
 
 
+console.log("events", eventOrders
+
+)
   // Check for event filter from sessionStorage or URL parameter when component mounts
   useEffect(() => {
     if (eventId && eventData?.events) {
