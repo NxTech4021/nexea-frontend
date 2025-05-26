@@ -2,8 +2,10 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
 import React, { useMemo, useState, useEffect } from 'react';
+import ReactApexChart from 'react-apexcharts';
+import { useGetAllEvents } from 'src/api/event';
 
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import {
   Box,
   List,
@@ -27,10 +29,14 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  ButtonGroup,
+  Card,
+  CardContent,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { useParams } from 'react-router-dom';
 
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
@@ -39,6 +45,8 @@ import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { TablePaginationCustom } from 'src/components/table';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const orders = [
   {
@@ -77,11 +85,20 @@ const orders = [
 const STATUS_TABS = ['All', 'paid', 'pending', 'failed'];
 
 export default function OrderView() {
+  const theme = useTheme();
+  
+  // Minimalistic palette - theme aware
+  const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';
+  const iconColor = theme.palette.mode === 'light' ? '#111' : '#fff';
+  const hoverBg = theme.palette.mode === 'light' ? '#f3f3f3' : '#2c2c2c';
+  const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
+  const cardBgColor = theme.palette.mode === 'light' ? '#fff' : '#1e1e1e';
+  
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState('All');
   const [eventFilter, setEventFilter] = useState('All');
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [open, setOpen] = useState(false);
   const [newOrder, setNewOrder] = useState({
     eventName: '',
@@ -97,12 +114,29 @@ export default function OrderView() {
     message: '',
     severity: 'success',
   });
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventOrders, setEventOrders] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [priceSort, setPriceSort] = useState(null);
+
+  const router = useRouter();
+  const { eventId } = useParams();
 
   const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
-  const router = useRouter();
+  const { data: eventData, isLoading: loadingEvents } = useGetAllEvents();
 
-  // Check for event filter from sessionStorage when component mounts
+  // Check for event filter from sessionStorage or URL parameter when component mounts
   useEffect(() => {
+    if (eventId && eventData?.events) {
+      const foundEvent = eventData.events.find(event => event.id === eventId);
+      if (foundEvent) {
+        setSelectedEvent(foundEvent);
+        return;
+      }
+    }
+    
     const storedEventFilter = sessionStorage.getItem('orderEventFilter');
     if (storedEventFilter && data?.length) {
       // Check if the stored event name exists in available options
@@ -113,7 +147,7 @@ export default function OrderView() {
       // Remove the stored filter to avoid applying it on subsequent visits
       sessionStorage.removeItem('orderEventFilter');
     }
-  }, [data]);
+  }, [data, eventId, eventData]);
 
   const eventOptions = useMemo(() => {
     if (!data?.length) return ['All'];
@@ -121,21 +155,6 @@ export default function OrderView() {
     const uniqueEvents = [...new Set(data.map((order) => order.event.name))];
     return ['All', ...uniqueEvents];
   }, [data]);
-
-  const filteredOrders =
-    !!data?.length &&
-    data
-      .sort((a, b) => (dayjs(a.createdAt).isBefore(dayjs(b.createdAt), 'date') ? 1 : -1))
-      .filter(
-        (order) =>
-          (tab === 'All' || order.status === tab.toLowerCase()) &&
-          (eventFilter === 'All' || order.event.name === eventFilter) &&
-          (order.id.toLowerCase().includes(search.toLowerCase()) ||
-            order.event.name.toLowerCase().includes(search.toLowerCase()) ||
-            order.attendee.name.toLowerCase().includes(search.toLowerCase()) ||
-            order.discountCode.code.toLowerCase().includes(search.toLowerCase()) ||
-            order.status.toLowerCase().includes(search.toLowerCase()))
-      );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -229,6 +248,73 @@ export default function OrderView() {
     }
   };
 
+  // Revenue chart data for selected event
+  const revenueChart = useMemo(() => {
+    if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
+    // Group by date (YYYY-MM-DD)
+    const map = {};
+    eventOrders.forEach((order) => {
+      if (order.status === 'paid') {
+        const date = dayjs(order.createdAt).format('YYYY-MM-DD');
+        map[date] = (map[date] || 0) + (order.totalAmount || 0);
+      }
+    });
+    const categories = Object.keys(map).sort();
+    const series = categories.map((date) => map[date]);
+    return { series, categories };
+  }, [eventOrders, selectedEvent]);
+
+  // Add order count chart data
+  const orderCountChart = useMemo(() => {
+    if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
+    const map = {};
+    eventOrders.forEach((order) => {
+      const date = dayjs(order.createdAt).format('YYYY-MM-DD');
+      map[date] = (map[date] || 0) + 1;
+    });
+    const categories = Object.keys(map).sort();
+    const series = categories.map((date) => map[date]);
+    return { series, categories };
+  }, [eventOrders, selectedEvent]);
+
+  // Update eventOrders and totalRevenue when selectedEvent or data changes
+  useEffect(() => {
+    if (selectedEvent && data?.length) {
+      const filtered = data.filter((order) => order.event?.id === selectedEvent.id);
+      setEventOrders(filtered);
+      setTotalRevenue(
+        filtered
+          .filter((order) => order.status === 'paid')
+          .reduce((sum, order) => sum + (order.totalAmount || 0), 0)
+      );
+    } else {
+      setEventOrders([]);
+      setTotalRevenue(0);
+    }
+  }, [selectedEvent, data]);
+
+  // Sort eventOrders by price if priceSort is set
+  const sortedEventOrders = useMemo(() => {
+    if (!priceSort) return eventOrders;
+    const sorted = [...eventOrders];
+    sorted.sort((a, b) => {
+      const aPrice = Number(a.totalAmount) || 0;
+      const bPrice = Number(b.totalAmount) || 0;
+      if (priceSort === 'asc') return aPrice - bPrice;
+      return bPrice - aPrice;
+    });
+    return sorted;
+  }, [eventOrders, priceSort]);
+
+  // handle price sort toggle to avoid nested ternary
+  const handlePriceSortToggle = () => {
+    setPriceSort((prev) => {
+      if (prev === 'desc') return 'asc';
+      if (prev === 'asc') return null;
+      return 'desc';
+    });
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -245,686 +331,384 @@ export default function OrderView() {
     );
   }
 
-  return (
-    <>
-      <Container maxWidth="xl">
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'left', sm: 'center' },
-            mb: { xs: 3, md: 5 },
-            gap: 1,
-          }}
-        >
-          <CustomBreadcrumbs
-            heading="Order View"
-            links={[
-              { name: 'Dashboard', href: paths.dashboard.root },
-              { name: 'Order View' },
-              { name: 'List' },
-            ]}
-          />
-        </Box>
-
-        {/* Search and Actions Section */}
-        <Box sx={{ mt: 4 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{
-                  mb: 2,
-                  width: '100%',
-                }}
-              >
-                <TextField
-                  fullWidth
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search Orders"
-                  InputProps={{
-                    startAdornment: (
-                      <Iconify
-                        icon="eva:search-fill"
-                        sx={{
-                          color: 'text.disabled',
-                          width: 20,
-                          height: 20,
-                          mr: 1,
-                        }}
-                      />
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: 40,
-                    },
-                  }}
-                />
-
-                <Select
-                  value={eventFilter}
-                  onChange={(e) => setEventFilter(e.target.value)}
-                  sx={{
-                    minWidth: 200,
-                    height: 40,
-                  }}
-                >
-                  {eventOptions.map((event) => (
-                    <MenuItem key={event} value={event}>
-                      {event}
-                    </MenuItem>
-                  ))}
-                </Select>
-
-                <Button
-                  variant="contained"
-                  color="info"
-                  onClick={handleClickOpen}
-                  sx={{
-                    minWidth: 'fit-content',
-                    height: 40,
-                    fontWeight: 550,
-                  }}
-                >
-                  Create Order
-                </Button>
-              </Stack>
-
-              {/* Status Filter Buttons - Similar to event-lists.jsx */}
-              <Stack
-                direction="row"
-                sx={{
-                  width: 'fit-content',
-                  position: 'relative',
-                  mb: 3,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                  '& .MuiButton-root': {
-                    fontSize: '0.875rem',
-                    fontWeight: 450,
-                  },
-                }}
-              >
-                {STATUS_TABS.map((status, index) => {
-                  const isActive = tab === status;
-                  let statusConfig = { color: 'text.primary', bgColor: 'transparent' };
-
-                  if (status === 'paid') {
-                    statusConfig = {
-                      icon: 'eva:checkmark-circle-2-fill',
-                      color: '#229A16',
-                      bgColor: '#E9FCD4',
-                    };
-                  } else if (status === 'pending') {
-                    statusConfig = {
-                      icon: 'eva:clock-fill',
-                      color: '#B78103',
-                      bgColor: '#FFF7CD',
-                    };
-                  } else if (status === 'failed') {
-                    statusConfig = {
-                      icon: 'ic:outline-block',
-                      color: '#B72136',
-                      bgColor: '#FFE7D9',
-                    };
-                  }
-
-                  let buttonColor = 'text.secondary';
-                  let buttonBgColor = 'transparent';
-
-                  if (isActive) {
-                    if (status === 'All') {
-                      buttonColor = 'text.primary';
-                      buttonBgColor = (theme) =>
-                        theme.palette.mode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
-                    } else {
-                      buttonColor = statusConfig.color;
-                      buttonBgColor = statusConfig.bgColor;
-                    }
-                  }
-
-                  let hoverBgColor = 'action.hover';
-
-                  if (isActive) {
-                    if (status === 'All') {
-                      hoverBgColor = (theme) =>
-                        theme.palette.mode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
-                    } else {
-                      hoverBgColor = statusConfig.bgColor;
-                    }
-                  }
-
-                  return (
-                    <Button
-                      key={status}
-                      disableRipple
-                      onClick={(e) => setTab(status)}
-                      startIcon={
-                        status !== 'All' ? (
-                          <Iconify icon={statusConfig.icon} sx={{ width: 18, height: 18 }} />
-                        ) : null
-                      }
-                      sx={{
-                        minWidth: 'max-content',
-                        height: '32px',
-                        px: 1.5,
-                        color: buttonColor,
-                        bgcolor: buttonBgColor,
-                        borderRight: index !== STATUS_TABS.length - 1 ? '1px solid' : 'none',
-                        borderColor: 'divider',
-                        borderRadius: 0,
-                        '&:hover': {
-                          bgcolor: hoverBgColor,
-                        },
-                      }}
-                    >
-                      {status[0].toUpperCase() + status.slice(1)}
-                    </Button>
-                  );
-                })}
-              </Stack>
-            </Grid>
-
-            {/* Table Section - Separate from search/filter controls */}
-            <Grid item xs={12}>
-              <Box
-                sx={{
-                  bgcolor: 'background.paper',
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  overflow: { xs: 'auto', sm: 'hidden' },
-                }}
-              >
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  sx={{
-                    py: 1.5,
-                    px: 3,
-                    borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'light' ? '#f1f2f3' : 'background.neutral',
-                    minWidth: { xs: 800, sm: '100%' },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    sx={{
-                      width: '100%',
-                      '& > *:not(:last-child)': {
-                        borderRight: (theme) =>
-                          `1px solid ${theme.palette.mode === 'light' ? '#dedfe2' : 'rgba(255, 255, 255, 0.12)'}`,
-                        pr: 2,
-                        mr: 2,
-                      },
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '15%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Order ID
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '20%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Event Name
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '20%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Buyer Name
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '15%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Discount Code
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '15%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Order Date
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '15%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Price (RM)
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '15%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Status
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        width: '5%',
-                        color: (theme) =>
-                          theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                        fontWeight: 550,
-                      }}
-                    >
-                      Actions
-                    </Typography>
-                  </Stack>
-                </Stack>
-                <Stack
-                  sx={{
-                    maxHeight: '70vh',
-                    overflow: 'auto',
-                    minWidth: { xs: 800, sm: '100%' },
-                  }}
-                >
-                  {(filteredOrders || [])
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((order) => {
-                      let statusConfig = {};
-
-                      if (order.status === 'paid') {
-                        statusConfig = {
-                          color: '#229A16',
-                          bgColor: '#E9FCD4',
-                          icon: 'eva:checkmark-circle-2-fill',
-                        };
-                      } else if (order.status === 'pending') {
-                        statusConfig = {
-                          color: '#B78103',
-                          bgColor: '#FFF7CD',
-                          icon: 'eva:clock-fill',
-                        };
-                      } else {
-                        statusConfig = {
-                          color: '#B72136',
-                          bgColor: '#FFE7D9',
-                          icon: 'ic:outline-block',
-                        };
-                      }
-
-                      return (
-                        <Tooltip title="View Order Details" arrow>
-                          <Stack
-                            key={order.id}
-                            direction="row"
-                            alignItems="center"
-                            onClick={() => router.push(paths.dashboard.order.details(order.id))}
-                            sx={{
-                              px: 3,
-                              py: 1.5,
-                              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-                              transition: 'all 0.2s ease-in-out',
-                              cursor: 'pointer',
-                              '&:hover': {
-                                bgcolor: 'background.neutral',
-                              },
-                            }}
-                            spacing={1}
-                          >
-                            <Box sx={{ width: '15%' }}>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontWeight: 600,
-                                  color: 'grey.600',
-                                  p: 0.75,
-                                  borderRadius: 1,
-                                  bgcolor: (theme) => alpha(theme.palette.grey[600], 0.08),
-                                  display: 'inline-flex',
-                                  fontSize: '0.8125rem',
-                                  fontFamily: 'monospace',
-                                  letterSpacing: '0.25px',
-                                }}
-                              >
-                                {order.orderNumber}
-                              </Typography>
-                            </Box>
-
-                            <Typography variant="body2" sx={{ width: '20%' }}>
-                              {order.event.name}
-                            </Typography>
-
-                            <Typography variant="body2" sx={{ width: '20%' }}>
-                              {order.buyerName}
-                            </Typography>
-
-                            <Typography variant="body2" sx={{ width: '15%' }}>
-                              {order?.discountCode?.code || 'N/A'}
-                            </Typography>
-
-                            <Typography variant="body2" sx={{ width: '15%' }}>
-                              {dayjs(order.createdAt).format('LL')}
-                            </Typography>
-
-                            <Typography variant="body2" sx={{ width: '15%' }}>
-                              RM {order.totalAmount.toFixed(2)}
-                            </Typography>
-
-                            <Box sx={{ width: '15%' }}>
-                              <Box
-                                sx={{
-                                  py: 0.5,
-                                  px: 1,
-                                  borderRadius: 1,
-                                  width: 'fit-content',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 0.5,
-                                  bgcolor: statusConfig.bgColor,
-                                }}
-                              >
-                                <Iconify
-                                  icon={statusConfig.icon}
-                                  sx={{
-                                    width: 16,
-                                    height: 16,
-                                    color: statusConfig.color,
-                                  }}
-                                />
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    color: statusConfig.color,
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}{' '}
-                                  {/* added this because prisma's status is in lowercase, temporary solution */}
-                                </Typography>
-                              </Box>
-                            </Box>
-
-                            <Box sx={{ width: '5%', display: 'flex', justifyContent: 'center' }}>
-                              <Tooltip title="View More Details">
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    router.push(paths.dashboard.order.details(order.id));
-                                  }}
-                                  sx={{
-                                    color: 'primary.main',
-                                  }}
-                                >
-                                  <Iconify icon="eva:info-outline" width={20} height={20} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip
-                                title={
-                                  order.status !== 'paid'
-                                    ? 'Resend only available for Paid orders'
-                                    : 'Resend Confirmation Email'
-                                }
-                              >
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenResendDialog(order);
-                                  }}
-                                  sx={{
-                                    color: 'info.main',
-                                  }}
-                                  disabled={order.status !== 'paid'}
-                                >
-                                  <Iconify icon="eva:email-outline" width={20} height={20} />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </Stack>
-                        </Tooltip>
-                      );
-                    })}
-                </Stack>
-              </Box>
-
-              {!filteredOrders && (
-                <EmptyContent
-                  filled
-                  title="No Orders"
-                  sx={{
-                    py: 10,
-                  }}
-                />
-              )}
-              {/* <TableNoData notFound={!filteredOrders} sx={{ width: 1 }} /> */}
-
-              <TablePaginationCustom
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredOrders.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Grid>
-          </Grid>
-        </Box>
-      </Container>
-
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          elevation: 0,
-          sx: {
-            borderRadius: 3,
-            border: '1px solid',
-            borderColor: 'divider',
-            background: (theme) =>
-              theme.palette.mode === 'light'
-                ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
-                : 'linear-gradient(to bottom, #1a202c, #2d3748)',
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            py: 3,
-            px: 4,
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? 'rgba(245, 247, 250, 0.85)'
-                : 'rgba(26, 32, 44, 0.85)',
-          }}
-        >
-          <Avatar
-            alt="Order"
-            src="/logo/nexea.png"
-            sx={{
-              width: 58,
-              height: 58,
-              marginRight: 2.5,
-              border: (theme) => `3px solid ${theme.palette.background.paper}`,
-              backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#f0f4f8' : '#2d3748'),
-            }}
-          />
-          <Box>
-            <Typography
-              variant="h5"
-              fontWeight="700"
-              sx={{
-                color: (theme) => theme.palette.text.primary,
-                letterSpacing: '-0.3px',
-                mb: 0.5,
-              }}
-            >
-              Create Order
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
+  if (!selectedEvent) {
+    return (
+      <Container maxWidth="md" sx={{ pt: 3 }}>
+        <Typography variant="h5" sx={{ mb: 2, color: textColor, fontWeight: 700, fontSize: 22 }}>
+          Select an Event
+        </Typography>
+        <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, overflow: 'hidden', bgcolor: cardBgColor }}>
+          {(eventData?.events || []).map((event) => (
+            <Box
+              key={event.id}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                fontSize: '0.85rem',
+                px: 2,
+                py: 1.25,
+                borderBottom: `1px solid ${borderColor}`,
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+                '&:hover': { bgcolor: hoverBg },
+                fontSize: 14,
               }}
+              onClick={() => router.push(paths.dashboard.order.event(event.id))} 
             >
-              Create a new order for an event
+              <Avatar src={event.eventSetting?.eventLogo || "/logo/nexea.png"}  alt={event.name} sx={{ width: 28, height: 28, mr: 1.5 }} />
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600, fontSize: 15 }}>{event.name}</Typography>
+                <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>{event.date ? dayjs(event.date).format('LLL') : ''}</Typography>
+              </Box>
+              <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ color: iconColor }} />
+            </Box>
+          ))}
+        </Box>
+      </Container>
+    );
+  }
+
+  // Orders Table for Selected Event
+  return (
+    <Container maxWidth="xl" sx={{ pt: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <IconButton 
+          onClick={() => {
+            setSelectedEvent(null);
+            router.push('/dashboard/order');
+          }} 
+          sx={{ color: iconColor, mr: 1, p: 0.5 }}
+        >
+          <Iconify icon="eva:arrow-back-fill" width={20} />
+        </IconButton>
+        <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 18 }}>
+          {selectedEvent.name}
+        </Typography>
+      </Box>
+      {/* Statistics and Revenue/Order Graphs */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+      <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
+          <CardContent sx={{ p: 2 }}>
+            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Revenue</Typography>
+            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
+              {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(totalRevenue)}
             </Typography>
-          </Box>
-        </DialogTitle>
-
-        <Divider />
-
-        <DialogContent
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+              <ReactApexChart
+                options={{
+                  chart: { type: 'area', height: 90, toolbar: { show: false } },
+                  xaxis: { categories: revenueChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
+                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
+                  stroke: { curve: 'smooth', width: 2 },
+                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
+                  grid: { show: false },
+                  dataLabels: { enabled: false },
+                  tooltip: { 
+                    enabled: true, 
+                    y: { formatter: (val) => `RM ${val.toFixed(2)}` },
+                    theme: theme.palette.mode,
+                    style: {
+                      fontSize: '12px',
+                      fontFamily: theme.typography.fontFamily,
+                    },
+                  },
+                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                }}
+                series={[{ name: 'Revenue', data: revenueChart.series }]}
+                type="area"
+                height={90}
+              />
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
+          <CardContent sx={{ p: 2 }}>
+            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders</Typography>
+            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>{eventOrders.length}</Typography>
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+              <ReactApexChart
+                options={{
+                  chart: { type: 'area', height: 90, toolbar: { show: false } },
+                  xaxis: { categories: orderCountChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
+                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
+                  stroke: { curve: 'smooth', width: 2 },
+                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
+                  grid: { show: false },
+                  dataLabels: { enabled: false },
+                  tooltip: { 
+                    enabled: true, 
+                    y: { formatter: (val) => `${val} orders` },
+                    theme: theme.palette.mode,
+                    style: {
+                      fontSize: '12px',
+                      fontFamily: theme.typography.fontFamily,
+                    },
+                  },
+                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                }}
+                series={[{ name: 'Orders', data: orderCountChart.series }]}
+                type="area"
+                height={90}
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      </Stack>
+      {/* Search and Status Filter */}
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' }, 
+          justifyContent: 'flex-start', 
+          alignItems: { xs: 'stretch', sm: 'center' }, 
+          mb: 2, 
+          gap: 2 
+        }}
+      >
+        <TextField
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+          placeholder="Search Orders"
+          InputProps={{
+            startAdornment: (
+              <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 18, height: 18, mr: 1 }} />
+            ),
+          }}
           sx={{
-            p: 4,
-            backgroundColor: (theme) => theme.palette.background.paper,
+            width: { xs: '100%', sm: searchFocused ? 320 : 180 },
+            maxWidth: '100%',
+            transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s',
+            '& .MuiOutlinedInput-root': { 
+              height: 36, 
+              fontSize: 14, 
+              borderRadius: 2,
+              backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#333',
+              borderColor,
+              '& fieldset': {
+                borderColor,
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.mode === 'light' ? '#999' : '#777',
+              },
+            },
+          }}
+        />
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap',
+            justifyContent: { xs: 'flex-start', sm: 'flex-start' },
+            gap: 1,
+            width: '100%'
           }}
         >
-          <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
-            <TextField
-              label="Event Name"
-              name="eventName"
-              fullWidth
-              margin="dense"
-              onChange={handleChange}
-            />
-            <TextField
-              label="Attendee Name"
-              name="attendeeName"
-              fullWidth
-              margin="dense"
-              onChange={handleChange}
-            />
-            <TextField
-              label="Discount Code"
-              name="discountCode"
-              fullWidth
-              margin="dense"
-              onChange={handleChange}
-            />
-            <TextField
-              label="Order Date"
-              name="orderDate"
-              fullWidth
-              margin="dense"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              onChange={handleChange}
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            p: 3,
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
-            borderTop: '1px solid',
-            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
+          {['All', 'Paid', 'Pending', 'Cancelled', 'Free'].map((status) => {
+            // Calculate count for each status
+            let count = eventOrders.length; // Default for 'All'
+            if (status === 'Paid') {
+              count = eventOrders.filter(order => order.status === 'paid').length;
+            } else if (status === 'Pending') {
+              count = eventOrders.filter(order => order.status === 'pending').length;
+            } else if (status === 'Cancelled') {
+              count = eventOrders.filter(order => order.status === 'cancelled').length;
+            } else if (status === 'Free') {
+              count = eventOrders.filter(order => Number(order.totalAmount) === 0).length;
+            }
+            
+            return (
+              <Button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                variant="outlined"
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  color: (() => {
+                    if (statusFilter === status) {
+                      return theme.palette.mode === 'light' ? '#fff' : '#000';
+                    }
+                    return textColor;
+                  })(),
+                  bgcolor: (() => {
+                    if (statusFilter === status) {
+                      return theme.palette.mode === 'light' ? '#111' : '#eee';
+                    }
+                    return theme.palette.mode === 'light' ? '#f3f3f3' : '#333';
+                  })(),
+                  borderColor,
+                  borderRadius: 1,
+                  minWidth: 'auto',
+                  px: 1.5,
+                  '&:hover': { 
+                    bgcolor: (() => {
+                      if (statusFilter === status) {
+                        return theme.palette.mode === 'light' ? '#222' : '#ddd';
+                      }
+                      return theme.palette.mode === 'light' ? '#e0e0e0' : '#444';
+                    })(),
+                    borderRight: `1px solid ${borderColor}`,
+                    zIndex: 1,
+                  },
+                }}
+              >
+                {status} ({count})
+              </Button>
+            );
+          })}
+        </Box>
+      </Box>
+      {/* Orders Table */}
+      <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, bgcolor: cardBgColor, overflow: 'hidden' }}>
+        {/* Header row for desktop */}
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          sx={{ 
+            px: 2, 
+            py: 1, 
+            bgcolor: hoverBg, 
+            display: { xs: 'none', md: 'flex' } 
           }}
         >
-          <Button
-            variant="outlined"
-            onClick={handleClose}
-            sx={{
-              borderRadius: 4,
-              height: '46px',
-              padding: '0 24px',
-              fontWeight: 600,
-              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
-              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
-              borderWidth: '1.5px',
-              letterSpacing: '0.3px',
-              textTransform: 'none',
-              fontSize: '0.95rem',
-              '&:hover': {
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
-                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
-              },
-            }}
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order ID</Typography>
+          <Typography sx={{ width: '20%', color: textColor, fontWeight: 600, fontSize: 13 }}>Buyer Name</Typography>
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Discount Code</Typography>
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Date</Typography>
+          <Box
+            sx={{ width: '15%', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+            onClick={handlePriceSortToggle}
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreateOrder}
-            variant="contained"
-            sx={{
-              borderRadius: 4,
-              height: '46px',
-              padding: '0 28px',
-              fontWeight: 600,
-              backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#38bdf8' : '#3182ce'),
-              color: 'white',
-              textTransform: 'none',
-              fontSize: '0.95rem',
-              letterSpacing: '0.3px',
-              boxShadow: 'none',
-              transition: 'all 0.2s',
-              '&:hover': {
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light' ? '#0ea5e9' : '#2b6cb0',
-                boxShadow: 'none',
-              },
-            }}
-          >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-
+            <Typography sx={{ color: textColor, fontWeight: 600, fontSize: 13, mr: 0.5 }}>Price (RM)</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', ml: 0.2 }}>
+              <ArrowDropUpIcon fontSize="small" sx={{ color: priceSort === 'asc' ? '#111' : '#bbb', mb: '-6px' }} />
+              <ArrowDropDownIcon fontSize="small" sx={{ color: priceSort === 'desc' ? '#111' : '#bbb', mt: '-6px' }} />
+            </Box>
+          </Box>
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Status</Typography>
+          <Typography sx={{ width: '5%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
+        </Stack>
+        <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
+          {sortedEventOrders
+            .filter((order) => {
+              const q = (search || '').toLowerCase().trim();
+              const matchesName = String(order.buyerName || order.buyer?.name || '').toLowerCase().includes(q);
+              let matchesStatus = true;
+              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid';
+              else if (statusFilter === 'Pending') matchesStatus = (order.status || '').toLowerCase() === 'pending';
+              else if (statusFilter === 'Cancelled') matchesStatus = (order.status || '').toLowerCase() === 'cancelled';
+              else if (statusFilter === 'Free') matchesStatus = Number(order.totalAmount) === 0;
+              // 'All' shows all
+              return matchesName && matchesStatus;
+            })
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((order) => {
+              let statusConfig = { color: textColor, icon: 'eva:clock-fill' };
+              if (order.status === 'paid') statusConfig = { color: '#229A16', icon: 'eva:checkmark-circle-2-fill' };
+              else if (order.status === 'pending') statusConfig = { color: '#B78103', icon: 'eva:clock-fill' };
+              else if (order.status === 'failed') statusConfig = { color: '#B72136', icon: 'ic:outline-block' };
+              return (
+                <Stack 
+                  key={order.id} 
+                  direction={{ xs: 'column', md: 'row' }} 
+                  alignItems={{ xs: 'flex-start', md: 'center' }} 
+                  sx={{ 
+                    p: 2, 
+                    borderBottom: `1px solid ${borderColor}`, 
+                    cursor: 'pointer', 
+                    '&:hover': { bgcolor: hoverBg } 
+                  }}
+                >
+                  {/* Mobile layout - Card style */}
+                  <Box 
+                    sx={{ 
+                      display: { xs: 'flex', md: 'none' }, 
+                      flexDirection: 'column', 
+                      width: '100%',
+                      mb: 1
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography sx={{ color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
+                        {order.orderNumber}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
+                        <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
+                          {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : ''}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Buyer:</Typography>
+                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>{order.buyerName}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Price:</Typography>
+                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>RM {order.totalAmount?.toFixed(2)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Date:</Typography>
+                      <Typography sx={{ color: textColor, fontSize: 13 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Discount:</Typography>
+                      <Typography sx={{ color: textColor, fontSize: 13 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                      <Tooltip title="View Details">
+                        <IconButton size="small" onClick={() => router.push(paths.dashboard.order.details(order.id))} sx={{ color: iconColor, p: 0.5 }}>
+                          <Iconify icon="eva:info-outline" width={16} height={16} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
+                        <IconButton size="small" onClick={() => handleOpenResendDialog(order)} sx={{ color: iconColor, p: 0.5 }} disabled={order.status !== 'paid'}>
+                          <Iconify icon="eva:email-outline" width={16} height={16} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+                  
+                  {/* Desktop layout - row style */}
+                  <Typography sx={{ width: '15%', color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.orderNumber}</Typography>
+                  <Typography sx={{ width: '20%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerName}</Typography>
+                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>RM {order.totalAmount?.toFixed(2)}</Typography>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+                    <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
+                    <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
+                      {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : ''}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ width: '5%', display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
+                    <Tooltip title="View Details">
+                      <IconButton size="small" onClick={() => router.push(paths.dashboard.order.details(order.id))} sx={{ color: iconColor, p: 0.5 }}>
+                        <Iconify icon="eva:info-outline" width={16} height={16} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
+                      <IconButton size="small" onClick={() => handleOpenResendDialog(order)} sx={{ color: iconColor, p: 0.5 }} disabled={order.status !== 'paid'}>
+                        <Iconify icon="eva:email-outline" width={16} height={16} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Stack>
+              );
+            })}
+        </Stack>
+        <TablePaginationCustom
+          rowsPerPageOptions={[10, 25, 50]}
+          component="div"
+          count={eventOrders.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        />
+      </Box>
+      {/* Resend Email Dialog and Snackbar (reuse existing logic) */}
       <Dialog
         open={resendDialogOpen}
         onClose={handleCloseResendDialog}
@@ -936,7 +720,7 @@ export default function OrderView() {
             borderRadius: 2,
             border: '1px solid',
             borderColor: 'divider',
-            background: (theme) =>
+            background: 
               theme.palette.mode === 'light'
                 ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
                 : 'linear-gradient(to bottom, #1a202c, #2d3748)',
@@ -950,7 +734,7 @@ export default function OrderView() {
             display: 'flex',
             alignItems: 'center',
             gap: 1,
-            backgroundColor: (theme) =>
+            backgroundColor: 
               theme.palette.mode === 'light'
                 ? 'rgba(245, 247, 250, 0.85)'
                 : 'rgba(26, 32, 44, 0.85)',
@@ -974,7 +758,7 @@ export default function OrderView() {
 
               <List
                 sx={{
-                  bgcolor: (theme) => theme.palette.background.neutral,
+                  bgcolor:  theme.palette.background.neutral,
                   borderRadius: 1,
                   mb: 2,
                   py: 0,
@@ -1025,10 +809,10 @@ export default function OrderView() {
           sx={{
             px: 3,
             py: 2,
-            backgroundColor: (theme) =>
+            backgroundColor: 
               theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
             borderTop: '1px solid',
-            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
+            borderColor:  (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
           }}
         >
           <Button
@@ -1037,13 +821,13 @@ export default function OrderView() {
             sx={{
               borderRadius: 2,
               fontWeight: 600,
-              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
-              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
+              borderColor:  (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
+              color:  (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
               borderWidth: '1.5px',
               '&:hover': {
-                backgroundColor: (theme) =>
+                backgroundColor: 
                   theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
-                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
+                borderColor:  (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
               },
             }}
           >
@@ -1090,6 +874,6 @@ export default function OrderView() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </>
+    </Container>
   );
 }

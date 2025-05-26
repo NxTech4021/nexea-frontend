@@ -261,7 +261,21 @@ const isDefaultTime = (date) => {
               {/* Left side - Avatar and Event Info */}
               <Grid item xs={12} sm={8}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar alt={event.name} src="/logo/nexea.png" sx={{ width: 48, height: 48 }} />
+                  <Avatar
+                    alt={event.name}
+                    src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      bgcolor: 'background.neutral',
+                      '& img': {
+                        objectFit: 'contain',
+                        width: '70%',
+                        height: '70%',
+                        margin: 'auto',
+                      },
+                    }}
+                  />
                   <Stack spacing={0.75}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       {event.name}
@@ -520,8 +534,12 @@ const isDefaultTime = (date) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
 
-          const VITE_BASE_URL = 'http://localhost:81';
-          console.log('events', event);
+          const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
+
+          const attendees = orders?.flatMap((a) => a?.attendees)?.length || 0;
+
+          // const VITE_BASE_URL = 'http://localhost:81';
+
           return (
             <Stack
               key={event.id}
@@ -530,108 +548,151 @@ const isDefaultTime = (date) => {
               }}
             >
               {/* Regular Row */}
-              <Stack
-                direction="row"
-                alignItems="center"
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
-                  // color: getTextColor(isExpanded, theme.palette.mode),
-                  // '&:hover': {
-                  //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .MuiTypography-root:not(.status-text)': {
-                  //   color: getTextColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
-                  //   color: getIconColor(isExpanded, theme.palette.mode),
-                  // },
-                  // '& .event-secondary-text': {
-                  //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
-                  // },
-                }}
-                onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
-              >
-                {/* Event Details */}
-                <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 1.5,
-                      overflow: 'hidden',
-                      position: 'relative',
-                      bgcolor: 'background.neutral',
-                    }}
-                  >
-                    <Avatar
-                      alt={event.name}
-                      src="/logo/nexea.png"
-                      sx={{ width: '100%', height: '100%' }}
-                    />
-                  </Box>
-                  <Stack spacing={0.25}>
-                    <Typography
-                      variant="subtitle2"
-                      noWrap
+              <Tooltip title={!isExpanded ? 'View Event Details' : ''} arrow placement="top">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
+                    // color: getTextColor(isExpanded, theme.palette.mode),
+                    // '&:hover': {
+                    //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .MuiTypography-root:not(.status-text)': {
+                    //   color: getTextColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
+                    //   color: getIconColor(isExpanded, theme.palette.mode),
+                    // },
+                    // '& .event-secondary-text': {
+                    //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
+                    // },
+                  }}
+                  onClick={() =>
+                    !isExpanded && router.push(paths.dashboard.events.details(event.id))
+                  }
+                >
+                  {/* Event Details */}
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
+                    <Box
                       sx={{
-                        fontWeight: '500',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                        },
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1.5,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        bgcolor: 'background.neutral',
                       }}
                     >
-                      {event.name}
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Iconify
-                        icon="mdi:account-group"
-                        sx={{ width: 14, height: 14 }}
-                        className="event-secondary-text"
+                      <Avatar
+                        alt={event.name}
+                        src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: 'background.neutral',
+                          '& img': {
+                            objectFit: 'contain',
+                            width: '70%',
+                            height: '70%',
+                            margin: 'auto',
+                          },
+                        }}
                       />
-                      <Typography variant="caption" className="event-secondary-text">
-                        {event.attendeeCount || 0} Attendees
+                    </Box>
+                    <Stack spacing={0.25}>
+                      <Typography
+                        variant="subtitle2"
+                        noWrap
+                        sx={{
+                          fontWeight: '500',
+                          '&:hover': {
+                            textDecoration: 'underline',
+                          },
+                        }}
+                      >
+                        {event.name}
                       </Typography>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Iconify
+                          icon="mdi:account-group"
+                          sx={{ width: 14, height: 14 }}
+                          className="event-secondary-text"
+                        />
+                        <Typography variant="caption" className="event-secondary-text">
+                          {attendees} Attendees
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
 
-                {/* Status - Preserving original colors */}
-                <Box sx={{ width: '15%' }}>
-                  <Box
-                    sx={{
-                      py: 0.5,
-                      px: 1,
-                      borderRadius: 1,
-                      width: 'fit-content',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5,
-                      bgcolor: statusConfig.bgColor,
-                    }}
-                  >
-                    <Iconify
-                      icon={statusConfig.icon}
-                      className="status-icon"
+                  {/* Status - Preserving original colors */}
+                  <Box sx={{ width: '15%' }}>
+                    <Box
                       sx={{
-                        width: 16,
-                        height: 16,
-                        color: statusConfig.color,
-                      }}
-                    />
-                    <Typography
-                      variant="caption"
-                      className="status-text"
-                      sx={{
-                        color: statusConfig.color,
-                        fontWeight: 600,
-                        textTransform: 'capitalize',
+                        py: 0.5,
+                        px: 1,
+                        borderRadius: 1,
+                        width: 'fit-content',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        bgcolor: statusConfig.bgColor,
                       }}
                     >
-                      {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+                      <Iconify
+                        icon={statusConfig.icon}
+                        className="status-icon"
+                        sx={{
+                          width: 16,
+                          height: 16,
+                          color: statusConfig.color,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        className="status-text"
+                        sx={{
+                          color: statusConfig.color,
+                          fontWeight: 600,
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Date & Time */}
+                  <Stack spacing={0.5} sx={{ width: '20%' }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography variant="body2">{fDate(event.date)}</Typography>
+                    </Stack>
+                    <Typography variant="caption" className="event-secondary-text">
+                      {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+                    </Typography>
+                  </Stack>
+
+                  {/* Event Manager */}
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
+                    <Avatar
+                      alt={event.personInCharge.fullName}
+                      src={event.personInCharge.avatar || ''}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        fontSize: '0.75rem',
+                        bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
+                      }}
+                    >
+                      {event.personInCharge.fullName.charAt(0)}
+                    </Avatar>
+                    <Typography variant="body2" noWrap>
+                      {event.personInCharge.fullName}
                     </Typography>
                   </Box>
                 </Box>
@@ -657,42 +718,24 @@ const isDefaultTime = (date) => {
   )}
 </Stack>
 
-                {/* Event Manager */}
-                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
-                  <Avatar
-                    alt={event.personInCharge.fullName}
-                    src={event.personInCharge.avatar || ''}
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      fontSize: '0.75rem',
-                      bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
-                    }}
-                  >
-                    {event.personInCharge.fullName.charAt(0)}
-                  </Avatar>
-                  <Typography variant="body2" noWrap>
-                    {event.personInCharge.fullName}
-                  </Typography>
+                  {/* Action Button */}
+                  <Box sx={{ width: '5%', textAlign: 'right' }}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedRow(isExpanded ? null : event.id);
+                      }}
+                      sx={{
+                        transform: isExpanded ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.2s ease-in-out',
+                        // color: getExpandedIconColor(isExpanded, theme.palette.mode),
+                      }}
+                    >
+                      <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
+                    </IconButton>
+                  </Box>
                 </Stack>
-
-                {/* Action Button */}
-                <Box sx={{ width: '5%', textAlign: 'right' }}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedRow(isExpanded ? null : event.id);
-                    }}
-                    sx={{
-                      transform: isExpanded ? 'rotate(180deg)' : 'none',
-                      transition: 'transform 0.2s ease-in-out',
-                      // color: getExpandedIconColor(isExpanded, theme.palette.mode),
-                    }}
-                  >
-                    <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
-                  </IconButton>
-                </Box>
-              </Stack>
+              </Tooltip>
 
               {/* Expanded Actions Row */}
               <Collapse in={isExpanded} timeout={250} unmountOnExit>
@@ -708,6 +751,29 @@ const isDefaultTime = (date) => {
                   alignItems="center"
                   spacing={1}
                 >
+                  <Button
+                    onClick={() => {
+                      router.push(paths.dashboard.events.details(event.id));
+                      setExpandedRow(null);
+                    }}
+                    startIcon={<Iconify icon="eva:alert-circle-outline" width={20} height={20} />}
+                    variant="text"
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      textTransform: 'none',
+                      transition: 'background 0.2s, transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        transform: 'scale(1.04)',
+                      },
+                    }}
+                    aria-label="View Event Details"
+                  >
+                    Details
+                  </Button>
                   <Button
                     onClick={() => {
                       setOpenEdit(true);
@@ -1389,11 +1455,48 @@ const isDefaultTime = (date) => {
         fullWidth
       >
         <DialogTitle id="upload-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            alt="Event"
-            src="/logo/nexea.png"
-            sx={{ width: 64, height: 64, marginRight: 2 }}
-          />
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              marginRight: 2,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'background.neutral',
+              overflow: 'hidden',
+            }}
+          >
+            {selectedEvent?.eventSetting?.eventLogo ? (
+              <Box
+                component="img"
+                src={selectedEvent.eventSetting.eventLogo}
+                alt={selectedEvent?.name || 'Event'}
+                sx={{
+                  width: '80%',
+                  height: '80%',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <Avatar
+                alt={selectedEvent?.name || 'Event'}
+                src={selectedEvent?.eventSetting?.eventLogo || '/logo/nexea.png'}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  bgcolor: 'background.neutral',
+                  '& img': {
+                    objectFit: 'contain',
+                    width: '70%',
+                    height: '70%',
+                    margin: 'auto',
+                  },
+                }}
+              />
+            )}
+          </Box>
           <Box>
             <Typography variant="h6">{selectedEvent?.name}</Typography>
             <Typography variant="subtitle1">Upload Attendees</Typography>
