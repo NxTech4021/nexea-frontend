@@ -647,7 +647,7 @@ export default function OrderView() {
             } else if (status === 'Cancelled') {
               count = eventOrders.filter(order => order.status === 'cancelled').length;
             } else if (status === 'Free') {
-              count = eventOrders.filter(order => Number(order.totalAmount) === 0).length;
+              count = eventOrders.filter(order => order.status === 'paid' && Number(order.totalAmount) === 0).length;
             }
             
             return (
@@ -729,10 +729,11 @@ export default function OrderView() {
               const q = (search || '').toLowerCase().trim();
               const matchesName = String(order.buyerName || order.buyer?.name || '').toLowerCase().includes(q);
               let matchesStatus = true;
-              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid';
+              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid'&&
+      Number(order.totalAmount) > 0;
               else if (statusFilter === 'Pending') matchesStatus = (order.status || '').toLowerCase() === 'pending';
               else if (statusFilter === 'Cancelled') matchesStatus = (order.status || '').toLowerCase() === 'cancelled';
-              else if (statusFilter === 'Free') matchesStatus = Number(order.totalAmount) === 0;
+              else if (statusFilter === 'Free') matchesStatus = (order.status || '').toLowerCase() === 'paid' &&  Number(order.totalAmount) === 0;
               // 'All' shows all
               return matchesName && matchesStatus;
             })
