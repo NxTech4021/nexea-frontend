@@ -21,6 +21,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 
+import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
@@ -65,7 +66,9 @@ export default function JwtLoginView() {
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 3 }}>
+    <Stack spacing={2} sx={{ mb: 5, alignItems: 'center' }}>
+      <Logo sx={{ width: 64, height: 64 }} />
+      
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">New user?</Typography>
 
@@ -73,7 +76,7 @@ export default function JwtLoginView() {
           component={RouterLink}
           href={paths.auth.jwt.register}
           variant="subtitle2"
-          sx={{ color: (theme) => theme.palette.text.secondary }}
+          sx={{ color: '#111' }}
         >
           Create an account
         </Link>
@@ -96,7 +99,7 @@ export default function JwtLoginView() {
           endAdornment: (
             <InputAdornment position="end">
               <IconButton onClick={password.onToggle} edge="end">
-                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                <Iconify icon={password.value ? 'eva:eye-outline' : 'eva:eye-off-outline'} />
               </IconButton>
             </InputAdornment>
           ),
@@ -108,7 +111,7 @@ export default function JwtLoginView() {
         component={RouterLink}
         color="inherit"
         underline="always"
-        sx={{ alignSelf: 'flex-start', color: (theme) => theme.palette.text.secondary }}
+        sx={{ alignSelf: 'flex-start', color: '#111' }}
         href={paths.auth.jwt.forgotPassword}
       >
         Forgot password?
@@ -121,6 +124,13 @@ export default function JwtLoginView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
+        sx={{
+          bgcolor: '#111',
+          color: 'white',
+          '&:hover': {
+            bgcolor: '#333',
+          },
+        }}
       >
         Login
       </LoadingButton>

@@ -214,6 +214,32 @@ const AttendeeInformation = ({ id }) => {
             }}
           >
             <Button
+              variant="contained"
+              onClick={() => navigate(`${paths.dashboard.events.qr}/${id}`)}
+              sx={{
+                height: '42px',
+                px: 2,
+                py: 1,
+                borderRadius: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                bgcolor: theme.palette.mode === 'light' ? 'grey.900' : 'common.white',
+                color: theme.palette.mode === 'light' ? 'common.white' : 'grey.900',
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'light' ? 'common.black' : 'grey.100',
+                },
+                fontWeight: 600,
+                fontSize: '13px',
+                textTransform: 'none',
+                boxShadow: 'none',
+              }}
+            >
+              <Iconify icon="bx:qr" width={20} height={20} />
+              Check In
+            </Button>
+
+            <Button
               variant="outlined"
               onClick={() => navigate(`${paths.dashboard.events.attendees}/${id}`)}
               sx={{
@@ -238,32 +264,6 @@ const AttendeeInformation = ({ id }) => {
             >
               <Iconify icon="mdi:account-group" width={20} height={20} />
               Attendee List
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={() => navigate(`${paths.dashboard.events.qr}/${id}`)}
-              sx={{
-                height: '42px',
-                px: 2,
-                py: 1,
-                borderRadius: 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                bgcolor: theme.palette.mode === 'light' ? 'grey.900' : 'common.white',
-                color: theme.palette.mode === 'light' ? 'common.white' : 'grey.900',
-                '&:hover': {
-                  bgcolor: theme.palette.mode === 'light' ? 'common.black' : 'grey.100',
-                },
-                fontWeight: 600,
-                fontSize: '13px',
-                textTransform: 'none',
-                boxShadow: 'none',
-              }}
-            >
-              <Iconify icon="bx:qr" width={20} height={20} />
-              Check In
             </Button>
           </Stack>
         </div>

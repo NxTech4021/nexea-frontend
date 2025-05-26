@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { Card } from '@mui/material';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -20,6 +21,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { useAuthContext } from 'src/auth/hooks';
 
+import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
@@ -71,12 +73,18 @@ export default function JwtRegisterView() {
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-      <Typography variant="h4">Sign up to Nexea Event Apppp</Typography>
+    <Stack spacing={2} sx={{ mb: 5, alignItems: 'center' }}>
+      <Logo sx={{ width: 64, height: 64 }} />
+      
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2"> Already have an account? </Typography>
+        <Typography variant="body2">Already have an account?</Typography>
 
-        <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2">
+        <Link 
+          component={RouterLink} 
+          href={paths.auth.jwt.login} 
+          variant="subtitle2"
+          sx={{ color: '#111' }}
+        >
           Sign in
         </Link>
       </Stack>
@@ -106,53 +114,78 @@ export default function JwtRegisterView() {
   );
 
   const renderForm = (
-    <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Stack spacing={2.5}>
-        {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+    <Stack spacing={2.5}>
+      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="firstName" label="First name" />
-          <RHFTextField name="lastName" label="Last name" />
-        </Stack>
-
-        <RHFTextField name="email" label="Email address" />
-
-        <RHFTextField
-          name="password"
-          label="Password"
-          type={password.value ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <LoadingButton
-          fullWidth
-          color="inherit"
-          size="large"
-          type="submit"
-          variant="contained"
-          loading={isSubmitting}
-        >
-          Create account
-        </LoadingButton>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <RHFTextField name="firstName" placeholder="First name" outerLabel="First name" />
+        <RHFTextField name="lastName" placeholder="Last name" outerLabel="Last name" />
       </Stack>
-    </FormProvider>
+
+      <RHFTextField name="email" placeholder="Email address" outerLabel="Email" />
+
+      <RHFTextField
+        name="password"
+        placeholder="Password"
+        outerLabel="Password"
+        type={password.value ? 'text' : 'password'}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={password.onToggle} edge="end">
+                <Iconify icon={password.value ? 'eva:eye-outline' : 'eva:eye-off-outline'} />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <LoadingButton
+        fullWidth
+        color="inherit"
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+        sx={{
+          bgcolor: '#111',
+          color: 'white',
+          '&:hover': {
+            bgcolor: '#333',
+          },
+        }}
+      >
+        Create account
+      </LoadingButton>
+
+      <Typography
+        component="div"
+        sx={{
+          color: 'text.secondary',
+          typography: 'caption',
+          textAlign: 'center',
+        }}
+      >
+        {'By signing up, I agree to '}
+        <Link underline="always" color="text.primary">
+          Terms of Service
+        </Link>
+        {' and '}
+        <Link underline="always" color="text.primary">
+          Privacy Policy
+        </Link>
+        .
+      </Typography>
+    </Stack>
   );
 
   return (
-    <>
-      {renderHead}
+    <FormProvider methods={methods} onSubmit={onSubmit}>
+      <Card sx={{ p: 3, borderRadius: 1 }}>
+        {renderHead}
 
-      {renderForm}
-
-      {renderTerms}
-    </>
+        {renderForm}
+      </Card>
+    </FormProvider>
   );
 }
