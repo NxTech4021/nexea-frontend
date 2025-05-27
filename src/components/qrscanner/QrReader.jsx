@@ -685,43 +685,106 @@ const QrReader = () => {
               </Stack>
 
               <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
-                {filteredAttendees.map((attendee, index) => (
+                {filteredAttendees.length === 0 ? (
                   <Stack 
-                    key={index} 
-                    direction={{ xs: 'column', md: 'row' }} 
-                    alignItems={{ xs: 'flex-start', md: 'center' }} 
+                    alignItems="center" 
+                    justifyContent="center" 
                     sx={{ 
-                      p: 2, 
-                      borderBottom: `1px solid ${theme.palette.divider}`, 
-                      cursor: 'pointer', 
-                      '&:hover': { 
-                        bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12)
-                      } 
+                      py: 5,
+                      px: 2,
+                      color: theme.palette.text.secondary
                     }}
                   >
-                    {/* Mobile layout - Card style */}
-                    <Box 
+                    <Iconify 
+                      icon="eva:search-fill" 
                       sx={{ 
-                        display: { xs: 'flex', md: 'none' }, 
-                        flexDirection: 'column', 
-                        width: '100%',
+                        width: 40, 
+                        height: 40, 
+                        color: theme.palette.mode === 'light' ? 'grey.400' : 'grey.600',
                         mb: 1
+                      }} 
+                    />
+                    <Typography variant="body2">
+                      No attendee found
+                    </Typography>
+                  </Stack>
+                ) : (
+                  filteredAttendees.map((attendee, index) => (
+                    <Stack 
+                      key={index} 
+                      direction={{ xs: 'column', md: 'row' }} 
+                      alignItems={{ xs: 'flex-start', md: 'center' }} 
+                      sx={{ 
+                        p: 2, 
+                        borderBottom: `1px solid ${theme.palette.divider}`, 
+                        cursor: 'pointer', 
+                        '&:hover': { 
+                          bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12)
+                        } 
                       }}
                     >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Name:</Typography>
-                        <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
-                          {`${attendee.firstName} ${attendee.lastName}`}
-                        </Typography>
+                      {/* Mobile layout - Card style */}
+                      <Box 
+                        sx={{ 
+                          display: { xs: 'flex', md: 'none' }, 
+                          flexDirection: 'column', 
+                          width: '100%',
+                          mb: 1
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Name:</Typography>
+                          <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                            {`${attendee.firstName} ${attendee.lastName}`}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Company:</Typography>
+                          <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                            {attendee.companyName}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Ticket Type:</Typography>
+                          <Chip 
+                            label={attendee.ticket.ticketType.title} 
+                            size="small"
+                            sx={{ 
+                              height: 24,
+                              fontSize: '0.75rem',
+                              borderRadius: 1
+                            }}
+                          />
+                        </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Company:</Typography>
-                        <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
-                          {attendee.companyName}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Ticket Type:</Typography>
+                      
+                      {/* Desktop layout - row style */}
+                      <Typography 
+                        sx={{ 
+                          width: '30%', 
+                          color: theme.palette.text.primary, 
+                          fontSize: 13, 
+                          display: { xs: 'none', md: 'block' } 
+                        }}
+                      >
+                        {`${attendee.firstName} ${attendee.lastName}`}
+                      </Typography>
+                      <Typography 
+                        sx={{ 
+                          width: '35%', 
+                          color: theme.palette.text.primary, 
+                          fontSize: 13, 
+                          display: { xs: 'none', md: 'block' } 
+                        }}
+                      >
+                        {attendee.companyName}
+                      </Typography>
+                      <Box 
+                        sx={{ 
+                          width: '35%', 
+                          display: { xs: 'none', md: 'flex' }
+                        }}
+                      >
                         <Chip 
                           label={attendee.ticket.ticketType.title} 
                           size="small"
@@ -732,47 +795,9 @@ const QrReader = () => {
                           }}
                         />
                       </Box>
-                    </Box>
-                    
-                    {/* Desktop layout - row style */}
-                    <Typography 
-                      sx={{ 
-                        width: '30%', 
-                        color: theme.palette.text.primary, 
-                        fontSize: 13, 
-                        display: { xs: 'none', md: 'block' } 
-                      }}
-                    >
-                      {`${attendee.firstName} ${attendee.lastName}`}
-                    </Typography>
-                    <Typography 
-                      sx={{ 
-                        width: '35%', 
-                        color: theme.palette.text.primary, 
-                        fontSize: 13, 
-                        display: { xs: 'none', md: 'block' } 
-                      }}
-                    >
-                      {attendee.companyName}
-                    </Typography>
-                    <Box 
-                      sx={{ 
-                        width: '35%', 
-                        display: { xs: 'none', md: 'flex' }
-                      }}
-                    >
-                      <Chip 
-                        label={attendee.ticket.ticketType.title} 
-                        size="small"
-                        sx={{ 
-                          height: 24,
-                          fontSize: '0.75rem',
-                          borderRadius: 1
-                        }}
-                      />
-                    </Box>
-                  </Stack>
-                ))}
+                    </Stack>
+                  ))
+                )}
               </Stack>
             </Box>
           </Box>

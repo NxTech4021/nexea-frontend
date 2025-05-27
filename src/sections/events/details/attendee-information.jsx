@@ -423,7 +423,31 @@ const filteredAttendees = attendeesData?.filter(
         </Stack>
 
         <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
-          {filteredAttendees.map((attendee, index) => (
+          {filteredAttendees.length === 0 ? (
+            <Stack 
+              alignItems="center" 
+              justifyContent="center" 
+              sx={{ 
+                py: 5,
+                px: 2,
+                color: theme.palette.text.secondary
+              }}
+            >
+              <Iconify 
+                icon="eva:search-fill" 
+                sx={{ 
+                  width: 40, 
+                  height: 40, 
+                  color: theme.palette.mode === 'light' ? 'grey.400' : 'grey.600',
+                  mb: 1
+                }} 
+              />
+              <Typography variant="body2">
+                No attendee found
+              </Typography>
+            </Stack>
+          ) : (
+            filteredAttendees.map((attendee, index) => (
             <Stack 
               key={index} 
               direction={{ xs: 'column', md: 'row' }} 
@@ -510,7 +534,8 @@ const filteredAttendees = attendeesData?.filter(
                 />
               </Box>
             </Stack>
-          ))}
+          ))
+          )}
         </Stack>
       </Box>
     </Box>
