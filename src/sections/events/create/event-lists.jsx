@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import 'react-toastify/dist/ReactToastify.css';
 
 import React, { useMemo, useState } from 'react';
-import Pagination from '@mui/material/Pagination';
+// import Pagination from '@mui/material/Pagination';
 import {
   Box,
   Grid,
@@ -151,7 +151,7 @@ const EventLists = ({ query }) => {
   });
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -804,7 +804,7 @@ const EventLists = ({ query }) => {
         })}
       </Stack>
       <TablePaginationCustom
-        rowsPerPageOptions={[10, 25, 50]}
+        rowsPerPageOptions={[5, 10, 25, 50]}
         component="div"
         count={sortedTableEvents?.length || 0}
         rowsPerPage={rowsPerPage}
@@ -1143,7 +1143,7 @@ const EventLists = ({ query }) => {
         </Grid>
       </Grid>
 
-      {!!data && data.events?.length > ITEMS_PER_PAGE && (
+      {/* {!!data && data.events?.length > ITEMS_PER_PAGE && (
         <Pagination
           count={Math.ceil(data.events.length / ITEMS_PER_PAGE)}
           page={currentPage}
@@ -1153,7 +1153,7 @@ const EventLists = ({ query }) => {
             justifyContent: 'center',
           }}
         />
-      )}
+      )} */}
 
       {/* Delete modal */}
       <Dialog
