@@ -17,11 +17,11 @@ import {
   // TableBody,
   // TableCell,
   // TableHead,
+  MenuItem,
+  TextField,
   Typography,
   // TableContainer,
   CircularProgress,
-  TextField,
-  MenuItem,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -152,7 +152,7 @@ const [ticketTypeFilter, setTicketTypeFilter] = React.useState('All');
 
   const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
-  const attendeesData = data?.attendees || [];
+  const attendeesData = React.useMemo(() => data?.attendees || [], [data]);
 
   const checkedInCount = attendeesData?.filter(
     (attendee) => attendee.status === 'checkedIn'
