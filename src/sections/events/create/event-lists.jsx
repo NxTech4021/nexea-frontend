@@ -36,6 +36,7 @@ import {
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
 import { endpoints, axiosInstance } from 'src/utils/axios';
+import { TablePaginationCustom } from 'src/components/table';
 
 import useSWR from 'swr';
 
@@ -149,6 +150,9 @@ const EventLists = ({ query }) => {
     direction: null,
   });
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -168,6 +172,15 @@ const EventLists = ({ query }) => {
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const filteredEvents = useMemo(() => {
@@ -475,12 +488,12 @@ const EventLists = ({ query }) => {
 
       <Stack
         sx={{
-          maxHeight: '70vh',
-          overflow: 'auto',
           minWidth: { xs: 800, sm: '100%' },
         }}
       >
-        {sortedTableEvents?.map((event) => {
+        {sortedTableEvents
+          ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+          ?.map((event) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
           const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
@@ -790,6 +803,15 @@ const EventLists = ({ query }) => {
           );
         })}
       </Stack>
+      <TablePaginationCustom
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={sortedTableEvents?.length || 0}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Box>
   );
 
