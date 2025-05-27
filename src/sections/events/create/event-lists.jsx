@@ -240,6 +240,34 @@ const EventLists = ({ query }) => {
 
   const [expandedRow, setExpandedRow] = useState(null);
 
+  const getHoverBackgroundColor = (isActive, themeMode) => {
+    if (!isActive) {
+      return themeMode === 'light' ? '#f3f3f3' : '#2c2c2c';
+    }
+    return themeMode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
+  };
+
+  const getBackgroundColor = (isExpanded, themeMode) => {
+    if (isExpanded) {
+      return themeMode === 'light' ? '#f8f9fa' : '#2c2c2c';
+    }
+    return 'transparent';
+  };
+
+  const getButtonColor = (isActive, themeMode) => {
+    if (isActive) {
+      return themeMode === 'light' ? '#000000' : 'common.white';
+    }
+    return themeMode === 'light' ? '#6B7280' : 'grey.400';
+  };
+
+  const getButtonBgColor = (isActive, themeMode) => {
+    if (isActive) {
+      return themeMode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
+    }
+    return 'transparent';
+  };
+
   const renderEventCard = (event) => {
     const statusConfig = getStatusColor(event.status);
 
@@ -367,10 +395,9 @@ const EventLists = ({ query }) => {
   const renderTableView = () => (
     <Box
       sx={{
-        bgcolor: 'background.paper',
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'divider',
+        border: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
+        borderRadius: 2,
+        bgcolor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
         overflow: { xs: 'auto', sm: 'hidden' },
       }}
     >
@@ -379,144 +406,71 @@ const EventLists = ({ query }) => {
         alignItems="center"
         sx={{
           py: 1.5,
-          px: 3,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          bgcolor: theme.palette.mode === 'light' ? '#f1f2f3' : 'background.neutral',
+          px: 2,
+          borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
+          bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
           minWidth: { xs: 800, sm: '100%' },
         }}
       >
-        <Stack
-          direction="row"
-          alignItems="center"
+        <Typography sx={{ width: '35%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Name</Typography>
+        <Box
           sx={{
-            width: '100%',
-            '& > *:not(:last-child)': {
-              borderRight: `1px solid ${theme.palette.mode === 'light' ? '#dedfe2' : 'rgba(255, 255, 255, 0.12)'}`,
-              pr: 2,
-              mr: 2,
-            },
+            width: '15%',
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
           }}
+          onClick={() => handleSort('status')}
         >
-          <Typography
-            variant="subtitle2"
-            sx={{
-              width: '35%',
-              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
-              fontWeight: 550,
-            }}
-          >
-            Event Name
-          </Typography>
-
-          {/* Status Column Header */}
-          <Box
-            sx={{
-              width: '15%',
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
-            onClick={() => handleSort('status')}
-          >
-            <Typography
-              variant="subtitle2"
+          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Status</Typography>
+          <Stack sx={{ ml: 0.5 }}>
+            {/* <Iconify
+              icon="eva:arrow-up-fill"
+              width={14}
               sx={{
-                color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                fontWeight: 550,
+                color: sortConfig.key === 'status' && sortConfig.direction === 'asc' ? 'grey.500' : 'text.disabled',
               }}
-            >
-              Status
-            </Typography>
-            <Stack sx={{ ml: 0.5 }}>
-              <Iconify
-                icon="eva:arrow-up-fill"
-                width={14}
-                sx={{
-                  color:
-                    sortConfig.key === 'status' && sortConfig.direction === 'asc'
-                      ? 'grey.500'
-                      : 'text.disabled',
-                }}
-              />
-              <Iconify
-                icon="eva:arrow-down-fill"
-                width={14}
-                sx={{
-                  color:
-                    sortConfig.key === 'status' && sortConfig.direction === 'desc'
-                      ? 'grey.500'
-                      : 'text.disabled',
-                  mt: '-8px',
-                }}
-              />
-            </Stack>
-          </Box>
-
-          {/* Date & Time Column Header */}
-          <Box
-            sx={{
-              width: '20%',
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
-            onClick={() => handleSort('date')}
-          >
-            <Typography
-              variant="subtitle2"
+            />
+            <Iconify
+              icon="eva:arrow-down-fill"
+              width={14}
               sx={{
-                color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
-                fontWeight: 550,
+                color: sortConfig.key === 'status' && sortConfig.direction === 'desc' ? 'grey.500' : 'text.disabled',
+                mt: '-6px',
               }}
-            >
-              Date & Time
-            </Typography>
-            <Stack sx={{ ml: 0.5 }}>
-              <Iconify
-                icon="eva:arrow-up-fill"
-                width={14}
-                sx={{
-                  color:
-                    sortConfig.key === 'date' && sortConfig.direction === 'asc'
-                      ? 'grey.500'
-                      : 'text.disabled',
-                }}
-              />
-              <Iconify
-                icon="eva:arrow-down-fill"
-                width={14}
-                sx={{
-                  color:
-                    sortConfig.key === 'date' && sortConfig.direction === 'desc'
-                      ? 'grey.500'
-                      : 'text.disabled',
-                  mt: '-8px',
-                }}
-              />
-            </Stack>
-          </Box>
-
-          <Typography
-            variant="subtitle2"
-            sx={{
-              width: '25%',
-              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
-              fontWeight: 550,
-            }}
-          >
-            Event Manager
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              width: '5%',
-              color: theme.palette.mode === 'light' ? '#151517' : 'common.white',
-              fontWeight: 550,
-            }}
-          >
-            Actions
-          </Typography>
-        </Stack>
+            /> */}
+          </Stack>
+        </Box>
+        <Box
+          sx={{
+            width: '20%',
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+          }}
+          onClick={() => handleSort('date')}
+        >
+          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Date & Time</Typography>
+          <Stack sx={{ ml: 0.5 }}>
+            {/* <Iconify
+              icon="eva:arrow-up-fill"
+              width={14}
+              sx={{
+                color: sortConfig.key === 'date' && sortConfig.direction === 'asc' ? 'grey.500' : 'text.disabled',
+              }}
+            />
+            <Iconify
+              icon="eva:arrow-down-fill"
+              width={14}
+              sx={{
+                color: sortConfig.key === 'date' && sortConfig.direction === 'desc' ? 'grey.500' : 'text.disabled',
+                mt: '-6px',
+              }}
+            /> */}
+          </Stack>
+        </Box>
+        <Typography sx={{ width: '25%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Manager</Typography>
+        <Typography sx={{ width: '5%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Actions</Typography>
       </Stack>
 
       <Stack
@@ -529,50 +483,32 @@ const EventLists = ({ query }) => {
         {sortedTableEvents?.map((event) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
-
           const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
-
           const attendees = orders?.flatMap((a) => a?.attendees)?.length || 0;
-
-          // const VITE_BASE_URL = 'http://localhost:81';
 
           return (
             <Stack
               key={event.id}
               sx={{
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
+                bgcolor: getBackgroundColor(isExpanded, theme.palette.mode),
+                transition: 'background-color 0.2s ease-in-out',
+                '&:hover': {
+                  bgcolor: getHoverBackgroundColor(!isExpanded, theme.palette.mode),
+                },
               }}
             >
-              {/* Regular Row */}
               <Tooltip title={!isExpanded ? 'View Event Details' : ''} arrow placement="top">
                 <Stack
                   direction="row"
                   alignItems="center"
                   sx={{
-                    px: 3,
+                    px: 2,
                     py: 1.5,
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease-in-out',
-                    // bgcolor: getRowBgColor(isExpanded, theme.palette.mode),
-                    // color: getTextColor(isExpanded, theme.palette.mode),
-                    // '&:hover': {
-                    //   bgcolor: getHoverBgColor(isExpanded, theme.palette.mode),
-                    // },
-                    // '& .MuiTypography-root:not(.status-text)': {
-                    //   color: getTextColor(isExpanded, theme.palette.mode),
-                    // },
-                    // '& .MuiSvgIcon-root:not(.status-icon), & .MuiIconify-root:not(.status-icon)': {
-                    //   color: getIconColor(isExpanded, theme.palette.mode),
-                    // },
-                    // '& .event-secondary-text': {
-                    //   color: getEventSecondaryTextColor(isExpanded, theme.palette.mode),
-                    // },
                   }}
-                  onClick={() =>
-                    !isExpanded && router.push(paths.dashboard.events.details(event.id))
-                  }
+                  onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
                 >
-                  {/* Event Details */}
                   <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '35%' }}>
                     <Box
                       sx={{
@@ -582,98 +518,68 @@ const EventLists = ({ query }) => {
                         overflow: 'hidden',
                         position: 'relative',
                         bgcolor: 'background.neutral',
+                        flexShrink: 0,
                       }}
                     >
-                      <Avatar
-                        alt={event.name}
+                      <Box
+                        component="img"
                         src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                        alt={event.name}
                         sx={{
-                          width: '100%',
-                          height: '100%',
-                          bgcolor: 'background.neutral',
-                          '& img': {
-                            objectFit: 'contain',
-                            width: '70%',
-                            height: '70%',
-                            margin: 'auto',
-                          },
+                          width: '70%',
+                          height: '70%',
+                          objectFit: 'contain',
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)'
                         }}
                       />
                     </Box>
                     <Stack spacing={0.25}>
-                      <Typography
-                        variant="subtitle2"
-                        noWrap
-                        sx={{
-                          fontWeight: '500',
-                          '&:hover': {
-                            textDecoration: 'underline',
-                          },
-                        }}
-                      >
+                      <Typography variant="subtitle2" noWrap sx={{ 
+                        fontWeight: 500,
+                        color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                        fontSize: 13
+                      }}>
                         {event.name}
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Iconify
                           icon="mdi:account-group"
-                          sx={{ width: 14, height: 14 }}
-                          className="event-secondary-text"
+                          sx={{ 
+                            width: 14, 
+                            height: 14,
+                            color: theme.palette.mode === 'light' ? '#666' : '#aaa'
+                          }}
                         />
-                        <Typography variant="caption" className="event-secondary-text">
+                        <Typography variant="caption" sx={{ 
+                          color: theme.palette.mode === 'light' ? '#666' : '#aaa'
+                        }}>
                           {attendees} Attendees
                         </Typography>
                       </Stack>
                     </Stack>
                   </Stack>
 
-                  {/* Status - Preserving original colors */}
                   <Box sx={{ width: '15%' }}>
-                    <Box
-                      sx={{
-                        py: 0.5,
-                        px: 1,
-                        borderRadius: 1,
-                        width: 'fit-content',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        bgcolor: statusConfig.bgColor,
-                      }}
-                    >
-                      <Iconify
-                        icon={statusConfig.icon}
-                        className="status-icon"
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          color: statusConfig.color,
-                        }}
-                      />
-                      <Typography
-                        variant="caption"
-                        className="status-text"
-                        sx={{
-                          color: statusConfig.color,
-                          fontWeight: 600,
-                          textTransform: 'capitalize',
-                        }}
-                      >
-                        {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
+                      <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
+                        {event.status.charAt(0).toUpperCase() + event.status.slice(1).toLowerCase()}
                       </Typography>
                     </Box>
                   </Box>
 
-                  {/* Date & Time */}
-                  <Stack spacing={0.5} sx={{ width: '20%' }}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body2">{fDate(event.date)}</Typography>
-                    </Stack>
-                    <Typography variant="caption" className="event-secondary-text">
-                      {`${dayjs(event.date).format('HH:mm')} - ${dayjs(event.endDate).format('HH:mm')}`}
+                  <Box sx={{ width: '20%' }}>
+                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontSize: 13 }}>
+                      {fDate(event.date)}
                     </Typography>
-                  </Stack>
+                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
+                      {dayjs(event.date).format('h:mm A')}
+                    </Typography>
+                  </Box>
 
-                  {/* Event Manager */}
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
                     <Avatar
                       alt={event.personInCharge.fullName}
@@ -682,17 +588,18 @@ const EventLists = ({ query }) => {
                         width: 24,
                         height: 24,
                         fontSize: '0.75rem',
-                        bgcolor: getExpandedAvatarBgColor(isExpanded, theme.palette.mode),
                       }}
                     >
                       {event.personInCharge.fullName.charAt(0)}
                     </Avatar>
-                    <Typography variant="body2" noWrap>
+                    <Typography variant="body2" noWrap sx={{ 
+                      color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                      fontSize: 13
+                    }}>
                       {event.personInCharge.fullName}
                     </Typography>
                   </Stack>
 
-                  {/* Action Button */}
                   <Box sx={{ width: '5%', textAlign: 'right' }}>
                     <IconButton
                       onClick={(e) => {
@@ -702,7 +609,7 @@ const EventLists = ({ query }) => {
                       sx={{
                         transform: isExpanded ? 'rotate(180deg)' : 'none',
                         transition: 'transform 0.2s ease-in-out',
-                        // color: getExpandedIconColor(isExpanded, theme.palette.mode),
+                        color: theme.palette.mode === 'light' ? '#111' : '#fff',
                       }}
                     >
                       <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
@@ -913,76 +820,6 @@ const EventLists = ({ query }) => {
 
       mutate();
     }
-  };
-
-  const getHoverBackgroundColor = (isActive, themeMode) => {
-    if (isActive) {
-      return themeMode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
-    }
-    return themeMode === 'light' ? '#F9fafb' : 'rgba(255, 255, 255, 0.05)';
-  };
-
-  const getButtonColor = (isActive, themeMode) => {
-    if (isActive) {
-      return themeMode === 'light' ? '#000000' : 'common.white';
-    }
-    return themeMode === 'light' ? '#6B7280' : 'grey.400';
-  };
-
-  const getButtonBgColor = (isActive, themeMode) => {
-    if (isActive) {
-      return themeMode === 'light' ? '#F3F4F6' : 'rgba(255, 255, 255, 0.08)';
-    }
-    return 'transparent';
-  };
-
-  const getExpandedIconColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'common.white' : 'grey.700';
-    }
-    return 'text.secondary';
-  };
-
-  const getExpandedAvatarBgColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'grey.300' : 'grey.700';
-    }
-    return 'default';
-  };
-
-  const getEventSecondaryTextColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'grey.300' : 'grey.600';
-    }
-    return 'text.secondary';
-  };
-
-  const getIconColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'common.white' : 'grey.700';
-    }
-    return 'inherit';
-  };
-
-  const getTextColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'common.white' : 'grey.900';
-    }
-    return 'text.primary';
-  };
-
-  const getHoverBgColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'grey.800' : 'grey.100';
-    }
-    return 'background.neutral';
-  };
-
-  const getRowBgColor = (isExpanded, themeMode) => {
-    if (isExpanded) {
-      return themeMode === 'light' ? 'grey.800' : 'grey.100';
-    }
-    return 'transparent';
   };
 
   if (isLoading)
