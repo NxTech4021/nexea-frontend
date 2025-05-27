@@ -20,6 +20,8 @@ import {
   Typography,
   // TableContainer,
   CircularProgress,
+  TextField,
+  MenuItem,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -143,6 +145,9 @@ const SliderIndicator = styled('div')(({ activeTab, theme }) => ({
 const AttendeeInformation = ({ id }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [searchQuery, setSearchQuery] = React.useState('');
+const [ticketTypeFilter, setTicketTypeFilter] = React.useState('All');
+
   const theme = useTheme();
 
   const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
@@ -157,12 +162,33 @@ const AttendeeInformation = ({ id }) => {
     (attendee) => attendee.status === 'pending'
   ).length;
 
-  const filteredAttendees = attendeesData?.filter(
-    (attendee) =>
+  // const filteredAttendees = attendeesData?.filter(
+  //   (attendee) =>
+  //     (activeTab === 0 && attendee.status === 'pending') ||
+  //     (activeTab === 1 && attendee.status === 'checkedIn')
+  // );
+const ticketTypes = React.useMemo(() => {
+  const types = new Set();
+  attendeesData.forEach(a => {
+    if (a.ticket?.ticketType?.title) types.add(a.ticket.ticketType.title);
+  });
+  return Array.from(types);
+}, [attendeesData]);
+const filteredAttendees = attendeesData?.filter(
+  (attendee) => {
+    const matchesTab =
       (activeTab === 0 && attendee.status === 'pending') ||
-      (activeTab === 1 && attendee.status === 'checkedIn')
-  );
-
+      (activeTab === 1 && attendee.status === 'checkedIn');
+    const matchesSearch =
+      attendee.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTicketType =
+      ticketTypeFilter === 'All' ||
+      attendee.ticket?.ticketType?.title === ticketTypeFilter;
+    return matchesTab && matchesSearch && matchesTicketType;
+  }
+);
   if (isLoading) {
     return (
       <Box
@@ -329,7 +355,56 @@ const AttendeeInformation = ({ id }) => {
           </Stack>
         </TabButton>
       </TabsWrapper>
-
+<Box sx={{ mb: 1.5, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+  <TextField
+    fullWidth
+    placeholder="Search attendees by name or company..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 20, height: 20, mr: 1 }} />
+      ),
+    }}
+    sx={{
+      mb: { xs: 1, sm: 0 },
+      '& .MuiOutlinedInput-root': {
+        height: 44,
+        backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
+        '& fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+        },
+        '&:hover fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+        },
+      },
+    }}
+  />
+  <TextField
+    select
+    label="Ticket Type"
+    value={ticketTypeFilter}
+    onChange={(e) => setTicketTypeFilter(e.target.value)}
+    sx={{
+      width: 200,
+      '& .MuiOutlinedInput-root': {
+        height: 44,
+        backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
+        '& fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+        },
+        '&:hover fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+        },
+      },
+    }}
+  >
+    <MenuItem value="All">All </MenuItem>
+    {ticketTypes.map((type) => (
+      <MenuItem key={type} value={type}>{type}</MenuItem>
+    ))}
+  </TextField>
+</Box>
       <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 2, bgcolor: theme.palette.background.paper, overflow: 'hidden' }}>
         {/* Header row for desktop */}
         <Stack 
