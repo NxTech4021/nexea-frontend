@@ -385,7 +385,7 @@ export default function OrderView() {
     });
 
     return (
-      <Container maxWidth="md" sx={{ pt: 3 }}>
+      <Container maxWidth="xl" sx={{ pt: 3 }}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="h5" sx={{ mb: 1, color: textColor, fontWeight: 700, fontSize: 22 }}>
             Select an Event
@@ -589,6 +589,13 @@ export default function OrderView() {
                           pt: 1.5,
                           mt: 1.5,
                           borderTop: `1px solid ${borderColor}`,
+                          width: {
+                            xs: '100%',
+                            sm: '100%',
+                            md: '65%',
+                            lg: '70%',
+                            xl: '76%'
+                          }
                         }}
                       >
                         <Box>
@@ -663,6 +670,196 @@ export default function OrderView() {
                             {data?.filter(order => order.event?.id === event.id)
                               .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
                           </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Mini Charts - Desktop Only */}
+                      <Box 
+                        sx={{ 
+                          display: { xs: 'none', md: 'flex' }, 
+                          alignItems: 'center',
+                          gap: 2,
+                          ml: 'auto',
+                          pl: 3,
+                          borderLeft: `1px solid ${borderColor}`,
+                          height: 'calc(100% - 16px)',
+                          position: 'absolute',
+                          right: 48,
+                          top: '50%',
+                          transform: 'translateY(-50%)'
+                        }}
+                      >
+                        {/* Orders Chart */}
+                        <Box sx={{ 
+                          width: 120,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ 
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.6875rem',
+                            }}>
+                              Orders (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[{
+                              name: 'Orders',
+                              data: (() => {
+                                const now = dayjs();
+                                const days = Array.from({ length: 7 }, (_, i) => now.subtract(i, 'day'));
+                                const ordersByDay = days.map(day => 
+                                  data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
+                                  ).length || 0
+                                ).reverse();
+                                return ordersByDay;
+                              })()
+                            }]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
+                                  enabled: true,
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.info.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100]
+                                }
+                              },
+                              tooltip: { 
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const dailyOrderCount = series[seriesIndex][dataPointIndex];
+                                  const paidOrders = data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === date.format('YYYY-MM-DD') &&
+                                    order.status === 'paid'
+                                  ).length || 0;
+                                  
+                                  return `
+                                    <div style="padding: 8px;">
+                                      <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+                                        ${date.format('MMM D, YYYY')}
+                                      </div>
+                                      <div style="font-size: 13px; color:#666; margin-bottom: 4px;">
+                                        <b>Total Orders:</b> ${dailyOrderCount}
+                                      </div>
+                                      <div style="font-size: 11px; color: #4caf50;">
+                                        Paid: ${paidOrders}
+                                      </div>
+
+                                    </div>
+                                  `;
+                                }
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } }
+                            }}
+                            height={35}
+                          />
+                        </Box>
+
+                        {/* Revenue Chart */}
+                        <Box sx={{ 
+                          width: 120,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ 
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.6875rem',
+                            }}>
+                              Revenue (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[{
+                              name: 'Revenue',
+                              data: (() => {
+                                const now = dayjs();
+                                const days = Array.from({ length: 7 }, (_, i) => now.subtract(i, 'day'));
+                                const revenueByDay = days.map(day => 
+                                  data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    order.status === 'paid' &&
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
+                                  ).reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                                ).reverse();
+                                return revenueByDay;
+                              })()
+                            }]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
+                                  enabled: true,
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.primary.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100]
+                                }
+                              },
+                              tooltip: { 
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const revenue = series[seriesIndex][dataPointIndex];
+                                  const dailyPaidOrders = data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    order.status === 'paid' &&
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')
+                                  );
+                                  const orderCount = dailyPaidOrders?.length || 0;
+                                  
+                                  return `
+                                    <div style="padding: 8px;">
+                                      <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+                                        ${date.format('MMM D, YYYY')}
+                                      </div>
+                                      <div style="font-size: 13px; color:#666; margin-bottom: 4px;">
+                                        <b>Revenue:</b> RM ${revenue.toFixed(2)}
+                                      </div>
+                                      <div style="font-size: 11px; color: #666;">
+                                        Orders: ${orderCount}
+                                      </div>
+                                    </div>
+                                  `;
+                                }
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } }
+                            }}
+                            height={35}
+                          />
                         </Box>
                       </Box>
                     </Box>
