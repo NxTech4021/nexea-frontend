@@ -56,11 +56,17 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
           width={100}
           sx={{
             position: 'absolute',
-            right: -20,
+            right: { xs: -10, sm: -20 },
             color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
             top: '50%',
             transform: 'translateY(-50%)',
-            zIndex: 0,
+            zIndex: -1,
+            width: {
+              xs: 60,
+              sm: 80,
+              md: 100
+            },
+            height: 'auto'
           }}
         />
 
@@ -70,15 +76,43 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
               className="hover-text"
               variant="subtitle2"
               color="text.secondary"
-              sx={{ fontWeight: 600 }}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: {
+                  xs: '0.8rem',
+                  sm: '0.875rem',
+                  md: '0.875rem'
+                }
+              }}
             >
               Completed Orders
             </Typography>
-            <Iconify className="hover-icon" icon="eva:arrow-ios-forward-fill" />
+            <Iconify 
+              className="hover-icon" 
+              icon="eva:arrow-ios-forward-fill"
+              sx={{
+                width: {
+                  xs: 16,
+                  sm: 20
+                },
+                height: 'auto'
+              }}
+            />
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="h2">{orders?.length || 0}</Typography>
+            <Typography 
+              variant="h2"
+              sx={{
+                fontSize: {
+                  xs: '1.75rem',
+                  sm: '2rem',
+                  md: '2.5rem'
+                }
+              }}
+            >
+              {orders?.length || 0}
+            </Typography>
 
             <Stack 
               direction="row" 
@@ -86,8 +120,8 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
               spacing={1.5}
               sx={{ 
                 minWidth: 'auto',
-                py: 0.75,
-                px: 1.5,
+                py: { xs: 0.5, sm: 0.75 },
+                px: { xs: 1, sm: 1.5 },
                 borderRadius: 1,
                 bgcolor: (theme) => theme.palette.mode === 'dark' 
                   ? 'rgba(145, 158, 171, 0.12)'
@@ -98,7 +132,7 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
                   : 'rgba(145, 158, 171, 0.12)',
               }}
             >
-              <Box sx={{ textAlign: 'center', minWidth: 36 }}>
+              <Box sx={{ textAlign: 'center', minWidth: { xs: 28, sm: 36 } }}>
                 <Typography 
                   variant="caption" 
                   sx={{ 
@@ -106,14 +140,28 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
                     fontWeight: 600,
                     mb: 0.25,
                     color: (theme) => theme.palette.mode === 'dark' ? '#fff' : 'text.primary',
-                    fontSize: '0.7rem',
+                    fontSize: {
+                      xs: '0.6rem',
+                      sm: '0.7rem'
+                    }
                   }}
                 >
                   Paid
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>{paidOrders}</Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontWeight: 600,
+                    fontSize: {
+                      xs: '0.75rem',
+                      sm: '0.875rem'
+                    }
+                  }}
+                >
+                  {paidOrders}
+                </Typography>
               </Box>
-              <Box sx={{ textAlign: 'center', minWidth: 36 }}>
+              <Box sx={{ textAlign: 'center', minWidth: { xs: 28, sm: 36 } }}>
                 <Typography 
                   variant="caption" 
                   sx={{ 
@@ -121,12 +169,26 @@ const OrderAnalytics = ({ orders, eventName, eventId }) => {
                     fontWeight: 600,
                     mb: 0.25,
                     color: (theme) => theme.palette.mode === 'dark' ? '#fff' : 'text.primary',
-                    fontSize: '0.7rem',
+                    fontSize: {
+                      xs: '0.6rem',
+                      sm: '0.7rem'
+                    }
                   }}
                 >
                   Free
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>{freeOrders}</Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontWeight: 600,
+                    fontSize: {
+                      xs: '0.75rem',
+                      sm: '0.875rem'
+                    }
+                  }}
+                >
+                  {freeOrders}
+                </Typography>
               </Box>
               {/* <Box sx={{ textAlign: 'center', minWidth: 36 }}>
                 <Typography 

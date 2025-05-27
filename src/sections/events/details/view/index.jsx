@@ -154,20 +154,23 @@ const EventDetails = ({ id }) => {
           <TotalRevenue totalRevenue={totalRevenue} />
         </Grid> */}
         <Grid item size={{ xs: 12 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
+          <Stack 
+            direction={{ xs: 'column', md: 'row', lg: 'row' }} 
+            justifyContent="space-between" 
+            spacing={2}
+          >
             <TicketAnalytics 
               tickets={totalTicketsSold.regularTickets} 
               addOns={totalTicketsSold.addOnTickets} 
               eventName={data.name} 
             />
-           <OrderAnalytics
+            <OrderAnalytics
               orders={data.order?.filter((a) => a?.status === 'paid') || []}
               eventName={data.name}
               eventId={id}
             />
             {/* <CheckInAnalytics checkedIns={totalCheckedIn} id={id} /> */}
             <TotalRevenue totalRevenue={totalRevenue} />
-
           </Stack>
         </Grid>
 
