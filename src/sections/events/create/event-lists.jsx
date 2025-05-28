@@ -504,7 +504,7 @@ const EventLists = ({ query }) => {
           ?.map((event) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
-          const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
+          const orders = event?.order || [];
           const attendees = orders?.flatMap((a) => a?.attendees) || [];
           const checkedInCount = attendees.filter(attendee => attendee.status === 'checkedIn').length;
           const notCheckedInCount = attendees.filter(attendee => attendee.status === 'pending').length;
