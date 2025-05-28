@@ -91,6 +91,13 @@ const fetcher = async (url) => {
 const EventLists = ({ query }) => {
   const theme = useTheme();
 
+  // Minimalistic palette - theme aware
+  const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';
+  const iconColor = theme.palette.mode === 'light' ? '#111' : '#fff';
+  const hoverBg = theme.palette.mode === 'light' ? '#f3f3f3' : '#2c2c2c';
+  const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
+  const cardBgColor = theme.palette.mode === 'light' ? '#fff' : '#1e1e1e';
+
   const auth = useAuthContext();
 
   const { data, isLoading, error: errorEvents, mutate } = useGetAllEvents();
@@ -482,8 +489,9 @@ const EventLists = ({ query }) => {
             /> */}
           </Stack>
         </Box>
-        <Typography sx={{ width: '25%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Manager</Typography>
-        <Typography sx={{ width: '5%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Actions</Typography>
+        <Typography sx={{ width: '20%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Manager</Typography>
+        <Typography sx={{ width: '15%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Check-in Status</Typography>
+        <Typography sx={{ width: '5%', color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13, textAlign: 'right' }}>Actions</Typography>
       </Stack>
 
       <Stack
@@ -497,7 +505,10 @@ const EventLists = ({ query }) => {
           const statusConfig = getStatusColor(event.status);
           const isExpanded = expandedRow === event.id;
           const orders = event?.order?.filter((a) => a?.status === 'paid') || [];
-          const attendees = orders?.flatMap((a) => a?.attendees)?.length || 0;
+          const attendees = orders?.flatMap((a) => a?.attendees) || [];
+          const checkedInCount = attendees.filter(attendee => attendee.status === 'checkedIn').length;
+          const notCheckedInCount = attendees.filter(attendee => attendee.status === 'pending').length;
+          const totalAttendees = attendees.length;
 
           return (
             <Stack
@@ -569,7 +580,7 @@ const EventLists = ({ query }) => {
                         <Typography variant="caption" sx={{ 
                           color: theme.palette.mode === 'light' ? '#666' : '#aaa'
                         }}>
-                          {attendees} Attendees
+                          {totalAttendees} Attendees
                         </Typography>
                       </Stack>
                     </Stack>
@@ -593,7 +604,7 @@ const EventLists = ({ query }) => {
                     </Typography>
                   </Box>
 
-                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '25%' }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '20%' }}>
                     <Avatar
                       alt={event.personInCharge.fullName}
                       src={event.personInCharge.avatar || ''}
@@ -611,6 +622,60 @@ const EventLists = ({ query }) => {
                     }}>
                       {event.personInCharge.fullName}
                     </Typography>
+                  </Stack>
+
+                  {/* Check-in Status */}
+                  <Stack direction="column" spacing={0} sx={{ width: '15%' }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 0.5,
+                      // backgroundColor: theme.palette.mode === 'light' ? alpha('#229A16', 0.08) : alpha('#229A16', 0.16),
+                      padding: '4px 8px',
+                      borderRadius: 1,
+                      width: 'fit-content'
+                    }}>
+                      <Iconify 
+                        icon="eva:checkmark-circle-2-fill" 
+                        sx={{ 
+                          width: 14, 
+                          height: 14, 
+                          color: '#229A16'
+                        }} 
+                      />
+                      <Typography variant="body2" sx={{ 
+                        color: '#229A16',
+                        fontWeight: 600,
+                        fontSize: 12
+                      }}>
+                        {checkedInCount} Checked In
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 0.5,
+                      // backgroundColor: theme.palette.mode === 'light' ? alpha('#B72136', 0.08) : alpha('#B72136', 0.16),
+                      padding: '4px 8px',
+                      borderRadius: 1,
+                      width: 'fit-content'
+                    }}>
+                      <Iconify 
+                        icon="eva:close-circle-fill" 
+                        sx={{ 
+                          width: 14, 
+                          height: 14, 
+                          color: '#B72136'
+                        }} 
+                      />
+                      <Typography variant="body2" sx={{ 
+                        color: '#B72136',
+                        fontWeight: 600,
+                        fontSize: 12
+                      }}>
+                        {notCheckedInCount} Not Checked In
+                      </Typography>
+                    </Box>
                   </Stack>
 
                   <Box sx={{ width: '5%', textAlign: 'right' }}>
@@ -927,7 +992,7 @@ const EventLists = ({ query }) => {
             spacing={2}
             alignItems={isSmallScreen ? 'stretch' : 'center'}
             justifyContent="space-between"
-            mb={3}
+            mb={1}
           >
             {isSmallScreen ? (
               // Mobile view - Filter button and menu
@@ -1016,74 +1081,75 @@ const EventLists = ({ query }) => {
               </>
             ) : (
               // Desktop view - Filter chips in tray design
-              <Stack
-                direction="row"
-                sx={{
-                  minWidth: 'min-content',
-                  position: 'relative',
-                  mb: -1,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                  '& .MuiButton-root': {
-                    fontSize: '0.875rem',
-                    fontWeight: 450,
-                  },
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap',
+                  justifyContent: { xs: 'flex-start', sm: 'flex-start' },
+                  gap: 1,
+                  width: '100%'
                 }}
               >
-                <Button
-                  onClick={() => handleStatusFilterChange('')}
-                  disableRipple
-                  sx={{
-                    minWidth: 'max-content',
-                    height: '32px',
-                    px: 1.5,
-                    color: getButtonColor(statusFilter === '', theme.palette.mode),
-                    bgcolor: getButtonBgColor(statusFilter === '', theme.palette.mode),
-                    borderRight: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 0,
-                    '&:hover': {
-                      bgcolor: getHoverBackgroundColor(statusFilter === '', theme.palette.mode),
-                    },
-                  }}
-                >
-                  All Events
-                </Button>
-                {Object.values(EventStatus).map((status, index) => {
-                  const statusConfig = getStatusColor(status);
+                {['All', ...Object.values(EventStatus)].map((status) => {
+                  // Calculate count for each status
+                  let count = data?.events?.length || 0; // Default for 'All'
+                  if (status !== 'All') {
+                    count = data?.events?.filter(event => event.status === status).length || 0;
+                  }
+                  
+                  const buttonText = status === 'All' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase();
+                  
                   return (
                     <Button
                       key={status}
-                      onClick={() => handleStatusFilterChange(status)}
-                      disableRipple
-                      startIcon={
-                        <Iconify icon={statusConfig.icon} sx={{ width: 18, height: 18 }} />
-                      }
+                      onClick={() => handleStatusFilterChange(status === 'All' ? '' : status)}
+                      variant="outlined"
+                      size="small"
                       sx={{
-                        minWidth: 'max-content',
-                        height: '32px',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        color: (() => {
+                          if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                            return theme.palette.mode === 'light' ? '#fff' : '#000';
+                          }
+                          return textColor;
+                        })(),
+                        bgcolor: (() => {
+                          if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                            return theme.palette.mode === 'light' ? '#111' : '#eee';
+                          }
+                          return 'transparent';
+                        })(),
+                        border: `1px solid ${borderColor}`,
+                        borderRadius: 1,
+                        minWidth: 'auto',
                         px: 1.5,
-                        color: getButtonColor(statusFilter === status, theme.palette.mode),
-                        bgcolor: getButtonBgColor(statusFilter === status, theme.palette.mode),
-                        borderRight:
-                          index !== Object.values(EventStatus).length - 1 ? '1px solid' : 'none',
-                        borderColor: 'divider',
-                        borderRadius: 0,
-                        '&:hover': {
-                          bgcolor: getHoverBackgroundColor(
-                            statusFilter === status,
-                            theme.palette.mode
-                          ),
+                        height: 32,
+                        '&:hover': { 
+                          bgcolor: (() => {
+                            if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                              return theme.palette.mode === 'light' ? '#222' : '#ddd';
+                            }
+                            return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
+                          })(),
+                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
                         },
+                        '&:active': {
+                          bgcolor: (() => {
+                            if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                              return theme.palette.mode === 'light' ? '#000' : '#fff';
+                            }
+                            return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
+                          })(),
+                        },
+                        transition: 'all 0.2s ease-in-out',
                       }}
                     >
-                      {status.charAt(0) + status.slice(1).toLowerCase()}
+                      {buttonText} ({count})
                     </Button>
                   );
                 })}
-              </Stack>
+              </Box>
             )}
 
             {/* <ToggleButtonGroup

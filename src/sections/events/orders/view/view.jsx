@@ -86,6 +86,20 @@ const orders = [
 ];
 const STATUS_TABS = ['All', 'paid', 'pending', 'failed'];
 
+const formatDiscountText = (discountCode) => {
+  if (!discountCode) return '';
+  
+  if (discountCode.type === 'percentage') {
+    return `${discountCode.value}% off`;
+  }
+  
+  if (discountCode.type === 'fixedAmountPerOrder') {
+    return `RM${discountCode.value} off order`;
+  }
+  
+  return `RM${discountCode.value} off per ticket`;
+};
+
 export default function OrderView() {
   const theme = useTheme();
   
@@ -150,8 +164,11 @@ export default function OrderView() {
     AttendeeCount: order.attendees?.length || 0,
   }));
 
-  // Example CSV export logic (adjust based on your actual export library)
-  exportToCSV(flattened, 'event_orders.csv');
+  // Export to CSV (associated event)
+  const sanitizedEventName = selectedEvent.name.replace(/[^a-zA-Z0-9]/g, '');
+  const filename = `${sanitizedEventName}_orders.csv`;
+  
+  exportToCSV(flattened, filename);
 };
 
   // Check for event filter from sessionStorage or URL parameter when component mounts
@@ -1182,22 +1199,31 @@ export default function OrderView() {
                     if (statusFilter === status) {
                       return theme.palette.mode === 'light' ? '#111' : '#eee';
                     }
-                    return theme.palette.mode === 'light' ? '#f3f3f3' : '#333';
+                    return 'transparent';
                   })(),
-                  borderColor,
+                  border: `1px solid ${borderColor}`,
                   borderRadius: 1,
                   minWidth: 'auto',
                   px: 1.5,
+                  height: 32,
                   '&:hover': { 
                     bgcolor: (() => {
                       if (statusFilter === status) {
                         return theme.palette.mode === 'light' ? '#222' : '#ddd';
                       }
-                      return theme.palette.mode === 'light' ? '#e0e0e0' : '#444';
+                      return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
                     })(),
-                    borderRight: `1px solid ${borderColor}`,
-                    zIndex: 1,
+                    borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
                   },
+                  '&:active': {
+                    bgcolor: (() => {
+                      if (statusFilter === status) {
+                        return theme.palette.mode === 'light' ? '#000' : '#fff';
+                      }
+                      return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
+                    })(),
+                  },
+                  transition: 'all 0.2s ease-in-out',
                 }}
               >
                 {status} ({count})
@@ -1207,35 +1233,41 @@ export default function OrderView() {
         </Box>
 
     {/* Download CSV Button */}
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={handleExportCSV}
-        startIcon={
-          <Iconify
-            icon="eva:download-outline"
-            width={18}
-            height={18}
-            sx={{ color: textColor }}
-          />
-        }
-        sx={{
-          textTransform: 'none',
-          fontWeight: 600,
-          color: textColor,
-          bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
-          borderColor: 'transparent',
-          borderRadius: 1,
-          px: 2,
-          mt: { xs: 1, sm: 0 },
-          '&:hover': {
-            bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#444',
-            borderColor,
-          },
-        }}
-      >
-        Export
-      </Button>
+      <Tooltip title="Export as CSV">
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleExportCSV}
+          startIcon={
+            <Iconify
+              icon="eva:download-outline"
+              width={18}
+              height={18}
+              sx={{ color: textColor }}
+            />
+          }
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            color: textColor,
+            bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
+            borderColor: 'transparent',
+            borderRadius: 1,
+            px: 2,
+            mt: { xs: 1, sm: 0 },
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#444',
+              borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+            },
+            '&:active': {
+              bgcolor: theme.palette.mode === 'light' ? '#d0d0d0' : '#505050',
+            },
+            transition: 'all 0.2s ease-in-out',
+          }}
+        >
+          Export
+        </Button>
+      </Tooltip>
 
       </Box>
       {/* Orders Table */}
@@ -1252,11 +1284,12 @@ export default function OrderView() {
           }}
         >
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order ID</Typography>
-          <Typography sx={{ width: '20%', color: textColor, fontWeight: 600, fontSize: 13 }}>Buyer Name</Typography>
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Buyer Name</Typography>
+          <Typography sx={{ width: '10%', color: textColor, fontWeight: 600, fontSize: 13 }}>Phone</Typography>
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Discount Code</Typography>
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Date</Typography>
           <Box
-            sx={{ width: '15%', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+            sx={{ width: '12%', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
             onClick={handlePriceSortToggle}
           >
             <Typography sx={{ color: textColor, fontWeight: 600, fontSize: 13, mr: 0.5 }}>Price (RM)</Typography>
@@ -1265,8 +1298,8 @@ export default function OrderView() {
               <ArrowDropDownIcon fontSize="small" sx={{ color: priceSort === 'desc' ? '#111' : '#bbb', mt: '-6px' }} />
             </Box>
           </Box>
-          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Status</Typography>
-          <Typography sx={{ width: '5%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
+          <Typography sx={{ width: '12%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Status</Typography>
+          <Typography sx={{ width: '6%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
         </Stack>
         <Stack>
           {sortedEventOrders
@@ -1305,7 +1338,7 @@ export default function OrderView() {
                   }}
                 >
                   {/* Clickable overlay */}
-                  <Box
+                  {/* <Box
                     onClick={() => router.push(paths.dashboard.order.details(order.id))}
                     sx={{
                       position: 'absolute',
@@ -1316,7 +1349,7 @@ export default function OrderView() {
                       cursor: 'pointer',
                       zIndex: 1,
                     }}
-                  />
+                  /> */}
 
                   {/* Mobile layout - Card style */}
                   <Box 
@@ -1339,44 +1372,70 @@ export default function OrderView() {
                         </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Buyer:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>{order.buyerName}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500, mb: 0.25 }}>{order.buyerName}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11, mb: 0.25 }}>{order.buyerEmail}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>{order.buyerPhoneNumber || 'No Phone'}</Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Price:</Typography>
                       <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>RM {order.totalAmount?.toFixed(2)}</Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Date:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, mb: 0.25 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>{dayjs(order.createdAt).format('h:mm A')}</Typography>
+                      </Box>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Discount:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, mb: 0.25 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                        {order?.discountCode?.code && (
+                          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>
+                            {formatDiscountText(order.discountCode)}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                    <Box 
+                    <Stack 
+                      direction="row"
                       className="action-buttons"
                       sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'flex-end', 
                         mt: 1,
                         position: 'relative',
                         zIndex: 2,
+                        border: '1px solid',
+                        borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        alignSelf: 'flex-end',
+                        height: 32,
                       }}
                     >
-                      <Tooltip title="View Details">
+                      <Tooltip title="View Order Details">
                         <IconButton 
                           size="small" 
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(paths.dashboard.order.details(order.id));
                           }} 
-                          sx={{ color: iconColor, p: 0.5 }}
+                          sx={{ 
+                            color: iconColor,
+                            p: 0.5,
+                            borderRadius: 0,
+                            height: 30,
+                            width: 30,
+                          }}
                         >
                           <Iconify icon="eva:info-outline" width={16} height={16} />
                         </IconButton>
                       </Tooltip>
+                      <Box sx={{ width: '1px', bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333' }} />
                       <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
                         <IconButton 
                           size="small" 
@@ -1384,49 +1443,84 @@ export default function OrderView() {
                             e.stopPropagation();
                             handleOpenResendDialog(order);
                           }} 
-                          sx={{ color: iconColor, p: 0.5 }} 
+                          sx={{ 
+                            color: iconColor,
+                            p: 0.5,
+                            borderRadius: 0,
+                            height: 30,
+                            width: 30,
+                          }} 
                           disabled={order.status !== 'paid'}
                         >
                           <Iconify icon="eva:email-outline" width={16} height={16} />
                         </IconButton>
                       </Tooltip>
-                    </Box>
+                    </Stack>
                   </Box>
                   
                   {/* Desktop layout - row style */}
                   <Typography sx={{ width: '15%', color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.orderNumber}</Typography>
-                  <Typography sx={{ width: '20%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerName}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order?.discountCode?.code || 'N/A'}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{dayjs(order.createdAt).format('LL')}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>RM {order.totalAmount?.toFixed(2)}</Typography>
-                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{order.buyerName}</Typography>
+                    <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>{order.buyerEmail}</Typography>
+                  </Box>
+                  <Typography sx={{ width: '10%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerPhoneNumber || 'No Phone'}</Typography>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                    {order?.discountCode?.code && (
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>
+                        {formatDiscountText(order.discountCode)}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                    <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>
+                      {dayjs(order.createdAt).format('h:mm A')}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ width: '12%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>RM {order.totalAmount?.toFixed(2)}</Typography>
+                  <Box sx={{ width: '12%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
                     <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
                     <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
                       {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : ''}
                     </Typography>
                   </Box>
-                  <Box 
+                  <Stack 
+                    direction="row"
                     className="action-buttons"
                     sx={{ 
-                      width: '5%', 
                       display: { xs: 'none', md: 'flex' }, 
-                      justifyContent: 'center',
                       position: 'relative',
                       zIndex: 2,
+                      border: '1px solid',
+                      borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                      height: 32,
+                      ml: 'auto',
+                      mr: 1,
                     }}
                   >
-                    <Tooltip title="View Details">
+                    <Tooltip title="View Order Details">
                       <IconButton 
                         size="small" 
                         onClick={(e) => {
                           e.stopPropagation();
                           router.push(paths.dashboard.order.details(order.id));
                         }} 
-                        sx={{ color: iconColor, p: 0.5 }}
+                        sx={{ 
+                          color: iconColor,
+                          p: 0.5,
+                          borderRadius: 0,
+                          height: 30,
+                          width: 30,
+                        }}
                       >
-                        <Iconify icon="eva:info-outline" width={16} height={16} />
+                        <Iconify icon="eva:file-text-outline" width={16} height={16} />
                       </IconButton>
                     </Tooltip>
+                    <Box sx={{ width: '1px', bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333' }} />
                     <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
                       <IconButton 
                         size="small" 
@@ -1434,13 +1528,19 @@ export default function OrderView() {
                           e.stopPropagation();
                           handleOpenResendDialog(order);
                         }} 
-                        sx={{ color: iconColor, p: 0.5 }} 
+                        sx={{ 
+                          color: iconColor,
+                          p: 0.5,
+                          borderRadius: 0,
+                          height: 30,
+                          width: 30,
+                        }} 
                         disabled={order.status !== 'paid'}
                       >
                         <Iconify icon="eva:email-outline" width={16} height={16} />
                       </IconButton>
                     </Tooltip>
-                  </Box>
+                  </Stack>
                 </Stack>
               );
             })}
