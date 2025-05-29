@@ -273,8 +273,16 @@ const schema = yup.object().shape({
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
   endDate: yup.date().required('End date is required'),
-  startTime: yup.date().required('Start time is required'),
-  endTime: yup.date().required('End time is required'),
+  startTime: yup.date().when('eventType', {
+    is: 'camp',
+    then: () => yup.date().nullable(),
+    otherwise: () => yup.date().required('Start time is required'),
+  }),
+  endTime: yup.date().when('eventType', {
+    is: 'camp',
+    then: () => yup.date().nullable(),
+    otherwise: () => yup.date().required('End time is required'),
+  }),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
   eventLogo: yup.object().nullable(),
   // Camp resources fields - rich text content
@@ -361,26 +369,124 @@ const EventCreateDialog = ({ open, onClose }) => {
     [setValue]
   );
 
-  const onSubmit = handleSubmit(async (eventData) => {
-    // Validate eventDate
-    if (dayjs(eventData.eventDate).isBefore(dayjs(), 'date')) {
-      setError('eventDate', {
-        type: 'custom',
-        message: "Event date cannot be before today's date",
-      });
+  // const onSubmit = handleSubmit(async (eventData) => {
+  //   // Validate eventDate
+  //   if (dayjs(eventData.eventDate).isBefore(dayjs(), 'date')) {
+  //     setError('eventDate', {
+  //       type: 'custom',
+  //       message: "Event date cannot be before today's date",
+  //     });
+  //     return;
+  //   }
+
+  //   // Validate endDate against eventDate
+  //   if (dayjs(eventData.endDate).isBefore(dayjs(eventData.eventDate), 'date')) {
+  //     setError('endDate', {
+  //       type: 'custom',
+  //       message: 'End date cannot be before start date',
+  //     });
+  //     return;
+  //   }
+
+  //   // Validate endTime against startTime if same day
+  //   if (
+  //     dayjs(eventData.eventDate).isSame(dayjs(eventData.endDate), 'date') &&
+  //     dayjs(eventData.endTime).isBefore(dayjs(eventData.startTime))
+  //   ) {
+  //     setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
+  //     return;
+  //   }
+
+  //   try {
+  //     const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
+  //     const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
+
+  //     const startTime = dayjs(eventData.startTime).format('HH:mm');
+  //     const endTime = dayjs(eventData.endTime).format('HH:mm');
+
+  //     console.log('Time values:', {
+  //       startTime: `${dayjs(eventData.startTime).format('hh:mm A')} -> ${startTime}`,
+  //       endTime: `${dayjs(eventData.endTime).format('hh:mm A')} -> ${endTime}`,
+  //     });
+
+  //     const startDateTimeFormatted = `${startDate}T${startTime}`;
+  //     const endDateTimeFormatted = `${endDate}T${endTime}`;
+
+  //     const formattedData = {
+  //       ...eventData,
+  //       date: startDateTimeFormatted,
+  //       endDate: endDateTimeFormatted,
+  //     };
+
+  //     // Remove fields not needed in the API
+  //     delete formattedData.startTime;
+  //     delete formattedData.endTime;
+  //     delete formattedData.eventDate;
+
+  //     // If event type is not camp, remove the campResources field
+  //     // if (formattedData.eventType !== 'camp') {
+  //     //   delete formattedData.campResources;
+  //     // }
+
+  //     // Prepare FormData for file upload and event data
+  //     const formData = new FormData();
+  //     formData.append('data', JSON.stringify(formattedData));
+
+  //     // Only append eventLogo if it exists
+  //     if (eventData.eventLogo?.file) {
+  //       formData.append('eventLogo', eventData.eventLogo?.file);
+  //     }
+
+  //     // Send the request to create the event
+  //     const res = await axiosInstance.post(endpoints.events.create, formData, {
+  //       headers: { 'Content-Type': 'multipart/form-data' },
+  //     });
+
+  //     // On success, refresh the data and display success message
+  //     mutate();
+  //     enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
+
+  //     handleCancel();
+  //   } catch (error) {
+  //     // Handle errors
+  //     enqueueSnackbar(error?.message, { variant: 'error' });
+  //   }
+  // });
+// Update this part of your onSubmit function to set default times for camp events:
+
+const onSubmit = handleSubmit(async (eventData) => {
+  // Validate eventDate
+  if (dayjs(eventData.eventDate).isBefore(dayjs(), 'date')) {
+    setError('eventDate', {
+      type: 'custom',
+      message: "Event date cannot be before today's date",
+    });
+    return;
+  }
+
+  // Validate endDate against eventDate
+  if (dayjs(eventData.endDate).isBefore(dayjs(eventData.eventDate), 'date')) {
+    setError('endDate', {
+      type: 'custom',
+      message: 'End date cannot be before start date',
+    });
+    return;
+  }
+
+  // For regular events, validate startTime and endTime are present and valid
+  const isCamp = eventData.eventType === 'camp';
+
+  if (!isCamp) {
+    if (!eventData.startTime || !dayjs(eventData.startTime).isValid()) {
+      setError('startTime', { type: 'custom', message: 'Start time is required' });
       return;
     }
 
-    // Validate endDate against eventDate
-    if (dayjs(eventData.endDate).isBefore(dayjs(eventData.eventDate), 'date')) {
-      setError('endDate', {
-        type: 'custom',
-        message: 'End date cannot be before start date',
-      });
+    if (!eventData.endTime || !dayjs(eventData.endTime).isValid()) {
+      setError('endTime', { type: 'custom', message: 'End time is required' });
       return;
     }
 
-    // Validate endTime against startTime if same day
     if (
       dayjs(eventData.eventDate).isSame(dayjs(eventData.endDate), 'date') &&
       dayjs(eventData.endTime).isBefore(dayjs(eventData.startTime))
@@ -388,62 +494,62 @@ const EventCreateDialog = ({ open, onClose }) => {
       setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
       return;
     }
+  }
 
-    try {
-      const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
-      const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
+  try {
+    const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
+    const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
 
-      const startTime = dayjs(eventData.startTime).format('HH:mm');
-      const endTime = dayjs(eventData.endTime).format('HH:mm');
+    // If it's a camp and times are empty or invalid, assign default times
+    let startTime = '00:00';
+    let endTime = '00:00';
 
-      console.log('Time values:', {
-        startTime: `${dayjs(eventData.startTime).format('hh:mm A')} -> ${startTime}`,
-        endTime: `${dayjs(eventData.endTime).format('hh:mm A')} -> ${endTime}`,
-      });
-
-      const startDateTimeFormatted = `${startDate}T${startTime}`;
-      const endDateTimeFormatted = `${endDate}T${endTime}`;
-
-      const formattedData = {
-        ...eventData,
-        date: startDateTimeFormatted,
-        endDate: endDateTimeFormatted,
-      };
-
-      // Remove fields not needed in the API
-      delete formattedData.startTime;
-      delete formattedData.endTime;
-      delete formattedData.eventDate;
-
-      // If event type is not camp, remove the campResources field
-      // if (formattedData.eventType !== 'camp') {
-      //   delete formattedData.campResources;
-      // }
-
-      // Prepare FormData for file upload and event data
-      const formData = new FormData();
-      formData.append('data', JSON.stringify(formattedData));
-
-      // Only append eventLogo if it exists
-      if (eventData.eventLogo?.file) {
-        formData.append('eventLogo', eventData.eventLogo?.file);
-      }
-
-      // Send the request to create the event
-      const res = await axiosInstance.post(endpoints.events.create, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      // On success, refresh the data and display success message
-      mutate();
-      enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
-
-      handleCancel();
-    } catch (error) {
-      // Handle errors
-      enqueueSnackbar(error?.message, { variant: 'error' });
+    if (eventData.startTime && dayjs(eventData.startTime).isValid()) {
+      startTime = dayjs(eventData.startTime).format('HH:mm');
     }
-  });
+
+    if (eventData.endTime && dayjs(eventData.endTime).isValid()) {
+      endTime = dayjs(eventData.endTime).format('HH:mm');
+    }
+
+    const startDateTimeFormatted = `${startDate}T${startTime}:00+08:00`;
+    const endDateTimeFormatted = `${endDate}T${endTime}:00+08:00`;
+
+    console.log('Submitting Event:', {
+      startDateTimeFormatted,
+      endDateTimeFormatted,
+      isCamp,
+    });
+
+    const formattedData = {
+      ...eventData,
+      date: startDateTimeFormatted,
+      endDate: endDateTimeFormatted,
+    };
+
+    delete formattedData.startTime;
+    delete formattedData.endTime;
+    delete formattedData.eventDate;
+
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(formattedData));
+
+    if (eventData.eventLogo?.file) {
+      formData.append('eventLogo', eventData.eventLogo.file);
+    }
+
+    const res = await axiosInstance.post(endpoints.events.create, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    mutate();
+    enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
+    handleCancel();
+  } catch (error) {
+    enqueueSnackbar(error?.message || 'Something went wrong', { variant: 'error' });
+  }
+});
+
 
   return (
     <Dialog
@@ -626,7 +732,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                 <Box width={{ xs: 1, sm: 1 / 2 }}>
                   {/* Start Time Picker */}
                   <Stack width={1} spacing={1}>
-                    <InputLabel required>Start Time</InputLabel>
+                    <InputLabel required={eventType !== 'camp'}>
+                      Start Time{' '}
+                      {eventType === 'camp' && (
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          (Optional)
+                        </Typography>
+                      )}
+                    </InputLabel>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Controller
                         name="startTime"
@@ -641,7 +754,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error ? fieldState.error.message : '',
-                                placeholder: 'Select start time',
+                                placeholder: `Select start time${eventType === 'camp' ? ' (Optional)' : ''}`,
                               },
                             }}
                           />
@@ -653,7 +766,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                 <Box width={{ xs: 1, sm: 1 / 2 }}>
                   {/* End Time Picker */}
                   <Stack width={1} spacing={1}>
-                    <InputLabel required>End Time</InputLabel>
+                    <InputLabel required={eventType !== 'camp'}>
+                      End Time{' '}
+                      {eventType === 'camp' && (
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          (Optional)
+                        </Typography>
+                      )}
+                    </InputLabel>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Controller
                         name="endTime"
@@ -669,7 +789,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error ? fieldState.error.message : '',
-                                placeholder: 'Select end time',
+                                placeholder: `Select end time${eventType === 'camp' ? ' (Optional)' : ''}`,
                               },
                             }}
                           />
@@ -750,15 +870,16 @@ const EventCreateDialog = ({ open, onClose }) => {
 
           {/* Settings Step */}
           {
-          // activeStep === (eventType === 'camp' ? 2 : 1) && ( //comented out for now since we are not using camp resouces
-          activeStep === 1 && (
-            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
-              <Stack width={1}>
-                <InputLabel>Event Logo</InputLabel>
-                <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
-              </Stack>
-            </Box>
-          )}
+            // activeStep === (eventType === 'camp' ? 2 : 1) && ( //comented out for now since we are not using camp resouces
+            activeStep === 1 && (
+              <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
+                <Stack width={1}>
+                  <InputLabel>Event Logo</InputLabel>
+                  <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
+                </Stack>
+              </Box>
+            )
+          }
         </DialogContent>
 
         <DialogActions
