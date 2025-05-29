@@ -762,7 +762,7 @@ const TicketOverviewCard = () => {
             {cartData?.event?.eventType === 'camp' && (
               <Stack spacing={2}>
                 {/* Refund Policy */}
-                <Stack direction="row" spacing={1.5} alignItems="center">
+                <Stack direction="row" spacing={1.5} alignItems="start">
                   <Checkbox
                     size="small"
                     checked={resourceConfirmations.refundPolicy || false}
@@ -786,13 +786,14 @@ const TicketOverviewCard = () => {
                       color: 'text.secondary',
                       fontSize: '0.7rem',
                       lineHeight: 1.6,
+                      mt: 0.5,
                     }}
                   >
                     I acknowledge that the payment made for this event is non-refundable.
                   </Typography>
                 </Stack>
                 {/* Insurance Policy */}
-                <Stack direction="row" spacing={1.5} alignItems="center">
+                <Stack direction="row" spacing={1.5} alignItems="start">
                   <Checkbox
                     size="small"
                     checked={resourceConfirmations.insurance || false}
@@ -816,6 +817,7 @@ const TicketOverviewCard = () => {
                       color: 'text.secondary',
                       fontSize: '0.7rem',
                       lineHeight: 1.6,
+                      mt: 0.5,
                     }}
                   >
                     I acknowledge and agree that Public Liability and Group Personal Accident (GPA)
