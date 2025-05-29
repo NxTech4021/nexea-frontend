@@ -119,9 +119,7 @@ const EventInformation = ({ event }) => {
     // This will refresh the data using your SWR hook
     mutate();
   };
-  const isDefaultTime = (date) => {
-  return dayjs(date).format('HH:mm') === '00:00';
-};
+  const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
   return (
     <Card
       sx={{
