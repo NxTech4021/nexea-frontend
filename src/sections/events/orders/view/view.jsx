@@ -1,52 +1,54 @@
 // Order
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import React, { useMemo, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import ReactApexChart from 'react-apexcharts';
-import { useGetAllEvents } from 'src/api/event';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import { alpha, useTheme } from '@mui/material/styles';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {
   Box,
   List,
   Grid,
+  Card,
   Alert,
   Stack,
   Button,
-  Select,
   Dialog,
-  Avatar,
   Tooltip,
-  Divider,
   ListItem,
-  MenuItem,
   Snackbar,
   Container,
   TextField,
   IconButton,
   Typography,
+  CardContent,
   DialogTitle,
   DialogContent,
   DialogActions,
   CircularProgress,
-  ButtonGroup,
-  Card,
-  CardContent,
+  // Avatar,
+  // ButtonGroup,
+  // Divider,
+  // MenuItem,
+  // Select,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { useParams } from 'react-router-dom';
 
+import { exportToCSV } from 'src/utils/exportcsv';
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
-// import Label from 'src/components/label';
+import { useGetAllEvents } from 'src/api/event';
+
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { TablePaginationCustom } from 'src/components/table';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+// import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+// import Label from 'src/components/label';
 
 const orders = [
   {
@@ -84,6 +86,20 @@ const orders = [
 ];
 const STATUS_TABS = ['All', 'paid', 'pending', 'failed'];
 
+const formatDiscountText = (discountCode) => {
+  if (!discountCode) return '';
+  
+  if (discountCode.type === 'percentage') {
+    return `${discountCode.value}% off`;
+  }
+  
+  if (discountCode.type === 'fixedAmountPerOrder') {
+    return `RM${discountCode.value} off order`;
+  }
+  
+  return `RM${discountCode.value} off per ticket`;
+};
+
 export default function OrderView() {
   const theme = useTheme();
   
@@ -109,6 +125,7 @@ export default function OrderView() {
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -126,6 +143,33 @@ export default function OrderView() {
 
   const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
   const { data: eventData, isLoading: loadingEvents } = useGetAllEvents();
+
+
+  // For exporting into CSV 
+ const handleExportCSV = () => {
+  if (!eventOrders.length) return;
+
+  const flattened = eventOrders.map(order => ({
+    OrderNumber: order.orderNumber,
+    BuyerName: order.buyerName,
+    BuyerEmail: order.buyerEmail,
+    BuyerPhone: order.buyerPhoneNumber,
+    EventName: order.event?.name || '',
+    Status: order.status,
+    DiscountCode: order.discountCode?.code || '',    
+    DiscountType: order.discountCode?.type || '',  
+    DiscountAmount: order.discountAmount,
+    TotalAmount: order.totalAmount,
+    OrderDate: dayjs(order.createdAt).format('DD-MM-YYYY'),
+    AttendeeCount: order.attendees?.length || 0,
+  }));
+
+  // Export to CSV (associated event)
+  const sanitizedEventName = selectedEvent.name.replace(/[^a-zA-Z0-9]/g, '');
+  const filename = `${sanitizedEventName}_orders.csv`;
+  
+  exportToCSV(flattened, filename);
+};
 
   // Check for event filter from sessionStorage or URL parameter when component mounts
   useEffect(() => {
@@ -251,7 +295,8 @@ export default function OrderView() {
   // Revenue chart data for selected event
   const revenueChart = useMemo(() => {
     if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
-    // Group by date (YYYY-MM-DD)
+    
+    // Group by date (YYYY-MM-DD) and only include dates with revenue
     const map = {};
     eventOrders.forEach((order) => {
       if (order.status === 'paid') {
@@ -259,22 +304,39 @@ export default function OrderView() {
         map[date] = (map[date] || 0) + (order.totalAmount || 0);
       }
     });
+
+    // Sort dates and format for display
     const categories = Object.keys(map).sort();
     const series = categories.map((date) => map[date]);
-    return { series, categories };
+    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
+
+    return { 
+      series, 
+      categories: formattedCategories,
+      rawDates: categories 
+    };
   }, [eventOrders, selectedEvent]);
 
   // Add order count chart data
   const orderCountChart = useMemo(() => {
     if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
+
+    // Group by date (YYYY-MM-DD) and only include dates with orders
     const map = {};
     eventOrders.forEach((order) => {
-      const date = dayjs(order.createdAt).format('YYYY-MM-DD');
-      map[date] = (map[date] || 0) + 1;
+      // Include only paid orders and free orders
+      if (order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)) {
+        const date = dayjs(order.createdAt).format('YYYY-MM-DD');
+        map[date] = (map[date] || 0) + 1;
+      }
     });
+
+    // Sort dates and format for display
     const categories = Object.keys(map).sort();
     const series = categories.map((date) => map[date]);
-    return { series, categories };
+    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
+
+    return { series, categories: formattedCategories };
   }, [eventOrders, selectedEvent]);
 
   // Update eventOrders and totalRevenue when selectedEvent or data changes
@@ -331,14 +393,55 @@ export default function OrderView() {
   }
 
   if (!selectedEvent) {
+    const filteredEvents = (eventData?.events || []).filter((event) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+      return (
+        event.name.toLowerCase().includes(query)
+      );
+    });
+
     return (
-      <Container maxWidth="md" sx={{ pt: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2, color: textColor, fontWeight: 700, fontSize: 22 }}>
-          Select an Event
-        </Typography>
+      <Container maxWidth="xl" sx={{ pt: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ mb: 1, color: textColor, fontWeight: 700, fontSize: 22 }}>
+            Select an Event
+          </Typography>
+          <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}>
+            Choose an event to view and manage its orders
+          </Typography>
+        </Box>
+
+        {/* Search and Filter */}
+        <Box sx={{ mb: 0.5 }}>
+          <TextField
+            fullWidth
+            placeholder="Search events by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 20, height: 20, mr: 1 }} />
+              ),
+            }}
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                height: 44,
+                backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
+                '& fieldset': {
+                  borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                },
+              },
+            }}
+          />
+        </Box>
         
         {/* Status Legend */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, px: 0.5 }}>
+        {/* <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, px: 0.5 }}>
           {[
             { status: 'Active', color: '#4caf50' },
             { status: 'Upcoming', color: '#0288d1' },
@@ -359,144 +462,445 @@ export default function OrderView() {
               </Typography>
             </Box>
           ))}
-        </Box>
-        
-        <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, overflow: 'hidden', bgcolor: cardBgColor }}>
-          {(eventData?.events || []).map((event) => (
-            <Box
-              key={event.id}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                px: 2,
-                py: 1.25,
-                borderBottom: `1px solid ${borderColor}`,
-                cursor: 'pointer',
-                transition: 'background 0.2s',
-                '&:hover': { bgcolor: hoverBg },
-                fontSize: 14,
-              }}
-              onClick={() => router.push(paths.dashboard.order.event(event.id))} 
-            >
-              <Avatar src={event.eventSetting?.eventLogo || "/logo/nexea.png"}  alt={event.name} sx={{ width: 28, height: 28, mr: 1.5 }} />
-              <Box sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600, fontSize: 15 }}>{event.name}</Typography>
-                  {(() => {
-                    // Calculate event status (upcoming, active, past)
-                    const now = dayjs();
-                    const startDate = event.date ? dayjs(event.date) : null;
-                    
-                    let endDate = null;
-                    if (event.endDate) {
-                      endDate = dayjs(event.endDate);
-                    } else if (startDate) {
-                      endDate = startDate.add(1, 'day');
-                    }
-                    
-                    let status = 'unknown';
-                    let statusColor = '#999';
-                    
-                    if (startDate && endDate) {
-                      if (now.isBefore(startDate)) {
-                        status = 'upcoming';
-                        statusColor = '#0288d1'; // blue
-                      } else if (now.isAfter(endDate)) {
-                        status = 'past';
-                        statusColor = '#616161'; // gray
-                      } else {
-                        status = 'active';
-                        statusColor = '#4caf50'; // green
-                      }
-                    }
-                    
-                    return (
-                      <Tooltip title={`Event is ${status}`}>
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: statusColor,
-                            ml: 0.75,
-                          }}
-                        />
-                      </Tooltip>
-                    );
-                  })()}
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Iconify icon="eva:shopping-cart-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
-                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
-                      {data?.filter(order => order.event?.id === event.id).length || 0}
-                    </Typography>
-                    {(() => {
-                      // Calculate order trend (last 7 days vs previous 7 days)
-                      const allOrders = data?.filter(order => order.event?.id === event.id) || [];
-                      const last7Days = allOrders.filter(order => 
-                        dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
-                      );
-                      const prev7Days = allOrders.filter(order => 
-                        dayjs(order.createdAt).isAfter(dayjs().subtract(14, 'days')) && 
-                        dayjs(order.createdAt).isBefore(dayjs().subtract(7, 'days'))
-                      );
-                      
-                      // Only show trend if we have sufficient data
-                      if (last7Days.length > 0 || prev7Days.length > 0) {
-                        const trend = last7Days.length - prev7Days.length;
-                        
-                        let trendColor = '#9e9e9e';
-                        let trendIcon = 'eva:minus-fill';
-                        
-                        if (trend > 0) {
-                          trendColor = '#4caf50';
-                          trendIcon = 'eva:trending-up-fill';
-                        } else if (trend < 0) {
-                          trendColor = '#f44336';
-                          trendIcon = 'eva:trending-down-fill';
-                        }
-                        
-                        let trendText = 'same';
-                        if (trend > 0) {
-                          trendText = 'more';
-                        } else if (trend < 0) {
-                          trendText = 'fewer';
-                        }
-                        
-                        return (
-                          <Tooltip title={`${Math.abs(trend)} ${trendText} orders compared to previous 7 days`}>
-                            <Box sx={{ display: 'inline-flex', alignItems: 'center', ml: 0.5 }}>
-                              <Iconify icon={trendIcon} width={10} height={10} sx={{ color: trendColor }} />
+        </Box> */}
+
+        {/* Events Grid */}
+        <Grid container spacing={2}>
+          {filteredEvents.map((event) => (
+            <Grid item xs={12} key={event.id}>
+              <Card 
+                sx={{ 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  border: `1px solid ${borderColor}`,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.customShadows.z8,
+                    borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                  },
+                }}
+                onClick={() => router.push(paths.dashboard.order.event(event.id))}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    {/* Event Logo */}
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 1.5,
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        bgcolor: 'background.neutral',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
+                        alt={event.name}
+                        sx={{
+                          width: '70%',
+                          height: '70%',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    </Box>
+
+                    {/* Event Details */}
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Typography variant="subtitle1" sx={{ color: textColor, fontWeight: 600, fontSize: 16 }}>
+                          {event.name}
+                        </Typography>
+                        {(() => {
+                          const now = dayjs();
+                          const startDate = event.date ? dayjs(event.date) : null;
+                          let endDate = null;
+                          if (event.endDate) {
+                            endDate = dayjs(event.endDate);
+                          } else if (startDate) {
+                            endDate = startDate.add(1, 'day');
+                          }
+                          
+                          let status = 'unknown';
+                          let statusColor = '#999';
+                          let statusBg = theme.palette.mode === 'light' ? '#f5f5f5' : '#333';
+                          
+                          if (startDate && endDate) {
+                            if (now.isBefore(startDate)) {
+                              status = 'Upcoming';
+                              statusColor = '#0288d1';
+                              statusBg = alpha('#0288d1', 0.1);
+                            } else if (now.isAfter(endDate)) {
+                              status = 'Past';
+                              statusColor = '#616161';
+                              statusBg = alpha('#616161', 0.1);
+                            } else {
+                              status = 'Active';
+                              statusColor = '#4caf50';
+                              statusBg = alpha('#4caf50', 0.1);
+                            }
+                          }
+                          
+                          return (
+                            <Box
+                              sx={{
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: statusColor,
+                                bgcolor: statusBg,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  bgcolor: statusColor,
+                                }}
+                              />
+                              {status}
                             </Box>
-                          </Tooltip>
-                        );
-                      }
-                      return null;
-                    })()}
+                          );
+                        })()}
+                      </Box>
+
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 3 }, mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Iconify icon="eva:calendar-outline" width={14} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                          <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: '0.75rem' }}>
+                            {dayjs(event.date).format('MMM D, YYYY')}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Iconify icon="eva:clock-outline" width={14} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                          <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: '0.75rem' }}>
+                            {dayjs(event.date).format('h:mm A')}
+                          </Typography>
+                        </Box>
+                        {event.personInCharge && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Iconify icon="eva:person-outline" width={14} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
+                            <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: '0.75rem' }}>
+                              {event.personInCharge.fullName}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Stats */}
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          gap: 3,
+                          pt: 1.5,
+                          mt: 1.5,
+                          borderTop: `1px solid ${borderColor}`,
+                          width: {
+                            xs: '100%',
+                            sm: '100%',
+                            md: '65%',
+                            lg: '70%',
+                            xl: '76%'
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', display: 'block', mb: 0.25 }}>
+                            Total Orders
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600 }}>
+                              {data?.filter(order => order.event?.id === event.id).length || 0}
+                            </Typography>
+                            {(() => {
+                              const allOrders = data?.filter(order => order.event?.id === event.id) || [];
+                              const last7Days = allOrders.filter(order => 
+                                dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
+                              );
+                              const prev7Days = allOrders.filter(order => 
+                                dayjs(order.createdAt).isAfter(dayjs().subtract(14, 'days')) && 
+                                dayjs(order.createdAt).isBefore(dayjs().subtract(7, 'days'))
+                              );
+                              
+                              if (last7Days.length > 0 || prev7Days.length > 0) {
+                                const trend = last7Days.length - prev7Days.length;
+                                let trendColor = '#9e9e9e';
+                                let trendIcon = 'eva:minus-fill';
+                                let trendText = 'same';
+                                
+                                if (trend > 0) {
+                                  trendColor = '#4caf50';
+                                  trendIcon = 'eva:trending-up-fill';
+                                  trendText = 'more';
+                                } else if (trend < 0) {
+                                  trendColor = '#f44336';
+                                  trendIcon = 'eva:trending-down-fill';
+                                  trendText = 'fewer';
+                                }
+                                
+                                return (
+                                  <Tooltip title={`${Math.abs(trend)} ${trendText} orders compared to previous 7 days`}>
+                                    <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      <Iconify icon={trendIcon} width={16} sx={{ color: trendColor }} />
+                                    </Box>
+                                  </Tooltip>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </Box>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', display: 'block', mb: 0.25 }}>
+                            Revenue
+                          </Typography>
+                          <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600 }}>
+                            {new Intl.NumberFormat('en-MY', { 
+                              style: 'currency', 
+                              currency: 'MYR',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(
+                              data?.filter(order => order.event?.id === event.id && order.status === 'paid')
+                                .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                            )}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', display: 'block', mb: 0.25 }}>
+                            Attendees
+                          </Typography>
+                          <Typography variant="subtitle2" sx={{ color: textColor, fontWeight: 600 }}>
+                            {data?.filter(order => order.event?.id === event.id)
+                              .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Mini Charts - Desktop Only */}
+                      <Box 
+                        sx={{ 
+                          display: { xs: 'none', md: 'flex' }, 
+                          alignItems: 'center',
+                          gap: 2,
+                          ml: 'auto',
+                          pl: 3,
+                          borderLeft: `1px solid ${borderColor}`,
+                          height: 'calc(100% - 16px)',
+                          position: 'absolute',
+                          right: 48,
+                          top: '50%',
+                          transform: 'translateY(-50%)'
+                        }}
+                      >
+                        {/* Orders Chart */}
+                        <Box sx={{ 
+                          width: 120,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ 
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.6875rem',
+                            }}>
+                              Orders (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[{
+                              name: 'Orders',
+                              data: (() => {
+                                const now = dayjs();
+                                const days = Array.from({ length: 7 }, (_, i) => now.subtract(i, 'day'));
+                                const ordersByDay = days.map(day => 
+                                  data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
+                                  ).length || 0
+                                ).reverse();
+                                return ordersByDay;
+                              })()
+                            }]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
+                                  enabled: true,
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.info.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100]
+                                }
+                              },
+                              tooltip: { 
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const dailyOrderCount = series[seriesIndex][dataPointIndex];
+                                  const paidOrders = data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === date.format('YYYY-MM-DD') &&
+                                    order.status === 'paid'
+                                  ).length || 0;
+                                  
+                                  return `
+                                    <div style="padding: 8px;">
+                                      <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+                                        ${date.format('MMM D, YYYY')}
+                                      </div>
+                                      <div style="font-size: 13px; color:#666; margin-bottom: 4px;">
+                                        <b>Total Orders:</b> ${dailyOrderCount}
+                                      </div>
+                                      <div style="font-size: 11px; color: #4caf50;">
+                                        Paid: ${paidOrders}
+                                      </div>
+
+                                    </div>
+                                  `;
+                                }
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } }
+                            }}
+                            height={35}
+                          />
+                        </Box>
+
+                        {/* Revenue Chart */}
+                        <Box sx={{ 
+                          width: 120,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ 
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.6875rem',
+                            }}>
+                              Revenue (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[{
+                              name: 'Revenue',
+                              data: (() => {
+                                const now = dayjs();
+                                const days = Array.from({ length: 7 }, (_, i) => now.subtract(i, 'day'));
+                                const revenueByDay = days.map(day => 
+                                  data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    order.status === 'paid' &&
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
+                                  ).reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                                ).reverse();
+                                return revenueByDay;
+                              })()
+                            }]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
+                                  enabled: true,
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.primary.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100]
+                                }
+                              },
+                              tooltip: { 
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const revenue = series[seriesIndex][dataPointIndex];
+                                  const dailyPaidOrders = data?.filter(order => 
+                                    order.event?.id === event.id && 
+                                    order.status === 'paid' &&
+                                    dayjs(order.createdAt).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')
+                                  );
+                                  const orderCount = dailyPaidOrders?.length || 0;
+                                  
+                                  return `
+                                    <div style="padding: 8px;">
+                                      <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+                                        ${date.format('MMM D, YYYY')}
+                                      </div>
+                                      <div style="font-size: 13px; color:#666; margin-bottom: 4px;">
+                                        <b>Revenue:</b> RM ${revenue.toFixed(2)}
+                                      </div>
+                                      <div style="font-size: 11px; color: #666;">
+                                        Orders: ${orderCount}
+                                      </div>
+                                    </div>
+                                  `;
+                                }
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } }
+                            }}
+                            height={35}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    {/* Arrow Icon */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+                      <Iconify icon="eva:arrow-ios-forward-fill" width={20} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }} />
+                    </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Iconify icon="eva:credit-card-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
-                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
-                      {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
-                        data?.filter(order => order.event?.id === event.id && order.status === 'paid')
-                          .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
-                      )}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Iconify icon="eva:people-outline" width={12} sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', mr: 0.5 }} />
-                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
-                      {data?.filter(order => order.event?.id === event.id)
-                        .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-              <Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ color: iconColor }} />
-            </Box>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
+
+        {/* Empty State */}
+        {(!eventData?.events || filteredEvents.length === 0) && (
+          <EmptyContent
+            title={searchQuery ? "No Matching Events" : "No Events Found"}
+            description={searchQuery ? "Try adjusting your search terms" : "There are no events available at the moment."}
+            imgUrl="/assets/illustrations/illustration_empty_content.svg"
+            sx={{ py: 10 }}
+          />
+        )}
       </Container>
     );
   }
@@ -526,62 +930,188 @@ export default function OrderView() {
             <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
               {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(totalRevenue)}
             </Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
               <ReactApexChart
                 options={{
-                  chart: { type: 'area', height: 90, toolbar: { show: false } },
-                  xaxis: { categories: revenueChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  stroke: { curve: 'smooth', width: 2 },
-                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
-                  grid: { show: false },
+                  chart: { 
+                    type: 'area',
+                    height: 140,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    animations: {
+                      enabled: true,
+                      easing: 'easeinout',
+                      speed: 800,
+                    },
+                    parentHeightOffset: 0
+                  },
+                  xaxis: { 
+                    categories: revenueChart.categories,
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      rotate: -45,
+                      rotateAlways: false,
+                      hideOverlappingLabels: true,
+                      offsetY: 2
+                    },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                  },
+                  yaxis: { 
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      formatter: (value) => `RM ${value.toFixed(0)}`,
+                      offsetX: -2
+                    },
+                    tickAmount: 4,
+                    min: 0,
+                    forceNiceScale: true
+                  },
+                  grid: { 
+                    show: true,
+                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
+                    strokeDashArray: 3,
+                    xaxis: { lines: { show: false } },
+                    padding: {
+                      top: 0,
+                      right: 15,
+                      bottom: 0,
+                      left: 5
+                    }
+                  },
                   dataLabels: { enabled: false },
                   tooltip: { 
-                    enabled: true, 
+                    enabled: true,
+                    shared: true,
+                    intersect: false,
                     y: { formatter: (val) => `RM ${val.toFixed(2)}` },
                     theme: theme.palette.mode,
                     style: {
                       fontSize: '12px',
                       fontFamily: theme.typography.fontFamily,
-                    },
+                    }
                   },
-                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                  colors: [theme.palette.primary.main],
+                  markers: {
+                    size: 0,
+                    strokeColors: theme.palette.background.paper,
+                    strokeWidth: 2,
+                    hover: { size: 6 }
+                  },
+                  stroke: { 
+                    curve: 'smooth', 
+                    width: 2,
+                    lineCap: 'round'
+                  },
                 }}
                 series={[{ name: 'Revenue', data: revenueChart.series }]}
                 type="area"
-                height={90}
+                height={140}
               />
             </Box>
           </CardContent>
         </Card>
         <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
           <CardContent sx={{ p: 2 }}>
-            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders</Typography>
-            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>{eventOrders.length}</Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: 320, mx: 'auto' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders (Paid & Free)</Typography>
+            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
+              {eventOrders.filter(order => 
+                order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)
+              ).length}
+            </Typography>
+            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
               <ReactApexChart
                 options={{
-                  chart: { type: 'area', height: 90, toolbar: { show: false } },
-                  xaxis: { categories: orderCountChart.categories, labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  yaxis: { labels: { style: { fontSize: '10px', colors: theme.palette.mode === 'light' ? '#888' : '#aaa' } } },
-                  stroke: { curve: 'smooth', width: 2 },
-                  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05 } },
-                  grid: { show: false },
+                  chart: { 
+                    type: 'area',
+                    height: 140,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    animations: {
+                      enabled: true,
+                      easing: 'easeinout',
+                      speed: 800,
+                    },
+                    parentHeightOffset: 0
+                  },
+                  xaxis: { 
+                    categories: orderCountChart.categories,
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      rotate: -45,
+                      rotateAlways: false,
+                      hideOverlappingLabels: true,
+                      offsetY: 2
+                    },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                  },
+                  yaxis: { 
+                    labels: { 
+                      style: { 
+                        fontSize: '11px', 
+                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
+                        fontWeight: 500
+                      },
+                      formatter: (value) => Math.round(value),
+                      offsetX: -2
+                    },
+                    tickAmount: 4,
+                    min: 0,
+                    forceNiceScale: true
+                  },
+                  grid: { 
+                    show: true,
+                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
+                    strokeDashArray: 3,
+                    xaxis: { lines: { show: false } },
+                    padding: {
+                      top: 0,
+                      right: 15,
+                      bottom: 0,
+                      left: 5
+                    }
+                  },
                   dataLabels: { enabled: false },
                   tooltip: { 
-                    enabled: true, 
-                    y: { formatter: (val) => `${val} orders` },
+                    enabled: true,
+                    shared: true,
+                    intersect: false,
+                    y: { formatter: (val) => `${Math.round(val)} orders` },
                     theme: theme.palette.mode,
                     style: {
                       fontSize: '12px',
                       fontFamily: theme.typography.fontFamily,
-                    },
+                    }
                   },
-                  colors: [theme.palette.mode === 'light' ? '#111' : '#eee'],
+                  colors: [theme.palette.primary.main],
+                  markers: {
+                    size: 0,
+                    strokeColors: theme.palette.background.paper,
+                    strokeWidth: 2,
+                    hover: { size: 6 }
+                  },
+                  stroke: { 
+                    curve: 'smooth', 
+                    width: 2,
+                    lineCap: 'round'
+                  },
                 }}
-                series={[{ name: 'Orders', data: orderCountChart.series }]}
+                series={[{ name: 'Confirmed Orders', data: orderCountChart.series }]}
                 type="area"
-                height={90}
+                height={140}
               />
             </Box>
           </CardContent>
@@ -641,7 +1171,7 @@ export default function OrderView() {
             // Calculate count for each status
             let count = eventOrders.length; // Default for 'All'
             if (status === 'Paid') {
-              count = eventOrders.filter(order => order.status === 'paid').length;
+              count = eventOrders.filter(order => order.status === 'paid' && Number(order.totalAmount) > 0).length;
             } else if (status === 'Pending') {
               count = eventOrders.filter(order => order.status === 'pending').length;
             } else if (status === 'Cancelled') {
@@ -669,22 +1199,31 @@ export default function OrderView() {
                     if (statusFilter === status) {
                       return theme.palette.mode === 'light' ? '#111' : '#eee';
                     }
-                    return theme.palette.mode === 'light' ? '#f3f3f3' : '#333';
+                    return 'transparent';
                   })(),
-                  borderColor,
+                  border: `1px solid ${borderColor}`,
                   borderRadius: 1,
                   minWidth: 'auto',
                   px: 1.5,
+                  height: 32,
                   '&:hover': { 
                     bgcolor: (() => {
                       if (statusFilter === status) {
                         return theme.palette.mode === 'light' ? '#222' : '#ddd';
                       }
-                      return theme.palette.mode === 'light' ? '#e0e0e0' : '#444';
+                      return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
                     })(),
-                    borderRight: `1px solid ${borderColor}`,
-                    zIndex: 1,
+                    borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
                   },
+                  '&:active': {
+                    bgcolor: (() => {
+                      if (statusFilter === status) {
+                        return theme.palette.mode === 'light' ? '#000' : '#fff';
+                      }
+                      return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
+                    })(),
+                  },
+                  transition: 'all 0.2s ease-in-out',
                 }}
               >
                 {status} ({count})
@@ -692,6 +1231,44 @@ export default function OrderView() {
             );
           })}
         </Box>
+
+    {/* Download CSV Button */}
+      <Tooltip title="Export as CSV">
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleExportCSV}
+          startIcon={
+            <Iconify
+              icon="eva:download-outline"
+              width={18}
+              height={18}
+              sx={{ color: textColor }}
+            />
+          }
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            color: textColor,
+            bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
+            borderColor: 'transparent',
+            borderRadius: 1,
+            px: 2,
+            mt: { xs: 1, sm: 0 },
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#444',
+              borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+            },
+            '&:active': {
+              bgcolor: theme.palette.mode === 'light' ? '#d0d0d0' : '#505050',
+            },
+            transition: 'all 0.2s ease-in-out',
+          }}
+        >
+          Export
+        </Button>
+      </Tooltip>
+
       </Box>
       {/* Orders Table */}
       <Box sx={{ border: `1px solid ${borderColor}`, borderRadius: 2, bgcolor: cardBgColor, overflow: 'hidden' }}>
@@ -707,11 +1284,12 @@ export default function OrderView() {
           }}
         >
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order ID</Typography>
-          <Typography sx={{ width: '20%', color: textColor, fontWeight: 600, fontSize: 13 }}>Buyer Name</Typography>
+          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Buyer Name</Typography>
+          <Typography sx={{ width: '10%', color: textColor, fontWeight: 600, fontSize: 13 }}>Phone</Typography>
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Discount Code</Typography>
           <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Date</Typography>
           <Box
-            sx={{ width: '15%', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+            sx={{ width: '12%', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
             onClick={handlePriceSortToggle}
           >
             <Typography sx={{ color: textColor, fontWeight: 600, fontSize: 13, mr: 0.5 }}>Price (RM)</Typography>
@@ -720,17 +1298,16 @@ export default function OrderView() {
               <ArrowDropDownIcon fontSize="small" sx={{ color: priceSort === 'desc' ? '#111' : '#bbb', mt: '-6px' }} />
             </Box>
           </Box>
-          <Typography sx={{ width: '15%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Status</Typography>
-          <Typography sx={{ width: '5%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
+          <Typography sx={{ width: '12%', color: textColor, fontWeight: 600, fontSize: 13 }}>Order Status</Typography>
+          <Typography sx={{ width: '6%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
         </Stack>
-        <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
+        <Stack>
           {sortedEventOrders
             .filter((order) => {
               const q = (search || '').toLowerCase().trim();
               const matchesName = String(order.buyerName || order.buyer?.name || '').toLowerCase().includes(q);
               let matchesStatus = true;
-              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid'&&
-      Number(order.totalAmount) > 0;
+              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid' && Number(order.totalAmount) > 0;
               else if (statusFilter === 'Pending') matchesStatus = (order.status || '').toLowerCase() === 'pending';
               else if (statusFilter === 'Cancelled') matchesStatus = (order.status || '').toLowerCase() === 'cancelled';
               else if (statusFilter === 'Free') matchesStatus = (order.status || '').toLowerCase() === 'paid' &&  Number(order.totalAmount) === 0;
@@ -750,18 +1327,38 @@ export default function OrderView() {
                   alignItems={{ xs: 'flex-start', md: 'center' }} 
                   sx={{ 
                     p: 2, 
-                    borderBottom: `1px solid ${borderColor}`, 
-                    cursor: 'pointer', 
-                    '&:hover': { bgcolor: hoverBg } 
+                    borderBottom: `1px solid ${borderColor}`,
+                    position: 'relative',
+                    '&:hover': { 
+                      bgcolor: hoverBg,
+                      '& .action-buttons': {
+                        opacity: 1,
+                      },
+                    },
                   }}
                 >
+                  {/* Clickable overlay */}
+                  {/* <Box
+                    onClick={() => router.push(paths.dashboard.order.details(order.id))}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      cursor: 'pointer',
+                      zIndex: 1,
+                    }}
+                  /> */}
+
                   {/* Mobile layout - Card style */}
                   <Box 
                     sx={{ 
                       display: { xs: 'flex', md: 'none' }, 
                       flexDirection: 'column', 
                       width: '100%',
-                      mb: 1
+                      mb: 1,
+                      position: 'relative',
                     }}
                   >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -775,60 +1372,175 @@ export default function OrderView() {
                         </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Buyer:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>{order.buyerName}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500, mb: 0.25 }}>{order.buyerName}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11, mb: 0.25 }}>{order.buyerEmail}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>{order.buyerPhoneNumber || 'No Phone'}</Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Price:</Typography>
                       <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>RM {order.totalAmount?.toFixed(2)}</Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Date:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, mb: 0.25 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>{dayjs(order.createdAt).format('h:mm A')}</Typography>
+                      </Box>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Discount:</Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ color: textColor, fontSize: 13, mb: 0.25 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                        {order?.discountCode?.code && (
+                          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11 }}>
+                            {formatDiscountText(order.discountCode)}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                      <Tooltip title="View Details">
-                        <IconButton size="small" onClick={() => router.push(paths.dashboard.order.details(order.id))} sx={{ color: iconColor, p: 0.5 }}>
+                    <Stack 
+                      direction="row"
+                      className="action-buttons"
+                      sx={{ 
+                        mt: 1,
+                        position: 'relative',
+                        zIndex: 2,
+                        border: '1px solid',
+                        borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        alignSelf: 'flex-end',
+                        height: 32,
+                      }}
+                    >
+                      <Tooltip title="View Order Details">
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(paths.dashboard.order.details(order.id));
+                          }} 
+                          sx={{ 
+                            color: iconColor,
+                            p: 0.5,
+                            borderRadius: 0,
+                            height: 30,
+                            width: 30,
+                          }}
+                        >
                           <Iconify icon="eva:info-outline" width={16} height={16} />
                         </IconButton>
                       </Tooltip>
+                      <Box sx={{ width: '1px', bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333' }} />
                       <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
-                        <IconButton size="small" onClick={() => handleOpenResendDialog(order)} sx={{ color: iconColor, p: 0.5 }} disabled={order.status !== 'paid'}>
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenResendDialog(order);
+                          }} 
+                          sx={{ 
+                            color: iconColor,
+                            p: 0.5,
+                            borderRadius: 0,
+                            height: 30,
+                            width: 30,
+                          }} 
+                          disabled={order.status !== 'paid'}
+                        >
                           <Iconify icon="eva:email-outline" width={16} height={16} />
                         </IconButton>
                       </Tooltip>
-                    </Box>
+                    </Stack>
                   </Box>
                   
                   {/* Desktop layout - row style */}
                   <Typography sx={{ width: '15%', color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.orderNumber}</Typography>
-                  <Typography sx={{ width: '20%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerName}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order?.discountCode?.code || 'N/A'}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{dayjs(order.createdAt).format('LL')}</Typography>
-                  <Typography sx={{ width: '15%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>RM {order.totalAmount?.toFixed(2)}</Typography>
-                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{order.buyerName}</Typography>
+                    <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>{order.buyerEmail}</Typography>
+                  </Box>
+                  <Typography sx={{ width: '10%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerPhoneNumber || 'No Phone'}</Typography>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{order?.discountCode?.code || 'N/A'}</Typography>
+                    {order?.discountCode?.code && (
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>
+                        {formatDiscountText(order.discountCode)}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
+                    <Typography sx={{ color: textColor, fontSize: 13 }}>{dayjs(order.createdAt).format('LL')}</Typography>
+                    <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>
+                      {dayjs(order.createdAt).format('h:mm A')}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ width: '12%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>RM {order.totalAmount?.toFixed(2)}</Typography>
+                  <Box sx={{ width: '12%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
                     <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
                     <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
                       {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : ''}
                     </Typography>
                   </Box>
-                  <Box sx={{ width: '5%', display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                    <Tooltip title="View Details">
-                      <IconButton size="small" onClick={() => router.push(paths.dashboard.order.details(order.id))} sx={{ color: iconColor, p: 0.5 }}>
-                        <Iconify icon="eva:info-outline" width={16} height={16} />
+                  <Stack 
+                    direction="row"
+                    className="action-buttons"
+                    sx={{ 
+                      display: { xs: 'none', md: 'flex' }, 
+                      position: 'relative',
+                      zIndex: 2,
+                      border: '1px solid',
+                      borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                      height: 32,
+                      ml: 'auto',
+                      mr: 1,
+                    }}
+                  >
+                    <Tooltip title="View Order Details">
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(paths.dashboard.order.details(order.id));
+                        }} 
+                        sx={{ 
+                          color: iconColor,
+                          p: 0.5,
+                          borderRadius: 0,
+                          height: 30,
+                          width: 30,
+                        }}
+                      >
+                        <Iconify icon="eva:file-text-outline" width={16} height={16} />
                       </IconButton>
                     </Tooltip>
+                    <Box sx={{ width: '1px', bgcolor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333' }} />
                     <Tooltip title={order.status !== 'paid' ? 'Resend only for Paid orders' : 'Resend Confirmation Email'}>
-                      <IconButton size="small" onClick={() => handleOpenResendDialog(order)} sx={{ color: iconColor, p: 0.5 }} disabled={order.status !== 'paid'}>
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenResendDialog(order);
+                        }} 
+                        sx={{ 
+                          color: iconColor,
+                          p: 0.5,
+                          borderRadius: 0,
+                          height: 30,
+                          width: 30,
+                        }} 
+                        disabled={order.status !== 'paid'}
+                      >
                         <Iconify icon="eva:email-outline" width={16} height={16} />
                       </IconButton>
                     </Tooltip>
-                  </Box>
+                  </Stack>
                 </Stack>
               );
             })}

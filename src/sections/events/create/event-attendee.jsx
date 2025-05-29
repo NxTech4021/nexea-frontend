@@ -7,22 +7,25 @@ import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { useTheme } from '@mui/material/styles';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import {
   Box,
+  Paper,
   Button,
   Dialog,
   Tooltip,
   Checkbox,
   Container,
+  Typography,
+  IconButton,
   DialogTitle,
   DialogContent,
   CircularProgress,
-  Paper,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
-import { useTheme } from '@mui/material/styles';
+import { useRouter } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -32,7 +35,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CreateAttendeeForm from 'src/components/modalAdd/attendeeform';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
+// import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +43,7 @@ export default function EventAttendee() {
   const { id } = useParams();
   const settings = useSettingsContext();
   const theme = useTheme();
+  const router = useRouter();
   
   // Theme-aware colors
   const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';
@@ -253,38 +257,48 @@ export default function EventAttendee() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
-      <CustomBreadcrumbs
-        heading="Attendees"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          {
-            name: data?.event?.name || 'Event',
-            href: paths.dashboard.events.root,
-          },
-          { name: 'Attendees' },
-        ]}
-        action={
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="material-symbols:add" />}
-            onClick={dialog.onTrue}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+        <Tooltip title={`Back to ${data?.event?.name || 'Event'}`}>
+          <IconButton
+            onClick={() => router.push(paths.dashboard.events.details(id))}
             sx={{
-              borderRadius: 1,
-              fontWeight: 600,
-              boxShadow: 'none',
-              bgcolor: theme.palette.mode === 'light' ? '#111' : '#eee',
-              color: theme.palette.mode === 'light' ? '#fff' : '#111',
+              width: 40,
+              height: 40,
+              color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white',
               '&:hover': {
-                bgcolor: theme.palette.mode === 'light' ? '#222' : '#ddd',
-                boxShadow: 'none',
+                bgcolor: theme.palette.mode === 'light' ? 'grey.100' : 'grey.800',
               },
             }}
           >
-            New Attendee
-          </Button>
-        }
-        sx={{ mb: 3 }}
-      />
+            <Iconify icon="eva:arrow-back-fill" width={20} height={20} />
+          </IconButton>
+        </Tooltip>
+
+        <Typography variant="h4" sx={{ color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white' }}>
+          Attendees
+        </Typography>
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Button
+          variant="contained"
+          startIcon={<Iconify icon="material-symbols:add" />}
+          onClick={dialog.onTrue}
+          sx={{
+            borderRadius: 1,
+            fontWeight: 600,
+            boxShadow: 'none',
+            bgcolor: theme.palette.mode === 'light' ? '#111' : '#eee',
+            color: theme.palette.mode === 'light' ? '#fff' : '#111',
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'light' ? '#222' : '#ddd',
+              boxShadow: 'none',
+            },
+          }}
+        >
+          New Attendee
+        </Button>
+      </Box>
 
       <Paper 
         elevation={0} 

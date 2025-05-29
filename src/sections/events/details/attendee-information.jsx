@@ -3,22 +3,24 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 
-import { grey } from '@mui/material/colors';
-import Tooltip from '@mui/material/Tooltip';
+// import { grey } from '@mui/material/colors';
+// import Tooltip from '@mui/material/Tooltip';
 import { styled, useTheme } from '@mui/material/styles';
 import {
   Box,
   Chip,
-  Table,
+  // Table,
   Stack,
   alpha,
   Button,
-  TableRow,
-  TableBody,
-  TableCell,
-  TableHead,
+  // TableRow,
+  // TableBody,
+  // TableCell,
+  // TableHead,
+  MenuItem,
+  TextField,
   Typography,
-  TableContainer,
+  // TableContainer,
   CircularProgress,
 } from '@mui/material';
 
@@ -143,11 +145,14 @@ const SliderIndicator = styled('div')(({ activeTab, theme }) => ({
 const AttendeeInformation = ({ id }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [searchQuery, setSearchQuery] = React.useState('');
+const [ticketTypeFilter, setTicketTypeFilter] = React.useState('All');
+
   const theme = useTheme();
 
   const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
 
-  const attendeesData = data?.attendees || [];
+  const attendeesData = React.useMemo(() => data?.attendees || [], [data]);
 
   const checkedInCount = attendeesData?.filter(
     (attendee) => attendee.status === 'checkedIn'
@@ -157,12 +162,33 @@ const AttendeeInformation = ({ id }) => {
     (attendee) => attendee.status === 'pending'
   ).length;
 
-  const filteredAttendees = attendeesData?.filter(
-    (attendee) =>
+  // const filteredAttendees = attendeesData?.filter(
+  //   (attendee) =>
+  //     (activeTab === 0 && attendee.status === 'pending') ||
+  //     (activeTab === 1 && attendee.status === 'checkedIn')
+  // );
+const ticketTypes = React.useMemo(() => {
+  const types = new Set();
+  attendeesData.forEach(a => {
+    if (a.ticket?.ticketType?.title) types.add(a.ticket.ticketType.title);
+  });
+  return Array.from(types);
+}, [attendeesData]);
+const filteredAttendees = attendeesData?.filter(
+  (attendee) => {
+    const matchesTab =
       (activeTab === 0 && attendee.status === 'pending') ||
-      (activeTab === 1 && attendee.status === 'checkedIn')
-  );
-
+      (activeTab === 1 && attendee.status === 'checkedIn');
+    const matchesSearch =
+      attendee.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTicketType =
+      ticketTypeFilter === 'All' ||
+      attendee.ticket?.ticketType?.title === ticketTypeFilter;
+    return matchesTab && matchesSearch && matchesTicketType;
+  }
+);
   if (isLoading) {
     return (
       <Box
@@ -201,42 +227,71 @@ const AttendeeInformation = ({ id }) => {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             alignItems: 'flex-end',
             marginBottom: '10px',
           }}
         >
-          <Tooltip title="View Full Attendee List">
+          <Stack
+            direction="column"
+            spacing={1}
+            sx={{
+              mb: 1,
+            }}
+          >
             <Button
-              variant="outlined"
-              color="inherit"
-              onClick={() => navigate(`${paths.dashboard.events.attendees}/${id}`)}
-              style={{
-                width: '48px',
-                height: '48px',
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-              }}
-            >
-              <Iconify icon="mdi:account-group" width={26} height={26} />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Check In Attendees">
-            <Button
-              variant="outlined"
-              color="inherit"
+              variant="contained"
               onClick={() => navigate(`${paths.dashboard.events.qr}/${id}`)}
-              style={{
-                width: '48px',
-                height: '48px',
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-                marginLeft: '10px',
+              sx={{
+                height: '42px',
+                px: 2,
+                py: 1,
+                borderRadius: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                bgcolor: theme.palette.mode === 'light' ? 'grey.900' : 'common.white',
+                color: theme.palette.mode === 'light' ? 'common.white' : 'grey.900',
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'light' ? 'common.black' : 'grey.100',
+                },
+                fontWeight: 600,
+                fontSize: '13px',
+                textTransform: 'none',
+                boxShadow: 'none',
               }}
             >
-              <Iconify icon="bx:qr" width={26} height={26} />
+              <Iconify icon="bx:qr" width={20} height={20} />
+              Check In
             </Button>
-          </Tooltip>
+
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`${paths.dashboard.events.attendees}/${id}`)}
+              sx={{
+                height: '42px',
+                px: 2,
+                py: 1,
+                borderRadius: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                color: theme.palette.mode === 'light' ? 'text.primary' : 'common.white',
+                borderColor: theme.palette.mode === 'light' ? 'grey.300' : 'grey.700',
+                bgcolor: theme.palette.mode === 'light' ? 'common.white' : 'grey.800',
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'grey.700',
+                  borderColor: theme.palette.mode === 'light' ? 'grey.400' : 'grey.600',
+                },
+                fontWeight: 600,
+                fontSize: '13px',
+                textTransform: 'none',
+              }}
+            >
+              <Iconify icon="mdi:account-group" width={20} height={20} />
+              Attendee List
+            </Button>
+          </Stack>
         </div>
       </div>
 
@@ -300,36 +355,189 @@ const AttendeeInformation = ({ id }) => {
           </Stack>
         </TabButton>
       </TabsWrapper>
+<Box sx={{ mb: 1.5, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+  <TextField
+    fullWidth
+    placeholder="Search attendees by name or company..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 20, height: 20, mr: 1 }} />
+      ),
+    }}
+    sx={{
+      mb: { xs: 1, sm: 0 },
+      '& .MuiOutlinedInput-root': {
+        height: 44,
+        backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
+        '& fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+        },
+        '&:hover fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+        },
+      },
+    }}
+  />
+  <TextField
+    select
+    label="Ticket Type"
+    value={ticketTypeFilter}
+    onChange={(e) => setTicketTypeFilter(e.target.value)}
+    sx={{
+      width: 200,
+      '& .MuiOutlinedInput-root': {
+        height: 44,
+        backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1e1e1e',
+        '& fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : '#333',
+        },
+        '&:hover fieldset': {
+          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+        },
+      },
+    }}
+  >
+    <MenuItem value="All">All </MenuItem>
+    {ticketTypes.map((type) => (
+      <MenuItem key={type} value={type}>{type}</MenuItem>
+    ))}
+  </TextField>
+</Box>
+      <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 2, bgcolor: theme.palette.background.paper, overflow: 'hidden' }}>
+        {/* Header row for desktop */}
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          sx={{ 
+            px: 2, 
+            py: 1.5, 
+            bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12), 
+            display: { xs: 'none', md: 'flex' } 
+          }}
+        >
+          <Typography sx={{ width: '30%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Name</Typography>
+          <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Company</Typography>
+          <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Ticket Type</Typography>
+        </Stack>
 
-      <TableContainer
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          border: 1,
-          borderColor: grey[200],
-          borderRadius: 2,
-        }}
-      >
-        <Table>
-          <TableHead sx={{ borderTop: '1px solid', borderColor: grey[200] }}>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Company</TableCell>
-              <TableCell>Ticket Type</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredAttendees.map((attendee, index) => (
-              <TableRow key={index}>
-                <TableCell>{`${attendee.firstName}  ${attendee.lastName}`}</TableCell>
-                <TableCell>{attendee.companyName}</TableCell>
-                <TableCell>
-                  <Chip label={attendee.ticket.ticketType.title} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
+          {filteredAttendees.length === 0 ? (
+            <Stack 
+              alignItems="center" 
+              justifyContent="center" 
+              sx={{ 
+                py: 5,
+                px: 2,
+                color: theme.palette.text.secondary
+              }}
+            >
+              <Iconify 
+                icon="eva:search-fill" 
+                sx={{ 
+                  width: 40, 
+                  height: 40, 
+                  color: theme.palette.mode === 'light' ? 'grey.400' : 'grey.600',
+                  mb: 1
+                }} 
+              />
+              <Typography variant="body2">
+                No attendee found
+              </Typography>
+            </Stack>
+          ) : (
+            filteredAttendees.map((attendee, index) => (
+            <Stack 
+              key={index} 
+              direction={{ xs: 'column', md: 'row' }} 
+              alignItems={{ xs: 'flex-start', md: 'center' }} 
+              sx={{ 
+                p: 2, 
+                borderBottom: `1px solid ${theme.palette.divider}`, 
+                cursor: 'pointer', 
+                '&:hover': { 
+                  bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : alpha(theme.palette.grey[500], 0.12)
+                } 
+              }}
+            >
+              {/* Mobile layout - Card style */}
+              <Box 
+                sx={{ 
+                  display: { xs: 'flex', md: 'none' }, 
+                  flexDirection: 'column', 
+                  width: '100%',
+                  mb: 1
+                }}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Name:</Typography>
+                  <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                    {`${attendee.firstName} ${attendee.lastName}`}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Company:</Typography>
+                  <Typography sx={{ color: theme.palette.text.primary, fontSize: 13, fontWeight: 500 }}>
+                    {attendee.companyName}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Ticket Type:</Typography>
+                  <Chip 
+                    label={attendee.ticket.ticketType.title} 
+                    size="small"
+                    sx={{ 
+                      height: 24,
+                      fontSize: '0.75rem',
+                      borderRadius: 1
+                    }}
+                  />
+                </Box>
+              </Box>
+              
+              {/* Desktop layout - row style */}
+              <Typography 
+                sx={{ 
+                  width: '30%', 
+                  color: theme.palette.text.primary, 
+                  fontSize: 13, 
+                  display: { xs: 'none', md: 'block' } 
+                }}
+              >
+                {`${attendee.firstName} ${attendee.lastName}`}
+              </Typography>
+              <Typography 
+                sx={{ 
+                  width: '35%', 
+                  color: theme.palette.text.primary, 
+                  fontSize: 13, 
+                  display: { xs: 'none', md: 'block' } 
+                }}
+              >
+                {attendee.companyName}
+              </Typography>
+              <Box 
+                sx={{ 
+                  width: '35%', 
+                  display: { xs: 'none', md: 'flex' }
+                }}
+              >
+                <Chip 
+                  label={attendee.ticket.ticketType.title} 
+                  size="small"
+                  sx={{ 
+                    height: 24,
+                    fontSize: '0.75rem',
+                    borderRadius: 1
+                  }}
+                />
+              </Box>
+            </Stack>
+          ))
+          )}
+        </Stack>
+      </Box>
     </Box>
   );
 };
