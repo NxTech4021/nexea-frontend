@@ -108,9 +108,10 @@ export default function EventCountdown() {
             alt={nextEvent.name}
             src={nextEvent.eventSetting?.eventLogo || "/logo/nexea.png"}
             sx={{
-              width: { xs: 28, sm: 32 },
-              height: { xs: 28, sm: 32 },
-              bgcolor: 'background.neutral',
+              width: { xs: 28, sm: 38 },
+              height: { xs: 28, sm: 38 },
+              borderRadius: 1.5,
+              bgcolor: nextEvent.eventSetting?.bgColor || 'background.neutral',
               '& img': {
                 objectFit: 'contain',
                 width: '70%',
@@ -171,7 +172,7 @@ export default function EventCountdown() {
               transition: (theme) => theme.transitions.create('color'),
             }}
           >
-            {countdown}
+          {countdown}  
           </Typography>
         </Box>
       </Box>

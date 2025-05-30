@@ -119,9 +119,8 @@ const EventInformation = ({ event }) => {
     // This will refresh the data using your SWR hook
     mutate();
   };
-  const isDefaultTime = (date) => {
-  return dayjs(date).format('HH:mm') === '00:00';
-};
+  const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
+  
   return (
     <Card
       sx={{
@@ -211,7 +210,7 @@ const EventInformation = ({ event }) => {
                 borderRadius: 1.5,
                 overflow: 'hidden',
                 position: 'relative',
-                bgcolor: 'background.neutral',
+                 bgcolor: event.eventSetting?.bgColor || 'background.neutral',
               }}
             >
               <Avatar
@@ -220,11 +219,11 @@ const EventInformation = ({ event }) => {
                 sx={{
                   width: '100%',
                   height: '100%',
-                  bgcolor: 'background.neutral',
+                   bgcolor: event.eventSetting?.bgColor || 'background.neutral',
                   '& img': {
                     objectFit: 'contain',
-                    width: '70%',
-                    height: '70%',
+                    width: '90%',
+                    height: '90%',
                     margin: 'auto',
                   },
                 }}

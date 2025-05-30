@@ -492,7 +492,7 @@ export default function OrderView() {
                         borderRadius: 1.5,
                         overflow: 'hidden',
                         flexShrink: 0,
-                        bgcolor: 'background.neutral',
+                        bgcolor: event.eventSetting?.bgColor || 'background.neutral',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -503,8 +503,8 @@ export default function OrderView() {
                         src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
                         alt={event.name}
                         sx={{
-                          width: '70%',
-                          height: '70%',
+                          width: '90%',
+                          height: '90%',
                           objectFit: 'contain',
                         }}
                       />
