@@ -88,6 +88,7 @@ const TickerPurchaseHeader = () => {
 
   const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
 
+
   useEffect(() => {
     const timer = setInterval(() => {
       const now = dayjs();

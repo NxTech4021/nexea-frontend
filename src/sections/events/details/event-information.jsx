@@ -120,7 +120,7 @@ const EventInformation = ({ event }) => {
     mutate();
   };
   const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
-  
+
   return (
     <Card
       sx={{

@@ -36,7 +36,6 @@ import {
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
 import { endpoints, axiosInstance } from 'src/utils/axios';
-import { TablePaginationCustom } from 'src/components/table';
 
 import useSWR from 'swr';
 
@@ -51,6 +50,7 @@ import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 
+import { TablePaginationCustom } from 'src/components/table';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
@@ -248,13 +248,10 @@ const EventLists = ({ query }) => {
   //   );
   // }, [filteredEvents, currentPage]);
 
-// Helper function to check if time is 00:00
-// const isDefaultTime = (date) => {
-//   return dayjs(date).format('HH:mm') === '00:00';
-// };
 
-const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
-
+  // Helper function to check if time is 00:00
+  const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
+  
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
   };
@@ -602,7 +599,6 @@ const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
                         {event.status.charAt(0).toUpperCase() + event.status.slice(1).toLowerCase()}
                       </Typography>
                     </Box>
-                  </Box>
 
                   <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
                     <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontSize: 13 }}>
@@ -699,11 +695,21 @@ const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
                         e.stopPropagation();
                         setExpandedRow(isExpanded ? null : event.id);
                       }}
+                      startIcon={<Iconify icon="eva:alert-circle-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        transform: isExpanded ? 'rotate(180deg)' : 'none',
-                        transition: 'transform 0.2s ease-in-out',
-                        color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
+                        },
                       }}
+                      aria-label="View Event Details"
                     >
                       <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
                     </IconButton>
@@ -1397,24 +1403,25 @@ const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
               </>
             ) : (
               // Desktop view - Filter chips in tray design
-              <Box 
-                sx={{ 
-                  display: 'flex', 
+              <Box
+                sx={{
+                  display: 'flex',
                   flexWrap: 'wrap',
                   justifyContent: { xs: 'flex-start', sm: 'flex-start' },
                   gap: 1,
-                  width: '100%'
+                  width: '100%',
                 }}
               >
                 {['All', ...Object.values(EventStatus)].map((status) => {
                   // Calculate count for each status
                   let count = data?.events?.length || 0; // Default for 'All'
                   if (status !== 'All') {
-                    count = data?.events?.filter(event => event.status === status).length || 0;
+                    count = data?.events?.filter((event) => event.status === status).length || 0;
                   }
-                  
-                  const buttonText = status === 'All' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase();
-                  
+
+                  const buttonText =
+                    status === 'All' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase();
+
                   return (
                     <Button
                       key={status}
@@ -1441,7 +1448,7 @@ const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
                         minWidth: 'auto',
                         px: 1.5,
                         height: 32,
-                        '&:hover': { 
+                        '&:hover': {
                           bgcolor: (() => {
                             if ((status === 'All' && !statusFilter) || status === statusFilter) {
                               return theme.palette.mode === 'light' ? '#222' : '#ddd';

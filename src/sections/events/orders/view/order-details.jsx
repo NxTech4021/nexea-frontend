@@ -566,7 +566,9 @@ const OrderDetails = ({ orderId }) => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body1">Subtotal</Typography>
                 <Typography variant="body1">
-                  {formatCurrency((order.totalAmount || 0) + (order.discountAmount || 0))}
+                  {formatCurrency(
+                    (order.totalAmount - order.tax || 0) + (order.discountAmount || 0)
+                  )}
                 </Typography>
               </Box>
 
