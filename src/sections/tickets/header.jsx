@@ -86,10 +86,7 @@ const TickerPurchaseHeader = () => {
     }
   }, [extend, timeOut, cartData, cartMutate]);
 
-  // Add this helper function after the imports
-const isDefaultTime = (date) => {
-  return dayjs(date).format('HH:mm') === '00:00';
-};
+  const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -163,11 +160,40 @@ const isDefaultTime = (date) => {
           px={{ sm: 5, md: 15 }}
           justifyContent={mdDown && 'space-between'}
         >
-          {eventData?.eventSetting?.eventLogo ? (
-            <Image src={eventData?.eventSetting?.eventLogo} width={120} height={50} />
-          ) : (
-            <Image src="/assets/nexea.png" width={120} />
-          )}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: eventData?.eventSetting?.bgColor || 'transparent',
+              p: 0.5,
+              borderRadius: 1,
+              maxHeight: { xs: 45, md: 50 },
+              '& img': {
+                maxHeight: { xs: '45px', md: '50px' },
+                width: 'auto',
+                maxWidth: '100%',
+              },
+            }}
+          >
+            {eventData?.eventSetting?.eventLogo ? (
+              <Image
+                src={eventData?.eventSetting?.eventLogo}
+                sx={{
+                  display: 'block',
+                  objectFit: 'none',
+                }}
+              />
+            ) : (
+              <Image
+                src="/assets/nexea.png"
+                sx={{
+                  display: 'block',
+                  objectFit: 'none',
+                }}
+              />
+            )}
+          </Box>
 
           {!mdDown && (
            <Stack flexGrow={1}>
