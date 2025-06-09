@@ -47,25 +47,25 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  if (isMini) {
-    return (
-      <>
-        <Header onOpenNav={nav.onTrue} />
+  // if (isMini) {
+  //   return (
+  //     <>
+  //       <Header onOpenNav={nav.onTrue} />
 
-        <Box
-          sx={{
-            minHeight: 1,
-            display: 'flex',
-            flexDirection: { xs: 'column', lg: 'row' },
-          }}
-        >
-          {lgUp ? renderNavMini : renderNavVertical}
+  //       <Box
+  //         sx={{
+  //           minHeight: 1,
+  //           display: 'flex',
+  //           flexDirection: { xs: 'column', lg: 'row' },
+  //         }}
+  //       >
+  //         {lgUp ? renderNavMini : renderNavVertical}
 
-          <Main>{children}</Main>
-        </Box>
-      </>
-    );
-  }
+  //         <Main>{children}</Main>
+  //       </Box>
+  //     </>
+  //   );
+  // }
 
   return (
     <>
@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }) {
           flexDirection: { xs: 'column', lg: 'row' },
         }}
       >
-        {renderNavVertical}
+        <Box>{!isMini || !lgUp ? renderNavVertical : renderNavMini}</Box>
 
         <Main>{children}</Main>
       </Box>
