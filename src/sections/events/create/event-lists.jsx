@@ -248,10 +248,9 @@ const EventLists = ({ query }) => {
   //   );
   // }, [filteredEvents, currentPage]);
 
-
   // Helper function to check if time is 00:00
   const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
-  
+
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
   };
@@ -309,32 +308,32 @@ const EventLists = ({ query }) => {
               {/* Left side - Avatar and Event Info */}
               <Grid item xs={12} sm={8}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 1.5,
-                          overflow: 'hidden',
-                          position: 'relative',
-                          bgcolor: event.eventSetting?.bgColor || 'background.neutral',
-                          flexShrink: 0,
-                        }}
-                      >
-                  <Avatar
-                    alt={event.name}
-                    src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                  <Box
                     sx={{
-                      width: 64,
-                      height: 64,
+                      width: 44,
+                      height: 44,
+                      borderRadius: 1.5,
+                      overflow: 'hidden',
+                      position: 'relative',
                       bgcolor: event.eventSetting?.bgColor || 'background.neutral',
-                      '& img': {
-                        objectFit: 'contain',
-                        width: '70%',
-                        height: '70%',
-                        margin: 'auto',
-                      },
+                      flexShrink: 0,
                     }}
-                  />
+                  >
+                    <Avatar
+                      alt={event.name}
+                      src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        bgcolor: event.eventSetting?.bgColor || 'background.neutral',
+                        '& img': {
+                          objectFit: 'contain',
+                          width: '70%',
+                          height: '70%',
+                          margin: 'auto',
+                        },
+                      }}
+                    />
                   </Box>
                   <Stack spacing={0.75}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -446,26 +445,76 @@ const EventLists = ({ query }) => {
           borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
           bgcolor: theme.palette.mode === 'light' ? '#f3f3f3' : '#333',
           minWidth: { xs: 800, sm: '100%' },
-          display: { xs: 'none', md: 'flex' }  // Hide header on mobile
+          display: { xs: 'none', md: 'flex' }, // Hide header on mobile
         }}
       >
         <Box sx={{ width: '35%', display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Name</Typography>
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Event Name
+          </Typography>
         </Box>
         <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Status</Typography>
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Status
+          </Typography>
         </Box>
         <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Date & Time</Typography>
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Date & Time
+          </Typography>
         </Box>
         <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Event Manager</Typography>
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Event Manager
+          </Typography>
         </Box>
         <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Check-in Status</Typography>
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Check-in Status
+          </Typography>
         </Box>
-        <Box sx={{ width: '5%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontWeight: 600, fontSize: 13 }}>Actions</Typography>
+        <Box
+          sx={{ width: '5%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
+        >
+          <Typography
+            sx={{
+              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            Actions
+          </Typography>
         </Box>
       </Stack>
 
@@ -479,13 +528,16 @@ const EventLists = ({ query }) => {
           bgcolor: theme.palette.mode === 'light' ? '#f8f9fa' : '#1e1e1e',
         }}
       >
-        <Typography variant="subtitle2" sx={{ 
-          color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-          fontSize: 12,
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: 0.5
-        }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+          }}
+        >
           {sortedTableEvents?.length || 0} Events Listed
         </Typography>
       </Box>
@@ -498,202 +550,459 @@ const EventLists = ({ query }) => {
         {sortedTableEvents
           ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
           ?.map((event) => {
-          const statusConfig = getStatusColor(event.status);
-          const isExpanded = expandedRow === event.id;
-          const orders = event?.order || [];
-          const attendees = orders?.flatMap((a) => a?.attendees) || [];
-          const checkedInCount = attendees.filter(attendee => attendee.status === 'checkedIn').length;
-          const notCheckedInCount = attendees.filter(attendee => attendee.status === 'pending').length;
-          const totalAttendees = attendees.length;
+            const statusConfig = getStatusColor(event.status);
 
-          return (
-            <Stack
-              key={event.id}
-              sx={{
-                borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
-                bgcolor: getBackgroundColor(isExpanded, theme.palette.mode),
-                transition: 'background-color 0.2s ease-in-out',
-                '&:hover': {
-                  bgcolor: getHoverBackgroundColor(!isExpanded, theme.palette.mode),
-                },
-              }}
-            >
-              <Tooltip title={!isExpanded ? 'View Event Details' : ''} arrow placement="top">
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    cursor: 'pointer',
-                    display: { xs: 'none', md: 'flex' }  // Hide on mobile
-                  }}
-                  onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
-                >
-                  <Box sx={{ width: '35%', display: 'flex', alignItems: 'center' }}>
-                    <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%', overflow: 'hidden' }}>
-                      <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 1.5,
-                          overflow: 'hidden',
-                          position: 'relative',
-                          bgcolor: event.eventSetting?.bgColor || 'background.neutral',
-                          flexShrink: 0,
-                        }}
+            const isExpanded = expandedRow === event.id;
+
+            const orders = event?.order?.filter((a) => a.status === 'paid') || [];
+
+            const attendees = orders?.flatMap((a) => a?.attendees) || [];
+
+            const checkedInCount = attendees.filter(
+              (attendee) => attendee.status === 'checkedIn'
+            ).length;
+
+            const notCheckedInCount = attendees.filter(
+              (attendee) => attendee.status === 'pending'
+            ).length;
+
+            const totalAttendees = attendees.length;
+
+            return (
+              <Stack
+                key={event.id}
+                sx={{
+                  borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
+                  bgcolor: getBackgroundColor(isExpanded, theme.palette.mode),
+                  transition: 'background-color 0.2s ease-in-out',
+                  '&:hover': {
+                    bgcolor: getHoverBackgroundColor(!isExpanded, theme.palette.mode),
+                  },
+                }}
+              >
+                <Tooltip title={!isExpanded ? 'View Event Details' : ''} arrow placement="top">
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      cursor: 'pointer',
+                      display: { xs: 'none', md: 'flex' }, // Hide on mobile
+                    }}
+                    onClick={() =>
+                      !isExpanded && router.push(paths.dashboard.events.details(event.id))
+                    }
+                  >
+                    <Box sx={{ width: '35%', display: 'flex', alignItems: 'center' }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                        sx={{ width: '100%', overflow: 'hidden' }}
                       >
                         <Box
-                          component="img"
-                          src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
-                          alt={event.name}
                           sx={{
-                            width: '90%',
-                            height: '90%',
-                            objectFit: 'contain',
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)'
-                          }}
-                        />
-                      </Box>
-                      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-                        <Typography 
-                          variant="subtitle2" 
-                          noWrap 
-                          sx={{ 
-                            fontWeight: 500,
-                            color: theme.palette.mode === 'light' ? '#111' : '#fff',
-                            fontSize: 13,
-                            // overflow: 'hidden',
-                            // textOverflow: 'ellipsis',
-                            whiteSpace: 'pre-wrap',
+                            width: 44,
+                            height: 44,
+                            borderRadius: 1.5,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            bgcolor: event.eventSetting?.bgColor || 'background.neutral',
+                            flexShrink: 0,
                           }}
                         >
-                          {event.name}
-                        </Typography>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Iconify
-                            icon="mdi:account-group"
-                            sx={{ 
-                              width: 14, 
-                              height: 14,
-                              color: theme.palette.mode === 'light' ? '#666' : '#aaa'
+                          <Box
+                            component="img"
+                            src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                            alt={event.name}
+                            sx={{
+                              width: '90%',
+                              height: '90%',
+                              objectFit: 'contain',
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
                             }}
                           />
-                          <Typography variant="caption" sx={{ 
-                            color: theme.palette.mode === 'light' ? '#666' : '#aaa'
-                          }}>
-                            {totalAttendees} Attendees
+                        </Box>
+                        <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                          <Typography
+                            variant="subtitle2"
+                            noWrap
+                            sx={{
+                              fontWeight: 500,
+                              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                              fontSize: 13,
+                              // overflow: 'hidden',
+                              // textOverflow: 'ellipsis',
+                              whiteSpace: 'pre-wrap',
+                            }}
+                          >
+                            {event.name}
                           </Typography>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Iconify
+                              icon="mdi:account-group"
+                              sx={{
+                                width: 14,
+                                height: 14,
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              }}
+                            />
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              }}
+                            >
+                              {totalAttendees} Attendees
+                            </Typography>
+                          </Stack>
                         </Stack>
+                      </Stack>
+                    </Box>
+
+                    <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify
+                          icon={statusConfig.icon}
+                          sx={{ width: 14, height: 14, color: statusConfig.color }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}
+                        >
+                          {event.status.charAt(0).toUpperCase() +
+                            event.status.slice(1).toLowerCase()}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
+                      <Typography
+                        sx={{
+                          color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                          fontSize: 13,
+                        }}
+                      >
+                        {fDate(event.date)}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                          fontSize: 12,
+                        }}
+                      >
+                        {dayjs(event.date).format('h:mm A')}
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
+                      <Stack
+                        direction="row"
+                        spacing={1.5}
+                        alignItems="center"
+                        sx={{ overflow: 'hidden' }}
+                      >
+                        <Avatar
+                          alt={event.personInCharge.fullName}
+                          src={event.personInCharge.avatar || ''}
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            fontSize: '0.75rem',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {event.personInCharge.fullName.charAt(0)}
+                        </Avatar>
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                            fontSize: 13,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {event.personInCharge.fullName}
+                        </Typography>
+                      </Stack>
+                    </Box>
+
+                    <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          padding: '4px 8px',
+                          borderRadius: 1,
+                          width: 'fit-content',
+                        }}
+                      >
+                        <Iconify
+                          icon="eva:checkmark-circle-2-fill"
+                          sx={{
+                            width: 14,
+                            height: 14,
+                            color: '#229A16',
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: '#229A16',
+                            fontWeight: 600,
+                            fontSize: 12,
+                          }}
+                        >
+                          {checkedInCount} Checked In
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          padding: '4px 8px',
+                          borderRadius: 1,
+                          width: 'fit-content',
+                        }}
+                      >
+                        <Iconify
+                          icon="eva:close-circle-fill"
+                          sx={{
+                            width: 14,
+                            height: 14,
+                            color: '#B72136',
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: '#B72136',
+                            fontWeight: 600,
+                            fontSize: 12,
+                          }}
+                        >
+                          {notCheckedInCount} Not Checked In
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedRow(isExpanded ? null : event.id);
+                        }}
+                        startIcon={
+                          <Iconify icon="eva:alert-circle-outline" width={20} height={20} />
+                        }
+                        variant="text"
+                        sx={{
+                          minWidth: 0,
+                          px: 1.5,
+                          fontWeight: 500,
+                          color: 'text.primary',
+                          textTransform: 'none',
+                          transition: 'background 0.2s, transform 0.2s',
+                          '&:hover': {
+                            bgcolor: 'action.hover',
+                            transform: 'scale(1.04)',
+                          },
+                        }}
+                        aria-label="View Event Details"
+                      >
+                        <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
+                      </IconButton>
+                    </Box>
+                  </Stack>
+
+                  {/* Mobile Card View */}
+                  <Box
+                    sx={{
+                      display: { xs: 'block', md: 'none' },
+                      p: 2,
+                      position: 'relative',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                      },
+                    }}
+                    onClick={() =>
+                      !isExpanded && router.push(paths.dashboard.events.details(event.id))
+                    }
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                      <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 1.5,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            bgcolor: event.eventSetting?.bgColor || 'background.neutral',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                            alt={event.name}
+                            sx={{
+                              width: '95%',
+                              height: '95%',
+                              objectFit: 'contain',
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                          />
+                        </Box>
+                        <Stack spacing={0.5}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                              fontWeight: 600,
+                              fontSize: 14,
+                            }}
+                          >
+                            {event.name}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Iconify
+                              icon={statusConfig.icon}
+                              sx={{ width: 14, height: 14, color: statusConfig.color }}
+                            />
+                            <Typography
+                              variant="caption"
+                              sx={{ color: statusConfig.color, fontWeight: 600 }}
+                            >
+                              {event.status.charAt(0).toUpperCase() +
+                                event.status.slice(1).toLowerCase()}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Stack>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedRow(isExpanded ? null : event.id);
+                        }}
+                        sx={{
+                          color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                          p: 0.5,
+                        }}
+                      >
+                        <Iconify
+                          icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'}
+                          width={20}
+                        />
+                      </IconButton>
+                    </Box>
+
+                    <Stack spacing={1.5}>
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Iconify
+                            icon="eva:calendar-outline"
+                            width={14}
+                            sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                          >
+                            {fDate(event.date)}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Iconify
+                            icon="eva:clock-outline"
+                            width={14}
+                            sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                          >
+                            {dayjs(event.date).format('h:mm A')}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar
+                          alt={event.personInCharge.fullName}
+                          src={event.personInCharge.avatar || ''}
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            fontSize: '0.75rem',
+                          }}
+                        >
+                          {event.personInCharge.fullName.charAt(0)}
+                        </Avatar>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                        >
+                          {event.personInCharge.fullName}
+                        </Typography>
+                      </Box>
+
+                      <Stack direction="row" spacing={2}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Iconify
+                            icon="eva:checkmark-circle-2-fill"
+                            sx={{ width: 14, height: 14, color: '#229A16' }}
+                          />
+                          <Typography variant="caption" sx={{ color: '#229A16', fontWeight: 600 }}>
+                            {checkedInCount} Checked In
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Iconify
+                            icon="eva:close-circle-fill"
+                            sx={{ width: 14, height: 14, color: '#B72136' }}
+                          />
+                          <Typography variant="caption" sx={{ color: '#B72136', fontWeight: 600 }}>
+                            {notCheckedInCount} Not Checked In
+                          </Typography>
+                        </Box>
                       </Stack>
                     </Stack>
                   </Box>
+                </Tooltip>
 
-                  <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
-                      <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
-                        {event.status.charAt(0).toUpperCase() + event.status.slice(1).toLowerCase()}
-                      </Typography>
-                    </Box>
-
-                  <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#111' : '#fff', fontSize: 13 }}>
-                      {fDate(event.date)}
-                    </Typography>
-                    <Typography sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>
-                      {dayjs(event.date).format('h:mm A')}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ width: '15%', display: 'flex', alignItems: 'center' }}>
-                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ overflow: 'hidden' }}>
-                      <Avatar
-                        alt={event.personInCharge.fullName}
-                        src={event.personInCharge.avatar || ''}
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          fontSize: '0.75rem',
-                          flexShrink: 0
-                        }}
-                      >
-                        {event.personInCharge.fullName.charAt(0)}
-                      </Avatar>
-                      <Typography 
-                        variant="body2" 
-                        noWrap 
-                        sx={{ 
-                          color: theme.palette.mode === 'light' ? '#111' : '#fff',
-                          fontSize: 13,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {event.personInCharge.fullName}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 0.5,
-                      padding: '4px 8px',
-                      borderRadius: 1,
-                      width: 'fit-content'
-                    }}>
-                      <Iconify 
-                        icon="eva:checkmark-circle-2-fill" 
-                        sx={{ 
-                          width: 14, 
-                          height: 14, 
-                          color: '#229A16'
-                        }} 
-                      />
-                      <Typography variant="body2" sx={{ 
-                        color: '#229A16',
-                        fontWeight: 600,
-                        fontSize: 12
-                      }}>
-                        {checkedInCount} Checked In
-                      </Typography>
-                    </Box>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 0.5,
-                      padding: '4px 8px',
-                      borderRadius: 1,
-                      width: 'fit-content'
-                    }}>
-                      <Iconify 
-                        icon="eva:close-circle-fill" 
-                        sx={{ 
-                          width: 14, 
-                          height: 14, 
-                          color: '#B72136'
-                        }} 
-                      />
-                      <Typography variant="body2" sx={{ 
-                        color: '#B72136',
-                        fontWeight: 600,
-                        fontSize: 12
-                      }}>
-                        {notCheckedInCount} Not Checked In
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedRow(isExpanded ? null : event.id);
+                {/* Expanded Actions Row */}
+                <Collapse in={isExpanded} timeout={250} unmountOnExit>
+                  {/* Desktop Actions */}
+                  <Stack
+                    direction="row"
+                    sx={{
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                      minHeight: 48,
+                      px: 2,
+                      bgcolor: 'background.paper',
+                      display: { xs: 'none', md: 'flex' },
+                    }}
+                    alignItems="center"
+                    spacing={1}
+                  >
+                    <Button
+                      onClick={() => {
+                        router.push(paths.dashboard.events.details(event.id));
+                        setExpandedRow(null);
                       }}
                       startIcon={<Iconify icon="eva:alert-circle-outline" width={20} height={20} />}
                       variant="text"
@@ -711,431 +1020,81 @@ const EventLists = ({ query }) => {
                       }}
                       aria-label="View Event Details"
                     >
-                      <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} />
-                    </IconButton>
-                  </Box>
-                </Stack>
-
-                {/* Mobile Card View */}
-                <Box 
-                  sx={{ 
-                    display: { xs: 'block', md: 'none' },
-                    p: 2,
-                    position: 'relative',
-                    cursor: 'pointer',
-                    '&:hover': { 
-                      bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
-                    },
-                  }}
-                  onClick={() => !isExpanded && router.push(paths.dashboard.events.details(event.id))}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 1.5,
-                          overflow: 'hidden',
-                          position: 'relative',
-                          bgcolor: event.eventSetting?.bgColor || 'background.neutral',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
-                          alt={event.name}
-                          sx={{
-                            width: '95%',
-                            height: '95%',
-                            objectFit: 'contain',
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)'
-                          }}
-                        />
-                      </Box>
-                      <Stack spacing={0.5}>
-                        <Typography 
-                          variant="subtitle2" 
-                          sx={{ 
-                            color: theme.palette.mode === 'light' ? '#111' : '#fff',
-                            fontWeight: 600,
-                            fontSize: 14,
-                          }}
-                        >
-                          {event.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
-                          <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600 }}>
-                            {event.status.charAt(0).toUpperCase() + event.status.slice(1).toLowerCase()}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Stack>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedRow(isExpanded ? null : event.id);
-                      }}
-                      sx={{
-                        color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                        p: 0.5,
-                      }}
-                    >
-                      <Iconify icon={isExpanded ? 'eva:close-fill' : 'eva:more-vertical-fill'} width={20} />
-                    </IconButton>
-                  </Box>
-
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify 
-                          icon="eva:calendar-outline" 
-                          width={14} 
-                          sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }} 
-                        />
-                        <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}>
-                          {fDate(event.date)}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify 
-                          icon="eva:clock-outline" 
-                          width={14} 
-                          sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }} 
-                        />
-                        <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}>
-                          {dayjs(event.date).format('h:mm A')}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar
-                        alt={event.personInCharge.fullName}
-                        src={event.personInCharge.avatar || ''}
-                        sx={{
-                          width: 20,
-                          height: 20,
-                          fontSize: '0.75rem',
-                        }}
-                      >
-                        {event.personInCharge.fullName.charAt(0)}
-                      </Avatar>
-                      <Typography variant="body2" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}>
-                        {event.personInCharge.fullName}
-                      </Typography>
-                    </Box>
-
-                    <Stack direction="row" spacing={2}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Iconify 
-                          icon="eva:checkmark-circle-2-fill" 
-                          sx={{ width: 14, height: 14, color: '#229A16' }} 
-                        />
-                        <Typography variant="caption" sx={{ color: '#229A16', fontWeight: 600 }}>
-                          {checkedInCount} Checked In
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Iconify 
-                          icon="eva:close-circle-fill" 
-                          sx={{ width: 14, height: 14, color: '#B72136' }} 
-                        />
-                        <Typography variant="caption" sx={{ color: '#B72136', fontWeight: 600 }}>
-                          {notCheckedInCount} Not Checked In
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Stack>
-                </Box>
-              </Tooltip>
-
-              {/* Expanded Actions Row */}
-              <Collapse in={isExpanded} timeout={250} unmountOnExit>
-                {/* Desktop Actions */}
-                <Stack
-                  direction="row"
-                  sx={{
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    minHeight: 48,
-                    px: 2,
-                    bgcolor: 'background.paper',
-                    display: { xs: 'none', md: 'flex' }
-                  }}
-                  alignItems="center"
-                  spacing={1}
-                >
-                  <Button
-                    onClick={() => {
-                      router.push(paths.dashboard.events.details(event.id));
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:alert-circle-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'text.primary',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="View Event Details"
-                  >
-                    Details
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setOpenEdit(true);
-                      setSelectedEvent(event);
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:edit-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'text.primary',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="Edit Event"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      ticketDialog.onTrue();
-                      setSelectedEvent(event);
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:pricetags-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'text.primary',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="Manage Tickets"
-                  >
-                    Tickets
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setOpenCSV(true);
-                      setSelectedEvent(event);
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:cloud-upload-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'text.primary',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="Upload CSV"
-                  >
-                    Upload CSV
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
-                      navigator.clipboard
-                        .writeText(eventLink)
-                        .then(() => {
-                          enqueueSnackbar('Cart link copied!', { variant: 'success' });
-                        })
-                        .catch((error) => {
-                          console.error('Error copying link: ', error);
-                          enqueueSnackbar('Failed to copy link', { variant: 'error' });
-                        });
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:copy-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'text.primary',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="Copy Cart Link"
-                  >
-                    Copy Link
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setOpenDelete(true);
-                      setSelectedEvent(event);
-                      setExpandedRow(null);
-                    }}
-                    startIcon={<Iconify icon="eva:trash-2-outline" width={20} height={20} />}
-                    variant="text"
-                    sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      fontWeight: 500,
-                      color: 'error.main',
-                      textTransform: 'none',
-                      transition: 'background 0.2s, transform 0.2s',
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                        color: 'error.dark',
-                        transform: 'scale(1.04)',
-                      },
-                    }}
-                    aria-label="Delete Event"
-                  >
-                    Delete
-                  </Button>
-                </Stack>
-
-                {/* Mobile Actions */}
-                <Stack
-                  sx={{
-                    display: { xs: 'flex', md: 'none' },
-                    p: 2,
-                    bgcolor: theme.palette.mode === 'light' ? '#f8f9fa' : '#1e1e1e',
-                    borderTop: '1px solid',
-                    borderColor: theme.palette.mode === 'light' ? '#eee' : '#333',
-                  }}
-                  spacing={1}
-                >
-                  <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
-                    <Button
-                      fullWidth
-                      onClick={() => {
-                        router.push(paths.dashboard.events.details(event.id));
-                        setExpandedRow(null);
-                      }}
-                      startIcon={<Iconify icon="eva:alert-circle-outline" width={20} />}
-                      variant="outlined"
-                      sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: textColor,
-                        borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
-                        '&:hover': {
-                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                          bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
-                        },
-                      }}
-                    >
                       Details
                     </Button>
                     <Button
-                      fullWidth
                       onClick={() => {
                         setOpenEdit(true);
                         setSelectedEvent(event);
                         setExpandedRow(null);
                       }}
-                      startIcon={<Iconify icon="eva:edit-outline" width={20} />}
-                      variant="outlined"
+                      startIcon={<Iconify icon="eva:edit-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: textColor,
-                        borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
                         '&:hover': {
-                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                          bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
                         },
                       }}
+                      aria-label="Edit Event"
                     >
                       Edit
                     </Button>
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
                     <Button
-                      fullWidth
                       onClick={() => {
                         ticketDialog.onTrue();
                         setSelectedEvent(event);
                         setExpandedRow(null);
                       }}
-                      startIcon={<Iconify icon="eva:pricetags-outline" width={20} />}
-                      variant="outlined"
+                      startIcon={<Iconify icon="eva:pricetags-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: textColor,
-                        borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
                         '&:hover': {
-                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                          bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
                         },
                       }}
+                      aria-label="Manage Tickets"
                     >
                       Tickets
                     </Button>
                     <Button
-                      fullWidth
                       onClick={() => {
                         setOpenCSV(true);
                         setSelectedEvent(event);
                         setExpandedRow(null);
                       }}
-                      startIcon={<Iconify icon="eva:cloud-upload-outline" width={20} />}
-                      variant="outlined"
+                      startIcon={<Iconify icon="eva:cloud-upload-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: textColor,
-                        borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
                         '&:hover': {
-                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                          bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
                         },
                       }}
+                      aria-label="Upload CSV"
                     >
                       Upload CSV
                     </Button>
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
                     <Button
-                      fullWidth
                       onClick={() => {
                         const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
                         navigator.clipboard
@@ -1149,46 +1108,215 @@ const EventLists = ({ query }) => {
                           });
                         setExpandedRow(null);
                       }}
-                      startIcon={<Iconify icon="eva:copy-outline" width={20} />}
-                      variant="outlined"
+                      startIcon={<Iconify icon="eva:copy-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: textColor,
-                        borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
                         '&:hover': {
-                          borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                          bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
                         },
                       }}
+                      aria-label="Copy Cart Link"
                     >
                       Copy Link
                     </Button>
                     <Button
-                      fullWidth
                       onClick={() => {
                         setOpenDelete(true);
                         setSelectedEvent(event);
                         setExpandedRow(null);
                       }}
-                      startIcon={<Iconify icon="eva:trash-2-outline" width={20} />}
-                      variant="outlined"
-                      color="error"
+                      startIcon={<Iconify icon="eva:trash-2-outline" width={20} height={20} />}
+                      variant="text"
                       sx={{
-                        py: 1,
-                        fontSize: 13,
-                        fontWeight: 600,
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'error.main',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                          color: 'error.dark',
+                          transform: 'scale(1.04)',
+                        },
                       }}
+                      aria-label="Delete Event"
                     >
                       Delete
                     </Button>
                   </Stack>
-                </Stack>
-              </Collapse>
-            </Stack>
-          );
-        })}
+
+                  {/* Mobile Actions */}
+                  <Stack
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      p: 2,
+                      bgcolor: theme.palette.mode === 'light' ? '#f8f9fa' : '#1e1e1e',
+                      borderTop: '1px solid',
+                      borderColor: theme.palette.mode === 'light' ? '#eee' : '#333',
+                    }}
+                    spacing={1}
+                  >
+                    <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          router.push(paths.dashboard.events.details(event.id));
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:alert-circle-outline" width={20} />}
+                        variant="outlined"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: textColor,
+                          borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                          '&:hover': {
+                            borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          },
+                        }}
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          setOpenEdit(true);
+                          setSelectedEvent(event);
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:edit-outline" width={20} />}
+                        variant="outlined"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: textColor,
+                          borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                          '&:hover': {
+                            borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          },
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          ticketDialog.onTrue();
+                          setSelectedEvent(event);
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:pricetags-outline" width={20} />}
+                        variant="outlined"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: textColor,
+                          borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                          '&:hover': {
+                            borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          },
+                        }}
+                      >
+                        Tickets
+                      </Button>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          setOpenCSV(true);
+                          setSelectedEvent(event);
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:cloud-upload-outline" width={20} />}
+                        variant="outlined"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: textColor,
+                          borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                          '&:hover': {
+                            borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          },
+                        }}
+                      >
+                        Upload CSV
+                      </Button>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
+                          navigator.clipboard
+                            .writeText(eventLink)
+                            .then(() => {
+                              enqueueSnackbar('Cart link copied!', { variant: 'success' });
+                            })
+                            .catch((error) => {
+                              console.error('Error copying link: ', error);
+                              enqueueSnackbar('Failed to copy link', { variant: 'error' });
+                            });
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:copy-outline" width={20} />}
+                        variant="outlined"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: textColor,
+                          borderColor: theme.palette.mode === 'light' ? '#ddd' : '#444',
+                          '&:hover': {
+                            borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                            bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d',
+                          },
+                        }}
+                      >
+                        Copy Link
+                      </Button>
+                      <Button
+                        fullWidth
+                        onClick={() => {
+                          setOpenDelete(true);
+                          setSelectedEvent(event);
+                          setExpandedRow(null);
+                        }}
+                        startIcon={<Iconify icon="eva:trash-2-outline" width={20} />}
+                        variant="outlined"
+                        color="error"
+                        sx={{
+                          py: 1,
+                          fontSize: 13,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Collapse>
+              </Stack>
+            );
+          })}
       </Stack>
       <TablePaginationCustom
         rowsPerPageOptions={[5, 10, 25, 50]}

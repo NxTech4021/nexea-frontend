@@ -419,6 +419,95 @@ const TicketInformationCard = () => {
                 Copy to All
               </Button>
             </Stack>
+            {/* {buyer && (
+              <Box sx={{ width: '100%' }}>
+                <Typography
+                  variant="body2"
+                  component="label"
+                  htmlFor="buyer-ticket"
+                  sx={{
+                    mb: 0.75,
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                  }}
+                >
+                  For which ticket?
+                </Typography>
+                <RHFSelect
+                  name="buyer.ticket"
+                  id="buyer-ticket"
+                  onChange={(e) => handleChangeTicket(e.target.value)}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      '& fieldset': {
+                        borderColor: alpha(theme.palette.text.primary, 0.2),
+                      },
+                      borderRadius: 1,
+                      fontSize: '0.9rem',
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      padding: '12px 14px',
+                    },
+                  }}
+                >
+                  {ticketTypes?.map((ticket) => (
+                    <MenuItem key={ticket.id} value={ticket.ticketType.id}>
+                      {ticket.ticketType.title}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </Box>
+            )} */}
+          </Box>
+
+          <Stack
+            spacing={1}
+            sx={{
+              mt: 2.5,
+              p: 1.5,
+              borderRadius: 1.5,
+              bgcolor: alpha(
+                theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
+                0.6
+              ),
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="material-symbols:mail-outline" width={18} color="text.secondary" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Your ticket(s) will be sent to your provided email address.
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="ic:baseline-whatsapp" width={18} color="text.secondary" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Information regarding the event will be sent to your WhatsApp.
+              </Typography>
+            </Stack>
+          </Stack>
+
+          <Box
+            sx={{ mt: 2, display: 'flex', alignItems: 'start', flexDirection: 'column', gap: 1 }}
+          >
+            <RHFCheckbox
+              name="buyer.isAnAttendee"
+              label="I am also an attendee"
+              onChange={(_, val) => handleBuyerCheckbox(val)}
+              sx={{
+                '& .MuiCheckbox-root': {
+                  padding: '4px',
+                  color: theme.palette.text.secondary,
+                  '&.Mui-checked': {
+                    color: theme.palette.text.primary,
+                  },
+                },
+                '& .MuiFormControlLabel-label': {
+                  fontSize: '0.85rem',
+                },
+              }}
+            />
             {buyer && (
               <Box sx={{ width: '100%' }}>
                 <Typography
@@ -460,52 +549,6 @@ const TicketInformationCard = () => {
                 </RHFSelect>
               </Box>
             )}
-          </Box>
-
-          <Stack
-            spacing={1}
-            sx={{
-              mt: 2.5,
-              p: 1.5,
-              borderRadius: 1.5,
-              bgcolor: alpha(
-                theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
-                0.6
-              ),
-            }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="material-symbols:mail-outline" width={18} color="text.secondary" />
-              <Typography variant="body2" fontSize="0.85rem">
-                Your ticket(s) will be sent to your provided email address.
-              </Typography>
-            </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="ic:baseline-whatsapp" width={18} color="text.secondary" />
-              <Typography variant="body2" fontSize="0.85rem">
-                Information regarding the event will be sent to your WhatsApp.
-              </Typography>
-            </Stack>
-          </Stack>
-
-          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-            <RHFCheckbox
-              name="buyer.isAnAttendee"
-              label="I am also an attendee"
-              onChange={(_, val) => handleBuyerCheckbox(val)}
-              sx={{
-                '& .MuiCheckbox-root': {
-                  padding: '4px',
-                  color: theme.palette.text.secondary,
-                  '&.Mui-checked': {
-                    color: theme.palette.text.primary,
-                  },
-                },
-                '& .MuiFormControlLabel-label': {
-                  fontSize: '0.85rem',
-                },
-              }}
-            />
           </Box>
         </Box>
       </Collapse>
