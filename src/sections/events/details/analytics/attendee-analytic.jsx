@@ -1,4 +1,5 @@
 import React from 'react';
+import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import ReactApexChart from 'react-apexcharts';
 
@@ -11,7 +12,7 @@ const AttendeeAnalytics = ({ groupedAttendees }) => {
       zoom: { enabled: false },
     },
     xaxis: {
-      categories: groupedAttendees.map((item) => item.date),
+      categories: groupedAttendees.map((item) => dayjs(item.date).format('LL')),
       title: { text: 'Date' },
       labels: { rotate: -45 },
     },
