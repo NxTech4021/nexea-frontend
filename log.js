@@ -1,3 +1,3 @@
-const asdsa = 'DisruptInvest SumMit 2025';
+const asdsa = 'NEXEA Entrepreneurs Camp 2025 (EP Exclusive)';
 
 console.log(asdsa.split(' ').join(''));

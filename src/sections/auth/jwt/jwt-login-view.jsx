@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -61,26 +62,14 @@ export default function JwtLoginView() {
       router.push(returnTo || PATH_AFTER_LOGIN);
     } catch (error) {
       console.log(error);
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      toast.error(error?.message);
+      // setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5, alignItems: 'center' }}>
+    <Stack spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
       <Logo sx={{ width: 64, height: 64 }} />
-      
-      <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2">New user?</Typography>
-
-        <Link
-          component={RouterLink}
-          href={paths.auth.jwt.register}
-          variant="subtitle2"
-          sx={{ color: '#111' }}
-        >
-          Create an account
-        </Link>
-      </Stack>
     </Stack>
   );
 
@@ -110,7 +99,7 @@ export default function JwtLoginView() {
         variant="subtitle2"
         component={RouterLink}
         color="inherit"
-        underline="always"
+        // underline="always"
         sx={{ alignSelf: 'flex-start', color: '#111' }}
         href={paths.auth.jwt.forgotPassword}
       >
@@ -139,14 +128,24 @@ export default function JwtLoginView() {
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Card sx={{ p: 3, borderRadius: 1 }}>
+      <Card sx={{ p: 3, borderRadius: 2 }}>
         {renderHead}
 
-        {/* <Alert severity="info" sx={{ mb: 3 }}>
-        Use nexea email : <strong>example@nexea.co or example@m.nexea.co</strong>
-      </Alert> */}
-
         {renderForm}
+        <Stack direction="row" spacing={0.5} mt={1}>
+          <Typography variant="subtitle2" fontWeight={400}>
+            New user ?
+          </Typography>
+
+          <Link
+            component={RouterLink}
+            href={paths.auth.jwt.register}
+            variant="subtitle2"
+            sx={{ color: '#111' }}
+          >
+            Create an account
+          </Link>
+        </Stack>
       </Card>
     </FormProvider>
   );

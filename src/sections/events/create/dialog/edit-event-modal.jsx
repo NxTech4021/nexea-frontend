@@ -90,7 +90,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
       >
         <Avatar
           alt="Event"
-          src={selectedEvent?.eventSetting?.eventLogo || "/logo/nexea.png"}
+          src={selectedEvent?.eventSetting?.eventLogo || '/logo/nexea.png'}
           sx={{
             width: 48,
             height: 48,
@@ -101,8 +101,8 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
               objectFit: 'contain',
               width: '70%',
               height: '70%',
-              margin: 'auto'
-            }
+              margin: 'auto',
+            },
           }}
         />
         <Box>
@@ -160,23 +160,23 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             // Get date parts from date objects
             const startDate = dayjs(values.date).format('YYYY-MM-DD');
             const endDate = dayjs(values.endDate).format('YYYY-MM-DD');
-            
+
             // Get time parts using 24-hour format (HH:mm)
             const startTime = dayjs(values.time).format('HH:mm');
             const endTime = dayjs(values.endTime).format('HH:mm');
-            
+
             console.log('Edit time values:', {
               startTime: `${dayjs(values.time).format('hh:mm A')} -> ${startTime}`,
               endTime: `${dayjs(values.endTime).format('hh:mm A')} -> ${endTime}`,
             });
-            
+
             // Format the date-time strings in ISO-like format
             const combinedDateTime = `${startDate}T${startTime}`;
             const combinedEndDateTime = `${endDate}T${endTime}`;
-            
+
             console.log('Edit formatted dates:', {
               startDateTime: combinedDateTime,
-              endDateTime: combinedEndDateTime
+              endDateTime: combinedEndDateTime,
             });
 
             const dataToSend = {
@@ -520,11 +520,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                    >
+                    <FormControl fullWidth required variant="outlined">
                       <Field
                         as={Select}
                         name="personInCharge"
@@ -629,11 +625,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                    >
+                    <FormControl fullWidth required variant="outlined">
                       <Field
                         as={Select}
                         name="status"
@@ -687,12 +679,14 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             width: '100%',
                             '& .MuiOutlinedInput-root': {
                               height: 42,
-                              bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                              bgcolor: (theme) =>
+                                theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
                               border: 'none',
                               '&:hover': {
-                                bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
-                              }
-                            }
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                              },
+                            },
                           }}
                         />
                       )}
@@ -710,12 +704,11 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                     >
                       Event Logo{' '}
-                      <Box component="span" sx={{ color: '#e53e3e' }}>*</Box>
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
                     </Typography>
-                    <Field
-                      name="eventLogo"
-                      id="eventLogo"
-                    >
+                    <Field name="eventLogo" id="eventLogo">
                       {({ field, form }) => (
                         <Upload
                           accept={{ 'image/*': [] }}
@@ -743,11 +736,13 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                               border: '1px dashed',
                               borderColor: 'divider',
                               borderRadius: 1,
-                              bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                              bgcolor: (theme) =>
+                                theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
                               '&:hover': {
-                                bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
-                              }
-                            }
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                              },
+                            },
                           }}
                         />
                       )}
@@ -791,9 +786,11 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       {values.eventLogo ? (
                         <Box
                           component="img"
-                          src={typeof values.eventLogo === 'string' 
-                            ? values.eventLogo 
-                            : URL.createObjectURL(values.eventLogo)}
+                          src={
+                            typeof values.eventLogo === 'string'
+                              ? values.eventLogo
+                              : URL.createObjectURL(values.eventLogo)
+                          }
                           alt="Preview"
                           sx={{
                             width: '70%',
@@ -815,13 +812,13 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         />
                       )}
                     </Box>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
+                    <Typography
+                      variant="caption"
+                      sx={{
                         display: 'block',
                         color: 'text.secondary',
                         mt: 1,
-                        fontSize: '0.75rem'
+                        fontSize: '0.75rem',
                       }}
                     >
                       This preview shows how the event logo will appear in the event list.
