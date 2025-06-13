@@ -289,7 +289,7 @@ const filteredAttendees = attendeesData?.filter(
               }}
             >
               <Iconify icon="mdi:account-group" width={20} height={20} />
-              Attendee List
+              Check-In List
             </Button>
           </Stack>
         </div>
