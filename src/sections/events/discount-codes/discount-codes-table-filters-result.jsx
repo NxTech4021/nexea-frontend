@@ -28,6 +28,18 @@ export default function DiscountCodeTableFiltersResult({
     onFilters('status', 'all');
   }, [onFilters]);
 
+  const handleRemoveAvailability = useCallback(() => {
+    onFilters('availability', 'all');
+  }, [onFilters]);
+
+  const handleRemoveType = useCallback(() => {
+    onFilters('type', 'all');
+  }, [onFilters]);
+
+  const handleRemoveEvent = useCallback(() => {
+    onFilters('event', 'all');
+  }, [onFilters]);
+
   return (
     <Stack spacing={1.5} {...other}>
       <Box sx={{ typography: 'body2' }}>
@@ -49,8 +61,38 @@ export default function DiscountCodeTableFiltersResult({
         )}
 
         {!!filters.codeName && (
-          <Block label="Keyword:">
+          <Block label="Search:">
             <Chip label={filters.codeName} size="small" onDelete={handleRemoveKeyword} />
+          </Block>
+        )}
+
+        {filters.event !== 'all' && (
+          <Block label="Event:">
+            <Chip
+              size="small"
+              label={filters.event}
+              onDelete={handleRemoveEvent}
+            />
+          </Block>
+        )}
+
+        {filters.availability !== 'all' && (
+          <Block label="Availability:">
+            <Chip
+              size="small"
+              label={filters.availability}
+              onDelete={handleRemoveAvailability}
+            />
+          </Block>
+        )}
+
+        {filters.type !== 'all' && (
+          <Block label="Type:">
+            <Chip
+              size="small"
+              label={filters.type}
+              onDelete={handleRemoveType}
+            />
           </Block>
         )}
 

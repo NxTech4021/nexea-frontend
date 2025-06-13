@@ -132,7 +132,7 @@ const EventLists = ({ query }) => {
 
   const [anchorElFilter, setAnchorElFilter] = useState(null);
 
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ACTIVE');
 
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -1540,33 +1540,76 @@ const EventLists = ({ query }) => {
                   width: '100%',
                 }}
               >
-                {['All', ...Object.values(EventStatus)].map((status) => {
-                  // Calculate count for each status
-                  let count = data?.events?.length || 0; // Default for 'All'
-                  if (status !== 'All') {
-                    count = data?.events?.filter((event) => event.status === status).length || 0;
-                  }
-
-                  const buttonText =
-                    status === 'All' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase();
+                {/* The 'All' status filter button is commented out as requested. */}
+                {/* <Button
+                  key="All"
+                  onClick={() => handleStatusFilterChange('')}
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    color: (() => {
+                      if (statusFilter === '') {
+                        return theme.palette.mode === 'light' ? '#fff' : '#000';
+                      }
+                      return textColor;
+                    })(),
+                    bgcolor: (() => {
+                      if (statusFilter === '') {
+                        return theme.palette.mode === 'light' ? '#111' : '#eee';
+                      }
+                      return 'transparent';
+                    })(),
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: 1,
+                    minWidth: 'auto',
+                    px: 1.5,
+                    height: 32,
+                    '&:hover': {
+                      bgcolor: (() => {
+                        if (statusFilter === '') {
+                          return theme.palette.mode === 'light' ? '#222' : '#ddd';
+                        }
+                        return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
+                      })(),
+                      borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                    },
+                    '&:active': {
+                      bgcolor: (() => {
+                        if (statusFilter === '') {
+                          return theme.palette.mode === 'light' ? '#000' : '#fff';
+                        }
+                        return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
+                      })(),
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  All ({data?.events?.length || 0})
+                </Button> */}
+                {Object.values(EventStatus).map((status) => {
+                  const count =
+                    data?.events?.filter((event) => event.status === status).length || 0;
+                  const buttonText = status.charAt(0) + status.slice(1).toLowerCase();
 
                   return (
                     <Button
                       key={status}
-                      onClick={() => handleStatusFilterChange(status === 'All' ? '' : status)}
+                      onClick={() => handleStatusFilterChange(status)}
                       variant="outlined"
                       size="small"
                       sx={{
                         textTransform: 'none',
                         fontWeight: 600,
                         color: (() => {
-                          if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                          if (status === statusFilter) {
                             return theme.palette.mode === 'light' ? '#fff' : '#000';
                           }
                           return textColor;
                         })(),
                         bgcolor: (() => {
-                          if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                          if (status === statusFilter) {
                             return theme.palette.mode === 'light' ? '#111' : '#eee';
                           }
                           return 'transparent';
@@ -1578,7 +1621,7 @@ const EventLists = ({ query }) => {
                         height: 32,
                         '&:hover': {
                           bgcolor: (() => {
-                            if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                            if (status === statusFilter) {
                               return theme.palette.mode === 'light' ? '#222' : '#ddd';
                             }
                             return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
@@ -1587,7 +1630,7 @@ const EventLists = ({ query }) => {
                         },
                         '&:active': {
                           bgcolor: (() => {
-                            if ((status === 'All' && !statusFilter) || status === statusFilter) {
+                            if (status === statusFilter) {
                               return theme.palette.mode === 'light' ? '#000' : '#fff';
                             }
                             return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
