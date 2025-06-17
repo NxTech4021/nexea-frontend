@@ -62,15 +62,25 @@ const TicketSelectionCard = () => {
     return ticketsTotal;
   }, [tixs]);
 
-  const subTotal = useMemo(
-    () => tixs.reduce((acc, tix) => acc + tix.selectedQuantity * tix.price, 0),
-    [tixs]
-  );
+  const subTotal = useMemo(() => {
+    const ticketsTotal = tixs.reduce((acc, tix) => acc + tix.selectedQuantity * tix.price, 0);
+    const addOnsTotal = tixs.reduce((acc, tix) => {
+      const addOnTotal =
+        tix.addOns?.reduce(
+          (addOnAcc, addOn) => addOnAcc + (addOn.selectedQuantity || 0) * addOn.price,
+          0
+        ) || 0;
+      return acc + addOnTotal;
+    }, 0);
+    return ticketsTotal + addOnsTotal;
+  }, [tixs]);
 
   const handleOpenAddOn = (ticketId, info) => {
     const existingTicket = tixs.find((item) => item.id === ticketId);
     if (existingTicket.selectedQuantity === 0) {
-      toast.warning('Please select at least one ticket to proceed');
+      toast.warning('Please select at least one ticket first to access add-ons', {
+        description: 'Add-ons can only be purchased with tickets',
+      });
       return;
     }
     setAddOnInfo({ ...info, selectedQuantity: existingTicket.selectedQuantity, ticketId });
@@ -275,78 +285,201 @@ const TicketSelectionCard = () => {
 
         {!!ticket?.addOns?.length && (
           <Grid2 size={12} alignContent="flex-end">
-            <Typography variant="caption" fontWeight={600} color="text.secondary">
-              Add Ons :
-            </Typography>
-
-            <Stack direction="row" spacing={1} overflow="auto" sx={{ scrollbarWidth: 'thin' }}>
-              {ticket.addOns.map((item) => (
-                <Box
-                  key={item.id}
-                  sx={{
-                    p: 1,
-                    position: 'relative',
-                    borderRadius: 1,
-                    border: 1,
-                    borderColor: 'divider',
-                    '&:hover': {
-                      borderColor: 'black',
-                      transition: 'linear .2s',
-                    },
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                  }}
-                  onClick={() => handleOpenAddOn(ticket.id, item)}
-                >
-                  <Box
-                    sx={{
-                      borderRadius: 10,
-                      width: 18,
-                      height: 18,
+            <Stack spacing={1.5} mt={1}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <Iconify 
+                    icon="material-symbols:add-shopping-cart-outline" 
+                    width={14} 
+                    color="text.secondary"
+                  />
+                  <Typography variant="caption" fontWeight={600} color="text.secondary">
+                    Add Ons Available:
+                  </Typography>
+                </Stack>
+                  {ticket.selectedQuantity === 0 ? (
+                   <Typography 
+                     variant="caption" 
+                     sx={{ 
+                       color: 'warning.main',
+                       fontStyle: 'italic',
+                       fontSize: 11,
+                       display: 'flex',
+                       alignItems: 'center',
+                       gap: 0.5,
+                       whiteSpace: 'nowrap',
+                       flexShrink: 0,
+                     }}
+                   >
+                     <Iconify icon="material-symbols:info-outline" width={12} />
+                     Select a ticket first to include add-ons
+                   </Typography>
+                ) : (
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'success.main',
+                      fontStyle: 'italic',
+                      fontSize: 11,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'absolute',
-                      right: -8,
-                      top: -8,
+                      gap: 0.5,
                     }}
                   >
-                    {!!item?.selectedQuantity && (
-                      <Typography variant="caption" color="success">
-                        {item?.selectedQuantity}x
-                      </Typography>
-                    )}
-                  </Box>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={item.description}
-                    slotProps={{
-                      primary: {
-                        fontWeight: 600,
-                        letterSpacing: -0.9,
-                        fontSize: 14,
-                        color: '#00000',
-                        mb: -0.3,
-                      },
-                      secondary: {
-                        variant: 'caption',
-                        fontWeight: 500,
-                        fontSize: 12,
-                        letterSpacing: -0.9,
-                        color: '#606060',
-                        maxWidth: 300,
-                        whiteSpace: 'pretty',
-                      },
-                    }}
-                  />
-                  <Typography fontWeight={600} fontSize={12}>
-                    {Intl.NumberFormat('en-MY', {
-                      style: 'currency',
-                      currency: 'MYR',
-                    }).format(item.price)}
+                    <Iconify icon="material-symbols:check-circle-outline" width={12} />
+                    {ticket.selectedQuantity} ticket{ticket.selectedQuantity > 1 ? 's' : ''} selected
                   </Typography>
-                </Box>
-              ))}
+                )}
+              </Stack>
+
+              <Stack 
+                direction="row" 
+                spacing={0.5} 
+                sx={{ 
+                  scrollbarWidth: 'thin',
+                  transition: 'all 0.3s ease-in-out',
+                  pt: 1.5,
+                  pb: 0.5, 
+                  overflowX: 'auto',
+                  overflowY: 'hidden', 
+                  justifyContent: 'flex-start', 
+                }}
+              >
+                {ticket.addOns.map((item) => {
+                  const isAddOnDisabled = ticket.selectedQuantity === 0;
+                  const isAddOnSelected = item?.selectedQuantity > 0;
+
+                  return (
+                    <Box
+                      key={item.id}
+                      sx={(theme) => {
+                        let bgcolor;
+                        if (isAddOnSelected) {
+                          bgcolor = 'success.lighter';
+                        } else if (theme.palette.mode === 'light') {
+                          bgcolor = 'common.black';
+                        } else {
+                          bgcolor = 'grey.800';
+                        }
+
+                        return {
+                          p: 1.5,
+                          position: 'relative',
+                          borderRadius: 1.5,
+                          border: 1,
+                          borderColor: 'divider',
+                          minWidth: 160,
+                          userSelect: 'none',
+                          transition: 'all 0.2s ease-in-out',
+                          my: 0.5,
+                          mr: 1,
+                          bgcolor,
+                          ...(isAddOnSelected && {
+                            borderColor: 'success.main',
+                          }),
+                          ...(isAddOnDisabled && {
+                            cursor: 'not-allowed',
+                          }),
+                        };
+                      }}
+                    >
+                      {/* Selection Indicator */}
+                      {!!item?.selectedQuantity && (
+                        <Box
+                          sx={{
+                            borderRadius: '50%',
+                            width: 26,
+                            height: 26,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                            right: -10,
+                            top: -8,
+                            bgcolor: 'success.main',
+                            color: 'white',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            zIndex: 100,
+                            border: '2px solid white',
+                          }}
+                        >
+                          <Iconify icon="material-symbols:check-rounded" width={16} />
+                        </Box>
+                      )}
+
+                      <Stack spacing={1}>
+                        <ListItemText
+                          primary={item.name}
+                          secondary={item.description}
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              letterSpacing: -0.5,
+                              fontSize: 13,
+                              color: isAddOnSelected ? 'text.primary' : 'common.white',
+                              mb: -0.2,
+                              noWrap: true,
+                            },
+                            secondary: {
+                              variant: 'caption',
+                              fontWeight: 400,
+                              fontSize: 11,
+                              letterSpacing: -0.3,
+                              color: isAddOnSelected ? 'text.secondary' : 'grey.400',
+                              sx: {
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                minHeight: 30, // to prevent layout shift
+                              },
+                            },
+                          }}
+                        />
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          sx={{ mt: 0.5 }}
+                        >
+                          <Typography
+                            fontWeight={600}
+                            fontSize={12}
+                            color={isAddOnSelected ? 'success.main' : 'common.white'}
+                          >
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(item.price)}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            disabled={isAddOnDisabled}
+                            onClick={() => {
+                              if (isAddOnDisabled) return;
+                              handleOpenAddOn(ticket.id, item);
+                            }}
+                            sx={(theme) => ({
+                              bgcolor: '#00564B',
+                              borderRadius: 1,
+                              border: '1px solid transparent',
+                              color: 'white',
+                              '&:hover': { bgcolor: '#00564B99' },
+                              '&.Mui-disabled': {
+                                bgcolor: alpha(theme.palette.common.white, 0.08),
+                                borderColor: alpha(theme.palette.common.white, 0.16),
+                                color: theme.palette.grey[600],
+                              },
+                            })}
+                          >
+                            <Iconify icon="material-symbols:add-rounded" width={15} />
+                          </IconButton>
+                        </Stack>
+                      </Stack>
+                    </Box>
+                  );
+                })}
+              </Stack>
             </Stack>
           </Grid2>
         )}
@@ -422,6 +555,7 @@ const TicketSelectionCard = () => {
       sx={{
         height: 1,
         p: 2,
+        ml: 0.5,
         overflow: 'hidden',
         position: 'relative',
       }}
@@ -550,29 +684,61 @@ const TicketSelectionCard = () => {
                     spacing={1}
                     flexGrow={1}
                     sx={{
+                      overflowY: 'auto',
+                      maxHeight: '25vh',
                       '& .MuiTypography-root': {
                         fontSize: 16,
                         fontWeight: 500,
                       },
                     }}
                   >
+                    {/* Tickets */}
                     {tixs
                       .filter((ticket) => ticket.selectedQuantity > 0)
                       .map((ticket) => (
-                        <Stack
-                          key={ticket.id}
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                          // "&"
-                        >
-                          <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
-                          <Typography>
-                            {Intl.NumberFormat('en-MY', {
-                              style: 'currency',
-                              currency: 'MYR',
-                            }).format(ticket.subTotal)}
-                          </Typography>
+                        <Stack key={ticket.id} spacing={0.5}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Typography>{`${ticket.selectedQuantity} x ${ticket.title}`}</Typography>
+                            <Typography>
+                              {Intl.NumberFormat('en-MY', {
+                                style: 'currency',
+                                currency: 'MYR',
+                              }).format(ticket.selectedQuantity * ticket.price)}
+                            </Typography>
+                          </Stack>
+                          
+                          {/* Add-ons for this ticket */}
+                          {ticket.addOns?.filter(addOn => addOn.selectedQuantity > 0).map((addOn) => (
+                            <Stack
+                              key={addOn.id}
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="space-between"
+                              sx={{ pl: 2 }}
+                            >
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ fontSize: 14 }}
+                              >
+                                {`+ ${addOn.selectedQuantity} x ${addOn.name}`}
+                              </Typography>
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ fontSize: 14 }}
+                              >
+                                {Intl.NumberFormat('en-MY', {
+                                  style: 'currency',
+                                  currency: 'MYR',
+                                }).format(addOn.selectedQuantity * addOn.price)}
+                              </Typography>
+                            </Stack>
+                          ))}
                         </Stack>
                       ))}
                   </Stack>
@@ -720,97 +886,132 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
       fullWidth
       maxWidth="xs"
     >
-      <DialogTitle>
-        <Stack direction="row" alignItems="flex-end">
-          <ListItemText
-            primary={addOnInfo?.name || ''}
-            secondary={addOnInfo?.description || ''}
-            slotProps={{ primary: { variant: 'subtitle1' }, secondary: { variant: 'caption' } }}
-          />
-          <Typography variant="caption" fontWeight={600} color="text.secondary">
-            Add on (
-            {tixs
-              ?.find((a) => a.id === addOnInfo?.ticketId)
-              ?.addOns?.reduce((acc, curr) => acc + (curr.selectedQuantity || 0), 0) || 0}
-            /{addOnInfo?.selectedQuantity})
-          </Typography>
-        </Stack>
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" fontWeight={600} gutterBottom>
+          {addOnInfo?.name || ''}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {addOnInfo?.description || ''}
+        </Typography>
       </DialogTitle>
-      <DialogContent>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={600}>
-            {Intl.NumberFormat('en-MY', {
-              style: 'currency',
-              currency: 'MYR',
-            }).format(addOnInfo?.price || 0)}
+      <DialogContent sx={{ pt: 0, pb: 1 }}>
+        <Stack spacing={2}>
+          {/* Price and Quantity Section */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack>
+              <Typography variant="h6" fontWeight={600} color="primary.main">
+                {Intl.NumberFormat('en-MY', {
+                  style: 'currency',
+                  currency: 'MYR',
+                }).format(addOnInfo?.price || 0)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                per add-on
+              </Typography>
+            </Stack>
+
+            {/* Quantity Controls */}
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <IconButton
+                size="small"
+                sx={{
+                  bgcolor: selectedQuantity === 0 ? 'grey.200' : 'primary.main',
+                  '&:hover': { 
+                    bgcolor: selectedQuantity === 0 ? 'grey.200' : 'primary.dark' 
+                  },
+                  width: 36,
+                  height: 36,
+                  ...(selectedQuantity === 0 && {
+                    pointerEvents: 'none',
+                  }),
+                }}
+                onClick={() => {
+                  if (selectedQuantity === 0) return;
+                  updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'decrement');
+                }}
+              >
+                <Iconify 
+                  icon="ic:round-minus" 
+                  width={18} 
+                  color={selectedQuantity === 0 ? 'grey.500' : 'white'} 
+                />
+              </IconButton>
+              
+              <Typography variant="h6" fontWeight={600} sx={{ minWidth: 30, textAlign: 'center' }}>
+                {selectedQuantity}
+              </Typography>
+              
+              <IconButton
+                size="small"
+                sx={{
+                  bgcolor: (totalSelectedQuantity >= addOnInfo?.selectedQuantity) ? 'grey.200' : 'primary.main',
+                  '&:hover': { 
+                    bgcolor: (totalSelectedQuantity >= addOnInfo?.selectedQuantity) ? 'grey.200' : 'primary.dark' 
+                  },
+                  width: 36,
+                  height: 36,
+                  ...((totalSelectedQuantity >= addOnInfo?.selectedQuantity) && {
+                    pointerEvents: 'none',
+                  }),
+                }}
+                onClick={() => {
+                  updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'increment');
+                }}
+              >
+                <Iconify 
+                  icon="material-symbols:add-rounded" 
+                  width={18} 
+                  color={(totalSelectedQuantity >= addOnInfo?.selectedQuantity) ? 'grey.500' : 'white'} 
+                />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          {/* Availability Info - Compact */}
+          <Typography variant="caption" color="text.secondary" textAlign="center">
+            Available for {addOnInfo?.selectedQuantity} x {tixs?.find((a) => a.id === addOnInfo?.ticketId)?.title || 'ticket'}
           </Typography>
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            justifyContent="end"
-            overflow="hidden"
-          >
-            <IconButton
+          {/* Subtotal - Only show if selected */}
+          {selectedQuantity > 0 && (
+            <Stack 
+              direction="row" 
+              alignItems="center" 
+              justifyContent="space-between"
               sx={{
-                bgcolor: '#00564B',
-                '&:hover': { bgcolor: '#00564B99' },
+                p: 1.5,
+                bgcolor: 'primary.lighter',
                 borderRadius: 1,
-                ...(selectedQuantity === 0 && {
-                  pointerEvents: 'none',
-                  bgcolor: '#D9D9D9',
-                }),
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(1px)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              onClick={() => {
-                if (selectedQuantity === 0) {
-                  return;
-                }
-                updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'decrement');
               }}
             >
-              <Iconify icon="ic:round-minus" width={15} color="white" />
-            </IconButton>
-            <Typography variant="subtitle1">{selectedQuantity}</Typography>
-            <IconButton
-              sx={{
-                bgcolor: '#00564B',
-                borderRadius: 1,
-                '&:hover': { bgcolor: '#00564B99' },
-                ...((totalSelectedQuantity === addOnInfo?.selectedQuantity ||
-                  totalSelectedQuantity === currentAddOn?.quantity) && {
-                  pointerEvents: 'none',
-                  bgcolor: '#D9D9D9',
-                }),
-              }}
-              onClick={(e) => {
-                updateAddOnQuantity(addOnInfo?.ticketId, addOnInfo?.id, 'increment');
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(1px)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <Iconify icon="material-symbols:add-rounded" width={15} color="white" />
-            </IconButton>
-          </Stack>
+              <Typography variant="body2" fontWeight={600}>
+                Total
+              </Typography>
+              <Typography variant="body1" fontWeight={600} color="primary.main">
+                {Intl.NumberFormat('en-MY', {
+                  style: 'currency',
+                  currency: 'MYR',
+                }).format((addOnInfo?.price || 0) * selectedQuantity)}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
       </DialogContent>
-      <DialogActions />
+      <DialogActions sx={{ p: 2, pt: 1 }}>
+        <LoadingButton
+          variant="contained"
+          onClick={handleCloseAddOn}
+          fullWidth
+          sx={{
+            py: 1,
+            fontSize: '0.9rem',
+            fontWeight: 600,
+          }}
+          startIcon={<Iconify icon="material-symbols:check-rounded" width={18} />}
+        >
+          Done
+        </LoadingButton>
+      </DialogActions>
     </Dialog>
   );
 };
