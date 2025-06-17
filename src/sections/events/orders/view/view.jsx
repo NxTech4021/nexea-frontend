@@ -17,23 +17,24 @@ import {
   Stack,
   Button,
   Dialog,
+  Select,
   Tooltip,
   ListItem,
   Snackbar,
+  MenuItem,
   Container,
   TextField,
   IconButton,
   Typography,
   CardContent,
   DialogTitle,
+  FormControl,
   DialogContent,
   DialogActions,
   CircularProgress,
   // Avatar,
   // ButtonGroup,
   // Divider,
-  // MenuItem,
-  // Select,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -47,6 +48,9 @@ import { useGetAllEvents } from 'src/api/event';
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { TablePaginationCustom } from 'src/components/table';
+
+import OrdersChart from './orders-chart';
+import RevenueChart from './revenue-chart';
 // import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 // import Label from 'src/components/label';
 
@@ -133,10 +137,10 @@ export default function OrderView() {
   });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventOrders, setEventOrders] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
   const [priceSort, setPriceSort] = useState(null);
+  const [dateRange, setDateRange] = useState('thisWeek');
 
   const router = useRouter();
   const { eventId } = useParams();
@@ -292,66 +296,13 @@ export default function OrderView() {
     }
   };
 
-  // Revenue chart data for selected event
-  const revenueChart = useMemo(() => {
-    if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
-    
-    // Group by date (YYYY-MM-DD) and only include dates with revenue
-    const map = {};
-    eventOrders.forEach((order) => {
-      if (order.status === 'paid') {
-        const date = dayjs(order.createdAt).format('YYYY-MM-DD');
-        map[date] = (map[date] || 0) + (order.totalAmount || 0);
-      }
-    });
-
-    // Sort dates and format for display
-    const categories = Object.keys(map).sort();
-    const series = categories.map((date) => map[date]);
-    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
-
-    return { 
-      series, 
-      categories: formattedCategories,
-      rawDates: categories 
-    };
-  }, [eventOrders, selectedEvent]);
-
-  // Add order count chart data
-  const orderCountChart = useMemo(() => {
-    if (!selectedEvent || !eventOrders.length) return { series: [], categories: [] };
-
-    // Group by date (YYYY-MM-DD) and only include dates with orders
-    const map = {};
-    eventOrders.forEach((order) => {
-      // Include only paid orders and free orders
-      if (order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)) {
-        const date = dayjs(order.createdAt).format('YYYY-MM-DD');
-        map[date] = (map[date] || 0) + 1;
-      }
-    });
-
-    // Sort dates and format for display
-    const categories = Object.keys(map).sort();
-    const series = categories.map((date) => map[date]);
-    const formattedCategories = categories.map(date => dayjs(date).format('MMM D'));
-
-    return { series, categories: formattedCategories };
-  }, [eventOrders, selectedEvent]);
-
-  // Update eventOrders and totalRevenue when selectedEvent or data changes
+  // Update eventOrders when selectedEvent or data changes
   useEffect(() => {
     if (selectedEvent && data?.length) {
       const filtered = data.filter((order) => order.event?.id === selectedEvent.id);
       setEventOrders(filtered);
-      setTotalRevenue(
-        filtered
-          .filter((order) => order.status === 'paid')
-          .reduce((sum, order) => sum + (order.totalAmount || 0), 0)
-      );
     } else {
       setEventOrders([]);
-      setTotalRevenue(0);
     }
   }, [selectedEvent, data]);
 
@@ -921,201 +872,47 @@ export default function OrderView() {
         <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 18 }}>
           {selectedEvent.name}
         </Typography>
+        <Box sx={{ ml: 'auto' }}>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <Select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 32,
+                fontSize: 13,
+                '& .MuiSelect-select': {
+                  py: 0.5,
+                  px: 1.5,
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor,
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                },
+              }}
+                         >
+               <MenuItem value="thisWeek" sx={{ fontSize: 13 }}>This week</MenuItem>
+               <MenuItem value={7} sx={{ fontSize: 13 }}>Last 7 days</MenuItem>
+               <MenuItem value={14} sx={{ fontSize: 13 }}>Last 14 days</MenuItem>
+               <MenuItem value={30} sx={{ fontSize: 13 }}>Last 30 days</MenuItem>
+             </Select>
+          </FormControl>
+        </Box>
       </Box>
       {/* Statistics and Revenue/Order Graphs */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-      <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
-          <CardContent sx={{ p: 2 }}>
-            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Revenue</Typography>
-            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
-              {new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(totalRevenue)}
-            </Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
-              <ReactApexChart
-                options={{
-                  chart: { 
-                    type: 'area',
-                    height: 140,
-                    toolbar: { show: false },
-                    zoom: { enabled: false },
-                    animations: {
-                      enabled: true,
-                      easing: 'easeinout',
-                      speed: 800,
-                    },
-                    parentHeightOffset: 0
-                  },
-                  xaxis: { 
-                    categories: revenueChart.categories,
-                    labels: { 
-                      style: { 
-                        fontSize: '11px', 
-                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
-                        fontWeight: 500
-                      },
-                      rotate: -45,
-                      rotateAlways: false,
-                      hideOverlappingLabels: true,
-                      offsetY: 2
-                    },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false }
-                  },
-                  yaxis: { 
-                    labels: { 
-                      style: { 
-                        fontSize: '11px', 
-                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
-                        fontWeight: 500
-                      },
-                      formatter: (value) => `RM ${value.toFixed(0)}`,
-                      offsetX: -2
-                    },
-                    tickAmount: 4,
-                    min: 0,
-                    forceNiceScale: true
-                  },
-                  grid: { 
-                    show: true,
-                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
-                    strokeDashArray: 3,
-                    xaxis: { lines: { show: false } },
-                    padding: {
-                      top: 0,
-                      right: 15,
-                      bottom: 0,
-                      left: 5
-                    }
-                  },
-                  dataLabels: { enabled: false },
-                  tooltip: { 
-                    enabled: true,
-                    shared: true,
-                    intersect: false,
-                    y: { formatter: (val) => `RM ${val.toFixed(2)}` },
-                    theme: theme.palette.mode,
-                    style: {
-                      fontSize: '12px',
-                      fontFamily: theme.typography.fontFamily,
-                    }
-                  },
-                  colors: [theme.palette.primary.main],
-                  markers: {
-                    size: 0,
-                    strokeColors: theme.palette.background.paper,
-                    strokeWidth: 2,
-                    hover: { size: 6 }
-                  },
-                  stroke: { 
-                    curve: 'smooth', 
-                    width: 2,
-                    lineCap: 'round'
-                  },
-                }}
-                series={[{ name: 'Revenue', data: revenueChart.series }]}
-                type="area"
-                height={140}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card sx={{ flex: 1, minWidth: 180, borderRadius: 2, boxShadow: 0, border: `1px solid ${borderColor}`, bgcolor: cardBgColor }}>
-          <CardContent sx={{ p: 2 }}>
-            <Typography variant="caption" sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa', fontSize: 12 }}>Total Orders (Paid & Free)</Typography>
-            <Typography variant="h6" sx={{ color: textColor, fontWeight: 700, fontSize: 22, mb: 1 }}>
-              {eventOrders.filter(order => 
-                order.status === 'paid' || (order.status !== 'cancelled' && Number(order.totalAmount) === 0)
-              ).length}
-            </Typography>
-            <Box sx={{ width: '100%', minWidth: 120, maxWidth: '100%', mx: 'auto', height: 140, mt: 1 }}>
-              <ReactApexChart
-                options={{
-                  chart: { 
-                    type: 'area',
-                    height: 140,
-                    toolbar: { show: false },
-                    zoom: { enabled: false },
-                    animations: {
-                      enabled: true,
-                      easing: 'easeinout',
-                      speed: 800,
-                    },
-                    parentHeightOffset: 0
-                  },
-                  xaxis: { 
-                    categories: orderCountChart.categories,
-                    labels: { 
-                      style: { 
-                        fontSize: '11px', 
-                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
-                        fontWeight: 500
-                      },
-                      rotate: -45,
-                      rotateAlways: false,
-                      hideOverlappingLabels: true,
-                      offsetY: 2
-                    },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false }
-                  },
-                  yaxis: { 
-                    labels: { 
-                      style: { 
-                        fontSize: '11px', 
-                        colors: theme.palette.mode === 'light' ? '#666' : '#bbb',
-                        fontWeight: 500
-                      },
-                      formatter: (value) => Math.round(value),
-                      offsetX: -2
-                    },
-                    tickAmount: 4,
-                    min: 0,
-                    forceNiceScale: true
-                  },
-                  grid: { 
-                    show: true,
-                    borderColor: theme.palette.mode === 'light' ? '#f0f0f0' : '#333',
-                    strokeDashArray: 3,
-                    xaxis: { lines: { show: false } },
-                    padding: {
-                      top: 0,
-                      right: 15,
-                      bottom: 0,
-                      left: 5
-                    }
-                  },
-                  dataLabels: { enabled: false },
-                  tooltip: { 
-                    enabled: true,
-                    shared: true,
-                    intersect: false,
-                    y: { formatter: (val) => `${Math.round(val)} orders` },
-                    theme: theme.palette.mode,
-                    style: {
-                      fontSize: '12px',
-                      fontFamily: theme.typography.fontFamily,
-                    }
-                  },
-                  colors: [theme.palette.primary.main],
-                  markers: {
-                    size: 0,
-                    strokeColors: theme.palette.background.paper,
-                    strokeWidth: 2,
-                    hover: { size: 6 }
-                  },
-                  stroke: { 
-                    curve: 'smooth', 
-                    width: 2,
-                    lineCap: 'round'
-                  },
-                }}
-                series={[{ name: 'Confirmed Orders', data: orderCountChart.series }]}
-                type="area"
-                height={140}
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <RevenueChart 
+          eventOrders={eventOrders} 
+          selectedEvent={selectedEvent} 
+          dateRange={dateRange} 
+        />
+        <OrdersChart 
+          eventOrders={eventOrders} 
+          selectedEvent={selectedEvent} 
+          dateRange={dateRange} 
+        />
       </Stack>
       {/* Search and Status Filter */}
       <Box 
