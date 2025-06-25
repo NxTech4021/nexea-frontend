@@ -40,6 +40,8 @@ import {
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
+import { useOrderSearchStore } from 'src/hooks/zustand/useOrderSearch';
+
 import { exportToCSV } from 'src/utils/exportcsv';
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
@@ -51,6 +53,8 @@ import { TablePaginationCustom } from 'src/components/table';
 
 import OrdersChart from './orders-chart';
 import RevenueChart from './revenue-chart';
+import AttendeePopover from './attendee-popover';
+import SearchMatchIndicator from './search-indicator';
 // import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 // import Label from 'src/components/label';
 
@@ -114,11 +118,27 @@ export default function OrderView() {
   const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
   const cardBgColor = theme.palette.mode === 'light' ? '#fff' : '#1e1e1e';
   
-  const [search, setSearch] = useState('');
-  const [tab, setTab] = useState('All');
-  const [eventFilter, setEventFilter] = useState('All');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  // Zustand store
+  const {
+    searchQuery,
+    statusFilter,
+    priceSort,
+    dateRange,
+    page,
+    rowsPerPage,
+    selectedEventId,
+    setSearchQuery,
+    setStatusFilter,
+    setPriceSort,
+    setDateRange,
+    setPage,
+    setRowsPerPage,
+    setSelectedEventId,
+    togglePriceSort,
+    searchOrders,
+  } = useOrderSearchStore();
+
+  // Local state for non-persistent UI states
   const [open, setOpen] = useState(false);
   const [newOrder, setNewOrder] = useState({
     eventName: '',
@@ -129,7 +149,6 @@ export default function OrderView() {
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [resendingEmail, setResendingEmail] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -138,9 +157,6 @@ export default function OrderView() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventOrders, setEventOrders] = useState([]);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [priceSort, setPriceSort] = useState(null);
-  const [dateRange, setDateRange] = useState('thisWeek');
 
   const router = useRouter();
   const { eventId } = useParams();
@@ -175,27 +191,25 @@ export default function OrderView() {
   exportToCSV(flattened, filename);
 };
 
-  // Check for event filter from sessionStorage or URL parameter when component mounts
+  // Check for event filter from URL parameter or stored state when component mounts
   useEffect(() => {
     if (eventId && eventData?.events) {
       const foundEvent = eventData.events.find(event => event.id === eventId);
       if (foundEvent) {
         setSelectedEvent(foundEvent);
+        setSelectedEventId(eventId);
         return;
       }
     }
     
-    const storedEventFilter = sessionStorage.getItem('orderEventFilter');
-    if (storedEventFilter && data?.length) {
-      // Check if the stored event name exists in available options
-      const eventExists = data.some((order) => order.event.name === storedEventFilter);
-      if (eventExists) {
-        setEventFilter(storedEventFilter);
+    // If there's a stored selected event ID, try to find and set it
+    if (selectedEventId && eventData?.events) {
+      const foundEvent = eventData.events.find(event => event.id === selectedEventId);
+      if (foundEvent) {
+        setSelectedEvent(foundEvent);
       }
-      // Remove the stored filter to avoid applying it on subsequent visits
-      sessionStorage.removeItem('orderEventFilter');
     }
-  }, [data, eventId, eventData]);
+  }, [data, eventId, eventData, selectedEventId, setSelectedEventId]);
 
   const eventOptions = useMemo(() => {
     if (!data?.length) return ['All'];
@@ -210,7 +224,6 @@ export default function OrderView() {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
   };
 
   const handleClickOpen = () => {
@@ -319,12 +332,21 @@ export default function OrderView() {
     return sorted;
   }, [eventOrders, priceSort]);
 
-  const handlePriceSortToggle = () => {
-    setPriceSort((prev) => {
-      if (prev === 'desc') return 'asc';
-      if (prev === 'asc') return null;
-      return 'desc';
+  // Get filtered orders (search + status filter)
+  const filteredOrders = useMemo(() => {
+    const searchFiltered = searchOrders(sortedEventOrders, searchQuery);
+    return searchFiltered.filter((order) => {
+      let matchesStatus = true;
+      if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid' && Number(order.totalAmount) > 0;
+      else if (statusFilter === 'Pending') matchesStatus = (order.status || '').toLowerCase() === 'pending';
+      else if (statusFilter === 'Cancelled') matchesStatus = (order.status || '').toLowerCase() === 'cancelled';
+      else if (statusFilter === 'Free') matchesStatus = (order.status || '').toLowerCase() === 'paid' &&  Number(order.totalAmount) === 0;
+      return matchesStatus;
     });
+  }, [sortedEventOrders, searchQuery, statusFilter, searchOrders]);
+
+  const handlePriceSortToggle = () => {
+    togglePriceSort();
   };
 
   if (isLoading) {
@@ -863,6 +885,7 @@ export default function OrderView() {
         <IconButton 
           onClick={() => {
             setSelectedEvent(null);
+            setSelectedEventId(null);
             router.push('/dashboard/order');
           }} 
           sx={{ color: iconColor, mr: 1, p: 0.5 }}
@@ -925,56 +948,101 @@ export default function OrderView() {
           gap: 2 
         }}
       >
-        <TextField
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
-          placeholder="Search Orders"
-          InputProps={{
-            startAdornment: (
-              <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 18, height: 18, mr: 1 }} />
-            ),
-          }}
-          sx={{
-            width: { xs: '100%', sm: searchFocused ? 320 : 180 },
-            maxWidth: '100%',
-            transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s',
-            '& .MuiOutlinedInput-root': { 
-              height: 36, 
-              fontSize: 14, 
-              borderRadius: 2,
-              backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#333',
-              borderColor,
-              '& fieldset': {
+        <Box sx={{ position: 'relative' }}>
+          <Tooltip 
+            title="Search orders by ID, buyer info, attendee details, or discount codes"
+            placement="top"
+            arrow
+          >
+            <TextField
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="Search..."
+            InputProps={{
+              startAdornment: (
+                <Iconify icon="eva:search-fill" sx={{ color: theme.palette.mode === 'light' ? '#888' : '#aaa', width: 18, height: 18, mr: 1 }} />
+              ),
+              endAdornment: searchQuery && (
+                <IconButton
+                  size="small"
+                  onClick={() => setSearchQuery('')}
+                  sx={{ 
+                    color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                    p: 0.5,
+                    mr: 0.5
+                  }}
+                >
+                  <Iconify icon="eva:close-fill" width={16} height={16} />
+                </IconButton>
+              ),
+            }}
+            sx={{
+              width: { xs: '100%', sm: searchFocused ? 320 : 180 },
+              maxWidth: '100%',
+              transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s',
+              '& .MuiOutlinedInput-root': { 
+                height: 36, 
+                fontSize: 14, 
+                borderRadius: 2,
+                backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#333',
                 borderColor,
+                '& fieldset': {
+                  borderColor,
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.mode === 'light' ? '#999' : '#777',
+                },
               },
-              '&:hover fieldset': {
-                borderColor: theme.palette.mode === 'light' ? '#999' : '#777',
-              },
-            },
-          }}
-        />
+                          }}
+            />
+          </Tooltip>
+          {searchQuery && (
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                position: 'absolute',
+                top: '100%',
+                left: 8,
+                mt: 1,
+                mb: 2,
+                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                zIndex: 1,
+              }}
+            >
+              {filteredOrders.length > 0 
+                ? `${filteredOrders.length} result${filteredOrders.length !== 1 ? 's' : ''} found`
+                : 'No results found'
+              }
+            </Typography>
+          )}
+        </Box>
         <Box 
           sx={{ 
             display: 'flex', 
             flexWrap: 'wrap',
             justifyContent: { xs: 'flex-start', sm: 'flex-start' },
             gap: 1,
-            width: '100%'
+            width: '100%',
+            mt: searchQuery ? 2 : 0,
+            mb: searchQuery ? 2 : 0,
           }}
         >
           {['All', 'Paid', 'Pending', 'Cancelled', 'Free'].map((status) => {
-            // Calculate count for each status
-            let count = eventOrders.length; // Default for 'All'
+            // Calculate count for each status using search-filtered results
+            const searchFiltered = searchOrders(eventOrders, searchQuery);
+            let count = searchFiltered.length; // Default for 'All'
             if (status === 'Paid') {
-              count = eventOrders.filter(order => order.status === 'paid' && Number(order.totalAmount) > 0).length;
+              count = searchFiltered.filter(order => order.status === 'paid' && Number(order.totalAmount) > 0).length;
             } else if (status === 'Pending') {
-              count = eventOrders.filter(order => order.status === 'pending').length;
+              count = searchFiltered.filter(order => order.status === 'pending').length;
             } else if (status === 'Cancelled') {
-              count = eventOrders.filter(order => order.status === 'cancelled').length;
+              count = searchFiltered.filter(order => order.status === 'cancelled').length;
             } else if (status === 'Free') {
-              count = eventOrders.filter(order => order.status === 'paid' && Number(order.totalAmount) === 0).length;
+              count = searchFiltered.filter(order => order.status === 'paid' && Number(order.totalAmount) === 0).length;
             }
             
             return (
@@ -1099,18 +1167,7 @@ export default function OrderView() {
           <Typography sx={{ width: '6%', color: textColor, fontWeight: 600, fontSize: 13 }}>Actions</Typography>
         </Stack>
         <Stack>
-          {sortedEventOrders
-            .filter((order) => {
-              const q = (search || '').toLowerCase().trim();
-              const matchesName = String(order.buyerName || order.buyer?.name || '').toLowerCase().includes(q);
-              let matchesStatus = true;
-              if (statusFilter === 'Paid') matchesStatus = (order.status || '').toLowerCase() === 'paid' && Number(order.totalAmount) > 0;
-              else if (statusFilter === 'Pending') matchesStatus = (order.status || '').toLowerCase() === 'pending';
-              else if (statusFilter === 'Cancelled') matchesStatus = (order.status || '').toLowerCase() === 'cancelled';
-              else if (statusFilter === 'Free') matchesStatus = (order.status || '').toLowerCase() === 'paid' &&  Number(order.totalAmount) === 0;
-              // 'All' shows all
-              return matchesName && matchesStatus;
-            })
+          {filteredOrders
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((order) => {
               let statusConfig = { color: textColor, icon: 'eva:clock-fill' };
@@ -1159,9 +1216,12 @@ export default function OrderView() {
                     }}
                   >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography sx={{ color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
-                        {order.orderNumber}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography sx={{ color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
+                          {order.orderNumber}
+                        </Typography>
+                        <SearchMatchIndicator searchContext={order.searchContext} searchQuery={searchQuery} />
+                      </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Iconify icon={statusConfig.icon} sx={{ width: 14, height: 14, color: statusConfig.color }} />
                         <Typography variant="caption" sx={{ color: statusConfig.color, fontWeight: 600, fontSize: 13 }}>
@@ -1198,6 +1258,10 @@ export default function OrderView() {
                           </Typography>
                         )}
                       </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Attendees:</Typography>
+                      <AttendeePopover attendees={order.attendees} searchQuery={searchQuery} />
                     </Box>
                     <Stack 
                       direction="row"
@@ -1256,10 +1320,20 @@ export default function OrderView() {
                   </Box>
                   
                   {/* Desktop layout - row style */}
-                  <Typography sx={{ width: '15%', color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.orderNumber}</Typography>
+                  <Box sx={{ width: '15%', display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+                    <Typography sx={{ color: textColor, fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
+                      {order.orderNumber}
+                    </Typography>
+                    <SearchMatchIndicator searchContext={order.searchContext} searchQuery={searchQuery} />
+                  </Box>
                   <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
-                    <Typography sx={{ color: textColor, fontSize: 13 }}>{order.buyerName}</Typography>
-                    <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>{order.buyerEmail}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box>
+                        <Typography sx={{ color: textColor, fontSize: 13 }}>{order.buyerName}</Typography>
+                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>{order.buyerEmail}</Typography>
+                      </Box>
+                      <AttendeePopover attendees={order.attendees} searchQuery={searchQuery} />
+                    </Box>
                   </Box>
                   <Typography sx={{ width: '10%', color: textColor, fontSize: 13, display: { xs: 'none', md: 'block' } }}>{order.buyerPhoneNumber || 'No Phone'}</Typography>
                   <Box sx={{ width: '15%', display: { xs: 'none', md: 'block' } }}>
@@ -1345,11 +1419,11 @@ export default function OrderView() {
         <TablePaginationCustom
           rowsPerPageOptions={[10, 25, 50]}
           component="div"
-          count={eventOrders.length}
+          count={filteredOrders.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); }}
         />
       </Box>
       {/* Resend Email Dialog and Snackbar (reuse existing logic) */}
