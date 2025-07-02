@@ -455,7 +455,7 @@ export default function OrderView() {
         <Grid container spacing={2}>
           {filteredEvents.map((event) => {
             const test =
-              data?.order?.filter(
+              data?.filter(
                 (a) => a?.event?.id === event?.id && a?.status === 'paid' && a.totalAmount !== 0
               ) || [];
 
