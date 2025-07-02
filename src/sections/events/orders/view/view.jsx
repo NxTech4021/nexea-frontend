@@ -453,440 +453,420 @@ export default function OrderView() {
 
         {/* Events Grid */}
         <Grid container spacing={2}>
-          {filteredEvents.map((event) => {
-            const test =
-              data?.order.filter(
-                (a) => a?.event?.id === event?.id && a?.status === 'paid' && a.totalAmount !== 0
-              ) || [];
-            const attendees = test?.flatMap((a) => a.attendees);
-
-            const discount = test.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
-
-            const totalTicketPrice = attendees.reduce(
-              (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
-              0
-            );
-
-            const totalRevenue = totalTicketPrice - discount;
-
-            return (
-              <Grid item xs={12} key={event.id}>
-                <Card
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease-in-out',
-                    border: `1px solid ${borderColor}`,
-                    boxShadow: 'none',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: theme.customShadows.z8,
-                      borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                    },
-                  }}
-                  onClick={() => router.push(paths.dashboard.order.event(event.id))}
-                >
-                  <CardContent sx={{ p: 2.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                      {/* Event Logo */}
+          {filteredEvents.map((event) => (
+            <Grid item xs={12} key={event.id}>
+              <Card
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  border: `1px solid ${borderColor}`,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.customShadows.z8,
+                    borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
+                  },
+                }}
+                onClick={() => router.push(paths.dashboard.order.event(event.id))}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    {/* Event Logo */}
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 1.5,
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        bgcolor: event.eventSetting?.bgColor || 'background.neutral',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
                       <Box
+                        component="img"
+                        src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
+                        alt={event.name}
                         sx={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 1.5,
-                          overflow: 'hidden',
-                          flexShrink: 0,
-                          bgcolor: event.eventSetting?.bgColor || 'background.neutral',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          width: '90%',
+                          height: '90%',
+                          objectFit: 'contain',
                         }}
-                      >
-                        <Box
-                          component="img"
-                          src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
-                          alt={event.name}
-                          sx={{
-                            width: '90%',
-                            height: '90%',
-                            objectFit: 'contain',
-                          }}
-                        />
-                      </Box>
+                      />
+                    </Box>
 
-                      {/* Event Details */}
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{ color: textColor, fontWeight: 600, fontSize: 16 }}
-                          >
-                            {event.name}
-                          </Typography>
-                          {(() => {
-                            const now = dayjs();
-                            const startDate = event.date ? dayjs(event.date) : null;
-                            let endDate = null;
-                            if (event.endDate) {
-                              endDate = dayjs(event.endDate);
-                            } else if (startDate) {
-                              endDate = startDate.add(1, 'day');
+                    {/* Event Details */}
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: textColor, fontWeight: 600, fontSize: 16 }}
+                        >
+                          {event.name}
+                        </Typography>
+                        {(() => {
+                          const now = dayjs();
+                          const startDate = event.date ? dayjs(event.date) : null;
+                          let endDate = null;
+                          if (event.endDate) {
+                            endDate = dayjs(event.endDate);
+                          } else if (startDate) {
+                            endDate = startDate.add(1, 'day');
+                          }
+
+                          let status = 'unknown';
+                          let statusColor = '#999';
+                          let statusBg = theme.palette.mode === 'light' ? '#f5f5f5' : '#333';
+
+                          if (startDate && endDate) {
+                            if (now.isBefore(startDate)) {
+                              status = 'Upcoming';
+                              statusColor = '#0288d1';
+                              statusBg = alpha('#0288d1', 0.1);
+                            } else if (now.isAfter(endDate)) {
+                              status = 'Past';
+                              statusColor = '#616161';
+                              statusBg = alpha('#616161', 0.1);
+                            } else {
+                              status = 'Active';
+                              statusColor = '#4caf50';
+                              statusBg = alpha('#4caf50', 0.1);
                             }
+                          }
 
-                            let status = 'unknown';
-                            let statusColor = '#999';
-                            let statusBg = theme.palette.mode === 'light' ? '#f5f5f5' : '#333';
-
-                            if (startDate && endDate) {
-                              if (now.isBefore(startDate)) {
-                                status = 'Upcoming';
-                                statusColor = '#0288d1';
-                                statusBg = alpha('#0288d1', 0.1);
-                              } else if (now.isAfter(endDate)) {
-                                status = 'Past';
-                                statusColor = '#616161';
-                                statusBg = alpha('#616161', 0.1);
-                              } else {
-                                status = 'Active';
-                                statusColor = '#4caf50';
-                                statusBg = alpha('#4caf50', 0.1);
-                              }
-                            }
-
-                            return (
-                              <Box
-                                sx={{
-                                  px: 1,
-                                  py: 0.5,
-                                  borderRadius: 1,
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  color: statusColor,
-                                  bgcolor: statusBg,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 0.5,
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    width: 6,
-                                    height: 6,
-                                    borderRadius: '50%',
-                                    bgcolor: statusColor,
-                                  }}
-                                />
-                                {status}
-                              </Box>
-                            );
-                          })()}
-                        </Box>
-
-                        <Box
-                          sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 3 }, mb: 1 }}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Iconify
-                              icon="eva:calendar-outline"
-                              width={14}
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                mr: 0.5,
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              {dayjs(event.date).format('MMM D, YYYY')}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Iconify
-                              icon="eva:clock-outline"
-                              width={14}
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                mr: 0.5,
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              {dayjs(event.date).format('h:mm A')}
-                            </Typography>
-                          </Box>
-                          {event.personInCharge && (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Iconify
-                                icon="eva:person-outline"
-                                width={14}
-                                sx={{
-                                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                  mr: 0.5,
-                                }}
-                              />
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                  fontSize: '0.75rem',
-                                }}
-                              >
-                                {event.personInCharge.fullName}
-                              </Typography>
-                            </Box>
-                          )}
-                        </Box>
-
-                        {/* Stats */}
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            gap: 3,
-                            pt: 1.5,
-                            mt: 1.5,
-                            borderTop: `1px solid ${borderColor}`,
-                            width: {
-                              xs: '100%',
-                              sm: '100%',
-                              md: '65%',
-                              lg: '70%',
-                              xl: '76%',
-                            },
-                          }}
-                        >
-                          <Box>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                display: 'block',
-                                mb: 0.25,
-                              }}
-                            >
-                              Total Orders
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                              <Typography
-                                variant="subtitle2"
-                                sx={{ color: textColor, fontWeight: 600 }}
-                              >
-                                {data?.filter((order) => order.event?.id === event.id).length || 0}
-                              </Typography>
-                              {(() => {
-                                const allOrders =
-                                  data?.filter((order) => order.event?.id === event.id) || [];
-                                const last7Days = allOrders.filter((order) =>
-                                  dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
-                                );
-                                const prev7Days = allOrders.filter(
-                                  (order) =>
-                                    dayjs(order.createdAt).isAfter(dayjs().subtract(14, 'days')) &&
-                                    dayjs(order.createdAt).isBefore(dayjs().subtract(7, 'days'))
-                                );
-
-                                if (last7Days.length > 0 || prev7Days.length > 0) {
-                                  const trend = last7Days.length - prev7Days.length;
-                                  let trendColor = '#9e9e9e';
-                                  let trendIcon = 'eva:minus-fill';
-                                  let trendText = 'same';
-
-                                  if (trend > 0) {
-                                    trendColor = '#4caf50';
-                                    trendIcon = 'eva:trending-up-fill';
-                                    trendText = 'more';
-                                  } else if (trend < 0) {
-                                    trendColor = '#f44336';
-                                    trendIcon = 'eva:trending-down-fill';
-                                    trendText = 'fewer';
-                                  }
-
-                                  return (
-                                    <Tooltip
-                                      title={`${Math.abs(trend)} ${trendText} orders compared to previous 7 days`}
-                                    >
-                                      <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
-                                        <Iconify
-                                          icon={trendIcon}
-                                          width={16}
-                                          sx={{ color: trendColor }}
-                                        />
-                                      </Box>
-                                    </Tooltip>
-                                  );
-                                }
-                                return null;
-                              })()}
-                            </Box>
-                          </Box>
-
-                          <Box>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                display: 'block',
-                                mb: 0.25,
-                              }}
-                            >
-                              Revenue
-                            </Typography>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ color: textColor, fontWeight: 600 }}
-                            >
-                              {new Intl.NumberFormat('en-MY', {
-                                style: 'currency',
-                                currency: 'MYR',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                              }).format(
-                                data
-                                  ?.filter(
-                                    (order) =>
-                                      order.event?.id === event.id && order.status === 'paid'
-                                  )
-                                  .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
-                              )}
-                            </Typography>
-                          </Box>
-
-                          <Box>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                display: 'block',
-                                mb: 0.25,
-                              }}
-                            >
-                              Attendees
-                            </Typography>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ color: textColor, fontWeight: 600 }}
-                            >
-                              {data
-                                ?.filter((order) => order.event?.id === event.id)
-                                .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) ||
-                                0}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Mini Charts - Desktop Only */}
-                        <Box
-                          sx={{
-                            display: { xs: 'none', md: 'flex' },
-                            alignItems: 'center',
-                            gap: 2,
-                            ml: 'auto',
-                            pl: 3,
-                            borderLeft: `1px solid ${borderColor}`,
-                            height: 'calc(100% - 16px)',
-                            position: 'absolute',
-                            right: 48,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                          }}
-                        >
-                          {/* Orders Chart */}
-                          <Box
-                            sx={{
-                              width: 120,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'center',
-                            }}
-                          >
+                          return (
                             <Box
                               sx={{
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: statusColor,
+                                bgcolor: statusBg,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: 1,
-                                mb: 0.5,
+                                gap: 0.5,
                               }}
                             >
-                              <Typography
-                                variant="caption"
+                              <Box
                                 sx={{
-                                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                  fontSize: '0.6875rem',
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  bgcolor: statusColor,
                                 }}
-                              >
-                                Orders (7d)
-                              </Typography>
+                              />
+                              {status}
                             </Box>
-                            <ReactApexChart
-                              type="area"
-                              series={[
-                                {
-                                  name: 'Orders',
-                                  data: (() => {
-                                    const now = dayjs();
-                                    const days = Array.from({ length: 7 }, (_, i) =>
-                                      now.subtract(i, 'day')
-                                    );
-                                    const ordersByDay = days
-                                      .map(
-                                        (day) =>
-                                          data?.filter(
-                                            (order) =>
-                                              order.event?.id === event.id &&
-                                              dayjs(order.createdAt).format('YYYY-MM-DD') ===
-                                                day.format('YYYY-MM-DD')
-                                          ).length || 0
-                                      )
-                                      .reverse();
-                                    return ordersByDay;
-                                  })(),
-                                },
-                              ]}
-                              options={{
-                                chart: {
-                                  sparkline: { enabled: true },
-                                  toolbar: { show: false },
-                                  zoom: { enabled: false },
-                                  animations: {
-                                    enabled: true,
-                                    easing: 'easeinout',
-                                    speed: 800,
-                                  },
-                                },
-                                stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
-                                colors: [theme.palette.info.main],
-                                fill: {
-                                  type: 'gradient',
-                                  gradient: {
-                                    shadeIntensity: 1,
-                                    opacityFrom: 0.45,
-                                    opacityTo: 0.05,
-                                    stops: [50, 100],
-                                  },
-                                },
-                                tooltip: {
-                                  enabled: true,
-                                  custom({ series, seriesIndex, dataPointIndex }) {
-                                    const date = dayjs().subtract(6 - dataPointIndex, 'days');
-                                    const dailyOrderCount = series[seriesIndex][dataPointIndex];
-                                    const paidOrders =
-                                      data?.filter(
-                                        (order) =>
-                                          order.event?.id === event.id &&
-                                          dayjs(order.createdAt).format('YYYY-MM-DD') ===
-                                            date.format('YYYY-MM-DD') &&
-                                          order.status === 'paid'
-                                      ).length || 0;
+                          );
+                        })()}
+                      </Box>
 
-                                    return `
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 3 }, mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Iconify
+                            icon="eva:calendar-outline"
+                            width={14}
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              mr: 0.5,
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.75rem',
+                            }}
+                          >
+                            {dayjs(event.date).format('MMM D, YYYY')}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Iconify
+                            icon="eva:clock-outline"
+                            width={14}
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              mr: 0.5,
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              fontSize: '0.75rem',
+                            }}
+                          >
+                            {dayjs(event.date).format('h:mm A')}
+                          </Typography>
+                        </Box>
+                        {event.personInCharge && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Iconify
+                              icon="eva:person-outline"
+                              width={14}
+                              sx={{
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                                mr: 0.5,
+                              }}
+                            />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                                fontSize: '0.75rem',
+                              }}
+                            >
+                              {event.personInCharge.fullName}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Stats */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          gap: 3,
+                          pt: 1.5,
+                          mt: 1.5,
+                          borderTop: `1px solid ${borderColor}`,
+                          width: {
+                            xs: '100%',
+                            sm: '100%',
+                            md: '65%',
+                            lg: '70%',
+                            xl: '76%',
+                          },
+                        }}
+                      >
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              display: 'block',
+                              mb: 0.25,
+                            }}
+                          >
+                            Total Orders
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ color: textColor, fontWeight: 600 }}
+                            >
+                              {data?.filter((order) => order.event?.id === event.id).length || 0}
+                            </Typography>
+                            {(() => {
+                              const allOrders =
+                                data?.filter((order) => order.event?.id === event.id) || [];
+                              const last7Days = allOrders.filter((order) =>
+                                dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
+                              );
+                              const prev7Days = allOrders.filter(
+                                (order) =>
+                                  dayjs(order.createdAt).isAfter(dayjs().subtract(14, 'days')) &&
+                                  dayjs(order.createdAt).isBefore(dayjs().subtract(7, 'days'))
+                              );
+
+                              if (last7Days.length > 0 || prev7Days.length > 0) {
+                                const trend = last7Days.length - prev7Days.length;
+                                let trendColor = '#9e9e9e';
+                                let trendIcon = 'eva:minus-fill';
+                                let trendText = 'same';
+
+                                if (trend > 0) {
+                                  trendColor = '#4caf50';
+                                  trendIcon = 'eva:trending-up-fill';
+                                  trendText = 'more';
+                                } else if (trend < 0) {
+                                  trendColor = '#f44336';
+                                  trendIcon = 'eva:trending-down-fill';
+                                  trendText = 'fewer';
+                                }
+
+                                return (
+                                  <Tooltip
+                                    title={`${Math.abs(trend)} ${trendText} orders compared to previous 7 days`}
+                                  >
+                                    <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      <Iconify
+                                        icon={trendIcon}
+                                        width={16}
+                                        sx={{ color: trendColor }}
+                                      />
+                                    </Box>
+                                  </Tooltip>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </Box>
+                        </Box>
+
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              display: 'block',
+                              mb: 0.25,
+                            }}
+                          >
+                            Revenue
+                          </Typography>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ color: textColor, fontWeight: 600 }}
+                          >
+                            {new Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(
+                              data
+                                ?.filter(
+                                  (order) => order.event?.id === event.id && order.status === 'paid'
+                                )
+                                .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                            )}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                              display: 'block',
+                              mb: 0.25,
+                            }}
+                          >
+                            Attendees
+                          </Typography>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ color: textColor, fontWeight: 600 }}
+                          >
+                            {data
+                              ?.filter((order) => order.event?.id === event.id)
+                              .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Mini Charts - Desktop Only */}
+                      <Box
+                        sx={{
+                          display: { xs: 'none', md: 'flex' },
+                          alignItems: 'center',
+                          gap: 2,
+                          ml: 'auto',
+                          pl: 3,
+                          borderLeft: `1px solid ${borderColor}`,
+                          height: 'calc(100% - 16px)',
+                          position: 'absolute',
+                          right: 48,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                        }}
+                      >
+                        {/* Orders Chart */}
+                        <Box
+                          sx={{
+                            width: 120,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 1,
+                              mb: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                                fontSize: '0.6875rem',
+                              }}
+                            >
+                              Orders (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[
+                              {
+                                name: 'Orders',
+                                data: (() => {
+                                  const now = dayjs();
+                                  const days = Array.from({ length: 7 }, (_, i) =>
+                                    now.subtract(i, 'day')
+                                  );
+                                  const ordersByDay = days
+                                    .map(
+                                      (day) =>
+                                        data?.filter(
+                                          (order) =>
+                                            order.event?.id === event.id &&
+                                            dayjs(order.createdAt).format('YYYY-MM-DD') ===
+                                              day.format('YYYY-MM-DD')
+                                        ).length || 0
+                                    )
+                                    .reverse();
+                                  return ordersByDay;
+                                })(),
+                              },
+                            ]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
+                                  enabled: true,
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.info.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100],
+                                },
+                              },
+                              tooltip: {
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const dailyOrderCount = series[seriesIndex][dataPointIndex];
+                                  const paidOrders =
+                                    data?.filter(
+                                      (order) =>
+                                        order.event?.id === event.id &&
+                                        dayjs(order.createdAt).format('YYYY-MM-DD') ===
+                                          date.format('YYYY-MM-DD') &&
+                                        order.status === 'paid'
+                                    ).length || 0;
+
+                                  return `
                                     <div style="padding: 8px;">
                                       <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
                                         ${date.format('MMM D, YYYY')}
@@ -900,110 +880,110 @@ export default function OrderView() {
 
                                     </div>
                                   `;
-                                  },
                                 },
-                                grid: { padding: { top: -10, bottom: -10 } },
-                              }}
-                              height={35}
-                            />
-                          </Box>
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } },
+                            }}
+                            height={35}
+                          />
+                        </Box>
 
-                          {/* Revenue Chart */}
+                        {/* Revenue Chart */}
+                        <Box
+                          sx={{
+                            width: 120,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                          }}
+                        >
                           <Box
                             sx={{
-                              width: 120,
                               display: 'flex',
-                              flexDirection: 'column',
+                              alignItems: 'center',
                               justifyContent: 'center',
+                              gap: 1,
+                              mb: 0.5,
                             }}
                           >
-                            <Box
+                            <Typography
+                              variant="caption"
                               sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: 1,
-                                mb: 0.5,
+                                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                                fontSize: '0.6875rem',
                               }}
                             >
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                                  fontSize: '0.6875rem',
-                                }}
-                              >
-                                Revenue (7d)
-                              </Typography>
-                            </Box>
-                            <ReactApexChart
-                              type="area"
-                              series={[
-                                {
-                                  name: 'Revenue',
-                                  data: (() => {
-                                    const now = dayjs();
-                                    const days = Array.from({ length: 7 }, (_, i) =>
-                                      now.subtract(i, 'day')
-                                    );
-                                    const revenueByDay = days
-                                      .map(
-                                        (day) =>
-                                          data
-                                            ?.filter(
-                                              (order) =>
-                                                order.event?.id === event.id &&
-                                                order.status === 'paid' &&
-                                                dayjs(order.createdAt).format('YYYY-MM-DD') ===
-                                                  day.format('YYYY-MM-DD')
-                                            )
-                                            .reduce(
-                                              (sum, order) => sum + (order.totalAmount || 0),
-                                              0
-                                            ) || 0
-                                      )
-                                      .reverse();
-                                    return revenueByDay;
-                                  })(),
-                                },
-                              ]}
-                              options={{
-                                chart: {
-                                  sparkline: { enabled: true },
-                                  toolbar: { show: false },
-                                  zoom: { enabled: false },
-                                  animations: {
-                                    enabled: true,
-                                    easing: 'easeinout',
-                                    speed: 800,
-                                  },
-                                },
-                                stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
-                                colors: [theme.palette.primary.main],
-                                fill: {
-                                  type: 'gradient',
-                                  gradient: {
-                                    shadeIntensity: 1,
-                                    opacityFrom: 0.45,
-                                    opacityTo: 0.05,
-                                    stops: [50, 100],
-                                  },
-                                },
-                                tooltip: {
+                              Revenue (7d)
+                            </Typography>
+                          </Box>
+                          <ReactApexChart
+                            type="area"
+                            series={[
+                              {
+                                name: 'Revenue',
+                                data: (() => {
+                                  const now = dayjs();
+                                  const days = Array.from({ length: 7 }, (_, i) =>
+                                    now.subtract(i, 'day')
+                                  );
+                                  const revenueByDay = days
+                                    .map(
+                                      (day) =>
+                                        data
+                                          ?.filter(
+                                            (order) =>
+                                              order.event?.id === event.id &&
+                                              order.status === 'paid' &&
+                                              dayjs(order.createdAt).format('YYYY-MM-DD') ===
+                                                day.format('YYYY-MM-DD')
+                                          )
+                                          .reduce(
+                                            (sum, order) => sum + (order.totalAmount || 0),
+                                            0
+                                          ) || 0
+                                    )
+                                    .reverse();
+                                  return revenueByDay;
+                                })(),
+                              },
+                            ]}
+                            options={{
+                              chart: {
+                                sparkline: { enabled: true },
+                                toolbar: { show: false },
+                                zoom: { enabled: false },
+                                animations: {
                                   enabled: true,
-                                  custom({ series, seriesIndex, dataPointIndex }) {
-                                    const date = dayjs().subtract(6 - dataPointIndex, 'days');
-                                    const revenue = series[seriesIndex][dataPointIndex];
-                                    const dailyPaidOrders = data?.filter(
-                                      (order) =>
-                                        order.event?.id === event.id &&
-                                        order.status === 'paid' &&
-                                        dayjs(order.createdAt).format('YYYY-MM-DD') ===
-                                          date.format('YYYY-MM-DD')
-                                    );
-                                    const orderCount = dailyPaidOrders?.length || 0;
+                                  easing: 'easeinout',
+                                  speed: 800,
+                                },
+                              },
+                              stroke: { width: 2, curve: 'smooth', lineCap: 'round' },
+                              colors: [theme.palette.primary.main],
+                              fill: {
+                                type: 'gradient',
+                                gradient: {
+                                  shadeIntensity: 1,
+                                  opacityFrom: 0.45,
+                                  opacityTo: 0.05,
+                                  stops: [50, 100],
+                                },
+                              },
+                              tooltip: {
+                                enabled: true,
+                                custom({ series, seriesIndex, dataPointIndex }) {
+                                  const date = dayjs().subtract(6 - dataPointIndex, 'days');
+                                  const revenue = series[seriesIndex][dataPointIndex];
+                                  const dailyPaidOrders = data?.filter(
+                                    (order) =>
+                                      order.event?.id === event.id &&
+                                      order.status === 'paid' &&
+                                      dayjs(order.createdAt).format('YYYY-MM-DD') ===
+                                        date.format('YYYY-MM-DD')
+                                  );
+                                  const orderCount = dailyPaidOrders?.length || 0;
 
-                                    return `
+                                  return `
                                     <div style="padding: 8px;">
                                       <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
                                         ${date.format('MMM D, YYYY')}
@@ -1016,30 +996,29 @@ export default function OrderView() {
                                       </div>
                                     </div>
                                   `;
-                                  },
                                 },
-                                grid: { padding: { top: -10, bottom: -10 } },
-                              }}
-                              height={35}
-                            />
-                          </Box>
+                              },
+                              grid: { padding: { top: -10, bottom: -10 } },
+                            }}
+                            height={35}
+                          />
                         </Box>
                       </Box>
-
-                      {/* Arrow Icon */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-                        <Iconify
-                          icon="eva:arrow-ios-forward-fill"
-                          width={20}
-                          sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
-                        />
-                      </Box>
                     </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
+
+                    {/* Arrow Icon */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+                      <Iconify
+                        icon="eva:arrow-ios-forward-fill"
+                        width={20}
+                        sx={{ color: theme.palette.mode === 'light' ? '#666' : '#aaa' }}
+                      />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
 
         {/* Empty State */}
