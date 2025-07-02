@@ -89,7 +89,7 @@ const EventDetails = ({ id }) => {
       .filter((a) => a?.status === 'paid')
       .reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
 
-    return totalTicketPrice - discount;
+    return totalSolds;
   }, [data]);
 
   const orders = data?.order?.filter((a) => a?.status === 'paid').flatMap((a) => a.attendees) || [];

@@ -85,16 +85,16 @@ export default function RevenueChart({ eventOrders, selectedEvent, dateRange }) 
 
   const totalRevenue = useMemo(() => {
     const orders = eventOrders.filter((a) => a?.status === 'paid' && a.totalAmount !== 0) || [];
-    const attendees = orders?.flatMap((a) => a.attendees);
+    // const attendees = orders?.flatMap((a) => a.attendees);
 
-    const discount = orders.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
+    // const discount = orders.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
 
-    const totalTicketPrice = attendees.reduce(
-      (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
-      0
-    );
+    // const totalTicketPrice = attendees.reduce(
+    //   (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
+    //   0
+    // );
 
-    return totalTicketPrice - discount;
+    return orders?.reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
   }, [eventOrders]);
 
   const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';

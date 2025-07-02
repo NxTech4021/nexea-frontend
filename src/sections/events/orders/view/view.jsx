@@ -455,10 +455,9 @@ export default function OrderView() {
         <Grid container spacing={2}>
           {filteredEvents.map((event) => {
             const test =
-              data?.filter(
+              data?.order.filter(
                 (a) => a?.event?.id === event?.id && a?.status === 'paid' && a.totalAmount !== 0
               ) || [];
-
             const attendees = test?.flatMap((a) => a.attendees);
 
             const discount = test.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
@@ -748,7 +747,14 @@ export default function OrderView() {
                                 currency: 'MYR',
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0,
-                              }).format(totalRevenue || 0)}
+                              }).format(
+                                data
+                                  ?.filter(
+                                    (order) =>
+                                      order.event?.id === event.id && order.status === 'paid'
+                                  )
+                                  .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
+                              )}
                             </Typography>
                           </Box>
 
