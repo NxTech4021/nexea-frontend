@@ -75,7 +75,7 @@ const EventDetails = ({ id }) => {
   }, [data]);
 
   const totalRevenue = useMemo(() => {
-    const orders = data?.order.filter((a) => a?.status === 'paid') || [];
+    const orders = data?.order.filter((a) => a?.status === 'paid' && a.totalAmount !== 0) || [];
     const attendees = orders?.flatMap((a) => a.attendees);
     console.log(attendees.length);
 
