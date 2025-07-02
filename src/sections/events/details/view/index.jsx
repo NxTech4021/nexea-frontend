@@ -77,7 +77,6 @@ const EventDetails = ({ id }) => {
   const totalRevenue = useMemo(() => {
     const orders = data?.order.filter((a) => a?.status === 'paid' && a.totalAmount !== 0) || [];
     const attendees = orders?.flatMap((a) => a.attendees);
-    console.log(attendees.length);
 
     const discount = orders.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
 
@@ -85,8 +84,6 @@ const EventDetails = ({ id }) => {
       (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
       0
     );
-
-    console.log(discount, totalTicketPrice);
 
     const totalSolds = orders
       .filter((a) => a?.status === 'paid')
