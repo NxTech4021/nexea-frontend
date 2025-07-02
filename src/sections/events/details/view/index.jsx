@@ -85,6 +85,8 @@ const EventDetails = ({ id }) => {
       0
     );
 
+    console.log(discount, totalTicketPrice);
+
     const totalSolds = orders
       .filter((a) => a?.status === 'paid')
       .reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
