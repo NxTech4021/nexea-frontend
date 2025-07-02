@@ -75,13 +75,21 @@ const EventDetails = ({ id }) => {
   }, [data]);
 
   const totalRevenue = useMemo(() => {
-    const orders = data?.order || [];
+    const orders = data?.order.filter((a) => a?.status === 'paid') || [];
+    const attendees = orders?.flatMap((a) => a.attendees);
+
+    const discount = orders.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
+
+    const totalTicketPrice = attendees.reduce(
+      (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
+      0
+    );
 
     const totalSolds = orders
       .filter((a) => a?.status === 'paid')
       .reduce((acc, cur) => acc + (cur?.totalAmount ?? 0), 0);
 
-    return totalSolds;
+    return totalTicketPrice - discount;
   }, [data]);
 
   const orders = data?.order?.filter((a) => a?.status === 'paid').flatMap((a) => a.attendees) || [];
