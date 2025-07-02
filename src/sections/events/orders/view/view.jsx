@@ -455,9 +455,10 @@ export default function OrderView() {
         <Grid container spacing={2}>
           {filteredEvents.map((event) => {
             const test =
-              data?.order.filter(
+              data?.order?.filter(
                 (a) => a?.event?.id === event?.id && a?.status === 'paid' && a.totalAmount !== 0
               ) || [];
+
             const attendees = test?.flatMap((a) => a.attendees);
 
             const discount = test.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
