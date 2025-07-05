@@ -44,7 +44,7 @@ export default function EventAttendee() {
   const settings = useSettingsContext();
   const theme = useTheme();
   const router = useRouter();
-  
+
   // Theme-aware colors
   const textColor = theme.palette.mode === 'light' ? '#111' : '#fff';
   const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
@@ -52,7 +52,7 @@ export default function EventAttendee() {
   const paperBgColor = theme.palette.mode === 'light' ? '#fff' : '#1e1e1e';
   const hoverBgColor = theme.palette.mode === 'light' ? '#f8f9fa' : '#2c2c2c';
   const secondaryTextColor = theme.palette.mode === 'light' ? '#666' : '#aaa';
-  
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
@@ -146,6 +146,12 @@ export default function EventAttendee() {
       valueGetter: (value, row) => `${row.ticket.ticketType.title || ''}`,
     },
     {
+      field: 'ticketAddOn',
+      headerName: 'Ticket Add On',
+      width: 200,
+      valueGetter: (value, row) => `${row.ticket.ticketAddOn?.addOn?.name || 'N/A'}`,
+    },
+    {
       field: 'ticketCode',
       headerName: 'Ticket Code',
       width: 200,
@@ -165,7 +171,7 @@ export default function EventAttendee() {
       renderCell: (params) => {
         const status = params.value;
         let color;
-        
+
         switch (status) {
           case 'paid':
             color = 'success';
@@ -185,14 +191,14 @@ export default function EventAttendee() {
           default:
             color = 'default';
         }
-        
+
         let displayText = 'Unknown';
         if (status === 'free') {
           displayText = 'Free';
         } else if (status) {
           displayText = status.charAt(0).toUpperCase() + status.slice(1);
         }
-        
+
         return (
           <Label size="small" color={color}>
             {displayText}
@@ -274,7 +280,10 @@ export default function EventAttendee() {
           </IconButton>
         </Tooltip>
 
-        <Typography variant="h4" sx={{ color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white' }}>
+        <Typography
+          variant="h4"
+          sx={{ color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white' }}
+        >
           Attendees
         </Typography>
 
@@ -300,13 +309,13 @@ export default function EventAttendee() {
         </Button>
       </Box>
 
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          border: `1px solid ${borderColor}`, 
-          borderRadius: 2, 
+      <Paper
+        elevation={0}
+        sx={{
+          border: `1px solid ${borderColor}`,
+          borderRadius: 2,
           overflow: 'hidden',
-          bgcolor: paperBgColor
+          bgcolor: paperBgColor,
         }}
       >
         <DataGrid
@@ -385,8 +394,8 @@ export default function EventAttendee() {
         />
       </Paper>
 
-      <Dialog 
-        open={dialog.value} 
+      <Dialog
+        open={dialog.value}
         onClose={dialog.onFalse}
         PaperProps={{
           elevation: 0,
