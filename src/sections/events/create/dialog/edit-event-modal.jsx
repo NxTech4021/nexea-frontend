@@ -3,6 +3,7 @@ import React from 'react';
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
+import { MuiColorInput } from 'mui-color-input';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -89,12 +90,19 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
       >
         <Avatar
           alt="Event"
-          src="/logo/nexea.png"
+          src={selectedEvent?.eventSetting?.eventLogo || '/logo/nexea.png'}
           sx={{
             width: 48,
             height: 48,
             marginRight: 2,
-            border: (theme) => `1px solid ${theme.palette.divider}`,
+            border: (theme) => `3px solid ${theme.palette.background.paper}`,
+            backgroundColor: selectedEvent?.eventSetting?.bgColor || '#f0f4f8',
+            '& img': {
+              objectFit: 'contain',
+              width: '70%',
+              height: '70%',
+              margin: 'auto',
+            },
           }}
         />
         <Box>
@@ -146,28 +154,29 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             sst: selectedEvent?.eventSetting?.sst,
             status: selectedEvent?.status,
             eventLogo: selectedEvent?.eventSetting?.eventLogo,
+            bgColor: selectedEvent?.eventSetting?.bgColor || '#f0f4f8',
           }}
           onSubmit={(values, { setSubmitting }) => {
             // Get date parts from date objects
             const startDate = dayjs(values.date).format('YYYY-MM-DD');
             const endDate = dayjs(values.endDate).format('YYYY-MM-DD');
-            
+
             // Get time parts using 24-hour format (HH:mm)
             const startTime = dayjs(values.time).format('HH:mm');
             const endTime = dayjs(values.endTime).format('HH:mm');
-            
+
             console.log('Edit time values:', {
               startTime: `${dayjs(values.time).format('hh:mm A')} -> ${startTime}`,
               endTime: `${dayjs(values.endTime).format('hh:mm A')} -> ${endTime}`,
             });
-            
+
             // Format the date-time strings in ISO-like format
             const combinedDateTime = `${startDate}T${startTime}`;
             const combinedEndDateTime = `${endDate}T${endTime}`;
-            
+
             console.log('Edit formatted dates:', {
               startDateTime: combinedDateTime,
-              endDateTime: combinedEndDateTime
+              endDateTime: combinedEndDateTime,
             });
 
             const dataToSend = {
@@ -511,11 +520,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                    >
+                    <FormControl fullWidth required variant="outlined">
                       <Field
                         as={Select}
                         name="personInCharge"
@@ -620,11 +625,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <FormControl
-                      fullWidth
-                      required
-                      variant="outlined"
-                    >
+                    <FormControl fullWidth required variant="outlined">
                       <Field
                         as={Select}
                         name="status"
@@ -654,7 +655,44 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography
+                      component="label"
+                      htmlFor="bgColor"
+                      sx={{
+                        display: 'block',
+                        mb: 0.75,
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Background Color
+                    </Typography>
+                    <Field name="bgColor">
+                      {({ field, form }) => (
+                        <MuiColorInput
+                          {...field}
+                          format="hex"
+                          value={field.value || '#f0f4f8'}
+                          onChange={(color) => form.setFieldValue('bgColor', color)}
+                          sx={{
+                            width: '100%',
+                            '& .MuiOutlinedInput-root': {
+                              height: 42,
+                              bgcolor: (theme) =>
+                                theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                              border: 'none',
+                              '&:hover': {
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                              },
+                            },
+                          }}
+                        />
+                      )}
+                    </Field>
+                  </Grid>
+                  <Grid item xs={12} sm={7}>
                     <Typography
                       component="label"
                       htmlFor="eventLogo"
@@ -670,10 +708,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                         *
                       </Box>
                     </Typography>
-                    <Field
-                      name="eventLogo"
-                      id="eventLogo"
-                    >
+                    <Field name="eventLogo" id="eventLogo">
                       {({ field, form }) => (
                         <Upload
                           accept={{ 'image/*': [] }}
@@ -692,7 +727,22 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                             )
                           }
                           onDrop={(e) => {
-                            setFieldValue('eventLogo', e[0]); // Set the selected file in Formik state
+                            setFieldValue('eventLogo', e[0]);
+                          }}
+                          sx={{
+                            '& .drop-zone': {
+                              height: '100px !important',
+                              minHeight: '100px !important',
+                              border: '1px dashed',
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              bgcolor: (theme) =>
+                                theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                              '&:hover': {
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                              },
+                            },
                           }}
                         />
                       )}
@@ -708,7 +758,72 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       }}
                     />
                   </Grid>
-
+                  <Grid item xs={12} sm={5}>
+                    <Typography
+                      sx={{
+                        display: 'block',
+                        mb: 0.75,
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Preview
+                    </Typography>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        aspectRatio: '1/1',
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: values.bgColor || '#f0f4f8',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {values.eventLogo ? (
+                        <Box
+                          component="img"
+                          src={
+                            typeof values.eventLogo === 'string'
+                              ? values.eventLogo
+                              : URL.createObjectURL(values.eventLogo)
+                          }
+                          alt="Preview"
+                          sx={{
+                            width: '70%',
+                            height: '70%',
+                            objectFit: 'contain',
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          component="img"
+                          src="/logo/nexea.png"
+                          alt="Default"
+                          sx={{
+                            width: '50%',
+                            height: '50%',
+                            objectFit: 'contain',
+                            opacity: 0.5,
+                          }}
+                        />
+                      )}
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        color: 'text.secondary',
+                        mt: 1,
+                        fontSize: '0.75rem',
+                      }}
+                    >
+                      This preview shows how the event logo will appear in the event list.
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12}>
                     <Divider sx={{ my: 2 }} />
                     <Stack direction="row" spacing={2} justifyContent="flex-end">

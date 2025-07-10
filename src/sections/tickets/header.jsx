@@ -86,6 +86,9 @@ const TickerPurchaseHeader = () => {
     }
   }, [extend, timeOut, cartData, cartMutate]);
 
+  const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
+
+
   useEffect(() => {
     const timer = setInterval(() => {
       const now = dayjs();
@@ -158,26 +161,59 @@ const TickerPurchaseHeader = () => {
           px={{ sm: 5, md: 15 }}
           justifyContent={mdDown && 'space-between'}
         >
-          {eventData?.eventSetting?.eventLogo ? (
-            <Image src={eventData?.eventSetting?.eventLogo} width={120} height={50} />
-          ) : (
-            <Image src="/assets/nexea.png" width={120} />
-          )}
-
-          {!mdDown && (
-            <Stack flexGrow={1}>
-              <ListItemText
-                primary={eventData?.name}
-                secondary={`${dayjs(eventData?.date).format('LLL')}`}
-                sx={{ textAlign: 'center' }}
-                slotProps={{
-                  secondary: {
-                    variant: 'caption',
-                    color: 'text.secondary',
-                  },
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: eventData?.eventSetting?.bgColor || 'transparent',
+              p: 0.5,
+              borderRadius: 1,
+              maxHeight: { xs: 45, md: 50 },
+              '& img': {
+                maxHeight: { xs: '45px', md: '50px' },
+                width: 'auto',
+                maxWidth: '100%',
+              },
+            }}
+          >
+            {eventData?.eventSetting?.eventLogo ? (
+              <Image
+                src={eventData?.eventSetting?.eventLogo}
+                sx={{
+                  display: 'block',
+                  objectFit: 'none',
                 }}
               />
-            </Stack>
+            ) : (
+              <Image
+                src="/assets/nexea.png"
+                sx={{
+                  display: 'block',
+                  objectFit: 'none',
+                }}
+              />
+            )}
+          </Box>
+
+          {!mdDown && (
+           <Stack flexGrow={1}>
+  <ListItemText
+    primary={eventData?.name}
+    secondary={
+      isDefaultTime(eventData?.date) 
+        ? dayjs(eventData?.date).format('LL')
+        : dayjs(eventData?.date).format('LLL')
+    }
+    sx={{ textAlign: 'center' }}
+    slotProps={{
+      secondary: {
+        variant: 'caption',
+        color: 'text.secondary',
+      },
+    }}
+  />
+</Stack>
           )}
 
           {cartData && (

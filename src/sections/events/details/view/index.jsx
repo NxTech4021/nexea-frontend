@@ -1,9 +1,19 @@
+import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import React, { useMemo } from 'react';
 
 import Grid from '@mui/material/Grid2';
 import { useTheme } from '@mui/material/styles';
-import { Box, Card, Stack, Tooltip, Container, IconButton, CardContent, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Card,
+  Stack,
+  Tooltip,
+  Container,
+  IconButton,
+  CardContent,
+  CircularProgress,
+} from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -18,6 +28,7 @@ import TotalRevenue from '../analytics/total-revenue';
 import AttendeeInformation from '../attendee-information';
 import OrderAnalytics from '../analytics/order-analytics';
 import TicketAnalytics from '../analytics/ticket-analytics';
+import AttendeeAnalytics from '../analytics/attendee-analytic';
 // import CheckInAnalytics from '../analytics/checkIn-analytics';
 
 const EventDetails = ({ id }) => {
@@ -42,21 +53,21 @@ const EventDetails = ({ id }) => {
     //   if (cur?.ticket) {
     //     acc += 1;
     //   }
-    const regularTickets = attendees.filter(cur => cur?.ticket).length;
-    const addOnTickets = attendees.filter(cur => cur?.ticket?.ticketAddOn).length;
+    const regularTickets = attendees.filter((cur) => cur?.ticket).length;
+    const addOnTickets = attendees.filter((cur) => cur?.ticket?.ticketAddOn).length;
 
-  //   if (cur?.ticket?.ticketAddOn) {
-  //     acc += 1;
-  //   }
+    //   if (cur?.ticket?.ticketAddOn) {
+    //     acc += 1;
+    //   }
 
-  //   return acc;
-  // }, 0);
+    //   return acc;
+    // }, 0);
 
-  // // const totalSolds = orders
-  // //   .filter((a) => a?.status === 'paid')
-  // //   .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
+    // // const totalSolds = orders
+    // //   .filter((a) => a?.status === 'paid')
+    // //   .reduce((acc, cur) => acc + (cur?.attendees?.length ?? 0), 0);
 
-  // return totalSolds;
+    // return totalSolds;
     return {
       regularTickets,
       addOnTickets,
@@ -64,7 +75,15 @@ const EventDetails = ({ id }) => {
   }, [data]);
 
   const totalRevenue = useMemo(() => {
-    const orders = data?.order || [];
+    const orders = data?.order.filter((a) => a?.status === 'paid' && a.totalAmount !== 0) || [];
+    const attendees = orders?.flatMap((a) => a.attendees);
+
+    const discount = orders.reduce((acc, curr) => acc + (curr.discountAmount ?? 0), 0);
+
+    const totalTicketPrice = attendees.reduce(
+      (acc, cur) => acc + (cur.ticket.price ?? 0) + (cur.ticket.ticketAddOn?.price ?? 0),
+      0
+    );
 
     const totalSolds = orders
       .filter((a) => a?.status === 'paid')
@@ -103,6 +122,21 @@ const EventDetails = ({ id }) => {
 
     return acc;
   }, {});
+
+  const groupedAttendees = useMemo(() => {
+    const attendees = data?.order?.flatMap((a) => a?.attendees || []);
+
+    return attendees?.reduce((acc, cur) => {
+      if (!acc.some((a) => dayjs(a.date).isSame(cur.created_at, 'date'))) {
+        acc.push({
+          date: dayjs(cur.created_at).format('L'),
+          count: attendees.filter((a) => dayjs(a.created_at).isSame(cur.created_at, 'date')).length,
+        });
+      }
+
+      return acc;
+    }, []);
+  }, [data]);
 
   if (error) return router.back();
   if (isLoading)
@@ -154,20 +188,24 @@ const EventDetails = ({ id }) => {
           <TotalRevenue totalRevenue={totalRevenue} />
         </Grid> */}
         <Grid item size={{ xs: 12 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
-            <TicketAnalytics 
-              tickets={totalTicketsSold.regularTickets} 
-              addOns={totalTicketsSold.addOnTickets} 
-              eventName={data.name} 
+          <Stack
+            direction={{ xs: 'column', md: 'row', lg: 'row' }}
+            justifyContent="space-between"
+            spacing={2}
+          >
+            <TicketAnalytics
+              tickets={totalTicketsSold.regularTickets}
+              addOns={totalTicketsSold.addOnTickets}
+              eventName={data.name}
             />
-           <OrderAnalytics
+
+            <OrderAnalytics
               orders={data.order?.filter((a) => a?.status === 'paid') || []}
               eventName={data.name}
               eventId={id}
             />
             {/* <CheckInAnalytics checkedIns={totalCheckedIn} id={id} /> */}
             <TotalRevenue totalRevenue={totalRevenue} />
-
           </Stack>
         </Grid>
 
@@ -179,7 +217,11 @@ const EventDetails = ({ id }) => {
           </Card>
         </Grid>
         <Grid item size={{ xs: 12, md: 6 }}>
-          <TicketInformation tickets={Object.values(grouped) || []} />
+          <Stack spacing={2}>
+            <TicketInformation tickets={Object.values(grouped) || []} />
+            <AttendeeAnalytics groupedAttendees={groupedAttendees} />
+            {/* <TicketInformation tickets={Object.values(grouped) || []} /> */}
+          </Stack>
         </Grid>
       </Grid>
     </Container>

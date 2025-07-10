@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import isEqual from 'lodash/isEqual';
 import { enqueueSnackbar } from 'notistack';
-import React, { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -23,6 +23,7 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { types } from 'src/_mock/_discountCodes';
 // import mockDiscountCodes from 'src/_mock/_discountCodes';
 import { useGetAllTicketTypes } from 'src/api/ticket-type';
 import { deleteDiscountCode, useGetAllDiscountCode } from 'src/api/discount-code';
@@ -54,7 +55,7 @@ const TABLE_HEAD = [
   { id: 'Name', label: 'Name', width: 180 },
   { id: 'Type', label: 'Type', width: 180 },
   { id: 'Value', label: 'Value', width: 180 },
-  { id: 'availability', label: 'Availability', width: 220 },
+  { id: 'availability', label: 'Availability', width: 350 },
   { id: 'limit', label: 'Limit', width: 180 },
   { id: 'endDate', label: 'Expired Date', width: 180 },
   { id: '', width: 88 },
@@ -63,6 +64,9 @@ const TABLE_HEAD = [
 const defaultFilters = {
   codeName: '',
   status: 'all',
+  availability: 'all',
+  type: 'all',
+  event: 'all',
 };
 
 export default function DiscountCodeView() {
@@ -79,6 +83,51 @@ export default function DiscountCodeView() {
 
   useEffect(() => {
     setTableData(discountCodes);
+  }, [discountCodes]);
+
+  // Get unique availability options from ticket types
+  const availabilityOptions = useMemo(() => {
+    if (!discountCodes) return [];
+    const uniqueTicketTypes = new Set();
+    discountCodes.forEach((code) => {
+      if (code.ticketType && Array.isArray(code.ticketType)) {
+        code.ticketType.forEach((ticket) => {
+          uniqueTicketTypes.add(`${ticket.title} ( ${ticket.event.name} )`);
+        });
+      }
+    });
+    return Array.from(uniqueTicketTypes);
+  }, [discountCodes]);
+
+  // Get unique type options
+  const typeOptions = useMemo(() => {
+    if (!discountCodes) return [];
+    const uniqueTypes = new Set();
+    discountCodes.forEach((code) => {
+      if (code.type) {
+        const typeObj = types.find((t) => t.id === code.type);
+        if (typeObj) {
+          uniqueTypes.add(typeObj.name);
+        }
+      }
+    });
+    return Array.from(uniqueTypes);
+  }, [discountCodes]);
+
+  // Get unique event options
+  const eventOptions = useMemo(() => {
+    if (!discountCodes) return [];
+    const uniqueEvents = new Set();
+    discountCodes.forEach((code) => {
+      if (code.ticketType && Array.isArray(code.ticketType)) {
+        code.ticketType.forEach((ticket) => {
+          if (ticket.event && ticket.event.name) {
+            uniqueEvents.add(ticket.event.name);
+          }
+        });
+      }
+    });
+    return Array.from(uniqueEvents);
   }, [discountCodes]);
 
   const notFound = tableData?.length === 0;
@@ -276,7 +325,13 @@ export default function DiscountCodeView() {
               ))}
             </Tabs>
 
-            <DiscountCodeTableToolbar filters={filters} onFilters={handleFilters} />
+            <DiscountCodeTableToolbar 
+              filters={filters} 
+              onFilters={handleFilters}
+              availabilityOptions={availabilityOptions}
+              typeOptions={typeOptions}
+              eventOptions={eventOptions}
+            />
 
             {canReset && (
               <DiscountCodeTableFiltersResult
@@ -393,7 +448,7 @@ export default function DiscountCodeView() {
 // ------------------------------------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
-  const { codeName, status } = filters;
+  const { codeName, status, availability, type, event } = filters;
 
   const stabilizedThis = inputData?.map((el, index) => [el, index]);
 
@@ -411,12 +466,41 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (codeName) {
     inputData = inputData.filter(
-      (id) => id?.codeName?.toLowerCase().indexOf(codeName.toLowerCase()) !== -1
+      (discountCode) => discountCode?.code?.toLowerCase().indexOf(codeName.toLowerCase()) !== -1
     );
   }
 
   if (status !== 'all') {
     inputData = inputData.filter((discountCode) => discountCode.isActive === status);
+  }
+
+  if (availability !== 'all') {
+    inputData = inputData.filter((discountCode) => {
+      if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
+        return discountCode.ticketType.some((ticket) => 
+          `${ticket.title} ( ${ticket.event.name} )` === availability
+        );
+      }
+      return false;
+    });
+  }
+
+  if (type !== 'all') {
+    inputData = inputData.filter((discountCode) => {
+      const typeObj = types.find((t) => t.id === discountCode.type);
+      return typeObj && typeObj.name === type;
+    });
+  }
+
+  if (event !== 'all') {
+    inputData = inputData.filter((discountCode) => {
+      if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
+        return discountCode.ticketType.some((ticket) => 
+          ticket.event && ticket.event.name === event
+        );
+      }
+      return false;
+    });
   }
 
   return inputData;

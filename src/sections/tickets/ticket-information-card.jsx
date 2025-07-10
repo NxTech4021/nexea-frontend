@@ -419,6 +419,95 @@ const TicketInformationCard = () => {
                 Copy to All
               </Button>
             </Stack>
+            {/* {buyer && (
+              <Box sx={{ width: '100%' }}>
+                <Typography
+                  variant="body2"
+                  component="label"
+                  htmlFor="buyer-ticket"
+                  sx={{
+                    mb: 0.75,
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                  }}
+                >
+                  For which ticket?
+                </Typography>
+                <RHFSelect
+                  name="buyer.ticket"
+                  id="buyer-ticket"
+                  onChange={(e) => handleChangeTicket(e.target.value)}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      '& fieldset': {
+                        borderColor: alpha(theme.palette.text.primary, 0.2),
+                      },
+                      borderRadius: 1,
+                      fontSize: '0.9rem',
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      padding: '12px 14px',
+                    },
+                  }}
+                >
+                  {ticketTypes?.map((ticket) => (
+                    <MenuItem key={ticket.id} value={ticket.ticketType.id}>
+                      {ticket.ticketType.title}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </Box>
+            )} */}
+          </Box>
+
+          <Stack
+            spacing={1}
+            sx={{
+              mt: 2.5,
+              p: 1.5,
+              borderRadius: 1.5,
+              bgcolor: alpha(
+                theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
+                0.6
+              ),
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="material-symbols:mail-outline" width={18} color="text.secondary" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Your ticket(s) will be sent to your provided email address.
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="ic:baseline-whatsapp" width={18} color="text.secondary" />
+              <Typography variant="body2" fontSize="0.85rem">
+                Information regarding the event will be sent to your WhatsApp.
+              </Typography>
+            </Stack>
+          </Stack>
+
+          <Box
+            sx={{ mt: 2, display: 'flex', alignItems: 'start', flexDirection: 'column', gap: 1 }}
+          >
+            <RHFCheckbox
+              name="buyer.isAnAttendee"
+              label="I am also an attendee"
+              onChange={(_, val) => handleBuyerCheckbox(val)}
+              sx={{
+                '& .MuiCheckbox-root': {
+                  padding: '4px',
+                  color: theme.palette.text.secondary,
+                  '&.Mui-checked': {
+                    color: theme.palette.text.primary,
+                  },
+                },
+                '& .MuiFormControlLabel-label': {
+                  fontSize: '0.85rem',
+                },
+              }}
+            />
             {buyer && (
               <Box sx={{ width: '100%' }}>
                 <Typography
@@ -460,52 +549,6 @@ const TicketInformationCard = () => {
                 </RHFSelect>
               </Box>
             )}
-          </Box>
-
-          <Stack
-            spacing={1}
-            sx={{
-              mt: 2.5,
-              p: 1.5,
-              borderRadius: 1.5,
-              bgcolor: alpha(
-                theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
-                0.6
-              ),
-            }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="material-symbols:mail-outline" width={18} color="text.secondary" />
-              <Typography variant="body2" fontSize="0.85rem">
-                Your ticket(s) will be sent to your provided email address.
-              </Typography>
-            </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Iconify icon="ic:baseline-whatsapp" width={18} color="text.secondary" />
-              <Typography variant="body2" fontSize="0.85rem">
-                Information regarding the event will be sent to your WhatsApp.
-              </Typography>
-            </Stack>
-          </Stack>
-
-          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-            <RHFCheckbox
-              name="buyer.isAnAttendee"
-              label="I am also an attendee"
-              onChange={(_, val) => handleBuyerCheckbox(val)}
-              sx={{
-                '& .MuiCheckbox-root': {
-                  padding: '4px',
-                  color: theme.palette.text.secondary,
-                  '&.Mui-checked': {
-                    color: theme.palette.text.primary,
-                  },
-                },
-                '& .MuiFormControlLabel-label': {
-                  fontSize: '0.85rem',
-                },
-              }}
-            />
           </Box>
         </Box>
       </Collapse>
@@ -1083,97 +1126,90 @@ const TicketInformationCard = () => {
                 flex={1}
                 justifyContent="space-between"
               >
-                                  <Card
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: alpha(
-                        theme.palette.mode === 'dark'
-                          ? theme.palette.background.neutral
-                          : theme.palette.background.neutral,
-                        theme.palette.mode === 'dark' ? 0.3 : 0.6
-                      ),
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <Stack spacing={2}>
-                      {cartData?.cartItem.map((item) => (
-                        <Stack key={item.id}>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
-                            <Stack direction="row" alignItems="center" spacing={1}>
-                              <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
-                              <Typography
-                                sx={{ fontWeight: 500 }}
-                              >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
-                            </Stack>
-                            <Typography sx={{ fontWeight: 600 }}>
-                              {Intl.NumberFormat('en-MY', {
-                                style: 'currency',
-                                currency: 'MYR',
-                              }).format(item.quantity * item.ticketType.price)}
-                            </Typography>
+                <Card
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: alpha(
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.background.neutral
+                        : theme.palette.background.neutral,
+                      theme.palette.mode === 'dark' ? 0.3 : 0.6
+                    ),
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Stack spacing={2}>
+                    {cartData?.cartItem.map((item) => (
+                      <Stack key={item.id}>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Iconify icon="mdi:ticket-outline" width={16} color="text.secondary" />
+                            <Typography
+                              sx={{ fontWeight: 500 }}
+                            >{`${item.quantity} × ${item.ticketType.title}`}</Typography>
                           </Stack>
-                          {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
-                            <Stack
-                              ml={4}
-                              mt={1}
-                              spacing={1}
+                          <Typography sx={{ fontWeight: 600 }}>
+                            {Intl.NumberFormat('en-MY', {
+                              style: 'currency',
+                              currency: 'MYR',
+                            }).format(item.quantity * item.ticketType.price)}
+                          </Typography>
+                        </Stack>
+                        {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
+                          <Stack
+                            ml={4}
+                            mt={1}
+                            spacing={1}
+                            sx={{
+                              p: 1.5,
+                              borderRadius: 1.5,
+                              bgcolor: alpha(theme.palette.background.neutral, 0.5),
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
                               sx={{
-                                p: 1.5,
-                                borderRadius: 1.5,
-                                bgcolor: alpha(
-                                  theme.palette.background.neutral,
-                                  0.5
-                                ),
+                                fontWeight: 600,
+                                color: 'text.secondary',
+                                fontSize: '0.75rem',
                               }}
                             >
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  fontWeight: 600,
-                                  color: 'text.secondary',
-                                  fontSize: '0.75rem',
-                                }}
+                              Add Ons:
+                            </Typography>
+                            {item?.cartAddOn?.map((a) => (
+                              <Stack
+                                key={a.id}
+                                direction="row"
+                                alignItems="center"
+                                justifyContent="space-between"
+                                sx={{ pl: 1 }}
                               >
-                                Add Ons:
-                              </Typography>
-                              {item?.cartAddOn?.map((a) => (
-                                <Stack
-                                  key={a.id}
-                                  direction="row"
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                  sx={{ pl: 1 }}
-                                >
-                                  <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Iconify icon="mdi:plus-circle-outline" width={14} />
-                                    <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>
-                                      {`${a.quantity} × ${a.addOn.name}`}
-                                    </Typography>
-                                  </Stack>
-                                  <Typography
-                                    variant="caption"
-                                    sx={{ fontWeight: 600, fontSize: '0.8rem' }}
-                                  >
-                                    {Intl.NumberFormat('en-MY', {
-                                      style: 'currency',
-                                      currency: 'MYR',
-                                    }).format(a.quantity * a.addOn.price)}
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Iconify icon="mdi:plus-circle-outline" width={14} />
+                                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>
+                                    {`${a.quantity} × ${a.addOn.name}`}
                                   </Typography>
                                 </Stack>
-                              ))}
-                            </Stack>
-                          )}
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Card>
+                                <Typography
+                                  variant="caption"
+                                  sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+                                >
+                                  {Intl.NumberFormat('en-MY', {
+                                    style: 'currency',
+                                    currency: 'MYR',
+                                  }).format(a.quantity * a.addOn.price)}
+                                </Typography>
+                              </Stack>
+                            ))}
+                          </Stack>
+                        )}
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Card>
 
                 <Stack spacing={2.5}>
                   {cartData && (
@@ -1365,6 +1401,7 @@ const TicketInformationCard = () => {
                             color: 'text.secondary',
                             fontSize: '0.7rem',
                             lineHeight: 1.6,
+                            mt: 0.5,
                           }}
                         >
                           I acknowledge that the payment made for this event is non-refundable.
@@ -1395,6 +1432,7 @@ const TicketInformationCard = () => {
                             color: 'text.secondary',
                             fontSize: '0.7rem',
                             lineHeight: 1.6,
+                            mt: 0.5,
                           }}
                         >
                           I acknowledge and agree that Public Liability and Group Personal Accident

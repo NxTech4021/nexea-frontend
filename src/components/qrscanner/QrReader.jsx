@@ -157,8 +157,35 @@ const QrReader = () => {
     `${endpoints.attendee.root}?eventId=${eventId}`,
     fetcher
   );
+    const attendeesData = useMemo(() => data?.attendees || [], [data]);
 
-  const attendeesData = useMemo(() => data?.attendees || [], [data]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [ticketTypeFilter, setTicketTypeFilter] = useState('All');
+
+  // Place ticketTypes and filteredAttendees here:
+  const ticketTypes = React.useMemo(() => {
+    const types = new Set();
+    attendeesData.forEach(a => {
+      if (a.ticket?.ticketType?.title) types.add(a.ticket.ticketType.title);
+    });
+    return Array.from(types);
+  }, [attendeesData]);
+
+  const filteredAttendees = attendeesData?.filter(
+    (attendee) => {
+      const matchesTab =
+        (activeTab === 0 && attendee.status === 'pending') ||
+        (activeTab === 1 && attendee.status === 'checkedIn');
+      const matchesSearch =
+        attendee.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        attendee.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        attendee.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTicketType =
+        ticketTypeFilter === 'All' ||
+        attendee.ticket?.ticketType?.title === ticketTypeFilter;
+      return matchesTab && matchesSearch && matchesTicketType;
+    }
+  );
 
   const fetchTicketDatabase = useCallback(async () => {
     try {
@@ -455,11 +482,7 @@ const QrReader = () => {
     (attendee) => attendee.status === 'pending'
   ).length;
 
-  const filteredAttendees = attendeesData?.filter(
-    (attendee) =>
-      (activeTab === 0 && attendee.status === 'pending') ||
-      (activeTab === 1 && attendee.status === 'checkedIn')
-  );
+  // x
 
   return (
     <Container maxWidth="lg">

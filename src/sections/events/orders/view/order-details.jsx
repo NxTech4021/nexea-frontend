@@ -7,7 +7,6 @@ import {
   Box,
   Card,
   Chip,
-  List,
   Grid,
   Stack,
   Paper,
@@ -19,7 +18,6 @@ import {
   Divider,
   Tooltip,
   MenuItem,
-  ListItem,
   Snackbar,
   Container,
   Typography,
@@ -35,6 +33,8 @@ import {
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
+import { useOrderSearchStore } from 'src/hooks/zustand/useOrderSearch';
 
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
@@ -90,6 +90,7 @@ const getStatusConfig = (status) => {
 const OrderDetails = ({ orderId }) => {
   const router = useRouter();
   const { data: order, isLoading, mutate } = useSWR(`${endpoints.order.root}/${orderId}`, fetcher);
+  const { selectedEventId } = useOrderSearchStore();
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendDialogOpen, setResendDialogOpen] = useState(false);
   const [statusChangeOpen, setStatusChangeOpen] = useState(false);
@@ -232,8 +233,10 @@ const OrderDetails = ({ orderId }) => {
         <Tooltip title="Back to Orders">
           <IconButton
             onClick={() => {
-              if (order?.event?.id) {
-                router.push(paths.dashboard.order.event(order.event.id));
+              // Prioritize the stored selected event ID, then order's event ID, then fallback
+              const eventIdToUse = selectedEventId || order?.event?.id;
+              if (eventIdToUse) {
+                router.push(paths.dashboard.order.event(eventIdToUse));
               } else {
                 // Fallback to general orders page if no event ID
                 router.push(paths.dashboard.order.root);
@@ -346,47 +349,78 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Buyer Information
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify icon="eva:person-outline" width={20} height={20} sx={{ color: '#000' }} />
+              </Box>
+              <Typography variant="h6">
+                Buyer Information
+              </Typography>
+            </Box>
+            
+            <Divider sx={{ mb: 3 }} />
+            
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+              {/* Buyer Avatar */}
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                  {`${order.buyerName?.charAt(0) || 'B'}`}
+                </Typography>
+              </Box>
+
+              {/* Buyer Details */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                  {order.buyerName}
+                </Typography>
+                
+                {/* Contact Information */}
                 <Stack spacing={1}>
-                  <Typography variant="body2" color="text.secondary">
-                    Full Name
-                  </Typography>
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    {order.buyerName}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Iconify icon="eva:email-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                    <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                      {order.buyerEmail}
+                    </Typography>
+                  </Box>
+                  
+                  {order.buyerPhoneNumber && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:phone-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {order.buyerPhoneNumber}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Iconify icon="eva:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      Purchased {dayjs(order.createdAt).format('MMM D, YYYY [at] h:mm A')}
+                    </Typography>
+                  </Box>
                 </Stack>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Stack spacing={1}>
-                  <Typography variant="body2" color="text.secondary">
-                    Email Address
-                  </Typography>
-                  <Typography variant="subtitle1">{order.buyerEmail}</Typography>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Stack spacing={1}>
-                  <Typography variant="body2" color="text.secondary">
-                    Phone Number
-                  </Typography>
-                  <Typography variant="subtitle1">{order.buyerPhoneNumber || 'N/A'}</Typography>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Stack spacing={1}>
-                  <Typography variant="body2" color="text.secondary">
-                    Purchase Date
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    {dayjs(order.createdAt).format('MMM D, YYYY, h:mm A')}
-                  </Typography>
-                </Stack>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </Paper>
 
           {/* Event Information */}
@@ -399,45 +433,160 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Event Information
-            </Typography>
-            <Stack spacing={2}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify icon="eva:calendar-outline" width={20} height={20} sx={{ color: '#000' }} />
+              </Box>
+              <Typography variant="h6">
+                Event Information
+              </Typography>
+            </Box>
+            
+            <Divider sx={{ mb: 3 }} />
+            
+            {order.event ? (
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                {/* Event Logo */}
                 <Box
                   sx={{
-                    width: 52,
-                    height: 52,
-                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                    width: 48,
+                    height: 48,
+                    borderRadius: 1.5,
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    bgcolor: order.event?.eventSetting?.bgColor || 'background.neutral',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: 1.5,
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
                   }}
                 >
-                  <Iconify
-                    icon="eva:calendar-fill"
-                    width={28}
-                    height={28}
-                    sx={{ color: 'primary.main' }}
+                  <Box
+                    component="img"
+                    src={order.event?.eventSetting?.eventLogo || "/logo/nexea.png"}
+                    alt={order.event?.name || 'Event'}
+                    sx={{
+                      width: '80%',
+                      height: '80%',
+                      objectFit: 'contain',
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
+                  <Box
+                    sx={{
+                      display: 'none',
+                      width: '100%',
+                      height: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                    }}
+                  >
+                    <Iconify
+                      icon="eva:calendar-outline"
+                      width={20}
+                      height={20}
+                      sx={{ color: 'primary.main' }}
+                    />
+                  </Box>
                 </Box>
-                <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    {order.event?.name || 'N/A'}
+
+                {/* Event Details */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
+                    {order.event.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {order.event?.date
-                      ? dayjs(order.event.date).format('MMMM D, YYYY h:mm A')
-                      : 'Date not available'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {order.event?.description || 'No description available'}{' '}
-                    {/* Add location/venue in the future */}
-                  </Typography>
-                </Stack>
+                  
+                  {order.event.description && (
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      sx={{ 
+                        mb: 1.5,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {order.event.description}
+                    </Typography>
+                  )}
+
+                  {/* Event Details */}
+                  <Stack spacing={1}>
+                    {/* Date */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:calendar-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {order.event.date
+                          ? dayjs(order.event.date).format('MMM D, YYYY')
+                          : 'Date not available'}
+                      </Typography>
+                    </Box>
+
+                    {/* Time */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {order.event.date
+                          ? dayjs(order.event.date).format('h:mm A')
+                          : 'Time not available'}
+                        {order.event.endDate && ` - ${dayjs(order.event.endDate).format('h:mm A')}`}
+                      </Typography>
+                    </Box>
+
+                    {/* Organizer */}
+                    {order.event.personInCharge && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:person-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                        <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                          {order.event.personInCharge.fullName}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* Location */}
+                    {order.event.location && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Iconify icon="eva:pin-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                        <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                          {order.event.location}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </Box>
               </Box>
-            </Stack>
+            ) : (
+              <Box
+                sx={{
+                  py: 4,
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Iconify icon="eva:calendar-outline" width={32} height={32} sx={{ color: 'text.secondary', mb: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Event information not available
+                </Typography>
+              </Box>
+            )}
           </Paper>
 
           {/* Attendees */}
@@ -450,97 +599,167 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Attendees
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="eva:people-outline" width={20} height={20} sx={{ color: '#000' }} />
+                </Box>
+                <Typography variant="h6">
+                  Attendees
+                </Typography>
+              </Box>
+              <Chip
+                size="small"
+                label={`${order.attendees?.length || 0} ${(order.attendees?.length || 0) === 1 ? 'person' : 'people'}`}
+                sx={{
+                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                }}
+              />
+            </Box>
+            
+            <Divider sx={{ mb: 3 }} />
+            
             {order.attendees && order.attendees.length > 0 ? (
-              <Stack spacing={2}>
+              <Stack spacing={0}>
                 {order.attendees.map((attendee, index) => (
                   <Box
                     key={attendee.id}
                     sx={{
-                      p: 2,
-                      borderRadius: 1.5,
-                      bgcolor: (theme) => theme.palette.background.neutral,
-                      ...(index < order.attendees.length - 1 && { mb: 1 }),
+                      py: 2.5,
+                      px: 0,
+                      borderBottom: index < order.attendees.length - 1 ? (theme) => `1px solid ${theme.palette.divider}` : 'none',
+                      '&:hover': {
+                        bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
+                        borderRadius: 1,
+                        mx: -1,
+                        px: 1,
+                      },
+                      transition: 'all 0.2s ease-in-out',
                     }}
                   >
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={6} md={4}>
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                            Attendee
-                          </Typography>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            {`${attendee.firstName} ${attendee.lastName}`}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {attendee.email}
-                          </Typography>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6} md={4}>
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                            Ticket
-                          </Typography>
-                          <Typography variant="subtitle2">
-                            {attendee?.ticket?.ticketType?.title || 'N/A'}
-                          </Typography>
-                          {/* <Chip
-                            size="small"
-                            label={attendee.status ? attendee.status.charAt(0).toUpperCase() + attendee.status.slice(1) : 'Unknown'}
-                            sx={{
-                              mt: 0.5,
-                              height: 20,
-                              fontSize: '0.7rem',
-                              width: 'fit-content',
-                              backgroundColor: attendee.status === 'checkedIn' ? '#E9FCD4' : '#FFF7CD',
-                              color: attendee.status === 'checkedIn' ? '#229A16' : '#B78103',
-                            }}
-                          /> */}
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6} md={4}>
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                            Price
-                          </Typography>
-                          <Typography variant="subtitle2" fontWeight={600} color="primary.main">
-                            {formatCurrency(
-                              attendee.ticket?.price || attendee.ticket?.ticketType?.price || 0
-                            )}
-                          </Typography>
-                          {attendee.ticket?.ticketAddOn?.addOn && (
-                            <Box sx={{ mt: 1 }}>
-                              <Typography
-                                variant="caption"
-                                sx={{ display: 'block', fontWeight: 500 }}
-                              >
-                                Add-on: {attendee.ticket.ticketAddOn.addOn.name}
-                              </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                      {/* Avatar */}
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: '50%',
+                          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                          {`${attendee.firstName?.charAt(0) || ''}${attendee.lastName?.charAt(0) || ''}`}
+                        </Typography>
+                      </Box>
+
+                      {/* Main Content */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.25 }}>
+                              {`${attendee.firstName} ${attendee.lastName}`}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                              {attendee.email}
+                            </Typography>
+                            {attendee.phoneNumber && (
                               <Typography variant="caption" color="text.secondary">
-                                +{formatCurrency(attendee.ticket.ticketAddOn.price || 0)}
+                                {attendee.phoneNumber}
+                              </Typography>
+                            )}
+                          </Box>
+                          
+                          {/* Price */}
+                          <Box sx={{ textAlign: 'right', ml: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000' }}>
+                              {formatCurrency(
+                                attendee.ticket?.price || attendee.ticket?.ticketType?.price || 0
+                              )}
+                            </Typography>
+                            {attendee.ticket?.ticketAddOn?.addOn && (
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                +{formatCurrency(attendee.ticket.ticketAddOn.price || 0)} add-on
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+
+                        {/* Details Row */}
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Iconify icon="eva:briefcase-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                              {attendee.companyName || 'No company'}
+                            </Typography>
+                          </Box>
+                          
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Iconify icon="eva:pricetags-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                              {attendee?.ticket?.ticketType?.title || 'No ticket type'}
+                            </Typography>
+                          </Box>
+
+                          {attendee.ticket?.ticketAddOn?.addOn && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Iconify icon="eva:plus-circle-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {attendee.ticket.ticketAddOn.addOn.name}
                               </Typography>
                             </Box>
                           )}
-                        </Stack>
-                      </Grid>
-                    </Grid>
+                        </Box>
+                      </Box>
+                    </Box>
                   </Box>
                 ))}
               </Stack>
             ) : (
               <Box
                 sx={{
-                  py: 4,
+                  py: 6,
                   textAlign: 'center',
-                  bgcolor: (theme) => theme.palette.background.neutral,
-                  borderRadius: 1.5,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
                 }}
               >
-                <Typography variant="body1" color="text.secondary">
-                  No attendees found for this order
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    backgroundColor: (theme) => alpha(theme.palette.grey[500], 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <Iconify icon="eva:people-outline" width={24} height={24} sx={{ color: 'text.secondary' }} />
+                </Box>
+                <Typography variant="subtitle2" color="text.secondary">
+                  No attendees found
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  This order does not have any attendees registered
                 </Typography>
               </Box>
             )}
@@ -559,41 +778,70 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Order Summary
-            </Typography>
-            <Stack spacing={2}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body1">Subtotal</Typography>
-                <Typography variant="body1">
-                  {formatCurrency((order.totalAmount || 0) + (order.discountAmount || 0))}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify icon="eva:shopping-cart-outline" width={20} height={20} sx={{ color: '#000' }} />
+              </Box>
+              <Typography variant="h6">
+                Order Summary
+              </Typography>
+            </Box>
+            
+            <Divider sx={{ mb: 3 }} />
+            
+            <Stack spacing={1.5}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Iconify icon="eva:shopping-cart-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary">Subtotal</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {formatCurrency(
+                    (order.totalAmount - order.tax || 0) + (order.discountAmount || 0)
+                  )}
                 </Typography>
               </Box>
 
               {(order.discountCode && order.discountAmount) ||
                 (order.discountAmount > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body1">
-                      Discount {/* ({order.discountCode?.code || 'N/A'}) */}
-                    </Typography>
-                    <Typography variant="body1" color="error.main">
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:gift-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">Discount</Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
                       -{formatCurrency(order.discountAmount || 0)}
                     </Typography>
                   </Box>
                 ))}
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body1">SST</Typography>
-                <Typography variant="body1">
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Iconify icon="eva:percent-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary">SST</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {order.totalAmount > 0 ? formatCurrency(order.tax || 0) : formatCurrency(0)}
                 </Typography>
               </Box>
 
               <Divider sx={{ my: 1 }} />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="h6">Total</Typography>
-                <Typography variant="h6" color="primary.main" fontWeight={700}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Iconify icon="eva:credit-card-outline" width={16} height={16} sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Total</Typography>
+                </Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main' }}>
                   {formatCurrency(order.totalAmount)}
                 </Typography>
               </Box>
@@ -610,48 +858,69 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Box
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
-            >
-              <Typography variant="h6">Payment Status</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="eva:credit-card-outline" width={20} height={20} sx={{ color: '#000' }} />
+                </Box>
+                <Typography variant="h6">Payment Status</Typography>
+              </Box>
               <Button
                 size="small"
                 variant="outlined"
-                startIcon={<Iconify icon="eva:edit-fill" />}
+                startIcon={<Iconify icon="eva:edit-outline" width={16} height={16} />}
                 onClick={handleOpenStatusChange}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  px: 1.5,
+                  py: 0.5,
+                  minWidth: 'auto',
+                }}
               >
-                Change Status
+                Edit
               </Button>
             </Box>
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 1.5,
-                bgcolor: getStatusConfig(order.status).bgColor,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-              }}
-            >
-              <Iconify
-                icon={getStatusConfig(order.status).icon}
-                width={24}
-                height={24}
-                sx={{ color: getStatusConfig(order.status).color }}
-              />
-              <Stack spacing={0.5}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ color: getStatusConfig(order.status).color, fontWeight: 600 }}
-                >
+            
+            <Divider sx={{ mb: 3 }} />
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: getStatusConfig(order.status).bgColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Iconify
+                  icon={getStatusConfig(order.status).icon}
+                  width={20}
+                  height={20}
+                  sx={{ color: getStatusConfig(order.status).color }}
+                />
+              </Box>
+              
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {order.status
                     ? `${order.status.charAt(0).toUpperCase()}${order.status.slice(1).toLowerCase()}`
                     : 'Unknown'}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: getStatusConfig(order.status).color, opacity: 0.8 }}
-                >
+                <Typography variant="caption" color="text.secondary">
                   {order.status &&
                     order.status.toLowerCase() === 'paid' &&
                     'Payment completed successfully'}
@@ -667,7 +936,7 @@ const OrderDetails = ({ orderId }) => {
                       order.status.toLowerCase() !== 'failed')) &&
                     'Status information unavailable'}
                 </Typography>
-              </Stack>
+              </Box>
             </Box>
           </Paper>
 
@@ -680,14 +949,27 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Order Actions
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify icon="eva:options-2-outline" width={20} height={20} sx={{ color: '#000' }} />
+              </Box>
+              <Typography variant="h6">
+                Order Actions
+              </Typography>
+            </Box>
+            
+            <Divider sx={{ mb: 3 }} />
+            
             <Stack spacing={2}>
-              {/* <Button fullWidth variant="outlined" startIcon={<Iconify icon="eva:printer-fill" />}>
-                Print Order Details
-              </Button> */}
-
               {order.status &&
               (order.status.toLowerCase() === 'pending' ||
                 order.status.toLowerCase() === 'failed' ||
@@ -697,9 +979,14 @@ const OrderDetails = ({ orderId }) => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      color="info"
-                      startIcon={<Iconify icon="eva:email-fill" />}
+                      startIcon={<Iconify icon="eva:email-outline" width={18} height={18} />}
                       disabled
+                      sx={{
+                        textTransform: 'none',
+                        py: 1.5,
+                        borderRadius: 1.5,
+                        fontWeight: 500,
+                      }}
                     >
                       Resend Confirmation Email
                     </Button>
@@ -710,9 +997,15 @@ const OrderDetails = ({ orderId }) => {
                   fullWidth
                   variant="outlined"
                   color="info"
-                  startIcon={<Iconify icon="eva:email-fill" />}
+                  startIcon={<Iconify icon="eva:email-outline" width={18} height={18} />}
                   onClick={handleOpenResendDialog}
                   disabled={resendingEmail}
+                  sx={{
+                    textTransform: 'none',
+                    py: 1.5,
+                    borderRadius: 1.5,
+                    fontWeight: 500,
+                  }}
                 >
                   {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
                 </Button>
@@ -751,115 +1044,138 @@ const OrderDetails = ({ orderId }) => {
             borderRadius: 2,
             border: '1px solid',
             borderColor: 'divider',
-            background: (theme) =>
-              theme.palette.mode === 'light'
-                ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
-                : 'linear-gradient(to bottom, #1a202c, #2d3748)',
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            py: 2.5,
-            px: 3,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? 'rgba(245, 247, 250, 0.85)'
-                : 'rgba(26, 32, 44, 0.85)',
-          }}
-        >
-          <Iconify icon="eva:email-fill" width={28} height={28} sx={{ color: 'info.main' }} />
-          <Typography variant="h6">Resend Confirmation Email</Typography>
+        <DialogTitle sx={{ p: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 3, pb: 2 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Iconify icon="eva:email-outline" width={20} height={20} sx={{ color: '#000' }} />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Resend Confirmation Email
+            </Typography>
+          </Box>
+          <Divider />
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 3, pb: 2, px: 3 }}>
+        <DialogContent sx={{ p: 3 }}>
           {order && (
-            <>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                Are you sure you want to resend the confirmation email for order{' '}
-                <b>#{order.orderNumber}</b>?
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Emails will be sent to the following addresses:
-              </Typography>
-
-              <List
-                sx={{
-                  bgcolor: (theme) => theme.palette.background.neutral,
-                  borderRadius: 1,
-                  mb: 2,
-                  py: 0,
-                }}
-                dense
-              >
-                <ListItem>
-                  <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {order.buyerEmail}{' '}
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ ml: 1 }}
-                    >
-                      ({order.buyerName})
-                    </Typography>
+            <Stack spacing={3}>
+              <Box>
+                <Typography variant="body1" sx={{ mb: 1, mt: 2 }}>
+                  Resend confirmation email for order{' '}
+                  <Typography component="span" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>
+                    {order.orderNumber}
                   </Typography>
-                </ListItem>
+                  ?
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  This will send confirmation emails to all recipients listed below.
+                </Typography>
+              </Box>
 
-                {order.attendees &&
-                  order.attendees.length > 0 &&
-                  order.attendees.map((attendee) => (
-                    <ListItem key={attendee.id}>
-                      <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                        {attendee.email}{' '}
-                        <Typography
-                          component="span"
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ ml: 1 }}
-                        >
-                          ({attendee.firstName} {attendee.lastName})
-                        </Typography>
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Iconify icon="eva:people-outline" width={16} height={16} sx={{ color: 'text.secondary' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    Email Recipients ({1 + (order.attendees?.length || 0)})
+                  </Typography>
+                </Box>
+
+                <Stack spacing={1}>
+                  {/* Buyer Email */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                        {order.buyerName?.charAt(0) || 'B'}
                       </Typography>
-                    </ListItem>
-                  ))}
-              </List>
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {order.buyerEmail}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {order.buyerName} (Buyer)
+                      </Typography>
+                    </Box>
+                  </Box>
 
-              <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
-                Note: This action will send emails to all the addresses listed above.
-              </Typography>
-            </>
+                  {/* Attendee Emails */}
+                  {order.attendees &&
+                    order.attendees.length > 0 &&
+                    order.attendees.map((attendee) => (
+                      <Box key={attendee.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                            {`${attendee.firstName?.charAt(0) || ''}${attendee.lastName?.charAt(0) || ''}`}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {attendee.email}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {attendee.firstName} {attendee.lastName} (Attendee)
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                </Stack>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: alpha('#ffa726', 0.1), borderRadius: 1 }}>
+                <Iconify icon="eva:info-outline" width={16} height={16} sx={{ color: '#ffa726' }} />
+                <Typography variant="caption" sx={{ color: '#ffa726', fontWeight: 500 }}>
+                  Confirmation emails will be sent immediately to all recipients above.
+                </Typography>
+              </Box>
+            </Stack>
           )}
         </DialogContent>
 
-        <DialogActions
-          sx={{
-            px: 3,
-            py: 2,
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
-            borderTop: '1px solid',
-            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
-          }}
-        >
+        <DialogActions sx={{ p: 3, pt: 0 }}>
           <Button
             variant="outlined"
             onClick={handleCloseResendDialog}
+            startIcon={<Iconify icon="eva:close-outline" width={18} height={18} />}
             sx={{
-              borderRadius: 2,
-              fontWeight: 600,
-              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
-              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
-              borderWidth: '1.5px',
-              '&:hover': {
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
-                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
-              },
+              textTransform: 'none',
+              fontWeight: 500,
+              borderRadius: 1.5,
+              px: 2,
+              py: 1,
             }}
           >
             Cancel
@@ -868,24 +1184,27 @@ const OrderDetails = ({ orderId }) => {
             onClick={handleResendConfirmationEmail}
             disabled={resendingEmail}
             variant="contained"
-            color="info"
+            color="primary"
             startIcon={
               resendingEmail ? (
-                <CircularProgress size={20} thickness={4} />
+                <CircularProgress size={18} thickness={4} sx={{ color: 'white' }} />
               ) : (
-                <Iconify icon="eva:email-fill" />
+                <Iconify icon="eva:email-outline" width={18} height={18} />
               )
             }
             sx={{
-              borderRadius: 2,
+              textTransform: 'none',
               fontWeight: 600,
+              borderRadius: 1.5,
+              px: 3,
+              py: 1,
               boxShadow: 'none',
               '&:hover': {
                 boxShadow: 'none',
               },
             }}
           >
-            {resendingEmail ? 'Sending...' : 'Resend Email'}
+            {resendingEmail ? 'Sending...' : 'Send Emails'}
           </Button>
         </DialogActions>
       </Dialog>

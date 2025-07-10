@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import * as yup from 'yup';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
+import { MuiColorInput } from 'mui-color-input';
 import React, { useState, useCallback } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -23,6 +24,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Step,
+  Grid,
   Stack,
   Paper,
   Dialog,
@@ -228,7 +230,7 @@ const RichTextEditor = ({ value, onChange }) => {
 };
 
 // All steps for the stepper
-const eventSteps = ['Event Information', 'Settings'];
+const eventSteps = ['Event Information', 'Event Logo & Styling'];
 // const campSteps = ['Event Information', 'Camp Resources', 'Settings'];
 
 const RenderSelectField = ({ name, control, label, options, required }) => (
@@ -273,10 +275,19 @@ const schema = yup.object().shape({
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
   endDate: yup.date().required('End date is required'),
-  startTime: yup.date().required('Start time is required'),
-  endTime: yup.date().required('End time is required'),
+  startTime: yup.date().when('eventType', {
+    is: 'camp',
+    then: () => yup.date().nullable(),
+    otherwise: () => yup.date().required('Start time is required'),
+  }),
+  endTime: yup.date().when('eventType', {
+    is: 'camp',
+    then: () => yup.date().nullable(),
+    otherwise: () => yup.date().required('End time is required'),
+  }),
   sst: yup.number().required('SST is required').typeError('SST must be a number'),
   eventLogo: yup.object().nullable(),
+  bgColor: yup.string().nullable(),
   // Camp resources fields - rich text content
   // campResources: yup.array().when('eventType', {
   //   is: 'camp',
@@ -315,6 +326,7 @@ const EventCreateDialog = ({ open, onClose }) => {
       themeColor: '',
       sst: '',
       eventLogo: null,
+      bgColor: '#f0f4f8',
       campResources: [{ title: '', content: '' }], // Default empty camp resource
     },
     mode: 'onChange',
@@ -380,29 +392,53 @@ const EventCreateDialog = ({ open, onClose }) => {
       return;
     }
 
-    // Validate endTime against startTime if same day
-    if (
-      dayjs(eventData.eventDate).isSame(dayjs(eventData.endDate), 'date') &&
-      dayjs(eventData.endTime).isBefore(dayjs(eventData.startTime))
-    ) {
-      setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
-      return;
+    // For regular events, validate startTime and endTime are present and valid
+    const isCamp = eventData.eventType === 'camp';
+
+    if (!isCamp) {
+      if (!eventData.startTime || !dayjs(eventData.startTime).isValid()) {
+        setError('startTime', { type: 'custom', message: 'Start time is required' });
+        return;
+      }
+
+      if (!eventData.endTime || !dayjs(eventData.endTime).isValid()) {
+        setError('endTime', { type: 'custom', message: 'End time is required' });
+        return;
+      }
+
+      if (
+        dayjs(eventData.eventDate).isSame(dayjs(eventData.endDate), 'date') &&
+        dayjs(eventData.endTime).isBefore(dayjs(eventData.startTime))
+      ) {
+        setError('endTime', { type: 'custom', message: 'End time cannot be before start time' });
+        return;
+      }
     }
 
     try {
       const startDate = dayjs(eventData.eventDate).format('YYYY-MM-DD');
       const endDate = dayjs(eventData.endDate).format('YYYY-MM-DD');
 
-      const startTime = dayjs(eventData.startTime).format('HH:mm');
-      const endTime = dayjs(eventData.endTime).format('HH:mm');
+      // If it's a camp and times are empty or invalid, assign default times
+      let startTime = '00:00';
+      let endTime = '00:00';
 
-      console.log('Time values:', {
-        startTime: `${dayjs(eventData.startTime).format('hh:mm A')} -> ${startTime}`,
-        endTime: `${dayjs(eventData.endTime).format('hh:mm A')} -> ${endTime}`,
+      if (eventData.startTime && dayjs(eventData.startTime).isValid()) {
+        startTime = dayjs(eventData.startTime).format('HH:mm');
+      }
+
+      if (eventData.endTime && dayjs(eventData.endTime).isValid()) {
+        endTime = dayjs(eventData.endTime).format('HH:mm');
+      }
+
+      const startDateTimeFormatted = `${startDate}T${startTime}:00+08:00`;
+      const endDateTimeFormatted = `${endDate}T${endTime}:00+08:00`;
+
+      console.log('Submitting Event:', {
+        startDateTimeFormatted,
+        endDateTimeFormatted,
+        isCamp,
       });
-
-      const startDateTimeFormatted = `${startDate}T${startTime}`;
-      const endDateTimeFormatted = `${endDate}T${endTime}`;
 
       const formattedData = {
         ...eventData,
@@ -410,38 +446,26 @@ const EventCreateDialog = ({ open, onClose }) => {
         endDate: endDateTimeFormatted,
       };
 
-      // Remove fields not needed in the API
       delete formattedData.startTime;
       delete formattedData.endTime;
       delete formattedData.eventDate;
 
-      // If event type is not camp, remove the campResources field
-      // if (formattedData.eventType !== 'camp') {
-      //   delete formattedData.campResources;
-      // }
-
-      // Prepare FormData for file upload and event data
       const formData = new FormData();
       formData.append('data', JSON.stringify(formattedData));
 
-      // Only append eventLogo if it exists
       if (eventData.eventLogo?.file) {
-        formData.append('eventLogo', eventData.eventLogo?.file);
+        formData.append('eventLogo', eventData.eventLogo.file);
       }
 
-      // Send the request to create the event
       const res = await axiosInstance.post(endpoints.events.create, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      // On success, refresh the data and display success message
       mutate();
       enqueueSnackbar(res?.data?.message || 'Event created successfully', { variant: 'success' });
-
       handleCancel();
     } catch (error) {
-      // Handle errors
-      enqueueSnackbar(error?.message, { variant: 'error' });
+      enqueueSnackbar(error?.message || 'Something went wrong', { variant: 'error' });
     }
   });
 
@@ -626,7 +650,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                 <Box width={{ xs: 1, sm: 1 / 2 }}>
                   {/* Start Time Picker */}
                   <Stack width={1} spacing={1}>
-                    <InputLabel required>Start Time</InputLabel>
+                    <InputLabel required={eventType !== 'camp'}>
+                      Start Time{' '}
+                      {eventType === 'camp' && (
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          (Optional)
+                        </Typography>
+                      )}
+                    </InputLabel>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Controller
                         name="startTime"
@@ -641,7 +672,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error ? fieldState.error.message : '',
-                                placeholder: 'Select start time',
+                                placeholder: `Select start time${eventType === 'camp' ? ' (Optional)' : ''}`,
                               },
                             }}
                           />
@@ -653,7 +684,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                 <Box width={{ xs: 1, sm: 1 / 2 }}>
                   {/* End Time Picker */}
                   <Stack width={1} spacing={1}>
-                    <InputLabel required>End Time</InputLabel>
+                    <InputLabel required={eventType !== 'camp'}>
+                      End Time{' '}
+                      {eventType === 'camp' && (
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          (Optional)
+                        </Typography>
+                      )}
+                    </InputLabel>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Controller
                         name="endTime"
@@ -669,7 +707,7 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error ? fieldState.error.message : '',
-                                placeholder: 'Select end time',
+                                placeholder: `Select end time${eventType === 'camp' ? ' (Optional)' : ''}`,
                               },
                             }}
                           />
@@ -749,14 +787,182 @@ const EventCreateDialog = ({ open, onClose }) => {
           )} */}
 
           {/* Settings Step */}
-          {
-          // activeStep === (eventType === 'camp' ? 2 : 1) && ( //comented out for now since we are not using camp resouces
-          activeStep === 1 && (
-            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={2.5}>
-              <Stack width={1}>
-                <InputLabel>Event Logo</InputLabel>
-                <RHFUpload name="eventLogo" type="file" onDrop={onDrop} />
-              </Stack>
+          {activeStep === 1 && (
+            <Box display="flex" flexDirection="column" gap={3}>
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
+                {/* Left Column - Upload and Color (Desktop) / Upload (Mobile) */}
+                <Grid item xs={12} sm={7}>
+                  <Stack spacing={3}>
+                    {/* Logo Upload */}
+                    <Stack spacing={1}>
+                      <InputLabel sx={{ 
+                        color: 'text.secondary',
+                        fontSize: '0.875rem',
+                        fontWeight: 500 
+                      }}>
+                        Event Logo
+                      </InputLabel>
+                      <RHFUpload 
+                        name="eventLogo" 
+                        type="file" 
+                        onDrop={onDrop}
+                        sx={{
+                          '& .drop-zone': {
+                            height: '100px !important',
+                            minHeight: '100px !important',
+                            border: '1px dashed',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                            '&:hover': {
+                              bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                            }
+                          }
+                        }} 
+                      />
+                    </Stack>
+
+                    {/* Color Picker - Visible in Desktop */}
+                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                      <Stack spacing={1}>
+                        <InputLabel sx={{ 
+                          color: 'text.secondary',
+                          fontSize: '0.875rem',
+                          fontWeight: 500 
+                        }}>
+                          Background Color
+                        </InputLabel>
+                        <Controller
+                          name="bgColor"
+                          control={control}
+                          render={({ field }) => (
+                            <MuiColorInput
+                              {...field}
+                              format="hex"
+                              value={field.value || '#f0f4f8'}
+                              onChange={(color) => field.onChange(color)}
+                              sx={{
+                                width: '100%',
+                                '& .MuiOutlinedInput-root': {
+                                  height: 42,
+                                  bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                                  border: 'none',
+                                  '&:hover': {
+                                    bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                                  }
+                                }
+                              }}
+                            />
+                          )}
+                        />
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </Grid>
+
+                {/* Right Column - Preview (Desktop) / Color & Preview (Mobile) */}
+                <Grid item xs={12} sm={5}>
+                  <Stack spacing={3}>
+                    {/* Color Picker - Visible in Mobile */}
+                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                      <Stack spacing={1}>
+                        <InputLabel sx={{ 
+                          color: 'text.secondary',
+                          fontSize: '0.875rem',
+                          fontWeight: 500 
+                        }}>
+                          Background Color
+                        </InputLabel>
+                        <Controller
+                          name="bgColor"
+                          control={control}
+                          render={({ field }) => (
+                            <MuiColorInput
+                              {...field}
+                              format="hex"
+                              value={field.value || '#f0f4f8'}
+                              onChange={(color) => field.onChange(color)}
+                              sx={{
+                                width: '100%',
+                                '& .MuiOutlinedInput-root': {
+                                  height: 42,
+                                  bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                                  border: 'none',
+                                  '&:hover': {
+                                    bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                                  }
+                                }
+                              }}
+                            />
+                          )}
+                        />
+                      </Stack>
+                    </Box>
+
+                    {/* Preview */}
+                    <Box>
+                      <InputLabel sx={{ 
+                        color: 'text.secondary',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        mb: 1 
+                      }}>
+                        Preview
+                      </InputLabel>
+                      <Box
+                        sx={{
+                          width: '100%',
+                          aspectRatio: '1/1',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: watch('bgColor') || '#f0f4f8',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {watch('eventLogo')?.preview ? (
+                          <Box
+                            component="img"
+                            src={watch('eventLogo').preview}
+                            alt="Preview"
+                            sx={{
+                              width: '70%',
+                              height: '70%',
+                              objectFit: 'contain',
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            component="img"
+                            src="/logo/nexea.png"
+                            alt="Default"
+                            sx={{
+                              width: '50%',
+                              height: '50%',
+                              objectFit: 'contain',
+                              opacity: 0.5,
+                            }}
+                          />
+                        )}
+                      </Box>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          display: 'block',
+                          color: 'text.secondary',
+                          mt: 1,
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        This preview shows how the event logo will appear in the event list.
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Grid>
+              </Grid>
             </Box>
           )}
         </DialogContent>

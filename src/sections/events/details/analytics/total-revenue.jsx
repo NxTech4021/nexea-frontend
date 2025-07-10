@@ -20,10 +20,17 @@ const TotalRevenue = ({ totalRevenue }) => (
         width={100}
         sx={{
           position: 'absolute',
-          right: -30,
-          color: '#EBEBEB',
+          right: { xs: -15, sm: -30 },
+          color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
           top: '50%',
           transform: 'translateY(-50%)',
+          zIndex: -1,
+          width: {
+            xs: 60,
+            sm: 80,
+            md: 100
+          },
+          height: 'auto'
         }}
       />
 
@@ -33,12 +40,28 @@ const TotalRevenue = ({ totalRevenue }) => (
             className="hover-text"
             variant="subtitle2"
             color="text.secondary"
-            sx={{ fontWeight: 600 }}
+            sx={{ 
+              fontWeight: 600,
+              fontSize: {
+                xs: '0.8rem',
+                sm: '0.875rem',
+                md: '0.875rem'
+              }
+            }}
           >
             Total Revenue
           </Typography>
         </Stack>
-        <Typography variant="h2">
+        <Typography 
+          variant="h2"
+          sx={{
+            fontSize: {
+              xs: '1.75rem',
+              sm: '2rem',
+              md: '2.5rem'
+            }
+          }}
+        >
           {new Intl.NumberFormat('en-MY', {
             minimumFractionDigits: 2,
             style: 'currency',
