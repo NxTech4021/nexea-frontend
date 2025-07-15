@@ -62,6 +62,24 @@ const attendees = [
   { name: 'Joseph', company: 'NEXEA', ticketType: 'Standard - Startup', status: 'Pending' },
 ];
 
+const getOrderTypeStatus = (attendee) => {
+  const status = attendee.order?.status || '';
+  const totalAmount = Number(attendee.order?.totalAmount ?? 0);
+
+  if (status === 'paid' && totalAmount === 0) {
+    return { label: 'Free', color: 'info' };
+  }
+  if (status === 'paid') {
+    return { label: 'Paid', color: 'success' };
+  }
+  if (status === 'pending') {
+    return { label: 'Pending', color: 'warning' };
+  }
+  if (status === 'cancelled' || status === 'failed') {
+    return { label: status.charAt(0).toUpperCase() + status.slice(1), color: 'error' };
+  }
+  return { label: 'Unknown', color: 'default' };
+};
 const TabsWrapper = styled('div')(({ theme }) => ({
   position: 'relative',
   backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[900], 0.7) : '#f2f5f7',
@@ -420,6 +438,9 @@ const filteredAttendees = attendeesData?.filter(
           <Typography sx={{ width: '30%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Name</Typography>
           <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Company</Typography>
           <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Ticket Type</Typography>
+          {/* <Typography sx={{ width: '35%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>Status</Typography> */}
+<Typography sx={{ width: '13%', color: theme.palette.text.primary, fontWeight: 600, fontSize: 13 }}>
+Status</Typography>
         </Stack>
 
         <Stack sx={{ maxHeight: '48vh', overflow: 'auto' }}>
@@ -494,6 +515,16 @@ const filteredAttendees = attendeesData?.filter(
                     }}
                   />
                 </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+  <Typography sx={{ color: theme.palette.text.secondary, fontSize: 12 }}>Ticket Payment:</Typography>
+  <Chip
+    label={getOrderTypeStatus(attendee).label}
+    color={getOrderTypeStatus(attendee).color}
+    size="small"
+    sx={{ fontWeight: 600, fontSize: '0.75rem', borderRadius: 1 }}
+  />
+</Box>
+                
               </Box>
               
               {/* Desktop layout - row style */}
@@ -533,6 +564,22 @@ const filteredAttendees = attendeesData?.filter(
                   }}
                 />
               </Box>
+              <Typography 
+  sx={{ 
+    width: '13%', 
+    color: theme.palette.text.primary, 
+    fontSize: 13, 
+    display: { xs: 'none', md: 'block' } 
+  }}
+>
+  <Chip
+    label={getOrderTypeStatus(attendee).label}
+    color={getOrderTypeStatus(attendee).color} 
+    size="small"
+    sx={{ fontWeight: 600, fontSize: '0.75rem', borderRadius: 1 }}
+  />
+</Typography>
+         
             </Stack>
           ))
           )}

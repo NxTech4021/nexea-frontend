@@ -206,37 +206,72 @@ export default function EventAttendee() {
       width: 150,
       valueGetter: (value, row) => (row.order.discountCode ? row.order.discountCode.code : 'None'),
     },
+    // {
+    //   field: 'status',
+    //   headerName: 'Checked In',
+    //   width: 150,
+    //   editable: true,
+    //   type: 'boolean',
+    //   renderCell: (params) =>
+    //     params.value === 'pending' ? (
+    //       <Tooltip title="Click to edit status">
+    //         <Label size="small" color="warning">
+    //           Pending
+    //         </Label>
+    //       </Tooltip>
+    //     ) : (
+    //       <Label size="small" color="success">
+    //         Checked In
+    //       </Label>
+    //     ),
+    //   renderEditCell: (params) => (
+    //     <Checkbox
+    //       checked={params.value === 'checkedIn'}
+    //       onChange={(e) => {
+    //         params.api.setEditCellValue({
+    //           id: params.id,
+    //           field: params.field,
+    //           value: e.target.checked ? 'checkedIn' : 'pending',
+    //         });
+    //       }}
+    //     />
+    //   ),
+    // },
     {
-      field: 'status',
-      headerName: 'Checked In',
-      width: 150,
-      editable: true,
-      type: 'boolean',
-      renderCell: (params) =>
-        params.value === 'pending' ? (
-          <Tooltip title="Click to edit status">
-            <Label size="small" color="warning">
-              Pending
-            </Label>
-          </Tooltip>
-        ) : (
-          <Label size="small" color="success">
-            Checked In
-          </Label>
-        ),
-      renderEditCell: (params) => (
-        <Checkbox
-          checked={params.value === 'checkedIn'}
-          onChange={(e) => {
-            params.api.setEditCellValue({
-              id: params.id,
-              field: params.field,
-              value: e.target.checked ? 'checkedIn' : 'pending',
-            });
-          }}
-        />
-      ),
-    },
+  field: 'status',
+  headerName: 'Checked In',
+  width: 150,
+  editable: true,
+  // Remove type: 'boolean' to fix CSV export
+  valueGetter: (value, row) => {
+    // Return the actual status text for CSV export
+    return row.status === 'checkedIn' ? 'Checked In' : 'Pending';
+  },
+  renderCell: (params) =>
+    params.row.status === 'pending' ? (
+      <Tooltip title="Click to edit status">
+        <Label size="small" color="warning">
+          Pending
+        </Label>
+      </Tooltip>
+    ) : (
+      <Label size="small" color="success">
+        Checked In
+      </Label>
+    ),
+  renderEditCell: (params) => (
+    <Checkbox
+      checked={params.row.status === 'checkedIn'}
+      onChange={(e) => {
+        params.api.setEditCellValue({
+          id: params.id,
+          field: params.field,
+          value: e.target.checked ? 'checkedIn' : 'pending',
+        });
+      }}
+    />
+  ),
+}
   ];
 
   if (isLoading) {
