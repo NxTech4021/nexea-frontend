@@ -221,7 +221,8 @@ const QrReader = () => {
         console.log(`Attempting to update attendee with ID: ${id}`);
         if (!id) {
           console.error('Error updating attendance: ID is undefined or null');
-          return toast.error('Failed to update attendance: Invalid attendee ID');
+          toast.error('Failed to update attendance: Invalid attendee ID');
+          return false;
         }
         
         const response = await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
@@ -229,11 +230,13 @@ const QrReader = () => {
         toast.success(`${response.data.attendee.firstName} successfully checked in`);
         // Refresh the attendees data after successful check-in
         mutate();
+        return true;
       } catch (err) {
         console.error('Error updating attendance:', err);
         // Display more specific error message
         const errorMessage = err.response?.data?.message || err.message || 'Failed to update attendance';
         toast.error(errorMessage);
+        return false;
       }
     },
     [mutate]
@@ -999,11 +1002,11 @@ const QrReader = () => {
               variant="h6"
               sx={{ textAlign: 'center', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}
             >
-              QR Scanned Attendee Details
+              QR Scanned!
             </Typography>
 
             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-              Successfully scanned
+              Attendee Details
             </Typography>
           </Stack>
 
