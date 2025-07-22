@@ -27,7 +27,7 @@ import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
 
-import { MaterialUISwitch } from 'src/layouts/dashboard/header';
+import { MaterialUISwitch } from 'src/theme/overrides/components/switch';
 
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';

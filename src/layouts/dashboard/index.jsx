@@ -2,6 +2,9 @@ import { useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
+
+import { usePathname } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
@@ -9,15 +12,45 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { useSettingsContext } from 'src/components/settings';
 
 import Main from './main';
-import Header from './header';
 import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
 
 // ----------------------------------------------------------------------
 
+// Function to get page title based on pathname
+const getPageTitle = (pathname) => {
+  if (pathname === '/dashboard') return 'Dashboard';
+  if (pathname === '/dashboard/events') return 'Events';
+  if (pathname === '/dashboard/events/create') return 'Create Event';
+  if (pathname === '/dashboard/ticket-type') return 'Ticket Types';
+  if (pathname === '/dashboard/add-on') return 'Ticket Add Ons';
+  if (pathname === '/dashboard/discount-code') return 'Discount Codes';
+  if (pathname === '/dashboard/order') return 'Orders';
+  if (pathname === '/dashboard/attendees') return 'Attendees';
+  if (pathname === '/dashboard/employee') return 'Employees';
+  if (pathname.startsWith('/dashboard/events/') && pathname.includes('/')) {
+    if (pathname.includes('notifcationStatus')) return 'Notification Status';
+    return 'Event Details';
+  }
+  if (pathname.startsWith('/dashboard/order/') && pathname !== '/dashboard/order') {
+    return 'Order Details';
+  }
+  if (pathname.startsWith('/dashboard/order/event/')) {
+    return 'Event Orders';
+  }
+  if (pathname === '/dashboard/user/profile') return 'Profile';
+  if (pathname === '/dashboard/templates') return 'WhatsApp Templates';
+  if (pathname === '/dashboard/qr') return 'QR Scanner';
+  
+  // Default title
+  return 'Dashboard';
+};
+
 export default function DashboardLayout({ children }) {
+  const theme = useTheme();
   const settings = useSettingsContext();
+  const pathname = usePathname();
 
   const testRef = useRef(null);
 
@@ -33,56 +66,41 @@ export default function DashboardLayout({ children }) {
 
   const renderHorizontal = <NavHorizontal />;
 
-  const renderNavVertical = <NavVertical openNav={nav.value} onCloseNav={nav.onFalse} />;
+  const renderNavVertical = <NavVertical openNav={nav.value} onCloseNav={nav.onFalse} onOpenNav={nav.onTrue} />;
+
+  const pageTitle = getPageTitle(pathname);
 
   if (isHorizontal) {
     return (
       <>
-        <Header onOpenNav={nav.onTrue} />
-
         {lgUp ? renderHorizontal : renderNavVertical}
 
-        <Main>{children}</Main>
+        <Main title={pageTitle} onOpenNav={nav.onTrue}>{children}</Main>
       </>
     );
   }
 
-  // if (isMini) {
-  //   return (
-  //     <>
-  //       <Header onOpenNav={nav.onTrue} />
-
-  //       <Box
-  //         sx={{
-  //           minHeight: 1,
-  //           display: 'flex',
-  //           flexDirection: { xs: 'column', lg: 'row' },
-  //         }}
-  //       >
-  //         {lgUp ? renderNavMini : renderNavVertical}
-
-  //         <Main>{children}</Main>
-  //       </Box>
-  //     </>
-  //   );
-  // }
-
   return (
-    <>
-      <Header onOpenNav={nav.onTrue} />
-
-      <Box
+    <Box
         sx={{
-          minHeight: 1,
+          height: '100vh',
+          width: '100vw',
           display: 'flex',
           flexDirection: { xs: 'column', lg: 'row' },
+          overflow: 'hidden',
+          maxWidth: '100vw',
+          boxSizing: 'border-box',
+          backgroundColor: theme.palette.background.default,
         }}
       >
-        <Box>{!isMini || !lgUp ? renderNavVertical : renderNavMini}</Box>
+        {/* Sidebar - participates in flex layout */}
+        <Box sx={{ flexShrink: 0 }}>
+          {!isMini || !lgUp ? renderNavVertical : renderNavMini}
+        </Box>
 
-        <Main>{children}</Main>
+        {/* Main content area */}
+        <Main title={pageTitle} onOpenNav={nav.onTrue}>{children}</Main>
       </Box>
-    </>
   );
 }
 

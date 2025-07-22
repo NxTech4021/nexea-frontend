@@ -8,34 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import {
   Box,
-  Chip,
   // Table,
   Stack,
   alpha,
   Button,
-  // TableRow,
-  // TableBody,
-  // TableCell,
-  // TableHead,
-  MenuItem,
-  TextField,
   Typography,
   // TableContainer,
   CircularProgress,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  Paper,
 } from '@mui/material';
 
-import { paths } from 'src/routes/paths';
+// import { paths } from 'src/routes/paths';
 
 import { fetcher, endpoints } from 'src/utils/axios';
 
-import Iconify from 'src/components/iconify';
+// import Iconify from 'src/components/iconify';
 
 // Mock data - replace later
 const attendees = [
@@ -228,7 +214,7 @@ const AttendeeInformation = ({ id }) => {
             {attendeesData?.length}
           </Typography>
         </div>
-        <div
+        {/* <div
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -296,7 +282,7 @@ const AttendeeInformation = ({ id }) => {
               Check-In List
             </Button>
           </Stack>
-        </div>
+        </div> */}
       </div>
 
       <TabsWrapper>
@@ -359,7 +345,7 @@ const AttendeeInformation = ({ id }) => {
           </Stack>
         </TabButton>
       </TabsWrapper>
-      <Box sx={{ mb: 1.5, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* <Box sx={{ mb: 1.5, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
         <TextField
           fullWidth
           placeholder="Search attendees by name or company..."
@@ -418,9 +404,9 @@ const AttendeeInformation = ({ id }) => {
             </MenuItem>
           ))}
         </TextField>
-      </Box>
+      </Box> */}
 
-      {filteredAttendees.length === 0 ? (
+      {/* {filteredAttendees.length === 0 ? (
         <Stack
           alignItems="center"
           justifyContent="center"
@@ -484,9 +470,9 @@ const AttendeeInformation = ({ id }) => {
             </Box>
           </Box>
         ))
-      )}
+      )} */}
 
-      <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' } }}>
+      {/* <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -526,9 +512,6 @@ const AttendeeInformation = ({ id }) => {
             ) : (
               filteredAttendees.map((attendee, index) => (
                 <TableRow key={attendee.id}>
-                  {/* Mobile layout - Card style */}
-
-                  {/* Desktop layout - row style */}
                   <TableCell>
                     <Typography
                       sx={{
@@ -594,7 +577,7 @@ const AttendeeInformation = ({ id }) => {
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer> */}
     </Box>
   );
 };

@@ -230,7 +230,7 @@ const OrderDetails = ({ orderId }) => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <Tooltip title="Back to Orders">
+        {/* <Tooltip title="Back to Orders">
           <IconButton
             onClick={() => {
               // Prioritize the stored selected event ID, then order's event ID, then fallback
@@ -240,6 +240,39 @@ const OrderDetails = ({ orderId }) => {
               } else {
                 // Fallback to general orders page if no event ID
                 router.push(paths.dashboard.order.root);
+              }
+            }}
+            sx={{
+              width: 40,
+              height: 40,
+              color: 'grey.800',
+              bgcolor: (theme) => alpha(theme.palette.grey[800], 0.08),
+              '&:hover': {
+                bgcolor: (theme) => alpha(theme.palette.grey[800], 0.16),
+              },
+            }}
+          >
+            <Iconify icon="eva:arrow-back-fill" width={20} height={20} />
+          </IconButton>
+        </Tooltip> */}
+        
+        <Tooltip title="Back to Attendees">
+          <IconButton
+            onClick={() => {
+              const eventIdToUse = order?.event?.id || selectedEventId;
+              
+              // console.log('Navigation Debug:', {
+              //   orderEventId: order?.event?.id,
+              //   selectedEventId,
+              //   eventIdToUse,
+              //   eventName: order?.event?.name,
+              // });
+              
+              if (eventIdToUse) {
+                router.push(`${paths.dashboard.events.attendees}/${eventIdToUse}`);
+              } else {
+                // Fallback
+                router.push(paths.dashboard.events.root);
               }
             }}
             sx={{

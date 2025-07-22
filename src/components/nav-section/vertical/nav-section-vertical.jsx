@@ -45,7 +45,7 @@ function Group({ subheader, items, slotProps }) {
   ));
 
   return (
-    <Stack px={2}>
+    <Stack>
       {subheader ? (
         <>
           <ListSubheader
@@ -59,7 +59,7 @@ function Group({ subheader, items, slotProps }) {
               display: 'inline-flex',
               color: 'text.disabled',
               mb: `${slotProps?.gap || 4}px`,
-              p: (theme) => theme.spacing(2, 1, 1, 1.5),
+              p: (theme) => theme.spacing(2, 0, 1, 0), // Clean padding - no left/right
               transition: (theme) =>
                 theme.transitions.create(['color'], {
                   duration: theme.transitions.duration.shortest,

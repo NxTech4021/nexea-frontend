@@ -178,34 +178,49 @@ const StyledNavItem = styled(ListItemButton, {
   const baseStyles = {
     item: {
       marginBottom: 4,
-      borderRadius: 8,
-      color: theme.palette.text.secondary,
-      padding: theme.spacing(0.5, 1, 0.5, 1.5),
+      borderRadius: 6, 
+      color: '#000',
+      padding: theme.spacing(0.5, 0.5, 0.5, 0.5), 
+      minHeight: 36, 
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-start', 
     },
     icon: {
-      width: 24,
-      height: 24,
+      width: 18, 
+      height: 18,
       flexShrink: 0,
-      marginRight: theme.spacing(2),
+      marginRight: theme.spacing(0.75), 
+      marginLeft: theme.spacing(0.25), 
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     label: {
       ...noWrapStyles,
       ...theme.typography.body2,
       textTransform: 'capitalize',
-      fontWeight: theme.typography[active ? 'fontWeightSemiBold' : 'fontWeightMedium'],
+      fontWeight: active ? theme.typography.fontWeightMedium : 400,
+      fontSize: '0.875rem', 
+      textAlign: 'left',
+      flex: 1,
     },
     caption: {
       ...noWrapStyles,
       ...theme.typography.caption,
       color: theme.palette.text.disabled,
+      fontSize: '0.75rem',
     },
     info: {
       display: 'inline-flex',
-      marginLeft: theme.spacing(0.75),
+      marginLeft: theme.spacing(0.5), 
+      fontSize: '0.75rem',
     },
     arrow: {
       flexShrink: 0,
-      marginLeft: theme.spacing(0.75),
+      marginLeft: theme.spacing(0.5), 
+      width: 16,
+      height: 16,
     },
   };
 
@@ -213,7 +228,7 @@ const StyledNavItem = styled(ListItemButton, {
     // Root item
     ...(!subItem && {
       ...baseStyles.item,
-      minHeight: 44,
+      minHeight: 36, 
       '& .icon': {
         ...baseStyles.icon,
       },
@@ -233,14 +248,9 @@ const StyledNavItem = styled(ListItemButton, {
         ...baseStyles.arrow,
       },
       ...(active && {
-        // color:
-        //   theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.light,
         color: theme.palette.mode === 'light' ? 'white' : 'black',
         backgroundColor: theme.palette.mode === 'light' ? '#202531' : '#D1D6E0',
-
-        // backgroundColor: alpha(theme.palette.primary.main, 0.08),
         '&:hover': {
-          // backgroundColor: alpha(theme.palette.primary.main, 0.16),
           backgroundColor:
             theme.palette.mode === 'light' ? alpha('#1F1F1F', 0.9) : alpha('#FFFFFF', 0.9),
         },
@@ -254,32 +264,16 @@ const StyledNavItem = styled(ListItemButton, {
     // Sub item
     ...(subItem && {
       ...baseStyles.item,
-      minHeight: 36,
+      minHeight: 32, 
+      paddingLeft: `${theme.spacing(Number(depth) * 1.5)} !important`, 
       '& .icon': {
         ...baseStyles.icon,
+        width: 16, 
+        height: 16,
       },
-      // '& .sub-icon': {
-      //   ...baseStyles.icon,
-      //   display: 'flex',
-      //   alignItems: 'center',
-      //   justifyContent: 'center',
-      //   // '&:before': {
-      //   //   content: '""',
-      //   //   width: 4,
-      //   //   height: 4,
-      //   //   borderRadius: '50%',
-      //   //   backgroundColor: theme.palette.text.disabled,
-      //   //   transition: theme.transitions.create(['transform'], {
-      //   //     duration: theme.transitions.duration.shorter,
-      //   //   }),
-      //   //   ...(active && {
-      //   //     transform: 'scale(2)',
-      //   //     backgroundColor: theme.palette.primary.main,
-      //   //   }),
-      //   // },
-      // },
       '& .label': {
         ...baseStyles.label,
+        fontSize: '0.8125rem', 
       },
       '& .caption': {
         ...baseStyles.caption,
@@ -298,7 +292,7 @@ const StyledNavItem = styled(ListItemButton, {
 
     // Deep sub item
     ...(deepSubItem && {
-      paddingLeft: `${theme.spacing(Number(depth))} !important`,
+      paddingLeft: `${theme.spacing(Number(depth) * 1.5)} !important`, // Consistent indentation
     }),
   };
 });

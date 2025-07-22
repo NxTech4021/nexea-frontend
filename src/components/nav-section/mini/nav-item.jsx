@@ -51,7 +51,8 @@ const NavItem = forwardRef(
             {icon}
           </Box>
         )}
-        {title && (
+        {/* Hide title in mini nav - only show icons */}
+        {false && title && (
           <Box component="span" className="label">
             {title}
           </Box>
@@ -71,9 +72,27 @@ const NavItem = forwardRef(
       </StyledNavItem>
     );
 
+    const contentWithTooltip = !subItem && title ? (
+      <Tooltip 
+        title={title} 
+        arrow 
+        placement="right"
+        enterDelay={300}
+        leaveDelay={100}
+      >
+        <Box>
+          {renderContent}
+        </Box>
+      </Tooltip>
+    ) : renderContent;
+
     // Hidden item by role
     if (roles && !roles.includes(`${currentRole}`)) {
       return null;
+    }
+
+    if (hasChild) {
+      return contentWithTooltip;
     }
 
     if (externalLink)
@@ -91,7 +110,7 @@ const NavItem = forwardRef(
             }),
           }}
         >
-          {renderContent}
+          {contentWithTooltip}
         </Link>
       );
 
@@ -108,7 +127,7 @@ const NavItem = forwardRef(
           }),
         }}
       >
-        {renderContent}
+        {contentWithTooltip}
       </Link>
     );
   }
@@ -155,22 +174,32 @@ const StyledNavItem = styled(ListItemButton, {
   const baseStyles = {
     item: {
       borderRadius: 6,
-      color: theme.palette.text.secondary,
+      color: '#000',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     icon: {
       width: 22,
       height: 22,
       flexShrink: 0,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     label: {
       textTransform: 'capitalize',
+      fontSize: '0.75rem',
     },
     caption: {
       color: theme.palette.text.disabled,
     },
     container: {
-      width: 65,
-      height: 50,
+      width: 40, // Match the parent styling
+      height: 40, // Match the parent styling
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   };
 
@@ -180,16 +209,18 @@ const StyledNavItem = styled(ListItemButton, {
       ...baseStyles.item,
       ...baseStyles.container,
       fontSize: 10,
-      minHeight: 56,
-      lineHeight: '16px',
+      minHeight: 40, // Match parent height
+      lineHeight: '14px',
       textAlign: 'center',
       flexDirection: 'column',
       justifyContent: 'center',
-      padding: theme.spacing(0.5),
-      margin: theme.spacing(0, 0.5),
-      fontWeight: theme.typography.fontWeightSemiBold,
+      alignItems: 'center',
+      padding: 0, // Remove padding for perfect centering
+      margin: 0, // Remove margin for perfect centering
+      fontWeight: theme.typography.fontWeightMedium,
       '& .icon': {
         ...baseStyles.icon,
+        margin: 0, // Remove any margin from icon
       },
       '& .label': {
         ...noWrapStyles,
@@ -208,19 +239,13 @@ const StyledNavItem = styled(ListItemButton, {
         position: 'absolute',
       },
       ...(active && {
-        fontWeight: theme.typography.fontWeightBold,
+        fontWeight: theme.typography.fontWeightSemiBold,
         color: theme.palette.mode === 'light' ? 'white' : 'black',
         backgroundColor: theme.palette.mode === 'light' ? '#202531' : '#D1D6E0',
         '&:hover': {
-          // backgroundColor: alpha(theme.palette.primary.main, 0.16),
           backgroundColor:
             theme.palette.mode === 'light' ? alpha('#1F1F1F', 0.9) : alpha('#FFFFFF', 0.9),
         },
-        // backgroundColor: alpha(theme.palette.primary.main, 0.08),
-        // color: lightMode ? theme.palette.primary.main : theme.palette.primary.light,
-        // '&:hover': {
-        //   backgroundColor: alpha(theme.palette.primary.main, 0.16),
-        // },
       }),
       ...(opened && {
         color: theme.palette.text.primary,
@@ -232,7 +257,7 @@ const StyledNavItem = styled(ListItemButton, {
     ...(subItem && {
       ...baseStyles.item,
       ...theme.typography.body2,
-      minHeight: 34,
+      minHeight: 32,
       padding: theme.spacing(0, 1),
       fontWeight: theme.typography.fontWeightMedium,
       '& .icon': {

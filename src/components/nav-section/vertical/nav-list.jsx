@@ -63,7 +63,7 @@ export default function NavList({ data, depth, slotProps }) {
       />
       {!!data.children && (
         <Collapse in={openMenu} unmountOnExit>
-          <Box paddingLeft={2}>
+          <Box paddingLeft={1}> {/* Reduced from 2 to 1 for tighter alignment */}
             <NavSubList data={data.children} depth={depth} slotProps={slotProps} />
           </Box>
         </Collapse>
@@ -102,7 +102,7 @@ function NavSubList({ data, depth, slotProps }) {
       {data.map((list) => (
         <Box
           // mt={1}
-          paddingLeft={2}
+          paddingLeft={1} // Reduced from 2 to 1 for tighter alignment
           key={list.title}
           sx={{
             position: 'relative',
@@ -110,12 +110,12 @@ function NavSubList({ data, depth, slotProps }) {
               content: '""',
               position: 'absolute',
               top: 10,
-              left: 12,
+              left: 8, // Adjusted from 12 to 8 to match new padding
               width: 14,
               height: 14,
               bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#343c48' : '#ebebeb'),
               mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23efefef' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E\") 50% 50% / 100% no-repeat",
-              transform: 'translate(-12px, -4.8px)',
+              transform: 'translate(-8px, -4.8px)', // Adjusted from -12px to -8px
             },
           }}
         >
