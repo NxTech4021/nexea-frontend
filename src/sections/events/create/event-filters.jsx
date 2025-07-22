@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { GridToolbarExport, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import {
   Box,
   Chip,
@@ -16,6 +15,13 @@ import {
   FormControl,
   useMediaQuery,
 } from '@mui/material';
+import { 
+  GridToolbarExport, 
+  GridToolbarContainer, 
+  GridToolbarQuickFilter, 
+  GridToolbarColumnsButton,
+  GridToolbarDensitySelector
+} from '@mui/x-data-grid';
 
 import Iconify from 'src/components/iconify';
 
@@ -54,57 +60,106 @@ const CustomToolbar = ({
       display: 'flex', 
       gap: isMobile ? 0.5 : 1,
       flexWrap: isMobile ? 'wrap' : 'nowrap',
-      justifyContent: isMobile ? 'center' : 'flex-start',
+      justifyContent: isMobile ? 'center' : 'space-between',
+      alignItems: 'center',
     }}>
-      {!isMobile && <GridToolbarColumnsButton />}
-      
-      <Button
-        size={isMobile ? "small" : "small"}
-        startIcon={<Iconify icon={isFilterExpanded ? "eva:chevron-up-outline" : "eva:funnel-outline"} />}
-        onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-        sx={{
-          color: isFilterExpanded ? theme.palette.primary.main : textColor,
-          textTransform: 'none',
-          fontWeight: 500,
-          bgcolor: getBackgroundColor(isFilterExpanded),
-          minWidth: isMobile ? 'auto' : 'unset',
-          px: isMobile ? 1 : 1.5,
-          fontSize: isMobile ? '0.75rem' : '0.875rem',
-          '&:hover': {
-            bgcolor: getBackgroundColor(isFilterExpanded, true),
-          },
-        }}
-      >
-        {isMobile ? 'Filter' : 'Filters'}
-        {filters.length > 0 && (
-          <Chip 
-            label={filters.length} 
-            size="small" 
-            sx={{ 
-              ml: 1,
-              height: isMobile ? 16 : 18, 
-              fontSize: isMobile ? '0.65rem' : '0.7rem',
-              bgcolor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
-            }}
-          />
+      {/* Left side - Toolbar buttons */}
+      <Box sx={{ 
+        display: 'flex', 
+        gap: isMobile ? 0.5 : 1,
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
+        alignItems: 'center',
+      }}>
+        {!isMobile && <GridToolbarColumnsButton />}
+        
+        <Button
+          size={isMobile ? "small" : "small"}
+          startIcon={<Iconify icon={isFilterExpanded ? "eva:chevron-up-outline" : "eva:funnel-outline"} />}
+          onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+          sx={{
+            color: isFilterExpanded ? theme.palette.primary.main : textColor,
+            textTransform: 'none',
+            fontWeight: 500,
+            bgcolor: getBackgroundColor(isFilterExpanded),
+            minWidth: isMobile ? 'auto' : 'unset',
+            px: isMobile ? 1 : 1.5,
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
+            '&:hover': {
+              bgcolor: getBackgroundColor(isFilterExpanded, true),
+            },
+          }}
+        >
+          {isMobile ? 'Filter' : 'Filters'}
+          {filters.length > 0 && (
+            <Chip 
+              label={filters.length} 
+              size="small" 
+              sx={{ 
+                ml: 1,
+                height: isMobile ? 16 : 18, 
+                fontSize: isMobile ? '0.65rem' : '0.7rem',
+                bgcolor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+              }}
+            />
+          )}
+        </Button>
+        
+        {!isMobile && (
+          <>
+            <GridToolbarDensitySelector />
+            <GridToolbarExport />
+          </>
         )}
-      </Button>
-      
-      {!isMobile && (
-        <>
-          <GridToolbarDensitySelector />
-          <GridToolbarExport />
-        </>
-      )}
-      
-      {isMobile && (
-        <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, width: '100%', justifyContent: 'center' }}>
-          <GridToolbarColumnsButton size="small" />
-          <GridToolbarDensitySelector size="small" />
-          <GridToolbarExport size="small" />
-        </Box>
-      )}
+        
+        {isMobile && (
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            <GridToolbarColumnsButton size="small" />
+            <GridToolbarDensitySelector size="small" />
+            <GridToolbarExport size="small" />
+          </Box>
+        )}
+      </Box>
+
+      {/* Right side - Search field */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        minWidth: isMobile ? '100%' : 'auto',
+        mt: isMobile ? 1 : 0,
+        justifyContent: isMobile ? 'center' : 'flex-end',
+      }}>
+        <GridToolbarQuickFilter
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              height: isMobile ? 36 : 32,
+              fontSize: isMobile ? '0.875rem' : '0.8125rem',
+              borderRadius: 1,
+              minWidth: isMobile ? 200 : 240,
+              '& fieldset': {
+                borderColor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)',
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.primary.main,
+                borderWidth: '2px',
+              },
+              '& input': {
+                py: isMobile ? 1 : 0.75,
+                color: textColor,
+                '&::placeholder': {
+                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                  opacity: 0.7,
+                },
+              },
+            },
+          }}
+          placeholder={isMobile ? "Search..." : "Search attendees..."}
+          debounceMs={300}
+        />
+      </Box>
     </GridToolbarContainer>
   );
 };

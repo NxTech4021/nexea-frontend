@@ -1008,7 +1008,7 @@ export default function EventAttendee() {
           bgcolor: paperBgColor,
         }}
       >
-{eventFilters.FilterSection()}
+        {eventFilters.FilterSection()}
 
         <DataGrid
           editMode="row"
@@ -1025,6 +1025,7 @@ export default function EventAttendee() {
           onColumnResizeCommit={handleColumnResize}
           onStateChange={handleStateChange}
           autoHeight
+          showToolbar
           initialState={{
             columns: {
               columnVisibilityModel: {
