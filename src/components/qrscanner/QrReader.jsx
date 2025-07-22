@@ -163,7 +163,7 @@ const QrReader = () => {
   const [ticketTypeFilter, setTicketTypeFilter] = useState('All');
 
   // Place ticketTypes and filteredAttendees here:
-  const ticketTypes = React.useMemo(() => {
+  const ticketTypes = useMemo(() => {
     const types = new Set();
     attendeesData.forEach(a => {
       if (a.ticket?.ticketType?.title) types.add(a.ticket.ticketType.title);

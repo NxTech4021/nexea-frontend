@@ -253,7 +253,8 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
             <MenuItem disabled value="">
               <em>Select an option</em>
             </MenuItem>
-            {options?.map((option) => (
+            {/* Add Array.isArray check to prevent map errors */}
+            {(Array.isArray(options) ? options : [])?.map((option) => (
               <MenuItem key={option.id} value={option.id}>
                 {!option?.department
                   ? `${option.fullName}`
