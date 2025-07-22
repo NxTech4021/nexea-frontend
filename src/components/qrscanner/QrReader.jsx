@@ -218,13 +218,22 @@ const QrReader = () => {
   const updateAttendees = useCallback(
     async (id) => {
       try {
+        console.log(`Attempting to update attendee with ID: ${id}`);
+        if (!id) {
+          console.error('Error updating attendance: ID is undefined or null');
+          return toast.error('Failed to update attendance: Invalid attendee ID');
+        }
+        
         const response = await axiosInstance.patch(`${endpoints.attendee.update}/${id}`, {});
+        console.log('Update response:', response);
         toast.success(`${response.data.attendee.firstName} successfully checked in`);
         // Refresh the attendees data after successful check-in
         mutate();
       } catch (err) {
         console.error('Error updating attendance:', err);
-        toast.error('Failed to update attendance');
+        // Display more specific error message
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to update attendance';
+        toast.error(errorMessage);
       }
     },
     [mutate]
@@ -295,35 +304,26 @@ const QrReader = () => {
       if (ticketMatch) {
         setTicketMatch(false);
         if (scannedResult) {
+          console.log('Verifying ticket code:', scannedResult);
           const attendeeData = attendeesData.find(
-            (attendee) => attendee.ticket.ticketCode === scannedResult
+            (attendee) => attendee.ticket?.ticketCode === scannedResult
           );
 
           if (attendeeData) {
+            console.log('Found attendee:', attendeeData);
             if (attendeeData?.status === 'checkedIn') {
               return toast.warning(`${attendeeData.firstName} is already checked in.`);
             }
 
-            updateAttendees(attendeeData.id);
-            // setScannedAttendee((prev) => ({
-            //   ...prev,
-            //   email: attendeeData.attendeeEmail,
-            //   name: attendeeData.attendeeFullName,
-            //   companyName: attendeeData.companyName,
-            //   phoneNumber: attendeeData.phoneNumber,
-            //   ticketType: attendeeData.ticketType,
-            // }));
-
-            // if (attendeesData.find((attendee) => attendee.buyerEmail === attendeeData.buyerEmail)) {
-            //   setOpenModalEmail(true);
-            // } else {
-            //   // Uncommand this if want to straight away update attendance for ticketCode that does not has any redundant buyerEmail
-            //   // setOpenModalConfirm(true);
-            //   setOpenModalEmail(true);
-            //   // await updateAttendees(scannedAttendee.id);
-            // }
+            // Make sure we have a valid ID before updating
+            if (!attendeeData.id) {
+              return toast.error('Cannot update attendance: Missing attendee ID');
+            }
+            
+            await updateAttendees(attendeeData.id);
           } else {
-            return toast.error('Attendee not found for scanned ticket ID:', scannedResult);
+            console.error('Attendee not found for scanned ticket ID:', scannedResult);
+            return toast.error('Attendee not found for this ticket');
           }
         } else {
           return toast.error('Scanned result is empty.');
@@ -332,9 +332,8 @@ const QrReader = () => {
         return toast.error('QR does not match any ticket in the database');
       }
     } catch (err) {
-      console.log(err);
-      return toast.error('Error updating attendance:');
-      // console.error('Error updating attendance:', err);
+      console.log('Error in handleVerify:', err);
+      return toast.error(`Error updating attendance: ${err.message || 'Unknown error'}`);
     }
   }, [ticketMatch, scannedResult, attendeesData, updateAttendees]);
 
@@ -354,41 +353,47 @@ const QrReader = () => {
   };
 
   useEffect(() => {
-    // const handleScanSuccess = async (result) => {
-    //   const scannedData = result?.data.trim();
-
-    //   setScannedResult(scannedData);
-    //   try {
-    //     const { ticketCode } = await fetchTicketDatabase();
-
-    //     if (ticketCode.includes(scannedData)) {
-    //       return setTicketMatch(true);
-    //     }
-    //     toast.warn('Ticket ID not found.');
-    //     return setTicketMatch(false);
-    //   } catch (err) {
-    //     console.error('Error checking ticket ID:', err);
-    //     return err;
-    //   }
-    // };
     const handleScanSuccess = async (result) => {
-      const scannedData = result?.data.trim();
-      setScannedResult(scannedData);
       try {
+        if (!result?.data) {
+          console.error('No data found in QR code scan result');
+          toast.error('Invalid QR code');
+          return false;
+        }
+        
+        const scannedData = result.data.trim();
+        console.log('QR code scanned:', scannedData);
+        setScannedResult(scannedData);
+        
         const { ticketCode } = await fetchTicketDatabase();
+        
+        if (!ticketCode || !ticketCode.length) {
+          console.error('No ticket codes found in database');
+          toast.error('Error fetching tickets database');
+          return false;
+        }
+        
         if (ticketCode.includes(scannedData)) {
           // Find attendee details
-          const attendee = attendeesData.find((a) => a.ticket.ticketCode === scannedData);
+          const attendee = attendeesData.find((a) => a.ticket?.ticketCode === scannedData);
+          if (!attendee) {
+            console.error('Ticket found but no matching attendee record');
+            toast.warning('Ticket found but attendee details missing');
+            return false;
+          }
+          
           setScannedAttendeeDetail(attendee);
           setShowAttendeeModal(true);
           setCameraScannerActive(false); // Stop camera while modal is open
           return setTicketMatch(true);
         }
-        toast.warn('Ticket ID not found.');
+        
+        toast.warning('Ticket ID not found in database.');
         return setTicketMatch(false);
       } catch (err) {
-        console.error('Error checking ticket ID:', err);
-        return err;
+        console.error('Error processing QR code:', err);
+        toast.error('Error processing QR code');
+        return false;
       }
     };
 
@@ -958,88 +963,118 @@ const QrReader = () => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            width: { xs: '90%', sm: 350, md: 400 },
+            maxWidth: 400,
             bgcolor: theme.palette.background.paper,
             boxShadow: 24,
-            p: 4,
-            borderRadius: 5,
+            p: { xs: 3, md: 4 },
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
           }}
         >
           <Stack
-  direction="column"
-  alignItems="center"
-  justifyContent="center"
-  spacing={1}
-  sx={{ mb: 3 }}
->
-  <Stack direction="row" alignItems="center" spacing={1}>
-    <CheckCircleOutlineIcon color="success" />
-    <Typography
-      id="attendee-modal-title"
-      variant="h6"
-      sx={{ textAlign: 'center' }}
-    >
-      QR Scanned Attendee Details
-    </Typography>
-  </Stack>
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            spacing={1}
+            sx={{ mb: 3 }}
+          >
+            <Box 
+              sx={{
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                backgroundColor: 'success.light',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 1,
+              }}
+            >
+              <CheckCircleOutlineIcon sx={{ fontSize: 32, color: 'white' }} />
+            </Box>
+            <Typography
+              id="attendee-modal-title"
+              variant="h6"
+              sx={{ textAlign: 'center', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}
+            >
+              QR Scanned Attendee Details
+            </Typography>
 
-  <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-    Successfully scanned
-  </Typography>
-</Stack>
-
-
+            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+              Successfully scanned
+            </Typography>
+          </Stack>
 
           {scannedAttendeeDetail ? (
-            <Grid container spacing={2}>
-              {/* Name */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  Name:
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 500 }}  >
-                  {scannedAttendeeDetail.firstName} {scannedAttendeeDetail.lastName}
-                </Typography>
-              </Grid>
+            <Box 
+              sx={{ 
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                p: { xs: 2, md: 2.5 },
+                borderRadius: 2,
+                mb: 3
+              }}
+            >
+              <Grid container spacing={2}>
+                {/* Name */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                    Name:
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                    {scannedAttendeeDetail.firstName} {scannedAttendeeDetail.lastName}
+                  </Typography>
+                </Grid>
 
-              {/* Company */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  Company:
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 500 }} >
-                  {scannedAttendeeDetail.companyName}
-                </Typography>
-              </Grid>
+                {/* Company */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                    Company:
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                    {scannedAttendeeDetail.companyName}
+                  </Typography>
+                </Grid>
 
-              {/* Ticket Type */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  Ticket Type:
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 500 }}  >
-                  {scannedAttendeeDetail.ticket?.ticketType?.title}
-                </Typography>
+                {/* Ticket Type */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                    Ticket Type:
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                    {scannedAttendeeDetail.ticket?.ticketType?.title}
+                  </Typography>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           ) : (
             <Typography>No attendee found.</Typography>
           )}
 
-          {/* Button aligned right */}
-          <Stack direction="row" justifyContent="flex-end" sx={{ mt: 4 }}>
+          {/* Button aligned center */}
+          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
             <Button
               variant="contained"
+              fullWidth
               onClick={() => {
                 setShowAttendeeModal(false);
                 if (scanner.current) {
+                  console.log('Destroying scanner instance before creating a new one');
                   scanner.current.destroy?.();
                   scanner.current = null;
                 }
                 setCameraScannerActive(true);
               }}
+              sx={{ 
+                py: { xs: 1, sm: 1.2 },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }}
             >
-              Scan
+              Done
             </Button>
           </Stack>
         </Box>
