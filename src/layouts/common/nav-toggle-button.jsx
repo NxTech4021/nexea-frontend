@@ -50,8 +50,8 @@ export default function NavToggleButton({ sx, ...other }) {
         width={16}
         icon={
           settings.themeLayout === 'vertical'
-            ? 'eva:arrow-ios-back-fill'
-            : 'eva:arrow-ios-forward-fill'
+            ? 'material-symbols:keyboard-double-arrow-left'
+            : 'material-symbols:keyboard-double-arrow-right'
         }
       />
     </IconButton>

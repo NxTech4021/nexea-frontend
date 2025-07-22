@@ -733,65 +733,59 @@ const EventLists = ({ query }) => {
                       </Stack>
                     </Box>
 
-                    <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column' }}>
-                      <Box
+                    <Box sx={{ width: '15%', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Chip
+                        icon={
+                          <Iconify
+                            icon="eva:checkmark-circle-2-fill"
+                            sx={{ width: 14, height: 14 }}
+                          />
+                        }
+                        label={`${checkedInCount} Checked In`}
+                        size="small"
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          padding: '4px 8px',
-                          borderRadius: 1,
+                          height: 20,
+                          color: '#229A16',
+                          bgcolor: 'rgba(34, 154, 22, 0.08)',
+                          border: '1px solid rgba(34, 154, 22, 0.2)',
+                          fontSize: 11,
+                          fontWeight: 600,
                           width: 'fit-content',
+                          '& .MuiChip-icon': { 
+                            color: '#229A16',
+                            ml: 0.5,
+                          },
+                          '& .MuiChip-label': { 
+                            px: 0.75,
+                          },
                         }}
-                      >
-                        <Iconify
-                          icon="eva:checkmark-circle-2-fill"
-                          sx={{
-                            width: 14,
-                            height: 14,
-                            color: '#229A16',
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: '#229A16',
-                            fontWeight: 600,
-                            fontSize: 12,
-                          }}
-                        >
-                          {checkedInCount} Checked In
-                        </Typography>
-                      </Box>
-                      <Box
+                      />
+                      <Chip
+                        icon={
+                          <Iconify
+                            icon="eva:close-circle-fill"
+                            sx={{ width: 14, height: 14 }}
+                          />
+                        }
+                        label={`${notCheckedInCount} Not Checked In`}
+                        size="small"
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          padding: '4px 8px',
-                          borderRadius: 1,
+                          height: 20,
+                          color: '#B72136',
+                          bgcolor: 'rgba(183, 33, 54, 0.08)',
+                          border: '1px solid rgba(183, 33, 54, 0.2)',
+                          fontSize: 11,
+                          fontWeight: 600,
                           width: 'fit-content',
+                          '& .MuiChip-icon': { 
+                            color: '#B72136',
+                            ml: 0.5,
+                          },
+                          '& .MuiChip-label': { 
+                            px: 0.75,
+                          },
                         }}
-                      >
-                        <Iconify
-                          icon="eva:close-circle-fill"
-                          sx={{
-                            width: 14,
-                            height: 14,
-                            color: '#B72136',
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: '#B72136',
-                            fontWeight: 600,
-                            fontSize: 12,
-                          }}
-                        >
-                          {notCheckedInCount} Not Checked In
-                        </Typography>
-                      </Box>
+                      />
                     </Box>
 
                     <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
@@ -959,25 +953,57 @@ const EventLists = ({ query }) => {
                         </Typography>
                       </Box>
 
-                      <Stack direction="row" spacing={2}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Iconify
-                            icon="eva:checkmark-circle-2-fill"
-                            sx={{ width: 14, height: 14, color: '#229A16' }}
-                          />
-                          <Typography variant="caption" sx={{ color: '#229A16', fontWeight: 600 }}>
-                            {checkedInCount} Checked In
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Iconify
-                            icon="eva:close-circle-fill"
-                            sx={{ width: 14, height: 14, color: '#B72136' }}
-                          />
-                          <Typography variant="caption" sx={{ color: '#B72136', fontWeight: 600 }}>
-                            {notCheckedInCount} Not Checked In
-                          </Typography>
-                        </Box>
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                        <Chip
+                          icon={
+                            <Iconify
+                              icon="eva:checkmark-circle-2-fill"
+                              sx={{ width: 12, height: 12 }}
+                            />
+                          }
+                          label={`${checkedInCount} Checked In`}
+                          size="small"
+                          sx={{
+                            height: 18,
+                            color: '#229A16',
+                            bgcolor: 'rgba(34, 154, 22, 0.08)',
+                            border: '1px solid rgba(34, 154, 22, 0.2)',
+                            fontSize: 10,
+                            fontWeight: 600,
+                            '& .MuiChip-icon': { 
+                              color: '#229A16',
+                              ml: 0.25,
+                            },
+                            '& .MuiChip-label': { 
+                              px: 0.5,
+                            },
+                          }}
+                        />
+                        <Chip
+                          icon={
+                            <Iconify
+                              icon="eva:close-circle-fill"
+                              sx={{ width: 12, height: 12 }}
+                            />
+                          }
+                          label={`${notCheckedInCount} Not Checked In`}
+                          size="small"
+                          sx={{
+                            height: 18,
+                            color: '#B72136',
+                            bgcolor: 'rgba(183, 33, 54, 0.08)',
+                            border: '1px solid rgba(183, 33, 54, 0.2)',
+                            fontSize: 10,
+                            fontWeight: 600,
+                            '& .MuiChip-icon': { 
+                              color: '#B72136',
+                              ml: 0.25,
+                            },
+                            '& .MuiChip-label': { 
+                              px: 0.5,
+                            },
+                          }}
+                        />
                       </Stack>
                     </Stack>
                   </Box>

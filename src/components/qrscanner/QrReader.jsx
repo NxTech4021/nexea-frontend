@@ -6,13 +6,14 @@ import styled from '@emotion/styled';
 import { useParams } from 'react-router';
 import { useTheme } from '@emotion/react';
 import 'react-toastify/dist/ReactToastify.css';
-// import VerifiedIcon from '@mui/icons-material/Verified';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
+// import VerifiedIcon from '@mui/icons-material/Verified';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
   Box,
   Chip,
+  Grid,
   Modal,
   alpha,
   Stack,
@@ -20,7 +21,6 @@ import {
   Container,
   TextField,
   Typography,
-  Grid,
 } from '@mui/material';
 
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
@@ -163,7 +163,7 @@ const QrReader = () => {
   const [ticketTypeFilter, setTicketTypeFilter] = useState('All');
 
   // Place ticketTypes and filteredAttendees here:
-  const ticketTypes = React.useMemo(() => {
+  const ticketTypes = useMemo(() => {
     const types = new Set();
     attendeesData.forEach(a => {
       if (a.ticket?.ticketType?.title) types.add(a.ticket.ticketType.title);

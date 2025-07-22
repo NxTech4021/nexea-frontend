@@ -8,27 +8,23 @@ import {
   Box,
   Card,
   Stack,
-  Tooltip,
   Container,
-  IconButton,
   CardContent,
   CircularProgress,
 } from '@mui/material';
 
-import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useGetAllEvents } from 'src/api/event';
 
-import Iconify from 'src/components/iconify';
-
+import EventStatistics from '../event-statistics';
 import EventInformation from '../event-information';
 import TicketInformation from '../ticket-information';
-import TotalRevenue from '../analytics/total-revenue';
+// import TotalRevenue from '../analytics/total-revenue';
 import AttendeeInformation from '../attendee-information';
-import OrderAnalytics from '../analytics/order-analytics';
-import TicketAnalytics from '../analytics/ticket-analytics';
-import AttendeeAnalytics from '../analytics/attendee-analytic';
+// import OrderAnalytics from '../analytics/order-analytics';
+// import TicketAnalytics from '../analytics/ticket-analytics';
+// import AttendeeAnalytics from '../analytics/attendee-analytic';
 // import CheckInAnalytics from '../analytics/checkIn-analytics';
 
 const EventDetails = ({ id }) => {
@@ -161,29 +157,14 @@ const EventDetails = ({ id }) => {
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <Tooltip title="Back to Events">
-          <IconButton
-            onClick={() => router.push(paths.dashboard.events.root)}
-            sx={{
-              width: 40,
-              height: 40,
-              color: theme.palette.mode === 'light' ? 'grey.800' : 'common.white',
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'light' ? 'grey.100' : 'grey.800',
-              },
-            }}
-          >
-            <Iconify icon="eva:arrow-back-fill" width={20} height={20} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      <Grid item size={{ xs: 12, md: 6 }}>
-        <EventInformation event={data} />
-      </Grid>
-
-      <Grid container spacing={2} mt={2}>
+      <Grid container spacing={2}>
+        <Grid item size={{ xs: 12 }}>
+          <EventInformation event={data} />
+        </Grid>
+        
+        <Grid item size={{ xs: 12 }}>
+          <EventStatistics data={data} />
+        </Grid>
         {/* <Grid item size={{ xs: 12 }}>
           <TotalRevenue totalRevenue={totalRevenue} />
         </Grid> */}
@@ -193,33 +174,33 @@ const EventDetails = ({ id }) => {
             justifyContent="space-between"
             spacing={2}
           >
-            <TicketAnalytics
+            {/* <TicketAnalytics
               tickets={totalTicketsSold.regularTickets}
               addOns={totalTicketsSold.addOnTickets}
               eventName={data.name}
-            />
+            /> */}
 
-            <OrderAnalytics
+            {/* <OrderAnalytics
               orders={data.order?.filter((a) => a?.status === 'paid') || []}
               eventName={data.name}
               eventId={id}
-            />
+            /> */}
             {/* <CheckInAnalytics checkedIns={totalCheckedIn} id={id} /> */}
-            <TotalRevenue totalRevenue={totalRevenue} />
+            {/* <TotalRevenue totalRevenue={totalRevenue} /> */}
           </Stack>
         </Grid>
 
-        <Grid item size={{ xs: 12, md: 6 }}>
+        <Grid item size={{ xs: 12, md: 6 }} sx={{ mt: { xs: -3, md: -3, lg: -3 } }}>
           <Card sx={{ border: 1, borderColor: theme.palette.divider, borderRadius: 2 }}>
             <CardContent>
               <AttendeeInformation id={id} />
             </CardContent>
           </Card>
         </Grid>
-        <Grid item size={{ xs: 12, md: 6 }}>
+        <Grid item size={{ xs: 12, md: 6 }} sx={{ mt: { xs: 0, md: 0, lg: -3 } }}>
           <Stack spacing={2}>
             <TicketInformation tickets={Object.values(grouped) || []} />
-            <AttendeeAnalytics groupedAttendees={groupedAttendees} />
+            {/* <AttendeeAnalytics groupedAttendees={groupedAttendees} /> */}
             {/* <TicketInformation tickets={Object.values(grouped) || []} /> */}
           </Stack>
         </Grid>
