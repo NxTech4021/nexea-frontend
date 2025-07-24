@@ -95,43 +95,36 @@ export default function JwtLoginView() {
         }}
       />
 
-      <Link
-        variant="subtitle2"
-        component={RouterLink}
-        color="inherit"
-        // underline="always"
-        sx={{ alignSelf: 'flex-start', color: '#111' }}
-        href={paths.auth.jwt.forgotPassword}
-      >
-        Forgot password?
-      </Link>
+      <Stack spacing={1}>
+        <Link
+          variant="subtitle2"
+          component={RouterLink}
+          color="inherit"
+          // underline="always"
+          sx={{ alignSelf: 'flex-start', color: '#111' }}
+          href={paths.auth.jwt.forgotPassword}
+        >
+          Forgot password?
+        </Link>
 
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-        sx={{
-          bgcolor: '#111',
-          color: 'white',
-          '&:hover': {
-            bgcolor: '#333',
-          },
-        }}
-      >
-        Login
-      </LoadingButton>
-    </Stack>
-  );
+        <LoadingButton
+          fullWidth
+          color="inherit"
+          size="medium"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          sx={{
+            bgcolor: '#111',
+            color: 'white',
+            '&:hover': {
+              bgcolor: '#333',
+            },
+          }}
+        >
+          Login
+        </LoadingButton>
 
-  return (
-    <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Card sx={{ p: 3, borderRadius: 2 }}>
-        {renderHead}
-
-        {renderForm}
         <Stack direction="row" spacing={0.5} mt={1}>
           <Typography variant="subtitle2" fontWeight={400}>
             New user ?
@@ -146,6 +139,15 @@ export default function JwtLoginView() {
             Create an account
           </Link>
         </Stack>
+      </Stack>
+    </Stack>
+  );
+
+  return (
+    <FormProvider methods={methods} onSubmit={onSubmit}>
+      <Card sx={{ p: 3, borderRadius: 2 }}>
+        {renderHead}
+        {renderForm}
       </Card>
     </FormProvider>
   );
