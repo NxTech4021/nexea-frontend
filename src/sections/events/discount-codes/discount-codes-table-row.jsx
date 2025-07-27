@@ -8,7 +8,17 @@ import CheckBox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
-import { Box, Chip, Stack, alpha, Paper, Tooltip, Typography, ListItemText, ClickAwayListener } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Stack,
+  alpha,
+  Paper,
+  Tooltip,
+  Typography,
+  ListItemText,
+  ClickAwayListener,
+} from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -72,7 +82,7 @@ export default function DiscountCodeTableRow({
 
     // Group tickets by event
     const groupedByEvent = ticketType.reduce((acc, ticket) => {
-      const eventName = ticket.event.name;
+      const eventName = ticket.event?.name;
       if (!acc[eventName]) {
         acc[eventName] = [];
       }
@@ -121,8 +131,8 @@ export default function DiscountCodeTableRow({
                   mb: 0.5,
                   '& .MuiChip-label': {
                     px: 0.75,
-                    fontWeight: 500
-                  }
+                    fontWeight: 500,
+                  },
                 }}
               />
             ))}
@@ -148,15 +158,15 @@ export default function DiscountCodeTableRow({
           </Typography>
           {eventEntries.map(([eventName, tickets]) => (
             <Box key={eventName}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   color: 'primary.main',
                   fontWeight: 600,
                   mb: 1,
                   pb: 0.5,
                   borderBottom: '1px solid',
-                  borderColor: 'divider'
+                  borderColor: 'divider',
                 }}
               >
                 {eventName} ({tickets.length} types)
@@ -177,8 +187,8 @@ export default function DiscountCodeTableRow({
                       mb: 0.5,
                       '& .MuiChip-label': {
                         px: 0.75,
-                        fontWeight: 500
-                      }
+                        fontWeight: 500,
+                      },
                     }}
                   />
                 ))}
@@ -193,7 +203,7 @@ export default function DiscountCodeTableRow({
       <Box sx={{ maxWidth: 350, position: 'relative' }}>
         <Stack spacing={1}>
           {displayEvents.map(([eventName, tickets]) => (
-            <Box 
+            <Box
               key={eventName}
               sx={{
                 p: 1.5,
@@ -203,9 +213,9 @@ export default function DiscountCodeTableRow({
                 bgcolor: (theme) => theme.palette.background.neutral,
               }}
             >
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   color: 'text.primary',
                   fontWeight: 600,
                   mb: 0.75,
@@ -230,8 +240,8 @@ export default function DiscountCodeTableRow({
                       mb: 0.5,
                       '& .MuiChip-label': {
                         px: 0.75,
-                        fontWeight: 500
-                      }
+                        fontWeight: 500,
+                      },
                     }}
                   />
                 ))}
@@ -252,8 +262,8 @@ export default function DiscountCodeTableRow({
                             },
                             '& .MuiTooltip-arrow': {
                               color: 'background.paper',
-                            }
-                          }
+                            },
+                          },
                         }}
                       >
                         <Chip
@@ -261,7 +271,9 @@ export default function DiscountCodeTableRow({
                           size="small"
                           variant="outlined"
                           clickable
-                          onClick={() => setShowFullList(showFullList === eventName ? false : eventName)}
+                          onClick={() =>
+                            setShowFullList(showFullList === eventName ? false : eventName)
+                          }
                           sx={{
                             height: 22,
                             fontSize: '0.7rem',
@@ -276,8 +288,8 @@ export default function DiscountCodeTableRow({
                             },
                             '& .MuiChip-label': {
                               px: 0.75,
-                              fontWeight: 500
-                            }
+                              fontWeight: 500,
+                            },
                           }}
                         />
                       </Tooltip>
@@ -287,7 +299,7 @@ export default function DiscountCodeTableRow({
               </Stack>
             </Box>
           ))}
-          
+
           {hasMoreEvents && (
             <ClickAwayListener onClickAway={() => setShowFullList(false)}>
               <Box sx={{ position: 'relative' }}>
@@ -305,8 +317,8 @@ export default function DiscountCodeTableRow({
                       },
                       '& .MuiTooltip-arrow': {
                         color: 'background.paper',
-                      }
-                    }
+                      },
+                    },
                   }}
                 >
                   <Box
@@ -325,22 +337,22 @@ export default function DiscountCodeTableRow({
                     }}
                     onClick={() => setShowFullList(showFullList === 'all' ? false : 'all')}
                   >
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      sx={{
                         color: 'primary.main',
                         fontWeight: 500,
-                        fontSize: '0.75rem'
+                        fontSize: '0.75rem',
                       }}
                     >
                       +{remainingEvents} more event{remainingEvents > 1 ? 's' : ''}
                     </Typography>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
+                    <Typography
+                      variant="caption"
+                      sx={{
                         color: 'text.secondary',
                         display: 'block',
-                        fontSize: '0.65rem'
+                        fontSize: '0.65rem',
                       }}
                     >
                       Click to view all
@@ -374,9 +386,7 @@ export default function DiscountCodeTableRow({
                 currency: 'MYR',
               }).format(value)}
         </TableCell>
-        <TableCell sx={{ py: 2 }}>
-          {renderAvailability()}
-        </TableCell>
+        <TableCell sx={{ py: 2 }}>{renderAvailability()}</TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{limit || 'Unlimited'}</TableCell>
         <TableCell>

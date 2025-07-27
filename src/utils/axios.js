@@ -4,7 +4,7 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API,withCredentials: true });
+const axiosInstance = axios.create({ baseURL: HOST_API, withCredentials: true });
 
 // axiosInstance.defaults.withCredentials = true
 
@@ -64,7 +64,7 @@ export const endpoints = {
     create: '/api/event/',
     list: '/api/event/',
     update: '/api/event/update',
-    delete: '/api/event/delete',
+    delete: (id) => `/api/event/delete/${id}`,
     text: '/api/event/sendtext',
     image: '/api/event/sendimage',
     location: '/api/event/sendlocation',

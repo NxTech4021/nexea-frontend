@@ -32,6 +32,9 @@ import {
   DialogActions,
   useMediaQuery,
   CardActionArea,
+  List,
+  ListItemText,
+  ListItem,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
@@ -54,6 +57,7 @@ import { TablePaginationCustom } from 'src/components/table';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
+import { toast } from 'sonner';
 
 const EventStatus = {
   ACTIVE: 'ACTIVE',
@@ -751,21 +755,18 @@ const EventLists = ({ query }) => {
                           fontSize: 11,
                           fontWeight: 600,
                           width: 'fit-content',
-                          '& .MuiChip-icon': { 
+                          '& .MuiChip-icon': {
                             color: '#229A16',
                             ml: 0.5,
                           },
-                          '& .MuiChip-label': { 
+                          '& .MuiChip-label': {
                             px: 0.75,
                           },
                         }}
                       />
                       <Chip
                         icon={
-                          <Iconify
-                            icon="eva:close-circle-fill"
-                            sx={{ width: 14, height: 14 }}
-                          />
+                          <Iconify icon="eva:close-circle-fill" sx={{ width: 14, height: 14 }} />
                         }
                         label={`${notCheckedInCount} Not Checked In`}
                         size="small"
@@ -777,11 +778,11 @@ const EventLists = ({ query }) => {
                           fontSize: 11,
                           fontWeight: 600,
                           width: 'fit-content',
-                          '& .MuiChip-icon': { 
+                          '& .MuiChip-icon': {
                             color: '#B72136',
                             ml: 0.5,
                           },
-                          '& .MuiChip-label': { 
+                          '& .MuiChip-label': {
                             px: 0.75,
                           },
                         }}
@@ -970,21 +971,18 @@ const EventLists = ({ query }) => {
                             border: '1px solid rgba(34, 154, 22, 0.2)',
                             fontSize: 10,
                             fontWeight: 600,
-                            '& .MuiChip-icon': { 
+                            '& .MuiChip-icon': {
                               color: '#229A16',
                               ml: 0.25,
                             },
-                            '& .MuiChip-label': { 
+                            '& .MuiChip-label': {
                               px: 0.5,
                             },
                           }}
                         />
                         <Chip
                           icon={
-                            <Iconify
-                              icon="eva:close-circle-fill"
-                              sx={{ width: 12, height: 12 }}
-                            />
+                            <Iconify icon="eva:close-circle-fill" sx={{ width: 12, height: 12 }} />
                           }
                           label={`${notCheckedInCount} Not Checked In`}
                           size="small"
@@ -995,11 +993,11 @@ const EventLists = ({ query }) => {
                             border: '1px solid rgba(183, 33, 54, 0.2)',
                             fontSize: 10,
                             fontWeight: 600,
-                            '& .MuiChip-icon': { 
+                            '& .MuiChip-icon': {
                               color: '#B72136',
                               ml: 0.25,
                             },
-                            '& .MuiChip-label': { 
+                            '& .MuiChip-label': {
                               px: 0.5,
                             },
                           }}
@@ -1382,6 +1380,17 @@ const EventLists = ({ query }) => {
       }
 
       mutate();
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await axiosInstance.delete(endpoints.events.delete(id));
+      mutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      console.log(error);
+      toast?.error('Error deleting event');
     }
   };
 
@@ -1776,6 +1785,29 @@ const EventLists = ({ query }) => {
           <Typography variant="body1" align="center" sx={{ fontSize: '1rem' }}>
             Are you sure you want to delete this event? This action cannot be undone.
           </Typography>
+          <Box sx={{ marginTop: 2 }}>
+            <Typography variant="subtitle2">This action will remove:</Typography>
+            <List dense>
+              <ListItem>
+                <ListItemIcon>
+                  <Iconify icon="oui:dot" />
+                </ListItemIcon>
+                <ListItemText primary="Orders" />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <Iconify icon="oui:dot" />
+                </ListItemIcon>
+                <ListItemText primary="Tickets" />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <Iconify icon="oui:dot" />
+                </ListItemIcon>
+                <ListItemText primary="Ticket Add Ons" />
+              </ListItem>
+            </List>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <Button
@@ -1794,8 +1826,8 @@ const EventLists = ({ query }) => {
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              // handleDelete(currentEvent.id);
+            onClick={async () => {
+              await handleDelete(selectedEvent.id);
               setOpenDelete(false);
               handleClose();
             }}

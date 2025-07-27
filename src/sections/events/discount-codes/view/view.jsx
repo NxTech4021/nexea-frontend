@@ -92,7 +92,7 @@ export default function DiscountCodeView() {
     discountCodes.forEach((code) => {
       if (code.ticketType && Array.isArray(code.ticketType)) {
         code.ticketType.forEach((ticket) => {
-          uniqueTicketTypes.add(`${ticket.title} ( ${ticket.event.name} )`);
+          uniqueTicketTypes.add(`${ticket.title} ( ${ticket.event?.name} )`);
         });
       }
     });
@@ -121,8 +121,8 @@ export default function DiscountCodeView() {
     discountCodes.forEach((code) => {
       if (code.ticketType && Array.isArray(code.ticketType)) {
         code.ticketType.forEach((ticket) => {
-          if (ticket.event && ticket.event.name) {
-            uniqueEvents.add(ticket.event.name);
+          if (ticket.event && ticket.event?.name) {
+            uniqueEvents.add(ticket.event?.name);
           }
         });
       }
@@ -325,8 +325,8 @@ export default function DiscountCodeView() {
               ))}
             </Tabs>
 
-            <DiscountCodeTableToolbar 
-              filters={filters} 
+            <DiscountCodeTableToolbar
+              filters={filters}
               onFilters={handleFilters}
               availabilityOptions={availabilityOptions}
               typeOptions={typeOptions}
@@ -477,8 +477,8 @@ function applyFilter({ inputData, comparator, filters }) {
   if (availability !== 'all') {
     inputData = inputData.filter((discountCode) => {
       if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
-        return discountCode.ticketType.some((ticket) => 
-          `${ticket.title} ( ${ticket.event.name} )` === availability
+        return discountCode.ticketType.some(
+          (ticket) => `${ticket.title} ( ${ticket.event.name} )` === availability
         );
       }
       return false;
@@ -495,8 +495,8 @@ function applyFilter({ inputData, comparator, filters }) {
   if (event !== 'all') {
     inputData = inputData.filter((discountCode) => {
       if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
-        return discountCode.ticketType.some((ticket) => 
-          ticket.event && ticket.event.name === event
+        return discountCode.ticketType.some(
+          (ticket) => ticket.event && ticket.event.name === event
         );
       }
       return false;

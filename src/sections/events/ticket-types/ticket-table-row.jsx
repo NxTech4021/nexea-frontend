@@ -152,7 +152,7 @@ export default function TicketTableRow({
   onEditSuccess, // New prop for handling successful edits
 }) {
   const {
-    event: { name, id },
+    event: eventData,
     id: ticketTypeId,
     ticketUrl,
     type,
@@ -384,7 +384,7 @@ export default function TicketTableRow({
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{title}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{eventData?.name || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[type] || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{dataMapping[category] || 'N/A'}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
