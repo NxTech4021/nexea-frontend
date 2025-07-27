@@ -1468,7 +1468,7 @@ export default function TicketTableRow({
                     Event Name
                   </Typography>
                   <Typography variant="body1" fontWeight={500}>
-                    {name}
+                    {eventData?.name}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>

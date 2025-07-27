@@ -796,16 +796,18 @@ const EventCreateDialog = ({ open, onClose }) => {
                   <Stack spacing={3}>
                     {/* Logo Upload */}
                     <Stack spacing={1}>
-                      <InputLabel sx={{ 
-                        color: 'text.secondary',
-                        fontSize: '0.875rem',
-                        fontWeight: 500 
-                      }}>
+                      <InputLabel
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      >
                         Event Logo
                       </InputLabel>
-                      <RHFUpload 
-                        name="eventLogo" 
-                        type="file" 
+                      <RHFUpload
+                        name="eventLogo"
+                        type="file"
                         onDrop={onDrop}
                         sx={{
                           '& .drop-zone': {
@@ -814,23 +816,27 @@ const EventCreateDialog = ({ open, onClose }) => {
                             border: '1px dashed',
                             borderColor: 'divider',
                             borderRadius: 1,
-                            bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
                             '&:hover': {
-                              bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
-                            }
-                          }
-                        }} 
+                              bgcolor: (theme) =>
+                                theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                            },
+                          },
+                        }}
                       />
                     </Stack>
 
                     {/* Color Picker - Visible in Desktop */}
                     <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                       <Stack spacing={1}>
-                        <InputLabel sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.875rem',
-                          fontWeight: 500 
-                        }}>
+                        <InputLabel
+                          sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                          }}
+                        >
                           Background Color
                         </InputLabel>
                         <Controller
@@ -846,12 +852,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 width: '100%',
                                 '& .MuiOutlinedInput-root': {
                                   height: 42,
-                                  bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                                  bgcolor: (theme) =>
+                                    theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
                                   border: 'none',
                                   '&:hover': {
-                                    bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
-                                  }
-                                }
+                                    bgcolor: (theme) =>
+                                      theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                                  },
+                                },
                               }}
                             />
                           )}
@@ -867,11 +875,13 @@ const EventCreateDialog = ({ open, onClose }) => {
                     {/* Color Picker - Visible in Mobile */}
                     <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                       <Stack spacing={1}>
-                        <InputLabel sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.875rem',
-                          fontWeight: 500 
-                        }}>
+                        <InputLabel
+                          sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                          }}
+                        >
                           Background Color
                         </InputLabel>
                         <Controller
@@ -887,12 +897,14 @@ const EventCreateDialog = ({ open, onClose }) => {
                                 width: '100%',
                                 '& .MuiOutlinedInput-root': {
                                   height: 42,
-                                  bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                                  bgcolor: (theme) =>
+                                    theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
                                   border: 'none',
                                   '&:hover': {
-                                    bgcolor: (theme) => theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
-                                  }
-                                }
+                                    bgcolor: (theme) =>
+                                      theme.palette.mode === 'light' ? 'grey.200' : 'grey.800',
+                                  },
+                                },
                               }}
                             />
                           )}
@@ -902,12 +914,14 @@ const EventCreateDialog = ({ open, onClose }) => {
 
                     {/* Preview */}
                     <Box>
-                      <InputLabel sx={{ 
-                        color: 'text.secondary',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        mb: 1 
-                      }}>
+                      <InputLabel
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          mb: 1,
+                        }}
+                      >
                         Preview
                       </InputLabel>
                       <Box
@@ -949,13 +963,13 @@ const EventCreateDialog = ({ open, onClose }) => {
                           />
                         )}
                       </Box>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
+                      <Typography
+                        variant="caption"
+                        sx={{
                           display: 'block',
                           color: 'text.secondary',
                           mt: 1,
-                          fontSize: '0.75rem'
+                          fontSize: '0.75rem',
                         }}
                       >
                         This preview shows how the event logo will appear in the event list.

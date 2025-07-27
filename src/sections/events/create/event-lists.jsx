@@ -13,6 +13,7 @@ import {
   Menu,
   Chip,
   Card,
+  List,
   Stack,
   Button,
   Dialog,
@@ -22,19 +23,18 @@ import {
   MenuItem,
   Skeleton,
   Collapse,
+  ListItem,
   TextField,
   Typography,
   IconButton,
   DialogTitle,
   CardContent,
   ListItemIcon,
+  ListItemText,
   DialogContent,
   DialogActions,
   useMediaQuery,
   CardActionArea,
-  List,
-  ListItemText,
-  ListItem,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
@@ -54,10 +54,10 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 
 import { TablePaginationCustom } from 'src/components/table';
+import { toast } from 'sonner';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
-import { toast } from 'sonner';
 
 const EventStatus = {
   ACTIVE: 'ACTIVE',
