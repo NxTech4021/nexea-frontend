@@ -34,6 +34,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcru
 
 import UploadPhoto from './dropzone';
 import AccountSecurity from './security';
+import QuickBooksIntegration from './quickbooks';
 
 dayjs.extend(localizedFormat);
 
@@ -215,6 +216,11 @@ const Profile = () => {
         value="security"
         icon={<Iconify icon="ic:round-vpn-key" width={24} />}
       />
+      <Tab
+        label="QuickBooks"
+        value="quickbooks"
+        icon={<Iconify icon="logos:quickbooks" width={24} />}
+      />
     </Tabs>
   );
 
@@ -242,6 +248,8 @@ const Profile = () => {
         </Typography>
 
         {currentTab === 'security' && <AccountSecurity />}
+
+        {currentTab === 'quickbooks' && <QuickBooksIntegration />}
 
         {currentTab === 'general' && (
           <Grid container spacing={3}>
