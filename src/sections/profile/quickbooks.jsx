@@ -19,6 +19,7 @@ import {
   Link,
 } from '@mui/material';
 
+import { HOST_API } from 'src/config-global';
 import { axiosInstance } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
@@ -34,6 +35,9 @@ const QuickBooksIntegration = () => {
   const [manualRealmId, setManualRealmId] = useState('');
   const [tokenInfo, setTokenInfo] = useState(null);
   const [showTokenInfo, setShowTokenInfo] = useState(false);
+  const [showAppCredentialsDialog, setShowAppCredentialsDialog] = useState(false);
+  const [newClientId, setNewClientId] = useState('');
+  const [newClientSecret, setNewClientSecret] = useState('');
 
   // Check QuickBooks connection status on component mount
   useEffect(() => {
@@ -277,6 +281,120 @@ const QuickBooksIntegration = () => {
     }
   };
 
+  // Scenario A: Connect to different company (same app)
+  const handleConnectDifferentCompany = async () => {
+    try {
+      setLoading(true);
+      
+      // Use the dedicated switch-company endpoint which clears tokens and forces fresh auth
+      const switchCompanyUrl = `${HOST_API}/quickbooks/switch-company`;
+      const popup = window.open(
+        switchCompanyUrl,
+        'quickbooks-switch-company',
+        'width=600,height=700,scrollbars=yes'
+      );
+
+      // Listen for message from popup
+      const messageListener = (event) => {
+        // Ensure message is from the popup  
+        if (event.source === popup && event.data.type === 'QUICKBOOKS_COMPANY_SWITCHED') {
+          console.log('✅ Received QuickBooks company switch success message:', event.data);
+          
+          // Clean up
+          window.removeEventListener('message', messageListener);
+          
+          if (event.data.success) {
+            toast.success('Successfully switched to new QuickBooks company!');
+            setIsConnected(true);
+            setCompanyId(event.data.realmId);
+            
+            // Refresh status after a short delay
+            setTimeout(() => {
+              checkConnectionStatus();
+            }, 1000);
+          } else {
+            toast.error('QuickBooks company switch failed');
+          }
+        }
+      };
+
+      // Add message listener
+      window.addEventListener('message', messageListener);
+
+      // Also listen for the popup to close (fallback)
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', messageListener);
+          
+          // Check connection status after popup closes (fallback)
+          setTimeout(() => {
+            checkConnectionStatus();
+          }, 1000);
+        }
+      }, 1000);
+
+      toast.info('Please authorize the new company in the popup window', {
+        autoClose: 5000,
+      });
+      
+    } catch (error) {
+      console.error('Error switching companies:', error);
+      toast.error('Failed to switch companies. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Scenario B: Update app credentials and connect
+  const handleUpdateAppCredentials = async () => {
+    if (!newClientId || !newClientSecret) {
+      toast.error('Please provide both Client ID and Client Secret');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Update app credentials in database
+      const updateResponse = await axiosInstance.post('/quickbooks/update-app-credentials', {
+        clientId: newClientId,
+        clientSecret: newClientSecret
+      });
+
+      if (updateResponse.data.success) {
+        toast.success('App credentials updated successfully!');
+        
+        // Disconnect current connection if exists
+        try {
+          await axiosInstance.post('/quickbooks/disconnect');
+          setIsConnected(false);
+          setCompanyId(null);
+        } catch (disconnectError) {
+          // Ignore disconnect errors if no connection exists
+        }
+
+        // Close dialog and clear inputs
+        setShowAppCredentialsDialog(false);
+        setNewClientId('');
+        setNewClientSecret('');
+        
+        toast.info('Please connect with your new app credentials.');
+        
+        // Start new connection flow with updated credentials
+        await handleConnect();
+        
+      } else {
+        throw new Error(updateResponse.data.error || 'Failed to update credentials');
+      }
+    } catch (error) {
+      console.error('Error updating app credentials:', error);
+      toast.error(error.response?.data?.error || 'Failed to update app credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (checkingStatus) {
     return (
       <Card sx={{ p: 3 }}>
@@ -341,18 +459,41 @@ const QuickBooksIntegration = () => {
           }}
         >
           {!isConnected ? (
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="eva:link-2-fill" />}
-              onClick={handleConnect}
-              disabled={loading}
-              sx={{
-                bgcolor: '#2E7BE0',
-                '&:hover': { bgcolor: '#1B5FB3' }
-              }}
-            >
-              {loading ? <CircularProgress size={20} /> : 'Connect to QuickBooks'}
-            </Button>
+            <>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="eva:link-2-fill" />}
+                onClick={handleConnect}
+                disabled={loading}
+                sx={{
+                  bgcolor: '#2E7BE0',
+                  '&:hover': { bgcolor: '#1B5FB3' }
+                }}
+              >
+                {loading ? <CircularProgress size={20} /> : 'Connect to QuickBooks'}
+              </Button>
+              
+              {/* Advanced Connection Options */}
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:swap-fill" />}
+                onClick={handleConnectDifferentCompany}
+                disabled={loading}
+                sx={{ color: '#2E7BE0', borderColor: '#2E7BE0' }}
+              >
+                {loading ? <CircularProgress size={20} /> : 'Switch Company'}
+              </Button>
+              
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:settings-2-fill" />}
+                onClick={() => setShowAppCredentialsDialog(true)}
+                disabled={loading}
+                sx={{ color: '#FF6B35', borderColor: '#FF6B35' }}
+              >
+                New App Credentials
+              </Button>
+            </>
           ) : (
             <>
               <Button
@@ -388,6 +529,29 @@ const QuickBooksIntegration = () => {
                 size="small"
               >
                 View Token Info
+              </Button>
+              
+              {/* Advanced Connection Options for Connected State */}
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:swap-fill" />}
+                onClick={handleConnectDifferentCompany}
+                disabled={loading}
+                size="small"
+                sx={{ color: '#2E7BE0', borderColor: '#2E7BE0' }}
+              >
+                {loading ? <CircularProgress size={16} /> : 'Switch Company'}
+              </Button>
+              
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:settings-2-fill" />}
+                onClick={() => setShowAppCredentialsDialog(true)}
+                disabled={loading}
+                size="small"
+                sx={{ color: '#FF6B35', borderColor: '#FF6B35' }}
+              >
+                Change App
               </Button>
             </>
           )}
@@ -544,6 +708,78 @@ const QuickBooksIntegration = () => {
         <DialogActions>
           <Button onClick={() => setShowTokenInfo(false)}>
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* App Credentials Update Dialog */}
+      <Dialog 
+        open={showAppCredentialsDialog} 
+        onClose={() => setShowAppCredentialsDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Iconify icon="eva:settings-2-fill" />
+            <Typography>Update QuickBooks App Credentials</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Alert severity="info">
+              <Typography variant="body2">
+                <strong>Scenario B:</strong> Use this to switch to a completely different QuickBooks app with different Client ID and Client Secret.
+                These credentials will be stored securely in the database.
+              </Typography>
+            </Alert>
+            
+            <TextField
+              fullWidth
+              label="New Client ID"
+              value={newClientId}
+              onChange={(e) => setNewClientId(e.target.value)}
+              placeholder="Enter your new QuickBooks app Client ID"
+              helperText="Get this from your Intuit Developer dashboard"
+            />
+            
+            <TextField
+              fullWidth
+              label="New Client Secret"
+              type="password"
+              value={newClientSecret}
+              onChange={(e) => setNewClientSecret(e.target.value)}
+              placeholder="Enter your new QuickBooks app Client Secret"
+              helperText="This will be encrypted and stored securely"
+            />
+            
+            <Alert severity="warning">
+              <Typography variant="body2">
+                <strong>Note:</strong> This will disconnect your current QuickBooks connection and require you to reconnect with the new app credentials.
+              </Typography>
+            </Alert>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => {
+              setShowAppCredentialsDialog(false);
+              setNewClientId('');
+              setNewClientSecret('');
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={handleUpdateAppCredentials}
+            disabled={loading || !newClientId || !newClientSecret}
+            sx={{
+              bgcolor: '#FF6B35',
+              '&:hover': { bgcolor: '#E55A2B' }
+            }}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Update & Connect'}
           </Button>
         </DialogActions>
       </Dialog>
