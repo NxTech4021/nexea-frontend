@@ -419,6 +419,7 @@ const TicketOverviewCard = () => {
                             }).format(item.quantity * item.ticketType.price)}
                           </Typography>
                         </Stack>
+
                         {item?.cartAddOn?.some((a) => a?.quantity > 0) && (
                           <Stack
                             ml={4}
