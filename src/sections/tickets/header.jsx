@@ -88,7 +88,6 @@ const TickerPurchaseHeader = () => {
 
   const isDefaultTime = (date) => dayjs(date).format('HH:mm') === '00:00';
 
-
   useEffect(() => {
     const timer = setInterval(() => {
       const now = dayjs();
@@ -197,23 +196,23 @@ const TickerPurchaseHeader = () => {
           </Box>
 
           {!mdDown && (
-           <Stack flexGrow={1}>
-  <ListItemText
-    primary={eventData?.name}
-    secondary={
-      isDefaultTime(eventData?.date) 
-        ? dayjs(eventData?.date).format('LL')
-        : dayjs(eventData?.date).format('LLL')
-    }
-    sx={{ textAlign: 'center' }}
-    slotProps={{
-      secondary: {
-        variant: 'caption',
-        color: 'text.secondary',
-      },
-    }}
-  />
-</Stack>
+            <Stack flexGrow={1}>
+              <ListItemText
+                primary={eventData?.name}
+                secondary={
+                  isDefaultTime(eventData?.date)
+                    ? dayjs(eventData?.date).format('LL')
+                    : dayjs(eventData?.date).format('LLL')
+                }
+                sx={{ textAlign: 'center' }}
+                slotProps={{
+                  secondary: {
+                    variant: 'caption',
+                    color: '#ccc',
+                  },
+                }}
+              />
+            </Stack>
           )}
 
           {cartData && (
