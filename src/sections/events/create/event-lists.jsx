@@ -35,6 +35,7 @@ import {
   DialogActions,
   useMediaQuery,
   CardActionArea,
+  Fab,
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { fDate } from 'src/utils/format-time';
@@ -1420,6 +1421,7 @@ const EventLists = ({ query }) => {
               mb: 2,
               width: '100%',
             }}
+            alignItems="center"
           >
             <TextField
               fullWidth
@@ -1446,7 +1448,7 @@ const EventLists = ({ query }) => {
               }}
             />
 
-            {isSmallScreen ? (
+            {/* {isSmallScreen ? (
               <IconButton
                 sx={{
                   border: 1,
@@ -1461,15 +1463,18 @@ const EventLists = ({ query }) => {
               <Button
                 onClick={createDialog.onTrue}
                 variant="contained"
+                size="small"
                 sx={{
                   minWidth: 'fit-content',
-                  height: 40,
+                  // height: 40,
                   fontWeight: 550,
+                  borderRadius: 0.5,
                 }}
+                startIcon={<Iconify icon="mingcute:add-line" width={18} />}
               >
-                Create Event
+                Event
               </Button>
-            )}
+            )} */}
           </Stack>
 
           <Stack
@@ -1575,54 +1580,6 @@ const EventLists = ({ query }) => {
                   width: '100%',
                 }}
               >
-                {/* The 'All' status filter button is commented out as requested. */}
-                {/* <Button
-                  key="All"
-                  onClick={() => handleStatusFilterChange('')}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    color: (() => {
-                      if (statusFilter === '') {
-                        return theme.palette.mode === 'light' ? '#fff' : '#000';
-                      }
-                      return textColor;
-                    })(),
-                    bgcolor: (() => {
-                      if (statusFilter === '') {
-                        return theme.palette.mode === 'light' ? '#111' : '#eee';
-                      }
-                      return 'transparent';
-                    })(),
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: 1,
-                    minWidth: 'auto',
-                    px: 1.5,
-                    height: 32,
-                    '&:hover': {
-                      bgcolor: (() => {
-                        if (statusFilter === '') {
-                          return theme.palette.mode === 'light' ? '#222' : '#ddd';
-                        }
-                        return theme.palette.mode === 'light' ? '#f5f5f5' : '#2d2d2d';
-                      })(),
-                      borderColor: theme.palette.mode === 'light' ? '#999' : '#666',
-                    },
-                    '&:active': {
-                      bgcolor: (() => {
-                        if (statusFilter === '') {
-                          return theme.palette.mode === 'light' ? '#000' : '#fff';
-                        }
-                        return theme.palette.mode === 'light' ? '#e0e0e0' : '#404040';
-                      })(),
-                    },
-                    transition: 'all 0.2s ease-in-out',
-                  }}
-                >
-                  All ({data?.events?.length || 0})
-                </Button> */}
                 {Object.values(EventStatus).map((status) => {
                   const count =
                     data?.events?.filter((event) => event.status === status).length || 0;
@@ -1679,6 +1636,67 @@ const EventLists = ({ query }) => {
                   );
                 })}
               </Box>
+            )}
+            {/* 
+            {isSmallScreen ? (
+              <IconButton
+                sx={{
+                  border: 1,
+                  width: 40,
+                  height: 40,
+                }}
+                onClick={createDialog.onTrue}
+              >
+                <Iconify icon="mingcute:add-line" />
+              </IconButton>
+            ) : (
+              <Button
+                onClick={createDialog.onTrue}
+                variant="contained"
+                size="small"
+                sx={{
+                  minWidth: 'fit-content',
+                  // height: 40,
+                  fontWeight: 550,
+                  borderRadius: 0.5,
+                }}
+                startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+              >
+                Event
+              </Button>
+            )} */}
+
+            {!isSmallScreen && (
+              <Button
+                onClick={createDialog.onTrue}
+                variant="contained"
+                size="small"
+                sx={{
+                  minWidth: 'fit-content',
+                  // height: 40,
+                  fontWeight: 550,
+                  borderRadius: 0.5,
+                }}
+                startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+              >
+                Event
+              </Button>
+            )}
+
+            {isSmallScreen && (
+              <Fab
+                aria-label="create"
+                sx={{
+                  color: 'white',
+                  backgroundColor: 'black',
+                  position: 'absolute',
+                  bottom: 30,
+                  right: 30,
+                }}
+                onClick={createDialog.onTrue}
+              >
+                <Iconify icon="mingcute:add-line" width={18} />
+              </Fab>
             )}
 
             {/* <ToggleButtonGroup
@@ -1847,46 +1865,6 @@ const EventLists = ({ query }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Whatsapp Modal */}
-      {/* <Dialog
-        open={openWhatsapp}
-        onClose={() => setOpenWhatsapp(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Edit Whatsapp</DialogTitle>
-
-        <DialogContent>
-          <Formik
-            initialValues={{
-              name: currentEvent?.name,
-              description: currentEvent?.description,
-              date: currentEvent?.date,
-              personInCharge: currentEvent?.personInCharge?.id,
-              tickera_api: currentEvent?.tickera_api,
-              status: currentEvent?.status,
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              axiosInstance
-                .put(`${endpoints.events.update}/${currentEvent?.id}`, values)
-                .then((response) => {
-                  setSubmitting(false);
-                  // fetchEvents();
-                  toast.success('Event updated successfully.');
-                })
-                .catch((error) => {
-                  console.error('Error updating event:', error);
-                  setSubmitting(false);
-                  toast.error('Update Failed, Try again!');
-                });
-              handleCloseEdit();
-            }}
-          >
-            {({ isSubmitting, setFieldValue, values }) => <Form />}
-          </Formik>
-        </DialogContent>
-      </Dialog> */}
 
       {/* Edit Event Modal */}
       <EditEventModal
@@ -2075,6 +2053,3 @@ export default EventLists;
 EventLists.propTypes = {
   query: PropTypes.string,
 };
-// TestCard.propTypes = {
-//   backgroundImage: PropTypes.string.isRequired,
-// };

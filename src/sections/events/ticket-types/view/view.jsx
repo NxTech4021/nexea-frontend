@@ -11,15 +11,18 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Tab,
   Box,
+  Fab,
   Tabs,
   Card,
   Table,
   alpha,
   Button,
   Tooltip,
+  useTheme,
   Container,
   TableBody,
   IconButton,
+  useMediaQuery,
   TableContainer,
   CircularProgress,
 } from '@mui/material';
@@ -57,6 +60,7 @@ import CreateTicketTypeDialog from '../dialog/create';
 import CreateAddOnDialog from '../add-on/dialog/create';
 import TicketTableToolbar from '../ticket-table-toolbar';
 import TicketTableFiltersResult from '../ticket-table-filters-result';
+// import { useTheme } from '@emotion/react';
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...TICKET_STATUS_OPTIONS];
 
@@ -97,11 +101,15 @@ export default function TicketTypeView({ data }) {
 
   const confirm = useBoolean();
 
+  const theme = useTheme();
+
   const addOn = useBoolean();
 
   const selectedAddOns = useAddOnsStore((state) => state.selectedAddOns);
 
   const { data: ticketTypesData, isLoading, mutate } = useGetAllTicketTypes();
+
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [tableData, setTableData] = useState([]);
   const [filters, setFilters] = useState(defaultFilters);
@@ -279,7 +287,7 @@ export default function TicketTypeView({ data }) {
           thickness={7}
           size={25}
           sx={{
-            color: (theme) => theme.palette.common.black,
+            color: theme.palette.common.black,
             strokeLinecap: 'round',
           }}
         />
@@ -308,22 +316,52 @@ export default function TicketTypeView({ data }) {
             ]}
           />
 
-          <Button
+          {!isSmallScreen ? (
+            <Button
+              onClick={handleCreateTicketType}
+              variant="contained"
+              size="small"
+              sx={{
+                minWidth: 'fit-content',
+                // height: 40,
+                fontWeight: 550,
+                borderRadius: 0.5,
+              }}
+              startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+            >
+              Ticket Type
+            </Button>
+          ) : (
+            <Fab
+              aria-label="create"
+              sx={{
+                color: 'white',
+                backgroundColor: 'black',
+                position: 'absolute',
+                bottom: 30,
+                right: 30,
+              }}
+              onClick={handleCreateTicketType}
+            >
+              <Iconify icon="mingcute:add-line" width={18} />
+            </Fab>
+          )}
+
+          {/* <Button
             variant="contained"
             onClick={handleCreateTicketType}
             startIcon={<Iconify icon="f7:tickets-fill" />}
           >
             Create New Ticket Type
-          </Button>
+          </Button> */}
         </Box>
-
         <Card>
           <Tabs
             value={filters.status}
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+              boxShadow: `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
             }}
           >
             {STATUS_OPTIONS.map((tab) => (

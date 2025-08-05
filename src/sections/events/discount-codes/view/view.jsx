@@ -6,6 +6,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Tab,
+  Fab,
   Card,
   Tabs,
   Table,
@@ -22,6 +23,7 @@ import {
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
 import { types } from 'src/_mock/_discountCodes';
 // import mockDiscountCodes from 'src/_mock/_discountCodes';
@@ -77,6 +79,7 @@ export default function DiscountCodeView() {
   const denseHeight = table.dense ? 56 : 76;
   const { data, isLoading } = useGetAllTicketTypes();
   const { discountCodes, discountCodesIsLoading, refetchDiscountCodes } = useGetAllDiscountCode();
+  const isSmallScreen = useResponsive('down', 'sm');
 
   const [filters, setFilters] = useState(defaultFilters);
   const confirm = useBoolean();
@@ -277,20 +280,51 @@ export default function DiscountCodeView() {
               { name: 'List' },
             ]}
           />
-          <Button variant="contained" onClick={handleCreateClick}>
+          {/* <Button variant="contained" onClick={handleCreateClick}>
             Create Discount Code
-          </Button>
+          </Button> */}
+
+          {!isSmallScreen && (
+            <Button
+              onClick={handleCreateClick}
+              variant="contained"
+              size="small"
+              sx={{
+                minWidth: 'fit-content',
+                // height: 40,
+                fontWeight: 550,
+                borderRadius: 0.5,
+              }}
+              startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+            >
+              Discount Code
+            </Button>
+          )}
+
+          {isSmallScreen && (
+            <Fab
+              aria-label="create"
+              sx={{
+                color: 'white',
+                backgroundColor: 'black',
+                position: 'absolute',
+                bottom: 30,
+                right: 30,
+              }}
+              onClick={handleCreateClick}
+            >
+              <Iconify icon="mingcute:add-line" width={18} />
+            </Fab>
+          )}
         </Box>
 
-        {isCreating && (
-          <CreateDiscountCode
-            discountCode={editingDiscountCode || {}}
-            onCreate={handleSaveDiscountCode}
-            open={isCreating}
-            onClose={handleCloseCreateForm}
-            ticketTypes={data?.ticketTypes}
-          />
-        )}
+        <CreateDiscountCode
+          discountCode={editingDiscountCode || {}}
+          onCreate={handleSaveDiscountCode}
+          open={isCreating}
+          onClose={handleCloseCreateForm}
+          ticketTypes={data?.ticketTypes}
+        />
 
         {tableData?.length > 0 && (
           <Card>
@@ -405,7 +439,6 @@ export default function DiscountCodeView() {
                 </Table>
               </Scrollbar>
             </TableContainer>
-
             <TablePaginationCustom
               page={table.page}
               rowsPerPage={table.rowsPerPage || 10}

@@ -5,6 +5,7 @@ import React, { useState, useCallback } from 'react';
 import {
   Box,
   Tab,
+  Fab,
   Card,
   Tabs,
   alpha,
@@ -18,6 +19,7 @@ import {
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
 import { fetcher, endpoints } from 'src/utils/axios';
 
@@ -128,6 +130,8 @@ const AddOnView = () => {
     [tableData, edit]
   );
 
+  const isSmallScreen = useResponsive('down', 'sm');
+
   return (
     <Container maxWidth="xl">
       <Box
@@ -149,14 +153,47 @@ const AddOnView = () => {
             { name: 'List' },
           ]}
         />
-
+        {/* 
         <Button
           variant="contained"
           onClick={create.onTrue}
           startIcon={<Iconify icon="icon-park-solid:add-web" />}
         >
           Create New Add On
-        </Button>
+        </Button> */}
+
+        {!isSmallScreen && (
+          <Button
+            onClick={create.onTrue}
+            variant="contained"
+            size="small"
+            sx={{
+              minWidth: 'fit-content',
+              // height: 40,
+              fontWeight: 550,
+              borderRadius: 0.5,
+            }}
+            startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+          >
+            Add On
+          </Button>
+        )}
+
+        {isSmallScreen && (
+          <Fab
+            aria-label="create"
+            sx={{
+              color: 'white',
+              backgroundColor: 'black',
+              position: 'absolute',
+              bottom: 30,
+              right: 30,
+            }}
+            onClick={create.onTrue}
+          >
+            <Iconify icon="mingcute:add-line" width={18} />
+          </Fab>
+        )}
       </Box>
 
       <Card>

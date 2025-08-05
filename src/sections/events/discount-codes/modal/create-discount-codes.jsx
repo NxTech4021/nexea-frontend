@@ -33,6 +33,7 @@ import FormProvider from 'src/components/hook-form';
 import RHFTextField from 'src/components/hook-form/rhf-text-field';
 import RHFDatePicker from 'src/components/hook-form/rhf-datePicker';
 import RHFAutocomplete from 'src/components/hook-form/rhf-autocomplete';
+import { useResponsive } from 'src/hooks/use-responsive';
 
 const FormField = ({ label, children, required = false }) => (
   <Stack spacing={0.3} sx={{ width: '100%' }}>
@@ -81,6 +82,8 @@ FormField.propTypes = {
 // Validation schema
 
 const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) => {
+  const smDown = useResponsive('down', 'sm');
+
   const schema = yup.object().shape({
     name: yup.string().required('Discount code name is required'),
     type: yup.string().required('Type is required'),
@@ -155,7 +158,8 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 1 } }}
+      PaperProps={{ sx: { borderRadius: 1, scrollbarWidth: 'none' } }}
+      fullScreen={smDown}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogTitle>

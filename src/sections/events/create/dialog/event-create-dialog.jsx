@@ -479,7 +479,8 @@ const EventCreateDialog = ({ open, onClose }) => {
       PaperProps={{
         elevation: 0,
         sx: {
-          borderRadius: 3,
+          scrollbarWidth: 'none',
+          borderRadius: 1,
           border: '1px solid',
           borderColor: 'divider',
           background: (theme) =>
