@@ -26,6 +26,7 @@ import { fDate } from 'src/utils/format-time';
 
 import { types } from 'src/_mock/_discountCodes';
 
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -43,7 +44,7 @@ export default function DiscountCodeTableRow({
   onSave,
   ticketTypes,
 }) {
-  const { code, created_at, expirationDate, id, limit, ticketType, type, value } = row;
+  const { code, created_at, expirationDate, id, limit, ticketType, type, value, addOn } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -386,7 +387,21 @@ export default function DiscountCodeTableRow({
                 currency: 'MYR',
               }).format(value)}
         </TableCell>
-        <TableCell sx={{ py: 2 }}>{renderAvailability()}</TableCell>
+        <TableCell>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {ticketType
+              .concat(addOn)
+              .slice(0, 3)
+              .map((item) => (
+                <Label
+                  key={item.id}
+                >{`${item.title || item.name} ( ${item.event?.name || 'Add On'} )`}</Label>
+              ))}
+            {ticketType.concat(addOn)?.length > 3 && (
+              <Label>{`${(ticketType.concat(addOn)?.length || null) - 3} more`}</Label>
+            )}
+          </Stack>
+        </TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{limit || 'Unlimited'}</TableCell>
         <TableCell>

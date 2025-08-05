@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
-import React from 'react';
 import * as yup from 'yup';
 import { mutate } from 'swr';
 import PropTypes from 'prop-types';
+import React, { useMemo } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
@@ -28,6 +28,7 @@ import { endpoints, axiosInstance } from 'src/utils/axios';
 
 import { types } from 'src/_mock/_discountCodes';
 
+import Label from 'src/components/label';
 import FormProvider from 'src/components/hook-form';
 import RHFTextField from 'src/components/hook-form/rhf-text-field';
 import RHFDatePicker from 'src/components/hook-form/rhf-datePicker';
@@ -107,7 +108,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
       name: discountCode?.code || '',
       type: discountCode?.type || '',
       value: discountCode?.value || null,
-      availability: discountCode?.ticketType || [],
+      availability: discountCode?.ticketType?.concat(discountCode?.addOn || []) || [],
       limit: discountCode?.limit || 0,
       expirationDate: dayjs(discountCode?.expirationDate) || null,
     },
@@ -115,19 +116,21 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
     reValidateMode: 'onChange',
   });
 
+  const availableTickets = useMemo(() => {
+    let addOns = ticketTypes
+      .flatMap((ticket) => ticket?.addOns || [])
+      .filter(Boolean)
+      .map((a) => ({ ...a, type: 'addOn' })); // remove any falsy values
+
+    // Filter unique ids
+    addOns = Array.from(new Map(addOns.map((obj) => [obj.id, obj])).values());
+
+    return [...ticketTypes.filter((a) => a?.event), ...addOns];
+  }, [ticketTypes]);
+
   const { control, handleSubmit, reset, isSubmitting, watch, setValue } = methods;
 
   const discountType = watch('type');
-
-  // const testDiscountValue = useCallback(
-  //   (val) => {
-  //     if (discountType === 'percentage' && val > 100) {
-  //       return false;
-  //     }
-  //     return true;
-  //   },
-  //   [discountType]
-  // );
 
   const onSubmit = handleSubmit(async (value) => {
     try {
@@ -202,11 +205,39 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
                 multiple
                 options={[
                   { id: 'all', title: 'Select all', event: { name: '' } },
-                  ...ticketTypes.filter((item) => item.event),
+                  ...availableTickets,
                 ]}
-                getOptionLabel={(option) =>
-                  option.id === 'all' ? 'Select all' : `${option.title} ( ${option.event.name} )`
-                }
+                groupBy={(option) => {
+                  if (option.id === 'all') return ''; // no group label
+                  return option.event?.name ? 'Tickets' : 'Add Ons';
+                }}
+                getOptionLabel={(option) => option?.title || option?.name}
+                // getOptionLabel={(option) =>
+                //   option.id === 'all' ? (
+                //     'Select all'
+                //   ) : (
+                //     <Stack spacing={1} flexDirection="row">
+                //       <Typography variant="body2">{option.title || option.name}</Typography>
+                //       <Label color={!option.event?.name ? 'primary' : 'error'} variant="soft">
+                //         {option.event?.name ?? 'Add On'}
+                //       </Label>
+                //     </Stack>
+                //   )
+                // }
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    {option.id === 'all' ? (
+                      'Select all'
+                    ) : (
+                      <Stack spacing={1} flexDirection="row" alignItems="center">
+                        <Typography variant="body2">{option.title || option.name}</Typography>
+                        <Label color={option.event?.name ? 'error' : 'primary'}>
+                          {option.event?.name || 'Add On'}
+                        </Label>
+                      </Stack>
+                    )}
+                  </li>
+                )}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect
                 placeholder="Select ticket types"
