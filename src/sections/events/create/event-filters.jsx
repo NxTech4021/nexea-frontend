@@ -1,12 +1,20 @@
 import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
+import { 
+  GridToolbarExport, 
+  GridToolbarContainer, 
+  GridToolbarQuickFilter, 
+  GridToolbarColumnsButton,
+  GridToolbarDensitySelector
+} from '@mui/x-data-grid';
 import {
   Box,
   Chip,
   Button,
   Select,
+  Tooltip,
   MenuItem,
   Collapse,
   TextField,
@@ -15,13 +23,6 @@ import {
   FormControl,
   useMediaQuery,
 } from '@mui/material';
-import { 
-  GridToolbarExport, 
-  GridToolbarContainer, 
-  GridToolbarQuickFilter, 
-  GridToolbarColumnsButton,
-  GridToolbarDensitySelector
-} from '@mui/x-data-grid';
 
 import Iconify from 'src/components/iconify';
 
@@ -179,6 +180,7 @@ const EventFilters = ({
   onFilteredDataChange,
   isFilterExpanded,
   setIsFilterExpanded,
+  eventId, // Add eventId prop for scoped persistence
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -189,8 +191,49 @@ const EventFilters = ({
   const borderColor = theme.palette.mode === 'light' ? '#eee' : '#333';
   const secondaryTextColor = theme.palette.mode === 'light' ? '#666' : '#aaa';
 
-  // Advanced filtering state
-  const [filters, setFilters] = useState([]);
+  // Storage key for persisting filters per event
+  const FILTERS_STORAGE_KEY = `event-filters-${eventId}`;
+
+  // Helper functions for filter persistence
+  const saveFiltersToStorage = (filtersToSave) => {
+    try {
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filtersToSave));
+    } catch (error) {
+      console.warn('Failed to save filters to localStorage:', error);
+    }
+  };
+
+  const loadFiltersFromStorage = useCallback(() => {
+    try {
+      const savedFilters = localStorage.getItem(FILTERS_STORAGE_KEY);
+      return savedFilters ? JSON.parse(savedFilters) : [];
+    } catch (error) {
+      console.warn('Failed to load filters from localStorage:', error);
+      return [];
+    }
+  }, [FILTERS_STORAGE_KEY]);
+
+  const clearFiltersFromStorage = () => {
+    try {
+      localStorage.removeItem(FILTERS_STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear filters from localStorage:', error);
+    }
+  };
+
+  // Advanced filtering state with persistence
+  const [filters, setFilters] = useState(() => 
+    // Load persisted filters on initial mount
+     loadFiltersFromStorage()
+  );
+
+  // Auto-expand filter section if persisted filters exist
+  useEffect(() => {
+    const persistedFilters = loadFiltersFromStorage();
+    if (persistedFilters.length > 0 && !isFilterExpanded) {
+      setIsFilterExpanded(true);
+    }
+  }, [setIsFilterExpanded, isFilterExpanded, loadFiltersFromStorage]);
 
   // Helper function to get background color without nested ternaries
   const getMobileBackgroundColor = () => {
@@ -254,21 +297,28 @@ const EventFilters = ({
       operator: 'contains',
       value: '',
     };
-    setFilters([...filters, newFilter]);
+    const updatedFilters = [...filters, newFilter];
+    setFilters(updatedFilters);
+    saveFiltersToStorage(updatedFilters);
   };
 
   const removeFilter = (filterId) => {
-    setFilters(filters.filter(filter => filter.id !== filterId));
+    const updatedFilters = filters.filter(filter => filter.id !== filterId);
+    setFilters(updatedFilters);
+    saveFiltersToStorage(updatedFilters);
   };
 
   const updateFilter = (filterId, updates) => {
-    setFilters(filters.map(filter => 
+    const updatedFilters = filters.map(filter => 
       filter.id === filterId ? { ...filter, ...updates } : filter
-    ));
+    );
+    setFilters(updatedFilters);
+    saveFiltersToStorage(updatedFilters);
   };
 
   const clearAllFilters = () => {
     setFilters([]);
+    clearFiltersFromStorage();
   };
 
   // Apply filters to data
@@ -393,13 +443,26 @@ const EventFilters = ({
               Advanced Filters
             </Typography>
             {filters.length > 0 && (
-              <Typography variant="caption" sx={{ 
-                color: theme.palette.primary.main, 
-                fontWeight: 500,
-                fontSize: isMobile ? '0.7rem' : '0.75rem',
-              }}>
-                ({data?.attendees ? filters.length : 0} active)
-              </Typography>
+              <>
+                <Typography variant="caption" sx={{ 
+                  color: theme.palette.primary.main, 
+                  fontWeight: 500,
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
+                }}>
+                  ({data?.attendees ? filters.length : 0} active)
+                </Typography>
+                <Tooltip title="Filters are automatically saved and will persist until cleared">
+                  <Iconify 
+                    icon="eva:bookmark-fill" 
+                    sx={{ 
+                      width: isMobile ? 14 : 16, 
+                      height: isMobile ? 14 : 16,
+                      color: theme.palette.success.main,
+                      opacity: 0.8,
+                    }} 
+                  />
+                </Tooltip>
+              </>
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1 }}>
@@ -931,6 +994,7 @@ EventFilters.propTypes = {
   onFilteredDataChange: PropTypes.func.isRequired,
   isFilterExpanded: PropTypes.bool.isRequired,
   setIsFilterExpanded: PropTypes.func.isRequired,
+  eventId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 export default EventFilters; 
