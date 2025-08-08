@@ -484,14 +484,14 @@ const EventStatistics = ({ data }) => {
   // Group tickets by type for detailed breakdown
   const ticketTypeBreakdown = allAttendees.reduce((acc, attendee) => {
     const ticketType = attendee.ticket?.ticketType?.title;
-    const price = attendee.ticket?.price || 0;
-    const addOnPrice = attendee.ticket?.ticketAddOn?.price || 0;
-    const totalPrice = price + addOnPrice;
+    const attendeeOrder = paidStatusOrders.find(order => 
+      order.attendees.some(orderAttendee => orderAttendee.id === attendee.id)
+    );
     
     // Check if this attendee is from a paid or free order
     const isFromPaidOrder = paidAttendees.includes(attendee);
 
-    if (!ticketType) return acc;
+    if (!ticketType || !attendeeOrder) return acc;
 
     if (!acc[ticketType]) {
       acc[ticketType] = {
@@ -503,7 +503,9 @@ const EventStatistics = ({ data }) => {
 
     if (isFromPaidOrder) {
       acc[ticketType].paidQuantity += 1;
-      acc[ticketType].revenue += totalPrice;
+      const orderTotalAttendees = attendeeOrder.attendees.length;
+      const proportionalRevenue = (attendeeOrder.totalAmount || 0) / orderTotalAttendees;
+      acc[ticketType].revenue += proportionalRevenue;
     } else {
       acc[ticketType].freeQuantity += 1;
     }
@@ -514,12 +516,14 @@ const EventStatistics = ({ data }) => {
   // Add-on tickets breakdown
   const addOnBreakdown = allAttendees.reduce((acc, attendee) => {
     const addOnName = attendee.ticket?.ticketAddOn?.addOn?.name;
-    const addOnPrice = attendee.ticket?.ticketAddOn?.price || 0;
+    const attendeeOrder = paidStatusOrders.find(order => 
+      order.attendees.some(orderAttendee => orderAttendee.id === attendee.id)
+    );
     
     // Check if this attendee is from a paid or free order
     const isFromPaidOrder = paidAttendees.includes(attendee);
 
-    if (!addOnName) return acc;
+    if (!addOnName || !attendeeOrder) return acc;
 
     if (!acc[addOnName]) {
       acc[addOnName] = {
@@ -531,7 +535,23 @@ const EventStatistics = ({ data }) => {
 
     if (isFromPaidOrder) {
       acc[addOnName].paidQuantity += 1;
-      acc[addOnName].revenue += addOnPrice;
+      const addOnPrice = attendee.ticket?.ticketAddOn?.price || 0;
+      const ticketPrice = attendee.ticket?.price || 0;
+      const originalItemTotal = ticketPrice + addOnPrice;
+      
+      // Calculate order's original total before discounts/taxes
+      const orderOriginalTotal = attendeeOrder.attendees.reduce((sum, orderAttendee) => {
+        const orderTicketPrice = orderAttendee.ticket?.price || 0;
+        const orderAddOnPrice = orderAttendee.ticket?.ticketAddOn?.price || 0;
+        return sum + orderTicketPrice + orderAddOnPrice;
+      }, 0);
+      
+      // Calculate add-on's proportional share of the actual paid amount
+      if (orderOriginalTotal > 0 && originalItemTotal > 0) {
+        const addOnProportion = addOnPrice / orderOriginalTotal;
+        const proportionalRevenue = (attendeeOrder.totalAmount || 0) * addOnProportion;
+        acc[addOnName].revenue += proportionalRevenue;
+      }
     } else {
       acc[addOnName].freeQuantity += 1;
     }

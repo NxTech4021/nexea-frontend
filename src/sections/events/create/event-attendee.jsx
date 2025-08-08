@@ -369,6 +369,7 @@ export default function EventAttendee() {
     onFilteredDataChange: setFilteredRows,
     isFilterExpanded,
     setIsFilterExpanded,
+    eventId: id,
   });
 
   // Handle column resize
@@ -462,7 +463,7 @@ export default function EventAttendee() {
     {
       field: 'status',
       headerName: 'Status',
-      width: persistedWidths.status || 150,
+      width: persistedWidths.status || 190,
       editable: false,
       renderCell: (params) => (
         <StatusCell 
