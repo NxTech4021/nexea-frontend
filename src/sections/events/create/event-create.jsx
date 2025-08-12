@@ -104,6 +104,7 @@ const CreateEvent = ({ step }) => {
           initialValues={{
             name: '',
             description: '',
+            eventVenue: '',
             date: new Date(),
             personInCharge: '',
             tickera_api: '',
@@ -112,6 +113,9 @@ const CreateEvent = ({ step }) => {
             const errors = {};
             if (!values.name) {
               errors.name = 'Required';
+            }
+            if (!values.eventVenue) {
+              errors.eventVenue = 'Required';
             }
             if (!values.date) {
               errors.date = 'Required';
@@ -128,6 +132,7 @@ const CreateEvent = ({ step }) => {
                 name: values.name,
                 personInCharge: values.personInCharge,
                 description: values.description,
+                eventVenue: values.eventVenue,
                 tickera_api: values.tickera_api,
                 date: formattedDate,
               };
@@ -198,6 +203,18 @@ const CreateEvent = ({ step }) => {
                     fullWidth
                   />
                   <ErrorMessage name="description" component="div" />
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Field
+                    as={TextField}
+                    type="text"
+                    name="eventVenue"
+                    label="Event Venue"
+                    fullWidth
+                    required
+                  />
+                  <ErrorMessage name="eventVenue" component="div" />
                 </Grid>
 
                 <Grid item xs={6}>

@@ -60,6 +60,7 @@ export default function LinearStepper() {
 
   const schema = yup.object().shape({
     eventName: yup.string().required('Event name is required.'),
+    eventVenue: yup.string().required('Event venue is required.'),
     eventDescription: yup.string().required('Event Description is Required'),
     personInCharge: yup.object().shape().required('Person In Charge is required'),
     startDate: yup.string().required('Start Date is required'),
@@ -69,6 +70,7 @@ export default function LinearStepper() {
     resolver: yupResolver(schema),
     defaultValues: {
       eventName: '',
+      eventVenue: '',
       personInCharge: null,
       eventDescription: '',
       startDate: null,
