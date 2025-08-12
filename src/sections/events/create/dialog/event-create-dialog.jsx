@@ -273,6 +273,7 @@ const RenderSelectField = ({ name, control, label, options, required }) => (
 const schema = yup.object().shape({
   eventType: yup.string().required('Event type is required'),
   eventName: yup.string().required('Event name is required'),
+  eventVenue: yup.string().required('Event venue is required'),
   personInCharge: yup.string().required('Person in charge is required'),
   eventDate: yup.date().required('Event date is required'),
   endDate: yup.date().required('End date is required'),
@@ -319,6 +320,7 @@ const EventCreateDialog = ({ open, onClose }) => {
     defaultValues: {
       eventType: 'event', // Default event type
       eventName: '',
+      eventVenue: '',
       personInCharge: '',
       eventDate: null,
       endDate: null,
@@ -605,6 +607,15 @@ const EventCreateDialog = ({ open, onClose }) => {
                 <RHFTextField
                   name="eventName"
                   placeholder="Enter the name of your event"
+                  fullWidth
+                />
+              </Stack>
+
+              <Stack width={1}>
+                <InputLabel required>Event Venue</InputLabel>
+                <RHFTextField
+                  name="eventVenue"
+                  placeholder="Enter the venue of your event"
                   fullWidth
                 />
               </Stack>

@@ -146,6 +146,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
           initialValues={{
             name: selectedEvent?.name,
             description: selectedEvent?.description,
+            eventVenue: selectedEvent?.eventVenue || '',
             date: dayjs(selectedEvent?.date).format('YYYY-MM-DD'), // Keep only the date part
             endDate: dayjs(selectedEvent?.endDate).format('YYYY-MM-DD'),
             time: selectedEvent?.date ? dayjs(selectedEvent.date) : null,
@@ -303,6 +304,52 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                     />
                     <ErrorMessage
                       name="description"
+                      component={Typography}
+                      sx={{
+                        color: '#e53e3e',
+                        fontSize: '0.75rem',
+                        mt: 0.5,
+                        ml: 1,
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Typography
+                      component="label"
+                      htmlFor="eventVenue"
+                      sx={{
+                        display: 'block',
+                        mb: 0.75,
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Event Venue{' '}
+                      <Box component="span" sx={{ color: '#e53e3e' }}>
+                        *
+                      </Box>
+                    </Typography>
+                    <Field
+                      as={TextField}
+                      name="eventVenue"
+                      id="eventVenue"
+                      fullWidth
+                      required
+                      variant="outlined"
+                      placeholder="Enter event venue"
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 1,
+                          '& .MuiInputBase-input': {
+                            padding: '12px 16px',
+                          },
+                        },
+                      }}
+                    />
+                    <ErrorMessage
+                      name="eventVenue"
                       component={Typography}
                       sx={{
                         color: '#e53e3e',

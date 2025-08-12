@@ -21,6 +21,7 @@ const EventInformation = () => {
         gap={2}
       >
         <RHFTextField name="eventName" label="Event Name" />
+        <RHFTextField name="eventVenue" label="Event Venue" />
         <RHFAutocomplete
           name="personInCharge"
           label="Person In Charge"
