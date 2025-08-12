@@ -78,6 +78,12 @@ const schema = yup.object().shape({
           return phones.filter((phone) => phone === value).length === 1;
         }),
       company: yup.string().required('Company name is required'),
+      // NEW FEATURE: Category field validation for general ticket attendees
+      category: yup.string().when('ticket', {
+        is: (ticket) => ticket && ticket.category === 'general',
+        then: (schema) => schema.required('Category is required for general ticket attendees'),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     })
   ),
 });
