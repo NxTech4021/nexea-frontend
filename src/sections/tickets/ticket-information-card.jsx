@@ -889,13 +889,10 @@ const TicketInformationCard = () => {
                             <em>Select Category</em>
                           </MenuItem>
                           <MenuItem value="startup">Startup</MenuItem>
-                          <MenuItem value="investor">Investor</MenuItem>
                           <MenuItem value="corporate">Corporate</MenuItem>
-                          <MenuItem value="entrepreneur">Entrepreneur</MenuItem>
-                          <MenuItem value="student">Student</MenuItem>
-                          <MenuItem value="media">Media</MenuItem>
                           <MenuItem value="government">Government</MenuItem>
-                          <MenuItem value="other">Other</MenuItem>
+                          <MenuItem value="investor">Investor/Venture Capital</MenuItem>
+                          <MenuItem value="others">Others</MenuItem>
                         </RHFSelect>
                       </Box>
                     )}
