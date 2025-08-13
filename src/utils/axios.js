@@ -127,4 +127,11 @@ export const endpoints = {
       resendConfirmation: (orderId) => `/api/payment/resend-confirmation/${orderId}`,
     },
   },
+  bulkDiscount: {
+    get: '/api/bulkDiscount/',
+    create: '/api/bulkDiscount/',
+    status: {
+      update: '/api/bulkDiscount/status',
+    },
+  },
 };

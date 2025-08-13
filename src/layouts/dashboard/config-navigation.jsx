@@ -12,6 +12,7 @@ const ICONS = {
   ticket: <Iconify icon="solar:ticket-linear" width={20} />,
   addOn: <Iconify icon="solar:add-circle-linear" width={20} />,
   discount: <Iconify icon="solar:tag-linear" width={20} />,
+  bulkDiscount: <Iconify icon="bxs:discount" width={20} />,
   orders: <Iconify icon="solar:bag-2-linear" width={20} />,
   attendees: <Iconify icon="solar:users-group-rounded-linear" width={20} />,
   qr: <Iconify icon="solar:qr-code-linear" width={20} />,
@@ -53,6 +54,11 @@ export function useNavData() {
             path: paths.dashboard.discountCode.root,
             icon: ICONS.discount,
           },
+          // {
+          //   title: 'Bulk Discount',
+          //   path: paths.dashboard.bulkDiscount.root,
+          //   icon: ICONS.bulkDiscount,
+          // },
           {
             title: 'Orders',
             path: paths.dashboard.order.root,
@@ -79,16 +85,16 @@ export function useNavData() {
 
       // MANAGEMENT
       // ----------------------------------------------------------------------
-      // {
-      //   subheader: 'nexea management',
-      //   items: [
-      //     {
-      //       title: 'employee',
-      //       path: paths.dashboard.employee,
-      //       icon: ICONS.employee,
-      //     },
-      //   ],
-      // },
+      {
+        subheader: 'nexea management',
+        items: [
+          {
+            title: 'Users',
+            path: paths.dashboard.employee,
+            icon: ICONS.employee,
+          },
+        ],
+      },
     ],
     []
   );

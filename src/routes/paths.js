@@ -47,6 +47,7 @@ export const paths = {
     discountCode: {
       root: `${ROOTS.DASHBOARD}/discount-code`,
     },
+    bulkDiscount: { root: `${ROOTS.DASHBOARD}/bulk-discount` },
     order: {
       root: `${ROOTS.DASHBOARD}/order`,
       details: (id) => `${ROOTS.DASHBOARD}/order/${id}`,

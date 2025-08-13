@@ -32,6 +32,8 @@ const AddOnView = lazy(() => import('src/pages/dashboard/event/ticket-types/add-
 
 const EventDetail = lazy(() => import('src/pages/dashboard/event/details/view'));
 
+const BulkDiscountPage = lazy(() => import('src/pages/dashboard/event/bulk-discount/view'));
+
 // ----------------------------------------------------------------------
 
 export const dashboardRoutes = [
@@ -86,6 +88,7 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'discount-code', element: <DiscountCodeView /> },
+      { path: 'bulk-discount', element: <BulkDiscountPage /> },
       { path: 'order', element: <OrderView /> },
       { path: 'order/event/:eventId', element: <OrderView /> },
       { path: 'order/:id', element: <OrderDetailsPage /> },

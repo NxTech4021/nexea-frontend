@@ -10,12 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import OutlinedInput from '@mui/material/OutlinedInput';
 
-export default function TicketTableToolbar({
-  filters,
-  onFilters,
-  eventNameOptions = [],
-}) {
-
+export default function TicketTableToolbar({ filters, onFilters, eventNameOptions = [] }) {
   const handleFilterTitle = useCallback(
     (event) => {
       onFilters('title', event.target.value);
@@ -42,56 +37,55 @@ export default function TicketTableToolbar({
 
   return (
     <Stack
-        spacing={2}
-        alignItems={{ xs: 'flex-end', md: 'center' }}
-        direction={{
-          xs: 'column',
-          md: 'row',
-        }}
+      spacing={2}
+      alignItems={{ xs: 'flex-end', md: 'center' }}
+      direction={{
+        xs: 'column',
+        md: 'row',
+      }}
+      sx={{
+        p: 2.5,
+        pr: { xs: 2.5, md: 1 },
+      }}
+    >
+      <FormControl
         sx={{
-          p: 2.5,
-          pr: { xs: 2.5, md: 1 },
+          flexShrink: 0,
+          width: { xs: 1, md: 200 },
         }}
       >
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
+        <InputLabel>Event Name</InputLabel>
+        <Select
+          multiple
+          value={filters.eventName}
+          onChange={handleFilterEventName}
+          input={<OutlinedInput label="Event Name" />}
+          renderValue={(selected) => selected.map((value) => value).join(', ')}
+          MenuProps={{
+            PaperProps: {
+              sx: { maxHeight: 240 },
+            },
           }}
         >
-          <InputLabel>Event Name</InputLabel>
-          <Select
-            multiple
-            value={filters.eventName}
-            onChange={handleFilterEventName}
-            input={<OutlinedInput label="Event Name" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            MenuProps={{
-              PaperProps: {
-                sx: { maxHeight: 240 },
-              },
-            }}
-          >
-            {eventNameOptions.length &&
-              eventNameOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  <Checkbox disableRipple size="small" checked={filters.eventName.includes(option)} />
-                  {option}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
+          {eventNameOptions.length &&
+            eventNameOptions.map((option) => (
+              <MenuItem key={option} value={option}>
+                <Checkbox disableRipple size="small" checked={filters.eventName.includes(option)} />
+                {option}
+              </MenuItem>
+            ))}
+        </Select>
+      </FormControl>
 
-        <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
-          <TextField
-            fullWidth
-            value={filters.title}
-            onChange={handleFilterTitle}
-            placeholder="Search by Title..."
-          />
-
-        </Stack>
+      <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
+        <TextField
+          fullWidth
+          value={filters.title}
+          onChange={handleFilterTitle}
+          placeholder="Search by Title..."
+        />
       </Stack>
+    </Stack>
   );
 }
 

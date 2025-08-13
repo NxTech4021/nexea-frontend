@@ -240,6 +240,7 @@ export default function TicketTypeView({ data }) {
   const handleViewDetails = (ticket) => {
     console.log('Viewing details for:', ticket);
   };
+
   const handleEditSuccess = (updatedTicket) => {
     // Update local state immediately
     setTableData((prev) =>
@@ -249,6 +250,7 @@ export default function TicketTypeView({ data }) {
     // Re-fresh data from server (if using SWR/mutate)
     if (mutate) mutate();
   };
+
   useEffect(() => {
     if (ticketTypesData?.ticketTypes?.length) {
       setTableData(
