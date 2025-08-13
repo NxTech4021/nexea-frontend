@@ -48,6 +48,7 @@ const defaultAttendee = {
   email: '',
   phoneNumber: '',
   company: '',
+  category: '', // NEW FEATURE: Category field for general ticket attendees
   isForbuyer: false,
 };
 
@@ -833,6 +834,68 @@ const TicketInformationCard = () => {
                         }
                       }
                     />
+                    
+                    {/* NEW FEATURE: Category field for General ticket type attendees only - styled to match other form fields */}
+                    {field.ticket?.category === 'general' && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography 
+                          variant="body2" 
+                          component="label" 
+                          sx={{ 
+                            mb: 0.75, 
+                            display: 'block', 
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                            color: 'text.secondary',
+                          }}
+                        >
+                          Category
+                        </Typography>
+                        <RHFSelect
+                          name={`attendees.${index}.category`}
+                          fullWidth
+                          displayEmpty
+                          slotProps={{
+                            input: getValues(`attendees.${index}.isForbuyer`) ? {
+                              readOnly: true,
+                            } : {}
+                          }}
+                          sx={{
+                            '& .MuiInputBase-root': {
+                              '& fieldset': {
+                                borderColor: alpha(theme.palette.text.primary, 0.2),
+                                transition: 'border-color 0.2s ease-in-out',
+                              },
+                              borderRadius: 1,
+                              fontSize: '0.9rem',
+                              '&:hover': {
+                                '& fieldset': {
+                                  borderColor: alpha(theme.palette.grey[600], 0.5),
+                                },
+                              },
+                              '&.Mui-focused': {
+                                '& fieldset': {
+                                  borderColor: theme.palette.grey[700],
+                                  borderWidth: '1.5px',
+                                },
+                              },
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              padding: '12px 14px',
+                            },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Select Category</em>
+                          </MenuItem>
+                          <MenuItem value="startup">Startup</MenuItem>
+                          <MenuItem value="corporate">Corporate</MenuItem>
+                          <MenuItem value="government">Government</MenuItem>
+                          <MenuItem value="investor">Investor/Venture Capital</MenuItem>
+                          <MenuItem value="others">Others</MenuItem>
+                        </RHFSelect>
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </Collapse>

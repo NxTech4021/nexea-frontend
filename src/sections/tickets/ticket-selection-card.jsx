@@ -333,6 +333,7 @@ const TicketSelectionCard = () => {
                 </Stack>
               </Stack>
 
+              {/* FEATURE IMPLEMENTED: Multiple add-on selection per ticket already supported - users can select multiple add-ons */}
               <Stack
                 direction="row"
                 spacing={0.5}
@@ -864,14 +865,6 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
     [tixs, addOnInfo]
   );
 
-  const totalSelectedQuantity = useMemo(
-    () =>
-      tixs
-        ?.find((a) => a.id === addOnInfo?.ticketId)
-        ?.addOns?.reduce((acc, curr) => acc + (curr?.selectedQuantity || 0), 0) || 0,
-    [tixs, addOnInfo]
-  );
-
   const selectedQuantity = currentAddOn?.selectedQuantity || 0;
 
   console.log(addOnInfo);
@@ -941,22 +934,19 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 {selectedQuantity}
               </Typography>
 
+              {/* FIX: Allow multiple add-ons - limit each add-on individually to ticket quantity, not total */}
               <IconButton
                 size="small"
                 sx={{
                   bgcolor:
-                    totalSelectedQuantity >= addOnInfo?.selectedQuantity
-                      ? 'grey.200'
-                      : 'primary.main',
+                    selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.200' : 'primary.main',
                   '&:hover': {
                     bgcolor:
-                      totalSelectedQuantity >= addOnInfo?.selectedQuantity
-                        ? 'grey.200'
-                        : 'primary.dark',
+                      selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.200' : 'primary.dark',
                   },
                   width: 36,
                   height: 36,
-                  ...(totalSelectedQuantity >= addOnInfo?.selectedQuantity && {
+                  ...(selectedQuantity >= addOnInfo?.selectedQuantity && {
                     pointerEvents: 'none',
                   }),
                 }}
@@ -967,9 +957,7 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 <Iconify
                   icon="material-symbols:add-rounded"
                   width={18}
-                  color={
-                    totalSelectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.500' : 'white'
-                  }
+                  color={selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.500' : 'white'}
                 />
               </IconButton>
             </Stack>
