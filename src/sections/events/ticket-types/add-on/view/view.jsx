@@ -1,6 +1,8 @@
 import useSWR from 'swr';
 import { isEqual } from 'lodash';
+import { enqueueSnackbar } from 'notistack';
 import React, { useState, useCallback } from 'react';
+
 
 import {
   Box,
@@ -19,7 +21,7 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { fetcher, endpoints } from 'src/utils/axios';
+import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import { TICKET_STATUS_OPTIONS } from 'src/_mock/_ticketTypes';
 
@@ -110,9 +112,16 @@ const AddOnView = () => {
     [handleFilters]
   );
 
-  const handleDeleteRow = useCallback(async (id) => {
-    console.log(id);
-  }, []);
+  const handleDeleteRow = async (id) => {
+    try {
+      await axiosInstance.delete(`${endpoints.ticketType.addOn.root}/${id}`);
+      enqueueSnackbar('Deleted successfully', { variant: 'success' });
+      setTableData((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      enqueueSnackbar('Delete failed', { variant: 'error' });
+    }
+  };
+  
 
   const handleDeleteRows = useCallback(() => {
     console.log('Deleted');
@@ -121,6 +130,7 @@ const AddOnView = () => {
   const handleEditRow = useCallback(
     async (id) => {
       const item = tableData?.find((a) => a.id === id);
+      if (!item) return;
       console.log(item);
       setAddOnItem(item);
       edit.onTrue();
@@ -316,5 +326,5 @@ function applyFilter({ inputData, comparator, filters }) {
   //     inputData = inputData.filter((ticker) => eventName.includes(ticker.event.name));
   //   }
 
-  return inputData;
+return inputData;
 }

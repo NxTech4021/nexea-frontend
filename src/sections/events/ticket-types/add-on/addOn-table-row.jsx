@@ -17,7 +17,10 @@ import DialogActions from '@mui/material/DialogActions';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { enqueueSnackbar } from 'notistack';
 import Iconify from 'src/components/iconify';
+
+import { endpoints, axiosInstance } from 'src/utils/axios';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 
@@ -39,12 +42,13 @@ export default function AddOnTableRow({
   onDeleteRow,
   onViewDetails,
   onEditRow,
+  setTableData, // this prop is required for updating the table
 }) {
   const { name, price, description, createdAt, quantity } = row;
 
   const confirm = useBoolean();
   const popover = usePopover();
-  // const loading = useBoolean();
+  const loading = useBoolean();
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -57,7 +61,22 @@ export default function AddOnTableRow({
     }
   };
 
-  // Define the color based on the status
+  const handleUpdate = async (updatedData) => {
+    try {
+      await axiosInstance.put(`${endpoints.ticketType.addOn.root}/${updatedData.id}`, updatedData);
+
+      enqueueSnackbar('Add-On updated successfully', { variant: 'success' });
+
+      setTableData((prevData) =>
+        prevData.map((item) => (item.id === updatedData.id ? updatedData : item))
+      );
+    } catch (error) {
+      enqueueSnackbar(error?.response?.data?.message || 'Failed to update Add-On', {
+        variant: 'error',
+      });
+    }
+  };
+
   const getStatusColor = (item) => {
     if (item) {
       return 'success';
@@ -65,22 +84,24 @@ export default function AddOnTableRow({
     return 'error';
   };
 
-  // const generateUrl = async () => {
-  //   try {
-  //     loading.onTrue();
+  const generateUrl = async () => {
+    try {
+      loading.onTrue();
 
-  //     await axiosInstance.post(endpoints.ticketType.generateUrl, {
-  //       eventId: id,
-  //       ticketTypeId,
-  //     });
-  //   } catch (error) {
-  //     enqueueSnackbar(error?.message, {
-  //       variant: 'error',
-  //     });
-  //   } finally {
-  //     loading.onFalse();
-  //   }
-  // };
+      await axiosInstance.post(endpoints.ticketType.generateUrl, {
+        eventId: selectedTicket?.eventId,
+        ticketTypeId: selectedTicket?.id,
+      });
+
+      enqueueSnackbar('URL generated successfully', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar(error?.message || 'Failed to generate URL', {
+        variant: 'error',
+      });
+    } finally {
+      loading.onFalse();
+    }
+  };
 
   return (
     <>
@@ -157,7 +178,7 @@ export default function AddOnTableRow({
           />
           <TextField
             label="Price"
-            value={`RM ${selectedTicket?.price.toFixed(2)}`}
+            value={`RM ${selectedTicket?.price?.toFixed(2)}`}
             InputProps={{ readOnly: true }}
             fullWidth
             margin="normal"
@@ -185,23 +206,25 @@ export default function AddOnTableRow({
       </Dialog>
 
       <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        // content={`Are you sure want to delete ${title}?`}
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              onDeleteRow();
-              confirm.onFalse();
-            }}
-          >
-            Delete
-          </Button>
-        }
-      />
+      open={confirm.value}
+      onClose={confirm.onFalse}
+      title="Delete"
+      content={`Are you sure you want to delete ${name}?`}
+      action={
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            console.log('Deleting:', name);
+            onDeleteRow();
+            confirm.onFalse();
+          }}
+        >
+          Delete
+        </Button>
+      }
+    />      
+
     </>
   );
 }
@@ -213,4 +236,5 @@ AddOnTableRow.propTypes = {
   selected: PropTypes.bool,
   onViewDetails: PropTypes.func,
   onEditRow: PropTypes.func,
+  setTableData: PropTypes.func,
 };
