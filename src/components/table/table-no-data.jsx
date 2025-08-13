@@ -7,14 +7,14 @@ import EmptyContent from '../empty-content';
 
 // ----------------------------------------------------------------------
 
-export default function TableNoData({ notFound, sx }) {
+export default function TableNoData({ notFound, sx, title = 'No Data' }) {
   return (
     <TableRow>
       {notFound ? (
         <TableCell colSpan={12}>
           <EmptyContent
             filled
-            title="No Data"
+            title={title}
             sx={{
               py: 10,
 
@@ -32,4 +32,5 @@ export default function TableNoData({ notFound, sx }) {
 TableNoData.propTypes = {
   notFound: PropTypes.bool,
   sx: PropTypes.object,
+  title: PropTypes.string,
 };

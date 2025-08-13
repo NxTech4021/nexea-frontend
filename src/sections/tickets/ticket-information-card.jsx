@@ -255,7 +255,7 @@ const TicketInformationCard = () => {
     });
   };
 
-  const removeTicket = async (item, index) => {
+  const removeTicket = async (item, index, id) => {
     const attendees = JSON.parse(localStorage.getItem('attendees'));
 
     if (attendees.length > index) {
@@ -270,7 +270,7 @@ const TicketInformationCard = () => {
 
     try {
       const ticket = cartData.cartItem.find((a) => a.ticketType.id === item);
-      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket });
+      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket, id: id || null });
       cartMutate();
       // mutate(`/api/cart/${cartSessionId}`);
       cartMutate();
@@ -743,7 +743,7 @@ const TicketInformationCard = () => {
                       color="error"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeTicket(field.ticket.id, index);
+                        removeTicket(field.ticket.id, index, field?.addOn?.id);
                       }}
                       sx={{
                         bgcolor: alpha(

@@ -175,7 +175,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
       toast.info('Cart ready! Please fill in your details to continue.');
       cartMutate();
     } catch (error) {
-      toast.error(error?.message);
+      toast.error('Please try again in a few minutes', { description: error?.message });
     } finally {
       loading.onFalse();
       mutate();
