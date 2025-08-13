@@ -36,7 +36,8 @@ const schema = yup
     phoneNumber: yup.string().matches(phoneRegExp, 'Phone number is not valid').required('Phone number is required'),
     companyName: yup.string().required('Company name is required'),
     ticketTypeId: yup.string().required('Ticket type is required'),
-    addOnId: yup.string(), // Optional
+    addOnIds: yup.array().of(yup.string()).nullable(), // Multiple add-ons support - nullable
+    category: yup.string().nullable(), // Category is optional and nullable
   })
   .required();
 
@@ -47,10 +48,11 @@ const initialValues = {
   phoneNumber: '',
   companyName: '',
   ticketTypeId: '',
-  addOnId: '',
+  addOnIds: [], // Multiple add-ons
+  category: '',
 };
 
-const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
+const CreateAttendeeForm = ({ dialog, selectedEventId, setIsModalOpen, fetchAttendees }) => {
   const [ticketTypes, setTicketTypes] = useState([]);
   const [addOns, setAddOns] = useState([]);
   const [selectedTicketType, setSelectedTicketType] = useState(null);
@@ -129,9 +131,20 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
     ));
   };
 
-  const onSubmit = async (values, { resetForm, setSubmitting }) => {
+  const onSubmit = async (values, { resetForm, setSubmitting, setFieldError }) => {
     try {
+      // Add alert to see if this function is being called at all
+      alert('🚨 FORM SUBMISSION TRIGGERED! Check browser console for logs.');
+      
+      console.log('🚀 FORM SUBMISSION STARTED - Manual Attendee Creation');
       setSubmitting(true);
+      
+      // Validate category for general tickets
+      if (selectedTicketType?.category === 'general' && !values.category) {
+        setFieldError('category', 'Category is required for general tickets');
+        setSubmitting(false);
+        return;
+      }
       
       const payload = {
         firstName: values.firstName,
@@ -139,18 +152,30 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
         email: values.email,
         phoneNumber: values.phoneNumber,
         companyName: values.companyName,
+        category: selectedTicketType?.category === 'general' ? values.category : null,
         ticketTypeId: values.ticketTypeId,
-        addOnId: values.addOnId || null,
+        addOnIds: values.addOnIds && values.addOnIds.length > 0 ? values.addOnIds : null, // Multiple add-ons
         eventId: selectedEventId,
       };
 
       await axiosInstance.post('/api/attendee/create-manual', payload);
 
-      dialog.onFalse();
+      // Close modal using the appropriate method
+      if (dialog?.onFalse) {
+        dialog.onFalse();
+      } else if (setIsModalOpen) {
+        setIsModalOpen(false);
+      }
+      
       resetForm();
       toast.success('Attendee added successfully!');
       
-      // Refresh the attendee list by triggering SWR revalidation
+      // Refresh the attendee list using the appropriate method
+      if (fetchAttendees) {
+        fetchAttendees();
+      }
+      
+      // Also trigger SWR revalidation if available
       mutate(`/api/attendee/?eventId=${selectedEventId}`);
       
     } catch (error) {
@@ -167,7 +192,9 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
     setSelectedTicketType(ticketType);
     setFieldValue('ticketTypeId', ticketTypeId);
     // Reset add-on selection when ticket type changes
-    setFieldValue('addOnId', '');
+    setFieldValue('addOnIds', []);
+    // Reset category when ticket type changes
+    setFieldValue('category', '');
   };
 
   return (
@@ -175,7 +202,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
       initialValues={initialValues}
       onSubmit={onSubmit}
       validationSchema={schema}
-      validateOnBlur
+      validateOnBlur={false}
       validateOnChange={false}
     >
       {({ isSubmitting, setFieldValue, values, errors, touched }) => (
@@ -288,15 +315,27 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
             {addOns.length > 0 && (
               <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel>Add-on (Optional)</InputLabel>
+                  <InputLabel>Add-ons (Optional - Multiple Selection)</InputLabel>
                   <Select
-                    value={values.addOnId}
-                    onChange={(e) => setFieldValue('addOnId', e.target.value)}
-                    label="Add-on (Optional)"
+                    multiple
+                    value={values.addOnIds}
+                    onChange={(e) => setFieldValue('addOnIds', e.target.value)}
+                    label="Add-ons (Optional - Multiple Selection)"
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => {
+                          const addOn = addOns.find(ao => ao.id === value);
+                          return (
+                            <Chip 
+                              key={value} 
+                              label={`${addOn?.name} - RM ${addOn?.price.toFixed(2)}`}
+                              size="small" 
+                            />
+                          );
+                        })}
+                      </Box>
+                    )}
                   >
-                    <MenuItem value="">
-                      <em>No add-on</em>
-                    </MenuItem>
                     {addOns.map((addOn) => (
                       <MenuItem key={addOn.id} value={addOn.id}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
@@ -320,6 +359,36 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                       </MenuItem>
                     ))}
                   </Select>
+                </FormControl>
+              </Grid>
+            )}
+
+            {/* Category field for general tickets */}
+            {selectedTicketType?.category === 'general' && (
+              <Grid item xs={12}>
+                <FormControl 
+                  fullWidth 
+                  required 
+                  error={!!(errors.category && touched.category)}
+                >
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={values.category}
+                    onChange={(e) => {
+                      setFieldValue('category', e.target.value);
+                    }}
+                    label="Category"
+                  >
+                    <MenuItem value="startup">Startup</MenuItem>
+                    <MenuItem value="investor">Investor</MenuItem>
+                    <MenuItem value="corporate">Corporate</MenuItem>
+                    <MenuItem value="student">Student</MenuItem>
+                    <MenuItem value="government">Government</MenuItem>
+                    <MenuItem value="entrepreneur">Entrepreneur</MenuItem>
+                  </Select>
+                  {touched.category && errors.category && (
+                    <FormHelperText error>{errors.category}</FormHelperText>
+                  )}
                 </FormControl>
               </Grid>
             )}
@@ -352,7 +421,13 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
               <Grid container justifyContent="flex-end" spacing={1}>
                 <Grid item>
                   <Button
-                    onClick={dialog.onFalse}
+                    onClick={() => {
+                      if (dialog?.onFalse) {
+                        dialog.onFalse();
+                      } else if (setIsModalOpen) {
+                        setIsModalOpen(false);
+                      }
+                    }}
                     variant="outlined"
                     disabled={isSubmitting}
                   >
@@ -366,6 +441,7 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
                     variant="contained"
                     color="primary"
                     sx={{ minWidth: 100 }}
+                    onClick={() => {}}
                   >
                     {isSubmitting ? (
                       <CircularProgress size={20} color="inherit" />
@@ -386,6 +462,8 @@ const CreateAttendeeForm = ({ dialog, selectedEventId }) => {
 export default CreateAttendeeForm;
 
 CreateAttendeeForm.propTypes = {
-  dialog: PropTypes.object.isRequired,
+  dialog: PropTypes.object,
   selectedEventId: PropTypes.string.isRequired,
+  setIsModalOpen: PropTypes.func,
+  fetchAttendees: PropTypes.func,
 };
