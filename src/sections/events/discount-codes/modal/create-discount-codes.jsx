@@ -200,9 +200,12 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
               <RHFAutocomplete
                 name="availability"
                 multiple
-                options={[{ id: 'all', title: 'Select all', event: { name: '' } }, ...ticketTypes]}
+                options={[
+                  { id: 'all', title: 'Select all', event: { name: '' } },
+                  ...ticketTypes.filter((i) => i?.event?.name),
+                ]}
                 getOptionLabel={(option) =>
-                  option.id === 'all' ? 'Select all' : `${option.title} ( ${option.event.name} )`
+                  option.id === 'all' ? 'Select all' : `${option.title} ( ${option?.event?.name} )`
                 }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect

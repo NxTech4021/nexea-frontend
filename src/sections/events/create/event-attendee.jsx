@@ -47,15 +47,15 @@ import EventFilters from './event-filters';
 const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const handleStatusToggle = async (newStatus) => {
     setIsUpdating(true);
-    
+
     const updatedRow = {
       ...params.row,
       status: newStatus,
     };
-    
+
     try {
       await updateAttendees(updatedRow);
       if (onStatusUpdate) {
@@ -89,12 +89,7 @@ const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
       <Box sx={{ flex: 1 }}>
         {isCheckedIn ? (
           <Chip
-            icon={
-              <Iconify
-                icon="eva:checkmark-circle-2-fill"
-                sx={{ width: 16, height: 16 }}
-              />
-            }
+            icon={<Iconify icon="eva:checkmark-circle-2-fill" sx={{ width: 16, height: 16 }} />}
             label="Checked In"
             size="small"
             sx={{
@@ -110,23 +105,18 @@ const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
                 bgcolor: 'rgba(34, 154, 22, 0.08)',
                 border: '1px solid rgba(34, 154, 22, 0.2)',
               },
-              '& .MuiChip-icon': { 
+              '& .MuiChip-icon': {
                 color: '#229A16',
                 ml: 0.5,
               },
-              '& .MuiChip-label': { 
+              '& .MuiChip-label': {
                 px: 1,
               },
             }}
           />
         ) : (
           <Chip
-            icon={
-              <Iconify
-                icon="eva:close-circle-fill"
-                sx={{ width: 16, height: 16 }}
-              />
-            }
+            icon={<Iconify icon="eva:close-circle-fill" sx={{ width: 16, height: 16 }} />}
             label="Pending"
             size="small"
             sx={{
@@ -142,72 +132,76 @@ const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
                 bgcolor: 'rgba(183, 33, 54, 0.08)',
                 border: '1px solid rgba(183, 33, 54, 0.2)',
               },
-              '& .MuiChip-icon': { 
+              '& .MuiChip-icon': {
                 color: '#B72136',
                 ml: 0.5,
               },
-              '& .MuiChip-label': { 
+              '& .MuiChip-label': {
                 px: 1,
               },
             }}
           />
         )}
       </Box>
-      
+
       {/* Vertical Divider */}
-      <Box 
-        sx={{ 
-          width: '1px', 
-          height: '20px', 
-          bgcolor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)',
+      <Box
+        sx={{
+          width: '1px',
+          height: '20px',
+          bgcolor:
+            theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)',
           mx: 1,
           flexShrink: 0,
-        }} 
+        }}
       />
-      
+
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
         {isCheckedIn ? (
           // isHovered && (
-            <Tooltip title="Mark as Pending">
-              <Button
-                variant="contained"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStatusToggle('pending');
-                }}
-                disabled={isUpdating}
-                sx={{
-                  height: '28px',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'transparent',
-                  color: theme.palette.mode === 'light' ? '#666' : '#aaa',
-                  border: '1px solid #eee',
-                  fontWeight: 500,
-                  fontSize: '0.7rem',
-                  textTransform: 'none',
-                  minWidth: 'auto',
+          <Tooltip title="Mark as Pending">
+            <Button
+              variant="contained"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStatusToggle('pending');
+              }}
+              disabled={isUpdating}
+              sx={{
+                height: '28px',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'transparent',
+                color: theme.palette.mode === 'light' ? '#666' : '#aaa',
+                border: '1px solid #eee',
+                fontWeight: 500,
+                fontSize: '0.7rem',
+                textTransform: 'none',
+                minWidth: 'auto',
+                boxShadow: 'none',
+                '&:hover': {
                   boxShadow: 'none',
-                  '&:hover': {
-                    boxShadow: 'none',
-                    bgcolor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.08)',
-                    color: theme.palette.mode === 'light' ? '#111' : '#fff',
-                  },
-                  '&:disabled': {
-                    opacity: 0.6,
-                  },
-                }}
-              >
-                <Iconify icon="eva:undo-outline" width={16} height={16} />
-              </Button>
-            </Tooltip>
-          // )
+                  bgcolor:
+                    theme.palette.mode === 'light'
+                      ? 'rgba(0, 0, 0, 0.04)'
+                      : 'rgba(255, 255, 255, 0.08)',
+                  color: theme.palette.mode === 'light' ? '#111' : '#fff',
+                },
+                '&:disabled': {
+                  opacity: 0.6,
+                },
+              }}
+            >
+              <Iconify icon="eva:undo-outline" width={16} height={16} />
+            </Button>
+          </Tooltip>
         ) : (
+          // )
           <Tooltip title="Mark as Checked In">
             <Button
               variant="contained"
@@ -225,9 +219,15 @@ const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: theme.palette.mode === 'light' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(76, 175, 80, 0.2)',
+                bgcolor:
+                  theme.palette.mode === 'light'
+                    ? 'rgba(76, 175, 80, 0.1)'
+                    : 'rgba(76, 175, 80, 0.2)',
                 color: theme.palette.mode === 'light' ? '#4caf50' : '#81c784',
-                border: theme.palette.mode === 'light' ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.4)',
+                border:
+                  theme.palette.mode === 'light'
+                    ? '1px solid rgba(76, 175, 80, 0.3)'
+                    : '1px solid rgba(76, 175, 80, 0.4)',
                 fontWeight: 500,
                 fontSize: '0.7rem',
                 textTransform: 'none',
@@ -235,19 +235,25 @@ const StatusCell = ({ params, updateAttendees, onStatusUpdate }) => {
                 boxShadow: 'none',
                 '&:hover': {
                   boxShadow: 'none',
-                  bgcolor: theme.palette.mode === 'light' ? 'rgba(76, 175, 80, 0.15)' : 'rgba(76, 175, 80, 0.3)',
-                  border: theme.palette.mode === 'light' ? '1px solid rgba(76, 175, 80, 0.4)' : '1px solid rgba(76, 175, 80, 0.5)',
+                  bgcolor:
+                    theme.palette.mode === 'light'
+                      ? 'rgba(76, 175, 80, 0.15)'
+                      : 'rgba(76, 175, 80, 0.3)',
+                  border:
+                    theme.palette.mode === 'light'
+                      ? '1px solid rgba(76, 175, 80, 0.4)'
+                      : '1px solid rgba(76, 175, 80, 0.5)',
                 },
                 '&:disabled': {
                   opacity: 0.6,
                 },
               }}
-              >
-                <Iconify icon="eva:checkmark-circle-2-fill" width={16} height={16} />
-              </Button>
+            >
+              <Iconify icon="eva:checkmark-circle-2-fill" width={16} height={16} />
+            </Button>
           </Tooltip>
         )}
-        
+
         {isUpdating && (
           <CircularProgress
             size={16}
@@ -296,10 +302,10 @@ export default function EventAttendee() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [attendees, setAttendees] = useState([]);
   const [page, setPage] = useState(1);
-  const [statusUpdates, setStatusUpdates] = useState({}); 
+  const [statusUpdates, setStatusUpdates] = useState({});
 
   const [snackbar, setSnackbar] = useState(null);
-  
+
   // Advanced filtering state
   const [filteredRows, setFilteredRows] = useState([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
@@ -355,10 +361,10 @@ export default function EventAttendee() {
     setSnackbar({ children: error.message, severity: 'error' });
   }, []);
 
-    const handleStatusUpdate = useCallback((attendeeId, newStatus) => {
-    setStatusUpdates(prev => ({
+  const handleStatusUpdate = useCallback((attendeeId, newStatus) => {
+    setStatusUpdates((prev) => ({
       ...prev,
-      [attendeeId]: newStatus
+      [attendeeId]: newStatus,
     }));
   }, []);
 
@@ -373,31 +379,37 @@ export default function EventAttendee() {
   });
 
   // Handle column resize
-  const handleColumnResize = useCallback((params) => {
-    // console.log('Column resize event:', params);
-    // Try different parameter structures
-    if (params.field && params.width) {
-      setColumnWidths(gridId, { [params.field]: params.width });
-    } else if (params.colDef && params.colDef.field && params.width) {
-      setColumnWidths(gridId, { [params.colDef.field]: params.width });
-    }
-  }, [gridId, setColumnWidths]);
+  const handleColumnResize = useCallback(
+    (params) => {
+      // console.log('Column resize event:', params);
+      // Try different parameter structures
+      if (params.field && params.width) {
+        setColumnWidths(gridId, { [params.field]: params.width });
+      } else if (params.colDef && params.colDef.field && params.width) {
+        setColumnWidths(gridId, { [params.colDef.field]: params.width });
+      }
+    },
+    [gridId, setColumnWidths]
+  );
 
   // Handle state changes to detect column width changes
-  const handleStateChange = useCallback((state) => {
-    // console.log('State change event:', state); 
-    if (state.columns && state.columns.dimensions) {
-      const columnWidths = {};
-      Object.entries(state.columns.dimensions).forEach(([field, dimension]) => {
-        if (dimension.width) {
-          columnWidths[field] = dimension.width;
+  const handleStateChange = useCallback(
+    (state) => {
+      // console.log('State change event:', state);
+      if (state.columns && state.columns.dimensions) {
+        const columnWidths = {};
+        Object.entries(state.columns.dimensions).forEach(([field, dimension]) => {
+          if (dimension.width) {
+            columnWidths[field] = dimension.width;
+          }
+        });
+        if (Object.keys(columnWidths).length > 0) {
+          setColumnWidths(gridId, columnWidths);
         }
-      });
-      if (Object.keys(columnWidths).length > 0) {
-        setColumnWidths(gridId, columnWidths);
       }
-    }
-  }, [gridId, setColumnWidths]);
+    },
+    [gridId, setColumnWidths]
+  );
 
   // Get persisted column widths
   const persistedWidths = getColumnWidths(gridId);
@@ -434,7 +446,7 @@ export default function EventAttendee() {
           >
             {`${params.row.firstName || ''} ${params.row.lastName || ''}`}
           </Typography>
-          
+
           <Tooltip title="View Order Details">
             <IconButton
               size="small"
@@ -449,7 +461,10 @@ export default function EventAttendee() {
                 border: '1px solid #eee',
                 flexShrink: 0,
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.08)',
+                  bgcolor:
+                    theme.palette.mode === 'light'
+                      ? 'rgba(0, 0, 0, 0.04)'
+                      : 'rgba(255, 255, 255, 0.08)',
                   color: theme.palette.mode === 'light' ? '#111' : '#fff',
                 },
               }}
@@ -466,15 +481,32 @@ export default function EventAttendee() {
       width: persistedWidths.status || 190,
       editable: false,
       renderCell: (params) => (
-        <StatusCell 
-          params={params} 
-          updateAttendees={updateAttendees} 
+        <StatusCell
+          params={params}
+          updateAttendees={updateAttendees}
           onStatusUpdate={handleStatusUpdate}
         />
       ),
     },
-    { field: 'email', headerName: 'Attendee Email', width: persistedWidths.email || 200, editable: true },
-    { field: 'phoneNumber', headerName: 'Attendee Phone Number', width: persistedWidths.phoneNumber || 200, editable: true },
+    {
+      field: 'email',
+      headerName: 'Attendee Email',
+      width: persistedWidths.email || 200,
+      editable: true,
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      width: persistedWidths.category || 200,
+      editable: true,
+      valueGetter: (value, row) => `${row.category || 'N/A'}`,
+    },
+    {
+      field: 'phoneNumber',
+      headerName: 'Attendee Phone Number',
+      width: persistedWidths.phoneNumber || 200,
+      editable: true,
+    },
     {
       field: 'companyName',
       headerName: 'Company Name',
@@ -535,7 +567,7 @@ export default function EventAttendee() {
         // Get icon and icon color based on status
         let icon;
         let iconColor;
-        
+
         switch (status) {
           case 'paid':
             icon = 'eva:checkmark-circle-2-fill';
@@ -561,12 +593,7 @@ export default function EventAttendee() {
 
         return (
           <Chip
-            icon={
-              <Iconify
-                icon={icon}
-                sx={{ width: 16, height: 16 }}
-              />
-            }
+            icon={<Iconify icon={icon} sx={{ width: 16, height: 16 }} />}
             label={displayText}
             size="small"
             sx={{
@@ -582,11 +609,11 @@ export default function EventAttendee() {
                 bgcolor: 'transparent',
                 border: '1px solid #E5E5E5',
               },
-              '& .MuiChip-icon': { 
+              '& .MuiChip-icon': {
                 color: iconColor,
                 ml: 0.5,
               },
-              '& .MuiChip-label': { 
+              '& .MuiChip-label': {
                 px: 1,
               },
             }}
@@ -604,18 +631,18 @@ export default function EventAttendee() {
         const orderStatus = row.order.status;
         const orderAmount = Number(row.order.totalAmount) || 0;
         const discountAmount = Number(row.order.discountAmount) || 0;
-        const {discountCode} = row.order;
-        
+        const { discountCode } = row.order;
+
         // If the original ticket type has no price, its free
         if (originalTicketPrice === 0) {
           return 'free';
         }
-        
+
         // If order is not paid, use order status
         if (orderStatus !== 'paid') {
           return orderStatus || 'pending';
         }
-        
+
         // For paid orders, check if ticket was discounted
         if (orderStatus === 'paid') {
           // If there's a discount code and discount amount > 0
@@ -624,26 +651,26 @@ export default function EventAttendee() {
             if (orderAmount === 0) {
               return 'free';
             }
-            
+
             // Calculate if ticket was fully discounted
             const addOnPrice = Number(row.ticket.ticketAddOn?.price) || 0;
             const totalBeforeDiscount = originalTicketPrice + addOnPrice;
-            
+
             // If discount covers the full ticket price or more
             if (discountAmount >= originalTicketPrice) {
               return 'free';
             }
-            
+
             // If discount is partial but covers some of the ticket
             if (discountAmount > 0 && discountAmount < originalTicketPrice) {
               return 'paid'; // Partially discounted but still paid
             }
           }
-          
+
           // If no discount or ticket not covered by discount, it's paid
           return 'paid';
         }
-        
+
         // Use order status for other cases
         return orderStatus || 'pending';
       },
@@ -660,7 +687,7 @@ export default function EventAttendee() {
         // Get icon and icon color based on status
         let icon;
         let iconColor;
-        
+
         switch (status) {
           case 'paid':
             icon = 'eva:checkmark-circle-2-fill';
@@ -686,12 +713,7 @@ export default function EventAttendee() {
 
         return (
           <Chip
-            icon={
-              <Iconify
-                icon={icon}
-                sx={{ width: 16, height: 16 }}
-              />
-            }
+            icon={<Iconify icon={icon} sx={{ width: 16, height: 16 }} />}
             label={displayText}
             size="small"
             sx={{
@@ -707,11 +729,11 @@ export default function EventAttendee() {
                 bgcolor: 'transparent',
                 border: '1px solid #E5E5E5',
               },
-              '& .MuiChip-icon': { 
+              '& .MuiChip-icon': {
                 color: iconColor,
                 ml: 0.5,
               },
-              '& .MuiChip-label': { 
+              '& .MuiChip-label': {
                 px: 1,
               },
             }}
@@ -725,66 +747,66 @@ export default function EventAttendee() {
       width: persistedWidths.addOnStatus || 130,
       valueGetter: (value, row) => {
         // Check if there's an add-on
-        const {ticketAddOn} = row.ticket;
-        
+        const { ticketAddOn } = row.ticket;
+
         if (!ticketAddOn) {
           return 'none';
         }
-        
+
         const addOnPrice = Number(ticketAddOn.price) || 0;
         const originalAddOnPrice = Number(ticketAddOn.addOn?.price) || 0;
         const orderStatus = row.order.status;
         const orderAmount = Number(row.order.totalAmount) || 0;
         const discountAmount = Number(row.order.discountAmount) || 0;
-        
+
         // If the original add-on has no price, its free
         if (originalAddOnPrice === 0) {
           return 'free';
         }
-        
+
         // If the add-on price stored in ticketAddOn is 0 but original price > 0, it was discounted
         if (addOnPrice === 0 && originalAddOnPrice > 0) {
           return 'free';
         }
-        
+
         // For add-ons, since discounts typically only apply to ticket types (not add-ons),
         // we need to determine if the add-on was actually paid for
         if (orderStatus === 'paid') {
           const originalTicketPrice = Number(row.ticket.ticketType.price) || 0;
-          const {discountCode} = row.order;
-          
+          const { discountCode } = row.order;
+
           // If order total is 0 but there's a discount, determine what was discounted
           if (orderAmount === 0 && discountAmount > 0) {
             // Calculate what the total should be without discount
             const totalWithoutDiscount = originalTicketPrice + originalAddOnPrice;
-            
+
             // If discount amount equals or exceeds the total, everything was discounted
             if (discountAmount >= totalWithoutDiscount) {
               return 'free';
             }
-            
+
             // If discount only covers the ticket price, add-on was paid
             if (discountAmount >= originalTicketPrice && discountAmount < totalWithoutDiscount) {
               return 'paid';
             }
-            
+
             // If discount is partial and less than ticket price, add-on wasn't discounted
             if (discountAmount < originalTicketPrice) {
               return 'paid';
             }
           }
-          
+
           // If order has amount > 0, the add-on was paid (since it has price)
           if (orderAmount > 0 && originalAddOnPrice > 0) {
             return 'paid';
           }
-          
+
           // If add-on has no original price, it's free
           if (originalAddOnPrice === 0) {
             return 'free';
           }
         }
-        
+
         // Use order status for other cases
         return orderStatus || 'pending';
       },
@@ -803,7 +825,7 @@ export default function EventAttendee() {
         // Get icon and icon color based on status
         let icon;
         let iconColor;
-        
+
         switch (status) {
           case 'paid':
             icon = 'eva:checkmark-circle-2-fill';
@@ -833,12 +855,7 @@ export default function EventAttendee() {
 
         return (
           <Chip
-            icon={
-              <Iconify
-                icon={icon}
-                sx={{ width: 16, height: 16 }}
-              />
-            }
+            icon={<Iconify icon={icon} sx={{ width: 16, height: 16 }} />}
             label={displayText}
             size="small"
             sx={{
@@ -854,11 +871,11 @@ export default function EventAttendee() {
                 bgcolor: 'transparent',
                 border: '1px solid #E5E5E5',
               },
-              '& .MuiChip-icon': { 
+              '& .MuiChip-icon': {
                 color: iconColor,
                 ml: 0.5,
               },
-              '& .MuiChip-label': { 
+              '& .MuiChip-label': {
                 px: 1,
               },
             }}
@@ -894,7 +911,15 @@ export default function EventAttendee() {
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ marginBottom: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         {/* Back Button + Breadcrumb Navigation */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, flex: 1, minWidth: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: { xs: 1, sm: 1.5 },
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <Tooltip title={`Back to ${data?.event?.name || 'Event'}`}>
             <IconButton
               onClick={() => router.push(paths.dashboard.events.details(id))}
@@ -912,7 +937,11 @@ export default function EventAttendee() {
                 },
               }}
             >
-              <Iconify icon="eva:arrow-back-fill" width={{ xs: 18, sm: 20 }} height={{ xs: 18, sm: 20 }} />
+              <Iconify
+                icon="eva:arrow-back-fill"
+                width={{ xs: 18, sm: 20 }}
+                height={{ xs: 18, sm: 20 }}
+              />
             </IconButton>
           </Tooltip>
 
@@ -937,17 +966,17 @@ export default function EventAttendee() {
           >
             {data?.event?.name || 'Event'}
           </Typography>
-          
-          <Iconify 
-            icon="eva:chevron-right-fill" 
-            sx={{ 
+
+          <Iconify
+            icon="eva:chevron-right-fill"
+            sx={{
               color: theme.palette.mode === 'light' ? '#ccc' : '#555',
               width: { xs: 16, sm: 18 },
               height: { xs: 16, sm: 18 },
               flexShrink: 0,
-            }} 
+            }}
           />
-          
+
           <Typography
             variant="body1"
             sx={{
@@ -998,8 +1027,6 @@ export default function EventAttendee() {
         </Box>
       </Box>
 
-
-
       <Paper
         elevation={0}
         sx={{
@@ -1047,8 +1074,8 @@ export default function EventAttendee() {
             return updateAttendees(newRow);
           }}
           onProcessRowUpdateError={handleProcessRowUpdateError}
-          slots={{ 
-            toolbar: eventFilters.CustomToolbar
+          slots={{
+            toolbar: eventFilters.CustomToolbar,
           }}
           sx={{
             '& .MuiDataGrid-root': {

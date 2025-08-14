@@ -287,7 +287,7 @@ const TicketSelectionCard = () => {
           <Grid2 size={12} alignContent="flex-end">
             <Stack spacing={1.5} mt={1}>
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Stack direction="column" alignItems="flex-start" spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
                   <Iconify
                     icon="material-symbols:add-shopping-cart-outline"
                     width={14}
@@ -296,44 +296,43 @@ const TicketSelectionCard = () => {
                   <Typography variant="caption" fontWeight={600} color="text.secondary">
                     Add Ons Available:
                   </Typography>
-                  {ticket.selectedQuantity === 0 ? (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: 'warning.main',
-                        fontStyle: 'italic',
-                        fontSize: 11,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Iconify icon="material-symbols:info-outline" width={12} />
-                      Select a ticket first to include add-ons
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: 'success.main',
-                        fontStyle: 'italic',
-                        fontSize: 11,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                      }}
-                    >
-                      <Iconify icon="material-symbols:check-circle-outline" width={12} />
-                      {ticket.selectedQuantity} ticket{ticket.selectedQuantity > 1 ? 's' : ''}{' '}
-                      selected
-                    </Typography>
-                  )}
                 </Stack>
+                {ticket.selectedQuantity === 0 ? (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'warning.main',
+                      fontStyle: 'italic',
+                      fontSize: 11,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Iconify icon="material-symbols:info-outline" width={12} />
+                    Select a ticket first to include add-ons
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'success.main',
+                      fontStyle: 'italic',
+                      fontSize: 11,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                    }}
+                  >
+                    <Iconify icon="material-symbols:check-circle-outline" width={12} />
+                    {ticket.selectedQuantity} ticket{ticket.selectedQuantity > 1 ? 's' : ''}{' '}
+                    selected
+                  </Typography>
+                )}
               </Stack>
 
-              {/* FEATURE IMPLEMENTED: Multiple add-on selection per ticket already supported - users can select multiple add-ons */}
               <Stack
                 direction="row"
                 spacing={0.5}
@@ -408,6 +407,7 @@ const TicketSelectionCard = () => {
                           <Iconify icon="material-symbols:check-rounded" width={16} />
                         </Box>
                       )}
+
                       <Stack spacing={1}>
                         <ListItemText
                           primary={item.name}
@@ -865,9 +865,15 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
     [tixs, addOnInfo]
   );
 
-  const selectedQuantity = currentAddOn?.selectedQuantity || 0;
+  const totalSelectedQuantity = useMemo(
+    () =>
+      tixs
+        ?.find((a) => a.id === addOnInfo?.ticketId)
+        ?.addOns?.reduce((acc, curr) => acc + (curr?.selectedQuantity || 0), 0) || 0,
+    [tixs, addOnInfo]
+  );
 
-  console.log(addOnInfo);
+  const selectedQuantity = currentAddOn?.selectedQuantity || 0;
 
   return (
     <Dialog
@@ -934,19 +940,22 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 {selectedQuantity}
               </Typography>
 
-              {/* FIX: Allow multiple add-ons - limit each add-on individually to ticket quantity, not total */}
               <IconButton
                 size="small"
                 sx={{
                   bgcolor:
-                    selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.200' : 'primary.main',
+                    totalSelectedQuantity >= addOnInfo?.selectedQuantity
+                      ? 'grey.200'
+                      : 'primary.main',
                   '&:hover': {
                     bgcolor:
-                      selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.200' : 'primary.dark',
+                      totalSelectedQuantity >= addOnInfo?.selectedQuantity
+                        ? 'grey.200'
+                        : 'primary.dark',
                   },
                   width: 36,
                   height: 36,
-                  ...(selectedQuantity >= addOnInfo?.selectedQuantity && {
+                  ...(totalSelectedQuantity >= addOnInfo?.selectedQuantity && {
                     pointerEvents: 'none',
                   }),
                 }}
@@ -957,7 +966,9 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 <Iconify
                   icon="material-symbols:add-rounded"
                   width={18}
-                  color={selectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.500' : 'white'}
+                  color={
+                    totalSelectedQuantity >= addOnInfo?.selectedQuantity ? 'grey.500' : 'white'
+                  }
                 />
               </IconButton>
             </Stack>

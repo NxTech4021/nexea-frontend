@@ -854,13 +854,13 @@ const TicketInformationCard = () => {
                             name={`attendees.${index}.category`}
                             fullWidth
                             displayEmpty
-                            slotProps={{
-                              input: getValues(`attendees.${index}.isForbuyer`)
-                                ? {
-                                    readOnly: true,
-                                  }
-                                : {},
-                            }}
+                            // slotProps={{
+                            //   input: getValues(`attendees.${index}.isForbuyer`)
+                            //     ? {
+                            //         readOnly: true,
+                            //       }
+                            //     : {},
+                            // }}
                             sx={{
                               '& .MuiInputBase-root': {
                                 '& fieldset': {
