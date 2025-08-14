@@ -948,6 +948,14 @@ const TicketInformationCard = () => {
   useEffect(() => {
     if (!cartData?.cartItem?.length) return;
 
+    // Load existing attendees from localStorage
+    const storedAttendees = localStorage.getItem('attendees');
+
+    if (storedAttendees) {
+      setValue('attendees', JSON.parse(storedAttendees));
+      return;
+    }
+
     const result = cartData.cartItem.flatMap((item) => {
       const results = Array.from({ length: item.quantity }, () => ({
         ticket: item.ticketType,
