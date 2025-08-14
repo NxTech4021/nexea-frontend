@@ -81,8 +81,8 @@ const schema = yup.object().shape({
       // NEW FEATURE: Category field validation for general ticket attendees
       category: yup.string().when('ticket', {
         is: (ticket) => ticket && ticket.category === 'general',
-        then: (schema) => schema.required('Category is required for general ticket attendees'),
-        otherwise: (schema) => schema.notRequired(),
+        then: (a) => a.required('Category is required for general ticket attendees'),
+        otherwise: (b) => b.notRequired(),
       }),
     })
   ),
