@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import 'react-phone-number-input/style.css';
 // import PhoneInput from 'react-phone-number-input';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';
@@ -38,6 +38,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { RHFSelect, RHFCheckbox } from 'src/components/hook-form';
 
+import AddOnItem from './components/addOnItem';
 import useGetCartData from './hooks/use-get-cart';
 import { TextFieldCustom } from './components/text-field';
 import { PhoneInputCustom } from './components/phone-input';
@@ -144,42 +145,46 @@ const TicketInformationCard = () => {
     name: 'attendees',
   });
 
-  const handleChangeTicket = (value) => {
-    setValue('buyer.ticket', value);
+  const handleChangeTicket = (attendeeId) => {
+    // Step 1: Update buyer ticket in form state
+    setValue('buyer.ticket', attendeeId);
     const buyerInfo = getValues('buyer');
-
     const attendees = getValues('attendees');
 
-    const newAttendees = [...attendees];
+    if (!attendees?.length) return;
 
-    if (buyer) {
-      const existingTagIndex = newAttendees.findIndex((item) => item.isForbuyer);
-      const existingValue = newAttendees[existingTagIndex];
+    // Step 2: Reset any previous buyer attendee
+    const existingBuyerIndex = attendees.findIndex((a) => a.isForbuyer);
 
-      if (existingTagIndex !== -1) {
-        update(existingTagIndex, {
-          ...defaultAttendee,
-          ticket: existingValue.ticket,
-        });
-        setLastRemoved(null); // Reset last removed after restoring
-      }
-
-      const index = newAttendees.findIndex((attendee) => attendee.ticket.id === value);
-
-      const val = {
-        firstName: buyerInfo.firstName || '',
-        lastName: buyerInfo.lastName || '',
-        email: buyerInfo.email || '',
-        phoneNumber: buyerInfo.phoneNumber || '',
-        company: buyerInfo.company || '',
-        ticket: newAttendees[index].ticket,
-        addOn: newAttendees[index]?.addOn || null,
-      };
-
-      if (index !== -1) {
-        update(index, { ...val, isForbuyer: true });
-      }
+    if (existingBuyerIndex !== -1) {
+      update(existingBuyerIndex, {
+        ...defaultAttendee,
+        ticket: attendees[existingBuyerIndex].ticket,
+        addOn: attendees[existingBuyerIndex].addOn || [],
+        isForbuyer: false,
+      });
     }
+
+    // // Step 3: Find the new attendee to set as buyer
+    const targetIndex = attendees.findIndex((a) => a.attendeeId === attendeeId);
+
+    if (targetIndex === -1) return; // Attendee not found
+
+    // // Step 4: Build updated buyer attendee data
+    const updatedBuyer = {
+      ...attendees[targetIndex],
+      firstName: buyerInfo.firstName || '',
+      lastName: buyerInfo.lastName || '',
+      email: buyerInfo.email || '',
+      phoneNumber: buyerInfo.phoneNumber || '',
+      company: buyerInfo.company || '',
+      isForbuyer: true,
+      attendeeId,
+    };
+
+    console.log(updatedBuyer);
+
+    update(targetIndex, updatedBuyer);
   };
 
   const handleBuyerCheckbox = (val) => {
@@ -256,26 +261,20 @@ const TicketInformationCard = () => {
     });
   };
 
-  const removeTicket = async (item, index, addOns) => {
+  const removeTicket = async (attendeeId) => {
     const attendees = JSON.parse(localStorage.getItem('attendees'));
-
-    if (attendees?.length > index) {
-      attendees.splice(index, 1); // Remove item at the specified index
-      localStorage.setItem('attendees', JSON.stringify(attendees));
-    }
 
     // Ensure that attendees is empty before removing from localStorage
     if (attendees?.length === 0) {
       localStorage.removeItem('attendees');
     }
 
-    const addOnIds = addOns.length ? addOns?.map((i) => i.addOn.id) : null;
-
     try {
-      const ticket = cartData.cartItem.find((a) => a.ticketType.id === item);
-      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket, addOnIds });
-      cartMutate();
+      const res = await axiosInstance.post(endpoints.cart.removeTicketV2, {
+        cartAttendeeId: attendeeId,
+      });
 
+      cartMutate();
       toast.success(res?.data?.message);
     } catch (error) {
       toast.error('Failed to remove');
@@ -303,11 +302,29 @@ const TicketInformationCard = () => {
     }
   };
 
+  const getTicketAddons = useCallback(
+    (ticketId) => {
+      const existingTickets = cartData?.cartItem?.flatMap((i) => i.ticketType);
+      const selectedTicket = existingTickets?.find((a) => a.id === ticketId);
+      const addOns = selectedTicket?.addOns || [];
+      return addOns;
+    },
+    [cartData]
+  );
+
+  const applyAddOn = useCallback(async (addOnId) => {
+    try {
+      console.log(addOnId);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   const buyerInfo = (
     <Card
       elevation={0}
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         border: '1px solid',
         borderColor: 'divider',
         mb: 2.5,
@@ -392,11 +409,6 @@ const TicketInformationCard = () => {
                   alignSelf: 'flex-end',
                   width: 'auto',
                   minWidth: 'auto',
-
-                  //                 sx={{
-                  //                   height: 36,
-                  //                   minWidth: 70,
-
                   ml: 1,
                   mb: '1px',
                   borderRadius: 1,
@@ -413,55 +425,11 @@ const TicketInformationCard = () => {
                       theme.palette.mode === 'dark' ? 0.12 : 0.08
                     ),
                   },
-                  //                     borderColor: 'grey.600',
-                  //                     bgcolor: 'grey.100',
-                  //                   },
                 }}
               >
                 Copy to All
               </Button>
             </Stack>
-            {/* {buyer && (
-              <Box sx={{ width: '100%' }}>
-                <Typography
-                  variant="body2"
-                  component="label"
-                  htmlFor="buyer-ticket"
-                  sx={{
-                    mb: 0.75,
-                    display: 'block',
-                    fontSize: '0.85rem',
-                    fontWeight: 500,
-                    color: 'text.secondary',
-                  }}
-                >
-                  For which ticket?
-                </Typography>
-                <RHFSelect
-                  name="buyer.ticket"
-                  id="buyer-ticket"
-                  onChange={(e) => handleChangeTicket(e.target.value)}
-                  sx={{
-                    '& .MuiInputBase-root': {
-                      '& fieldset': {
-                        borderColor: alpha(theme.palette.text.primary, 0.2),
-                      },
-                      borderRadius: 1,
-                      fontSize: '0.9rem',
-                    },
-                    '& .MuiOutlinedInput-input': {
-                      padding: '12px 14px',
-                    },
-                  }}
-                >
-                  {ticketTypes?.map((ticket) => (
-                    <MenuItem key={ticket.id} value={ticket.ticketType.id}>
-                      {ticket.ticketType.title}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-              </Box>
-            )} */}
           </Box>
 
           <Stack
@@ -510,6 +478,7 @@ const TicketInformationCard = () => {
                 },
               }}
             />
+
             {buyer && (
               <Box sx={{ width: '100%' }}>
                 <Typography
@@ -524,7 +493,7 @@ const TicketInformationCard = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  For which ticket?
+                  For which attendee?
                 </Typography>
                 <RHFSelect
                   name="buyer.ticket"
@@ -543,9 +512,9 @@ const TicketInformationCard = () => {
                     },
                   }}
                 >
-                  {ticketTypes?.map((ticket) => (
-                    <MenuItem key={ticket.id} value={ticket.ticketType.id}>
-                      {ticket.ticketType.title}
+                  {fields?.map((ticket, index) => (
+                    <MenuItem key={ticket.id} value={ticket.attendeeId}>
+                      {`Attendee ${index + 1} - ${ticket?.ticket?.title}`}
                     </MenuItem>
                   ))}
                 </RHFSelect>
@@ -561,7 +530,7 @@ const TicketInformationCard = () => {
     <Card
       elevation={0}
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         border: '2px solid',
         borderColor: 'divider',
         mb: 2.5,
@@ -590,15 +559,16 @@ const TicketInformationCard = () => {
       <Box sx={{ p: 2 }}>
         <Stack spacing={2}>
           {fields.map((field, index) => {
-            console.log('asd');
+            const tixs = getTicketAddons(field.ticket.id);
+
             return (
               <Card
                 key={field.id}
                 elevation={0}
                 sx={{
-                  border: '1px solid',
+                  border: '0.5px solid',
                   borderColor: 'divider',
-                  borderRadius: 1.5,
+                  borderRadius: 1,
                   overflow: 'hidden',
                   transition: 'all 0.2s',
                   '&:hover': {
@@ -718,7 +688,7 @@ const TicketInformationCard = () => {
                           Buyer&apos;s ticket
                         </Label>
                       )}
-                      {!!field.addOn.length &&
+                      {!!field?.addOn?.length &&
                         field.addOn.map((item) => (
                           <Label
                             color="warning"
@@ -743,7 +713,7 @@ const TicketInformationCard = () => {
                         color="error"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeTicket(field.ticket.id, index, field?.addOn);
+                          removeTicket(field.attendeeId);
                         }}
                         sx={{
                           bgcolor: alpha(
@@ -899,6 +869,28 @@ const TicketInformationCard = () => {
                       )}
                     </Box>
                   </Box>
+
+                  <Box sx={{ px: 2 }}>
+                    <Typography variant="subtitle2">Add Ons:</Typography>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      mb={2}
+                      mt={1}
+                      overflow="auto"
+                      sx={{ scrollbarWidth: 'none' }}
+                    >
+                      {!!tixs.length &&
+                        tixs.map((tix) => (
+                          <AddOnItem
+                            title={tix.name}
+                            description={tix.description}
+                            price={tix.price}
+                            id={tix.id}
+                          />
+                        ))}
+                    </Stack>
+                  </Box>
                 </Collapse>
               </Card>
             );
@@ -945,42 +937,67 @@ const TicketInformationCard = () => {
   //   localStorage.setItem('attendees', JSON.stringify(result)); // Cache the cartData
   // }, [cartData, setValue, cartSessionId]);
 
+  // useEffect(() => {
+  //   if (!cartData?.cartItem?.length) return;
+
+  //   const result = cartData.cartItem.flatMap((item) => {
+  //     const results = Array.from({ length: item.quantity }, () => ({
+  //       ticket: item.ticketType,
+  //       addOn: [],
+  //       ...defaultAttendee,
+  //     }));
+
+  //     // Expand add-ons by quantity
+  //     const addOnPool =
+  //       item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
+
+  //     // Assign add-ons round-robin without repeating same type on same ticket
+  //     let ticketIndex = 0;
+  //     // eslint-disable-next-line no-restricted-syntax
+  //     for (const addOn of addOnPool) {
+  //       let attempts = 0;
+  //       while (
+  //         attempts < results.length &&
+  //         results[ticketIndex].addOn.some((a) => a.id === addOn.id) // Check duplicate
+  //       ) {
+  //         ticketIndex = (ticketIndex + 1) % results.length;
+  //         // eslint-disable-next-line no-plusplus
+  //         attempts++;
+  //       }
+
+  //       if (!results[ticketIndex].addOn.some((a) => a.id === addOn.id)) {
+  //         results[ticketIndex].addOn.push(addOn);
+  //       }
+
+  //       ticketIndex = (ticketIndex + 1) % results.length;
+  //     }
+
+  //     return results;
+  //   });
+
+  //   setValue('attendees', result);
+  //   localStorage.setItem('attendees', JSON.stringify(result));
+  // }, [cartData, setValue, cartSessionId]);
+
   useEffect(() => {
     if (!cartData?.cartItem?.length) return;
 
     const result = cartData.cartItem.flatMap((item) => {
-      const results = Array.from({ length: item.quantity }, () => ({
+      // const results = Array.from({ length: item?.cartAttendees?.length }, () => ({
+      //   ticket: item.ticketType,
+      //   addOn: [],
+      //   ...defaultAttendee,
+      // }));
+
+      const attendees = item.cartAttendees.map((att) => ({
+        id: att.id, // DB ID
         ticket: item.ticketType,
         addOn: [],
+        attendeeId: att.id,
         ...defaultAttendee,
       }));
 
-      // Expand add-ons by quantity
-      const addOnPool =
-        item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
-
-      // Assign add-ons round-robin without repeating same type on same ticket
-      let ticketIndex = 0;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const addOn of addOnPool) {
-        let attempts = 0;
-        while (
-          attempts < results.length &&
-          results[ticketIndex].addOn.some((a) => a.id === addOn.id) // Check duplicate
-        ) {
-          ticketIndex = (ticketIndex + 1) % results.length;
-          // eslint-disable-next-line no-plusplus
-          attempts++;
-        }
-
-        if (!results[ticketIndex].addOn.some((a) => a.id === addOn.id)) {
-          results[ticketIndex].addOn.push(addOn);
-        }
-
-        ticketIndex = (ticketIndex + 1) % results.length;
-      }
-
-      return results;
+      return attendees;
     });
 
     setValue('attendees', result);
@@ -1121,11 +1138,11 @@ const TicketInformationCard = () => {
     <Box
       sx={{
         height: 1,
-        // borderRadius: 3,
+
         overflow: 'hidden',
         p: { xs: 2, md: 3 },
         bgcolor: 'background.paper',
-        // bgcolor: 'beige',
+
         boxShadow: `0 0 24px ${alpha(theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.black, 0.05)}`,
       }}
     >
@@ -1143,12 +1160,8 @@ const TicketInformationCard = () => {
         ref={ref}
         flexGrow={1}
         sx={{
-          // bgcolor: 'beige',
-          // px: { xs: 1, md: 2 },
-          // height: '100%',
           height: 1,
           my: 2,
-          // height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',

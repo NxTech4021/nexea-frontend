@@ -109,6 +109,7 @@ export const endpoints = {
     addTicket: `/api/cart/addTicket`,
     extendSession: '/api/cart/extendSession',
     removeTicket: '/api/cart/removeCartItem',
+    removeTicketV2: '/api/cart/v2/removeCartItem',
   },
   discount: {
     get: '/api/discount/',
