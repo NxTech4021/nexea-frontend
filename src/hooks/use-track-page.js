@@ -9,7 +9,7 @@ export const useMetaPixel = (
   eventName,
   eventData = {},
   firePageView = false,
-  pixelId = '1213108609599419'
+  pixelId = '598753975606755'
 ) => {
   useEffect(() => {
     ReactPixel.init(pixelId, {}, { autoConfig: true, debug: false });
