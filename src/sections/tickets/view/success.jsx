@@ -38,7 +38,8 @@ const SuccessPayment = () => {
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
 
   const pixelId =
-    data?.event?.name === 'DisruptInvest Summit 2025' ? '1213108609599419' : '719576360668196';
+    // data?.event?.name === 'DisruptInvest Summit 2025' ? '1213108609599419' : '719576360668196';
+    data?.event?.name === 'DisruptInvest Summit 2025' ? '1213108609599419' : '598753975606755';
 
   useMetaPixel(
     'Purchase',
