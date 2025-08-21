@@ -23,7 +23,7 @@ import {
 import { paths } from 'src/routes/paths';
 import { useSearchParams } from 'src/routes/hooks';
 
-import { useMetaPixel } from 'src/hooks/use-track-page';
+import { trackMetaPixel } from 'src/hooks/use-track-page';
 
 import { fetcher } from 'src/utils/axios';
 
@@ -37,28 +37,39 @@ const SuccessPayment = () => {
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
 
-  const pixelId =
-    // data?.event?.name === 'DisruptInvest Summit 2025' ? '1213108609599419' : '719576360668196';
-    data?.event?.name === 'DisruptInvest Summit 2025' ? '1213108609599419' : '598753975606755';
-
-  useMetaPixel(
-    'Purchase',
-    {
-      value: data?.totalAmount || 0,
-      currency: 'MYR',
-      content_type: 'product',
-      eventName: data?.event?.name || '',
-      // name: data?.buyerName || '',
-      // email: data?.buyerEmail || '',
-      // phoneNumber: data?.buyerPhoneNumber || '',
-    },
-    true
-    // pixelId
-  );
+  // useMetaPixel(
+  //   'Purchase',
+  //   {
+  //     value: data?.totalAmount || 0,
+  //     currency: 'MYR',
+  //     content_type: 'product',
+  //     eventName: data?.event?.name || '',
+  //     // name: data?.buyerName || '',
+  //     // email: data?.buyerEmail || '',
+  //     // phoneNumber: data?.buyerPhoneNumber || '',
+  //   },
+  //   true
+  //   // pixelId
+  // );
 
   useEffect(() => {
     localStorage.removeItem('attendees');
   }, []);
+
+  useEffect(() => {
+    if (data && data.status === 'success') {
+      trackMetaPixel(
+        'Purchase',
+        {
+          value: data.totalAmount,
+          currency: 'MYR',
+          content_type: 'product',
+          eventName: data.event?.name || '',
+        },
+        true
+      );
+    }
+  }, [data]);
 
   if (!orderId || !data) {
     return (
