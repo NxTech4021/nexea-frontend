@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useMetaPixel } from 'src/hooks/use-track-page';
 
 import EventLists from '../event-lists';
 import EventCountdown from '../event-countdown';
@@ -20,6 +21,8 @@ export default function Events() {
       query: inputValue,
     }));
   }, []);
+
+  useMetaPixel('Test', {}, true, '598753975606755');
 
   return (
     <>
