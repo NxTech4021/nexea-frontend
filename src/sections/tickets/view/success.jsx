@@ -46,10 +46,11 @@ const SuccessPayment = () => {
     {
       value: data?.totalAmount || 0,
       currency: 'MYR',
-      eventName: data?.event?.name || '',
-      name: data?.buyerName || '',
-      email: data?.buyerEmail || '',
-      phoneNumber: data?.buyerPhoneNumber || '',
+      content_type: 'product',
+      // eventName: data?.event?.name || '',
+      // name: data?.buyerName || '',
+      // email: data?.buyerEmail || '',
+      // phoneNumber: data?.buyerPhoneNumber || '',
     },
     true,
     pixelId
