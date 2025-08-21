@@ -5,6 +5,8 @@ import ReactPixel from 'react-facebook-pixel';
 
 // console.log(pixelId);
 
+let pixelInitialized = false;
+
 export const useMetaPixel = (
   eventName,
   eventData = {},
@@ -12,7 +14,10 @@ export const useMetaPixel = (
   pixelId = '598753975606755'
 ) => {
   useEffect(() => {
-    ReactPixel.init(pixelId, {}, { autoConfig: true, debug: false });
+    if (!pixelInitialized) {
+      ReactPixel.init(pixelId, {}, { autoConfig: true, debug: false });
+      pixelInitialized = true;
+    }
 
     if (firePageView) {
       ReactPixel.pageView();

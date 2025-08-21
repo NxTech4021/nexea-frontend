@@ -47,13 +47,13 @@ const SuccessPayment = () => {
       value: data?.totalAmount || 0,
       currency: 'MYR',
       content_type: 'product',
-      // eventName: data?.event?.name || '',
+      eventName: data?.event?.name || '',
       // name: data?.buyerName || '',
       // email: data?.buyerEmail || '',
       // phoneNumber: data?.buyerPhoneNumber || '',
     },
-    true,
-    pixelId
+    true
+    // pixelId
   );
 
   useEffect(() => {
