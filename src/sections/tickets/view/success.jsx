@@ -57,7 +57,7 @@ const SuccessPayment = () => {
   }, []);
 
   useEffect(() => {
-    if (data && data.status === 'success') {
+    if (data && data.status === 'paid') {
       trackMetaPixel(
         'Purchase',
         {
