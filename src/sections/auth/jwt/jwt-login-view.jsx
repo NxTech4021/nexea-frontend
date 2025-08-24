@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -25,6 +25,7 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { trackMetaPixel } from 'src/hooks/use-track-page';
 
 // ----------------------------------------------------------------------
 
@@ -142,6 +143,11 @@ export default function JwtLoginView() {
       </Stack>
     </Stack>
   );
+
+  useEffect(() => {
+    trackMetaPixel('TestingLocal', { value: 10, currency: 'USD' }, true);
+    console.log('LOADED PIXEL');
+  }, []);
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>

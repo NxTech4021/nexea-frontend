@@ -55,6 +55,6 @@ export const trackMetaPixel = (
   }
 
   if (eventName) {
-    ReactPixel.track(eventName, eventData);
+    ReactPixel.trackCustom(eventName, eventData);
   }
 };
