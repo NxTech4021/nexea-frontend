@@ -861,7 +861,7 @@ const OrderDetails = ({ orderId }) => {
                                 sx={{ color: 'text.secondary' }}
                               />
                               <Typography variant="caption" color="text.secondary">
-                                {attendee.ticket.ticketAddOn.addOn.name}
+                                {attendee.ticket.ticketAddOn?.addOn.name}
                               </Typography>
                             </Box>
                           )}

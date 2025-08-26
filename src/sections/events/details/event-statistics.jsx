@@ -543,7 +543,7 @@ const EventStatistics = ({ data }) => {
 
   // Calculate add-ons quantity
   const addOnsQuantity = allAttendees.filter(
-    (attendee) => attendee.ticket?.ticketAddOn.addOn !== null
+    (attendee) => attendee.ticket?.ticketAddOn?.addOn !== null
   ).length;
 
   // Tickets chart data (paid vs free vs add-ons)

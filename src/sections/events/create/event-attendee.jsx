@@ -754,7 +754,7 @@ export default function EventAttendee() {
         }
 
         const addOnPrice = Number(ticketAddOn.price) || 0;
-        const originalAddOnPrice = Number(ticketAddOn.addOn?.price) || 0;
+        const originalAddOnPrice = Number(ticketAddOn?.addOn?.price) || 0;
         const orderStatus = row.order.status;
         const orderAmount = Number(row.order.totalAmount) || 0;
         const discountAmount = Number(row.order.discountAmount) || 0;
