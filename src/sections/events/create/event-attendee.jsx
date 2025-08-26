@@ -286,6 +286,14 @@ export default function EventAttendee() {
   const settings = useSettingsContext();
   const theme = useTheme();
   const router = useRouter();
+  
+  // Get URL search parameters for initial filtering
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTicketType = urlParams.get('ticketType');
+  const initialTicketStatus = urlParams.get('ticketStatus');
+  const initialTicketAddOn = urlParams.get('ticketAddOn');
+  const initialAddOnStatus = urlParams.get('addOnStatus');
+  const showColumns = urlParams.get('showColumns');
 
   // Column width persistence
   const { getColumnWidths, setColumnWidths } = useDataGridColumnsStore();
@@ -376,6 +384,10 @@ export default function EventAttendee() {
     isFilterExpanded,
     setIsFilterExpanded,
     eventId: id,
+    initialTicketType,
+    initialTicketStatus,
+    initialTicketAddOn,
+    initialAddOnStatus,
   });
 
   // Handle column resize
@@ -885,7 +897,7 @@ export default function EventAttendee() {
     },
     {
       field: 'orderAmount',
-      headerName: 'Order Amount',
+      headerName: 'Total Amount',
       width: persistedWidths.orderAmount || 200,
       valueGetter: (value, row) => `RM${(row.order.totalAmount || 0).toFixed(2)}`,
     },
@@ -1064,11 +1076,11 @@ export default function EventAttendee() {
             columns: {
               columnVisibilityModel: {
                 orderNumber: false,
-                ticketType: false,
-                ticketAddOn: false,
+                ticketType: !!((initialTicketType && showColumns === 'ticketType')),
+                ticketAddOn: !!((initialTicketAddOn && showColumns === 'ticketAddOn')),
                 ticketCode: false,
-                ticketStatus: false,
-                addOnStatus: false,
+                ticketStatus: showColumns === 'ticketStatus',
+                addOnStatus: showColumns === 'addOnStatus',
               },
             },
           }}

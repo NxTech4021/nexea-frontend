@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
+import { enqueueSnackbar } from 'notistack';
 // import { toast } from 'react-toastify';
 import React, { useState, useEffect } from 'react';
 // import { Form, Field, Formik, ErrorMessage } from 'formik';
@@ -398,6 +399,45 @@ const EventInformation = ({ event }) => {
 
               <Button
                 variant="contained"
+                onClick={() => {
+                  const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
+                  navigator.clipboard
+                    .writeText(eventLink)
+                    .then(() => {
+                      enqueueSnackbar('Cart link copied!', { variant: 'success' });
+                    })
+                    .catch((error) => {
+                      console.error('Error copying link: ', error);
+                      enqueueSnackbar('Failed to copy link', { variant: 'error' });
+                    });
+                }}
+                sx={{
+                  height: '34px',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  color: 'common.white',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                  },
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  textTransform: 'none',
+                  minWidth: 'auto',
+                }}
+              >
+                <Iconify icon="eva:copy-outline" width={16} height={16} />
+                Cart Link
+              </Button>
+
+              <Button
+                variant="contained"
                 onClick={() => router.push(`${paths.dashboard.events.attendees}/${event.id}`)}
                 sx={{
                   height: '34px',
@@ -547,6 +587,43 @@ const EventInformation = ({ event }) => {
             >
               <Iconify icon="bx:qr" width={16} height={16} />
               Check In
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
+                navigator.clipboard
+                  .writeText(eventLink)
+                  .then(() => {
+                    enqueueSnackbar('Cart link copied!', { variant: 'success' });
+                  })
+                  .catch((error) => {
+                    console.error('Error copying link: ', error);
+                    enqueueSnackbar('Failed to copy link', { variant: 'error' });
+                  });
+              }}
+              sx={{
+                height: '36px',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.75,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                textTransform: 'none',
+              }}
+            >
+              <Iconify icon="eva:copy-outline" width={16} height={16} />
+              Cart Link
             </Button>
 
             <Button

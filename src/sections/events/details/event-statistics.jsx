@@ -12,11 +12,15 @@ import {
   alpha,
   Button,
   Select,
+  Divider,
+  Tooltip,
   MenuItem,
   useTheme,
   Typography,
   CardContent,
 } from '@mui/material';
+
+import { useRouter } from 'src/routes/hooks';
 
 const StatCard = ({ title, value, subtitle, color }) => {
   const theme = useTheme();
@@ -60,242 +64,648 @@ StatCard.propTypes = {
   color: PropTypes.string,
 };
 
-const ModernTable = ({ data: breakdownData, title, isAddOn = false }) => {
+// Helper function to generate tooltip messages
+const getTooltipMessage = (ticketType, status, isAddOn) => {
+  const itemType = isAddOn ? 'add-on' : 'ticket';
+  const filterType = isAddOn ? 'add-on' : 'ticket type';
+  
+  if (status === 'total') {
+    return `Click to filter attendees by ${filterType}: ${ticketType}`;
+  }
+  
+  return `Click to filter attendees by ${filterType}: ${ticketType} (${status} only)`;
+};
+
+const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) => {
   const theme = useTheme();
+  const router = useRouter();
+  
   const entries = Object.entries(breakdownData);
+  const filteredEntries = entries;
+  
+  // Always show all columns
+  const visibleColumns = ['type', 'paid', 'free', 'total', 'revenue'];
+  
+  // Fixed column widths for 5-column layout
+  const columnWidths = {
+    type: '35%',
+    paid: '16.25%',
+    free: '16.25%',
+    total: '16.25%',
+    revenue: '16.25%'
+  };
 
   // Theme-aware colors
   const textColor = theme.palette.text.primary;
   const secondaryTextColor = theme.palette.text.secondary;
   const hoverBg = theme.palette.action.hover;
   const borderColor = theme.palette.divider;
+
+  // Handle clicks on paid/free/total numbers
+  const handleNumberClick = (ticketType, status) => {
+    console.log('Click handler triggered:', { ticketType, status, eventId, isAddOn });
+    
+    if (!eventId) {
+      console.error('No eventId provided');
+      return;
+    }
+    
+    // Navigate to event-attendee page with filters
+    const attendeeUrl = `/dashboard/events/attendees/${eventId}`;
+    
+    // Create URL with search params for filtering
+    const url = new URL(attendeeUrl, window.location.origin);
+    
+    if (isAddOn) {
+      // For add-ons table, filter by ticketAddOn instead of ticketType
+      url.searchParams.set('ticketAddOn', ticketType);
+      
+      if (status === 'total') {
+        // For total, only filter by add-on, no status filter
+        // Show ticketAddOn column for context
+        url.searchParams.set('showColumns', 'ticketAddOn');
+      } else {
+        // For paid or free, show only that add-on status
+        url.searchParams.set('addOnStatus', status);
+        // Show relevant columns automatically
+        url.searchParams.set('showColumns', 'addOnStatus');
+      }
+    } else {
+      // For tickets table, use original logic
+      url.searchParams.set('ticketType', ticketType);
+      
+      if (status === 'total') {
+        // For total, only filter by ticket type, no status filter
+        // Show ticketType column for context
+        url.searchParams.set('showColumns', 'ticketType');
+      } else {
+        // For paid or free, show only that status
+        url.searchParams.set('ticketStatus', status);
+        // Show relevant columns automatically
+        url.searchParams.set('showColumns', 'ticketStatus');
+      }
+    }
+    
+    const finalUrl = url.pathname + url.search;
+    console.log('Navigating to:', finalUrl);
+    
+    router.push(finalUrl);
+  };
   const cardBgColor = theme.palette.background.paper;
 
   if (entries.length === 0) {
     return (
-      <Card
-        sx={{
+      <Card sx={{ 
           border: 1,
           borderColor: theme.palette.divider,
-          borderRadius: 2,
+        borderRadius: 3,
           backgroundColor: theme.palette.background.paper,
-          backgroundImage:
-            theme.palette.mode === 'light'
-              ? 'linear-gradient(to bottom, #ffffff 0%, #f8f8f8 100%)'
-              : 'none',
-        }}
-      >
-        <CardContent>
-          <Stack spacing={2}>
-            <Typography fontSize={14} color={theme.palette.text.secondary} fontWeight={600}>
-              {title}
+        boxShadow: theme.palette.mode === 'light' 
+          ? '0 1px 3px rgba(0, 0, 0, 0.05)'
+          : '0 1px 3px rgba(0, 0, 0, 0.2)',
+      }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography fontSize={16} color={theme.palette.text.primary} fontWeight={600} sx={{ mb: 3 }}>
+            {title}
+          </Typography>
+          <Box sx={{ 
+            py: 8, 
+            textAlign: 'center',
+            color: theme.palette.text.secondary
+          }}>
+            <Typography variant="body2" fontSize={14}>
+              No data available
             </Typography>
-            <Box
-              sx={{
-                py: 6,
-                textAlign: 'center',
-                color: theme.palette.text.secondary,
-              }}
-            >
-              <Typography variant="body2">No data available</Typography>
-            </Box>
-          </Stack>
+          </Box>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card
-      sx={{
+    <Card sx={{ 
         border: 1,
         borderColor: theme.palette.divider,
-        borderRadius: 2,
+      borderRadius: 3,
         backgroundColor: theme.palette.background.paper,
-        backgroundImage:
-          theme.palette.mode === 'light'
-            ? 'linear-gradient(to bottom, #ffffff 0%, #f8f8f8 100%)'
-            : 'none',
-      }}
-    >
-      <CardContent>
-        <Stack spacing={2}>
-          <Typography fontSize={14} color={theme.palette.text.primary} fontWeight={600}>
+      boxShadow: theme.palette.mode === 'light' 
+        ? '0 1px 3px rgba(0, 0, 0, 0.05)'
+        : '0 1px 3px rgba(0, 0, 0, 0.2)',
+      overflow: 'hidden',
+    }}>
+      {/* Header with Title */}
+      <Box sx={{ p: 3, pb: 0 }}>
+          <Typography fontSize={16} color={theme.palette.text.primary} fontWeight={600}>
             {title}
           </Typography>
-          <Box
-            sx={{
-              border: `1px solid ${borderColor}`,
-              borderRadius: 1,
-              bgcolor: cardBgColor,
-              overflow: 'hidden',
-            }}
-          >
-            {/* Header row for desktop */}
-            <Stack
-              direction="row"
-              alignItems="center"
-              sx={{
-                px: 2,
-                py: 1,
-                bgcolor: hoverBg,
+      </Box>
+      
+      <Divider sx={{ mt: 3, borderColor: alpha(theme.palette.divider, 0.5) }} />
+      
+      {/* Table Content */}
+      <Box sx={{ overflow: 'hidden' }}>
+        {filteredEntries.length === 0 ? (
+          <Box sx={{ 
+            py: 6, 
+            px: 3,
+                  textAlign: 'center',
+            color: theme.palette.text.secondary
+          }}>
+                        <Typography variant="body2" fontSize={14}>
+              No data available
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            {/* Desktop Header */}
+            <Box
+                sx={{
                 display: { xs: 'none', md: 'flex' },
-                borderBottom: `1px solid ${borderColor}`,
+                alignItems: 'center',
+                px: 3,
+                py: 1.5,
+                bgcolor: theme.palette.mode === 'light' ? '#fafafa' : '#1e1e1e',
+                borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#e4e4e7' : '#27272a'}`,
               }}
             >
-              <Typography sx={{ width: '30%', color: textColor, fontWeight: 600, fontSize: 13 }}>
-                Type
+              {visibleColumns.includes('type') && (
+                <Typography sx={{ 
+                  width: visibleColumns.length === 3 ? columnWidths.type : columnWidths.type, 
+                  color: theme.palette.mode === 'light' ? '#71717a' : '#a1a1aa', 
+                  fontWeight: 500, 
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.025em',
+                  textTransform: 'uppercase'
+                }}>
+                  TYPE
               </Typography>
-              <Typography
-                sx={{
-                  width: '17.5%',
+              )}
+              {visibleColumns.includes('paid') && (
+                <Typography sx={{ 
+                  width: columnWidths.paid, 
+                  color: theme.palette.mode === 'light' ? '#71717a' : '#a1a1aa',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.025em',
+                  textTransform: 'uppercase',
+                  textAlign: 'center' 
+                }}>
+                  PAID
+              </Typography>
+              )}
+              {visibleColumns.includes('free') && (
+                <Typography sx={{ 
+                  width: columnWidths.free, 
+                  color: theme.palette.mode === 'light' ? '#71717a' : '#a1a1aa',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.025em',
+                  textTransform: 'uppercase',
+                  textAlign: 'center' 
+                }}>
+                  FREE
+              </Typography>
+              )}
+              {visibleColumns.includes('total') && (
+                <Typography sx={{ 
+                  width: columnWidths.total, 
+                  color: theme.palette.mode === 'light' ? '#71717a' : '#a1a1aa',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.025em',
+                  textTransform: 'uppercase',
+                  textAlign: 'center' 
+                }}>
+                  TOTAL
+              </Typography>
+              )}
+              {visibleColumns.includes('revenue') && (
+                <Typography sx={{ 
+                  width: visibleColumns.length === 3 ? columnWidths.revenue : columnWidths.revenue, 
                   color: textColor,
                   fontWeight: 600,
                   fontSize: 13,
-                  textAlign: 'center',
-                }}
-              >
-                Paid
+                  textAlign: 'right' 
+                }}>
+                  REVENUE
               </Typography>
-              <Typography
-                sx={{
-                  width: '17.5%',
-                  color: textColor,
-                  fontWeight: 600,
-                  fontSize: 13,
-                  textAlign: 'center',
-                }}
-              >
-                Free
-              </Typography>
-              <Typography
-                sx={{
-                  width: '17.5%',
-                  color: textColor,
-                  fontWeight: 600,
-                  fontSize: 13,
-                  textAlign: 'center',
-                }}
-              >
-                Total
-              </Typography>
-              <Typography
-                sx={{
-                  width: '16.5%',
-                  color: textColor,
-                  fontWeight: 600,
-                  fontSize: 13,
-                  textAlign: 'right',
-                }}
-              >
-                Revenue
-              </Typography>
-            </Stack>
+              )}
+            </Box>
 
-            {/* Data rows */}
-            <Stack>
-              {entries.map(([type, stats], index) => (
-                <Stack
+            {/* Data Rows */}
+            <Box>
+              {filteredEntries.map(([type, stats], index) => (
+                <Box
                   key={type}
-                  direction={{ xs: 'column', md: 'row' }}
-                  alignItems={{ xs: 'flex-start', md: 'center' }}
                   sx={{
-                    p: 2,
-                    borderBottom:
-                      index === entries.length - 1 ? 'none' : `1px solid ${borderColor}`,
+                    px: 3,
+                    py: 2.5,
+                    borderBottom: index === filteredEntries.length - 1 ? 'none' : `1px solid ${theme.palette.mode === 'light' ? '#e4e4e7' : '#27272a'}`,
+                    transition: 'all 0.15s ease-in-out',
                     '&:hover': {
-                      bgcolor: hoverBg,
+                      bgcolor: theme.palette.mode === 'light' ? '#f9fafb' : '#1f2937',
                     },
                   }}
                 >
-                  {/* Mobile layout - Card style */}
-                  <Box
-                    sx={{
-                      display: { xs: 'flex', md: 'none' },
-                      flexDirection: 'column',
-                      width: '100%',
-                      mb: 1,
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography
-                          sx={{
-                            color: textColor,
-                            fontWeight: 600,
-                            fontSize: 14,
-                          }}
-                        >
-                          {type}
-                        </Typography>
-                        {isAddOn && (
-                          <Chip
-                            label="Add-on"
-                            size="small"
+                  {/* Mobile Layout */}
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                    <Stack spacing={3}>
+                      {/* Header Section */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
                             sx={{
-                              height: 20,
-                              fontSize: '0.65rem',
-                              fontWeight: 500,
-                              bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                              color: 'secondary.main',
-                              border: 1,
-                              borderColor: alpha(theme.palette.secondary.main, 0.3),
-                              '& .MuiChip-label': { px: 1 },
+                              color: textColor,
+                              fontWeight: 600,
+                              fontSize: { xs: 14, sm: 15 },
+                              lineHeight: 1.3,
+                              wordBreak: 'break-word',
+                              flex: 1
                             }}
-                          />
+                          >
+                            {type}
+                          </Typography>
+                          {isAddOn && (
+                            <Chip
+                              label="Add-on"
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: '0.6875rem',
+                                fontWeight: 500,
+                                bgcolor: 'transparent',
+                                color: '#737373',
+                                border: '1px solid #E5E5E5',
+                                '& .MuiChip-label': { px: 1 },
+                                flexShrink: 0
+                              }}
+                            />
+                          )}
+                        </Stack>
+                        <Typography sx={{ 
+                          color: theme.palette.success.main, 
+                          fontSize: { xs: 14, sm: 15 }, 
+                          fontWeight: 700,
+                          letterSpacing: '-0.01em',
+                          flexShrink: 0
+                        }}>
+                          RM {stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Typography>
+                      </Box>
+
+                      {/* Stats Section - Grid Layout for Better Mobile Experience */}
+                      <Box sx={{ 
+                        display: 'grid',
+                        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)' },
+                        gap: 2,
+                        mt: 1
+                      }}>
+                        {visibleColumns.includes('paid') && (
+                          <Tooltip title={getTooltipMessage(type, 'paid', isAddOn)} arrow placement="top">
+                            <Box sx={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'flex-start',
+                              gap: 1,
+                              p: 2,
+                              borderRadius: 1.5,
+                              bgcolor: theme.palette.mode === 'light' ? 'rgba(34, 154, 22, 0.04)' : 'rgba(34, 154, 22, 0.08)',
+                              border: '1px solid rgba(34, 154, 22, 0.15)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(34, 154, 22, 0.08)' : 'rgba(34, 154, 22, 0.12)',
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 2px 8px rgba(34, 154, 22, 0.2)'
+                              },
+                              '&:active': {
+                                transform: 'translateY(0)',
+                              }
+                            }}
+                            onClick={() => handleNumberClick(type, 'paid')}
+                            >
+                              <Typography sx={{ 
+                                color: '#229A16', 
+                                fontSize: 11, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Paid
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#229A16', 
+                                fontSize: { xs: 20, sm: 22 }, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.paidQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
                         )}
-                      </Stack>
-                      <Typography sx={{ color: textColor, fontSize: 14, fontWeight: 600 }}>
-                        RM{' '}
-                        {stats.revenue.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </Typography>
-                    </Box>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography sx={{ color: secondaryTextColor, fontSize: 12 }}>
-                        Paid:
-                      </Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>
-                        {stats.paidQuantity}
-                      </Typography>
-                    </Box>
+                        {visibleColumns.includes('free') && (
+                          <Tooltip title={getTooltipMessage(type, 'free', isAddOn)} arrow placement="top">
+                            <Box sx={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'flex-start',
+                              gap: 1,
+                              p: 2,
+                              borderRadius: 1.5,
+                              bgcolor: theme.palette.mode === 'light' ? 'rgba(33, 150, 243, 0.04)' : 'rgba(33, 150, 243, 0.08)',
+                              border: '1px solid rgba(33, 150, 243, 0.15)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(33, 150, 243, 0.08)' : 'rgba(33, 150, 243, 0.12)',
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 2px 8px rgba(33, 150, 243, 0.2)'
+                              },
+                              '&:active': {
+                                transform: 'translateY(0)',
+                              }
+                            }}
+                            onClick={() => handleNumberClick(type, 'free')}
+                            >
+                              <Typography sx={{ 
+                                color: '#2196F3', 
+                                fontSize: 11, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Free
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#2196F3', 
+                                fontSize: { xs: 20, sm: 22 }, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.freeQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        )}
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography sx={{ color: secondaryTextColor, fontSize: 12 }}>
-                        Free:
-                      </Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>
-                        {stats.freeQuantity}
-                      </Typography>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography sx={{ color: secondaryTextColor, fontSize: 12 }}>
-                        Total:
-                      </Typography>
-                      <Typography sx={{ color: textColor, fontSize: 13, fontWeight: 500 }}>
-                        {stats.paidQuantity + stats.freeQuantity}
-                      </Typography>
-                    </Box>
+                        {visibleColumns.includes('total') && (
+                          <Tooltip title={getTooltipMessage(type, 'total', isAddOn)} arrow placement="top">
+                            <Box sx={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'flex-start',
+                              gap: 1,
+                              p: 2,
+                              borderRadius: 1.5,
+                              bgcolor: theme.palette.mode === 'light' ? 'rgba(115, 115, 115, 0.04)' : 'rgba(115, 115, 115, 0.08)',
+                              border: '1px solid rgba(115, 115, 115, 0.15)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              gridColumn: { xs: 'span 2', sm: 'span 1' },
+                              '&:hover': {
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(115, 115, 115, 0.08)' : 'rgba(115, 115, 115, 0.12)',
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 2px 8px rgba(115, 115, 115, 0.2)'
+                              },
+                              '&:active': {
+                                transform: 'translateY(0)',
+                              }
+                            }}
+                            onClick={() => handleNumberClick(type, 'total')}
+                            >
+                              <Typography sx={{ 
+                                color: '#737373', 
+                                fontSize: 11, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Total
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#737373', 
+                                fontSize: { xs: 20, sm: 22 }, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.paidQuantity + stats.freeQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </Stack>
                   </Box>
 
-                  {/* Desktop layout - row style */}
-                  <Box
-                    sx={{
-                      width: '30%',
+                  {/* Tablet Layout */}
+                  <Box sx={{ display: { xs: 'none', sm: 'block', md: 'none' } }}>
+                    <Stack spacing={2}>
+                      {/* Header Section for Tablet */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Stack direction="row" alignItems="center" spacing={1.5}>
+                          <Typography
+                            sx={{
+                              color: textColor,
+                              fontWeight: 600,
+                              fontSize: 16
+                            }}
+                          >
+                            {type}
+                          </Typography>
+                          {isAddOn && (
+                            <Chip
+                              label="Add-on"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: '0.7rem',
+                                fontWeight: 500,
+                                bgcolor: 'transparent',
+                                color: '#737373',
+                                border: '1px solid #E5E5E5',
+                                '& .MuiChip-label': { px: 1.5 }
+                              }}
+                            />
+                          )}
+                        </Stack>
+                        <Typography sx={{ 
+                          color: theme.palette.success.main, 
+                          fontSize: 16, 
+                          fontWeight: 700,
+                          letterSpacing: '-0.01em'
+                        }}>
+                          RM {stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Typography>
+                      </Box>
+
+                      {/* Stats Row for Tablet */}
+                      <Box sx={{ 
+                        display: 'flex',
+                        gap: 2,
+                        justifyContent: 'flex-start',
+                        flexWrap: 'wrap'
+                      }}>
+                        {visibleColumns.includes('paid') && (
+                          <Tooltip title={getTooltipMessage(type, 'paid', isAddOn)} arrow placement="top">
+                            <Box 
+                              sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                gap: 1.5,
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(34, 154, 22, 0.04)' : 'rgba(34, 154, 22, 0.08)',
+                                border: '1px solid rgba(34, 154, 22, 0.15)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease-in-out',
+                                minWidth: 'fit-content',
+                                '&:hover': {
+                                  bgcolor: theme.palette.mode === 'light' ? 'rgba(34, 154, 22, 0.08)' : 'rgba(34, 154, 22, 0.12)',
+                                  transform: 'translateY(-1px)',
+                                  boxShadow: '0 2px 8px rgba(34, 154, 22, 0.2)'
+                                },
+                                '&:active': {
+                                  transform: 'translateY(0)',
+                                }
+                              }}
+                              onClick={() => handleNumberClick(type, 'paid')}
+                            >
+                              <Typography sx={{ 
+                                color: '#229A16', 
+                                fontSize: 12, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Paid
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#229A16', 
+                                fontSize: 18, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.paidQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        )}
+
+                        {visibleColumns.includes('free') && (
+                          <Tooltip title={getTooltipMessage(type, 'free', isAddOn)} arrow placement="top">
+                            <Box 
+                              sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                gap: 1.5,
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(33, 150, 243, 0.04)' : 'rgba(33, 150, 243, 0.08)',
+                                border: '1px solid rgba(33, 150, 243, 0.15)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease-in-out',
+                                minWidth: 'fit-content',
+                                '&:hover': {
+                                  bgcolor: theme.palette.mode === 'light' ? 'rgba(33, 150, 243, 0.08)' : 'rgba(33, 150, 243, 0.12)',
+                                  transform: 'translateY(-1px)',
+                                  boxShadow: '0 2px 8px rgba(33, 150, 243, 0.2)'
+                                },
+                                '&:active': {
+                                  transform: 'translateY(0)',
+                                }
+                              }}
+                              onClick={() => handleNumberClick(type, 'free')}
+                            >
+                              <Typography sx={{ 
+                                color: '#2196F3', 
+                                fontSize: 12, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Free
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#2196F3', 
+                                fontSize: 18, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.freeQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        )}
+
+                        {visibleColumns.includes('total') && (
+                          <Tooltip title={getTooltipMessage(type, 'total', isAddOn)} arrow placement="top">
+                            <Box 
+                              sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                gap: 1.5,
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor: theme.palette.mode === 'light' ? 'rgba(115, 115, 115, 0.04)' : 'rgba(115, 115, 115, 0.08)',
+                                border: '1px solid rgba(115, 115, 115, 0.15)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease-in-out',
+                                minWidth: 'fit-content',
+                                '&:hover': {
+                                  bgcolor: theme.palette.mode === 'light' ? 'rgba(115, 115, 115, 0.08)' : 'rgba(115, 115, 115, 0.12)',
+                                  transform: 'translateY(-1px)',
+                                  boxShadow: '0 2px 8px rgba(115, 115, 115, 0.2)'
+                                },
+                                '&:active': {
+                                  transform: 'translateY(0)',
+                                }
+                              }}
+                              onClick={() => handleNumberClick(type, 'total')}
+                            >
+                              <Typography sx={{ 
+                                color: '#737373', 
+                                fontSize: 12, 
+                                fontWeight: 600, 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                Total
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#737373', 
+                                fontSize: 18, 
+                                fontWeight: 700,
+                                lineHeight: 1
+                              }}>
+                                {stats.paidQuantity + stats.freeQuantity}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </Stack>
+                  </Box>
+
+                  {/* Desktop Layout */}
+                  <Box sx={{ 
                       display: { xs: 'none', md: 'flex' },
+                    alignItems: 'center' 
+                  }}>
+                    {visibleColumns.includes('type') && (
+                      <Box sx={{ 
+                        width: visibleColumns.length === 3 ? columnWidths.type : columnWidths.type, 
+                        display: 'flex', 
                       alignItems: 'center',
-                      gap: 1,
-                    }}
-                  >
+                        gap: 1.5 
+                      }}>
                     <Typography
                       sx={{
                         color: textColor,
-                        fontWeight: 500,
+                            fontWeight: 600, 
                         fontSize: 14,
+                            letterSpacing: '-0.01em'
                       }}
                     >
                       {type}
@@ -305,137 +715,127 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false }) => {
                         label="Add-on"
                         size="small"
                         sx={{
-                          height: 20,
-                          fontSize: '0.65rem',
+                              height: 22,
+                              fontSize: '0.7rem',
                           fontWeight: 500,
-                          bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                          color: 'secondary.main',
-                          border: 1,
-                          borderColor: alpha(theme.palette.secondary.main, 0.3),
-                          '& .MuiChip-label': { px: 1 },
+                          bgcolor: 'transparent',
+                          color: '#737373',
+                              border: '1px solid #E5E5E5',
+                              '& .MuiChip-label': { px: 1.5 },
                           '&:hover': {
-                            bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                            color: 'secondary.main',
-                          },
+                                bgcolor: 'rgba(115, 115, 115, 0.08)',
+                              }
                         }}
                       />
                     )}
                   </Box>
-
-                  <Box
-                    sx={{
-                      width: '17.5%',
-                      display: { xs: 'none', md: 'flex' },
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Box
+                    )}
+                    
+                    {visibleColumns.includes('paid') && (
+                      <Box sx={{ width: columnWidths.paid, display: 'flex', justifyContent: 'center' }}>
+                        <Tooltip title={getTooltipMessage(type, 'paid', isAddOn)} arrow placement="top">
+                          <Chip
+                            label={stats.paidQuantity}
+                            size="small"
+                            clickable
+                            onClick={() => handleNumberClick(type, 'paid')}
                       sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: 32,
-                        height: 24,
-                        px: 1,
-                        borderRadius: 1,
-                        border: `1px solid ${theme.palette.divider}`,
-                        backgroundColor: theme.palette.action.hover,
-                        color: theme.palette.text.secondary,
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      {stats.paidQuantity}
+                              height: 26,
+                          fontSize: '0.75rem',
+                              fontWeight: 600,
+                              bgcolor: 'rgba(34, 154, 22, 0.08)',
+                              color: '#229A16',
+                              border: '1px solid rgba(34, 154, 22, 0.2)',
+                              cursor: 'pointer',
+                              '& .MuiChip-label': { px: 1.5 },
+                              '&:hover': {
+                                bgcolor: 'rgba(34, 154, 22, 0.15)',
+                              }
+                        }}
+                          />
+                        </Tooltip>
                     </Box>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      width: '17.5%',
-                      display: { xs: 'none', md: 'flex' },
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Box
+                    )}
+                    
+                    {visibleColumns.includes('free') && (
+                      <Box sx={{ width: columnWidths.free, display: 'flex', justifyContent: 'center' }}>
+                        <Tooltip title={getTooltipMessage(type, 'free', isAddOn)} arrow placement="top">
+                          <Chip
+                            label={stats.freeQuantity}
+                            size="small"
+                            clickable
+                            onClick={() => handleNumberClick(type, 'free')}
                       sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: 32,
-                        height: 24,
-                        px: 1,
-                        borderRadius: 1,
-                        border: `1px solid ${theme.palette.divider}`,
-                        backgroundColor: theme.palette.action.hover,
-                        color: theme.palette.text.secondary,
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      {stats.freeQuantity}
+                              height: 26,
+                          fontSize: '0.75rem',
+                              fontWeight: 600,
+                              bgcolor: 'rgba(33, 150, 243, 0.08)',
+                              color: '#2196F3',
+                              border: '1px solid rgba(33, 150, 243, 0.2)',
+                              cursor: 'pointer',
+                              '& .MuiChip-label': { px: 1.5 },
+                              '&:hover': {
+                                bgcolor: 'rgba(33, 150, 243, 0.15)',
+                              }
+                        }}
+                          />
+                        </Tooltip>
                     </Box>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      width: '17.5%',
-                      display: { xs: 'none', md: 'flex' },
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Box
+                    )}
+                    
+                    {visibleColumns.includes('total') && (
+                      <Box sx={{ width: columnWidths.total, display: 'flex', justifyContent: 'center' }}>
+                        <Tooltip title={getTooltipMessage(type, 'total', isAddOn)} arrow placement="top">
+                          <Chip
+                            label={stats.paidQuantity + stats.freeQuantity}
+                            size="small"
+                            clickable
+                            onClick={() => handleNumberClick(type, 'total')}
                       sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: 32,
-                        height: 24,
-                        px: 1,
-                        borderRadius: 1,
-                        border: `1px solid ${theme.palette.divider}`,
-                        backgroundColor: theme.palette.action.hover,
-                        color: theme.palette.text.secondary,
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      {stats.paidQuantity + stats.freeQuantity}
+                              height: 26,
+                          fontSize: '0.75rem',
+                              fontWeight: 600,
+                              bgcolor: 'transparent',
+                              color: '#737373',
+                              border: '1px solid #E5E5E5',
+                              cursor: 'pointer',
+                              '& .MuiChip-label': { px: 1.5 },
+                              '&:hover': {
+                                bgcolor: 'rgba(115, 115, 115, 0.08)',
+                              }
+                        }}
+                          />
+                        </Tooltip>
                     </Box>
-                  </Box>
-
-                  <Box
+                    )}
+                    
+                    {visibleColumns.includes('revenue') && (
+                      <Box sx={{ 
+                        width: visibleColumns.length === 3 ? columnWidths.revenue : columnWidths.revenue, 
+                        display: 'flex', 
+                        justifyContent: 'flex-end' 
+                      }}>
+                        <Typography 
                     sx={{
-                      width: '17.5%',
-                      display: { xs: 'none', md: 'flex' },
-                      justifyContent: 'flex-end',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        px: 1.5,
-                        height: 24,
-                        borderRadius: 1,
-                        color: theme.palette.text.primary,
+                            color: textColor,
                         fontWeight: 600,
-                        fontSize: '0.8rem',
-                      }}
-                    >
-                      RM{' '}
-                      {stats.revenue.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                            fontSize: 14,
+                            letterSpacing: '-0.01em'
+                          }}
+                        >
+                          RM {stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Typography>
                     </Box>
+                    )}
                   </Box>
-                </Stack>
+                </Box>
               ))}
-            </Stack>
           </Box>
-        </Stack>
-      </CardContent>
+          </>
+        )}
+      </Box>
+      
+
     </Card>
   );
 };
@@ -444,9 +844,10 @@ ModernTable.propTypes = {
   data: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   isAddOn: PropTypes.bool,
+  eventId: PropTypes.string,
 };
 
-const EventStatistics = ({ data }) => {
+const EventStatistics = ({ data, eventId }) => {
   const theme = useTheme();
   const [revenueTimeRange, setRevenueTimeRange] = useState(7); // Default to 7 days
 
@@ -590,9 +991,9 @@ const EventStatistics = ({ data }) => {
 
     if (isFromPaidOrder) {
       acc[ticketType].paidQuantity += 1;
-      const orderTotalAttendees = attendeeOrder.attendees.length;
-      const proportionalRevenue = (attendeeOrder.totalAmount || 0) / orderTotalAttendees;
-      acc[ticketType].revenue += proportionalRevenue;
+      // For ticket types, only count the base ticket price (excluding add-ons)
+      const baseTicketPrice = attendee.ticket?.price || 0;
+      acc[ticketType].revenue += baseTicketPrice;
     } else {
       acc[ticketType].freeQuantity += 1;
     }
@@ -1092,13 +1493,13 @@ const EventStatistics = ({ data }) => {
           Object.keys(addOnBreakdown).length > 0) && (
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: Object.keys(addOnBreakdown).length > 0 ? 6 : 12 }}>
-              <ModernTable data={ticketTypeBreakdown} title="All Tickets" />
+              <ModernTable data={ticketTypeBreakdown} title="All Tickets" eventId={eventId} />
             </Grid>
 
             {/* Add-on Breakdown Table */}
             {Object.keys(addOnBreakdown).length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <ModernTable data={addOnBreakdown} title="Add-ons" isAddOn />
+                <ModernTable data={addOnBreakdown} title="Add-ons" isAddOn eventId={eventId} />
               </Grid>
             )}
           </Grid>
@@ -1110,6 +1511,7 @@ const EventStatistics = ({ data }) => {
 
 EventStatistics.propTypes = {
   data: PropTypes.object,
+  eventId: PropTypes.string,
 };
 
 export default EventStatistics;

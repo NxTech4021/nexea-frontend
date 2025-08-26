@@ -24,6 +24,8 @@ import {
   useMediaQuery,
 } from '@mui/material';
 
+import { useRouter } from 'src/routes/hooks';
+
 import Iconify from 'src/components/iconify';
 
 // Custom toolbar component
@@ -189,8 +191,13 @@ const EventFilters = ({
   isFilterExpanded,
   setIsFilterExpanded,
   eventId, // Add eventId prop for scoped persistence
+  initialTicketType,
+  initialTicketStatus,
+  initialTicketAddOn,
+  initialAddOnStatus,
 }) => {
   const theme = useTheme();
+  const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -229,19 +236,82 @@ const EventFilters = ({
     }
   };
 
-  // Advanced filtering state with persistence
-  const [filters, setFilters] = useState(() =>
-    // Load persisted filters on initial mount
-    loadFiltersFromStorage()
-  );
-
-  // Auto-expand filter section if persisted filters exist
-  useEffect(() => {
-    const persistedFilters = loadFiltersFromStorage();
-    if (persistedFilters.length > 0 && !isFilterExpanded) {
-      setIsFilterExpanded(true);
+  // Helper function to create initial filters from URL parameters
+  const createInitialFiltersFromURL = useCallback(() => {
+    const urlFilters = [];
+    
+    // Add ticket type filter if provided
+    if (initialTicketType) {
+      urlFilters.push({
+        id: `url-ticketType-${Date.now()}`,
+        field: 'ticketType',
+        operator: 'equals',
+        value: initialTicketType,
+      });
     }
-  }, [setIsFilterExpanded, isFilterExpanded, loadFiltersFromStorage]);
+    
+    // Add ticket add-on filter if provided
+    if (initialTicketAddOn) {
+      urlFilters.push({
+        id: `url-ticketAddOn-${Date.now()}`,
+        field: 'ticketAddOn',
+        operator: 'equals',
+        value: initialTicketAddOn,
+      });
+    }
+    
+    // Add ticket status filter(s) if provided
+    if (initialTicketStatus) {
+      const statuses = initialTicketStatus.split(',');
+      statuses.forEach((status, index) => {
+        urlFilters.push({
+          id: `url-ticketStatus-${Date.now()}-${index}`,
+          field: 'ticketStatus',
+          operator: 'equals',
+          value: status.trim(),
+        });
+      });
+    }
+    
+    // Add add-on status filter(s) if provided
+    if (initialAddOnStatus) {
+      const statuses = initialAddOnStatus.split(',');
+      statuses.forEach((status, index) => {
+        urlFilters.push({
+          id: `url-addOnStatus-${Date.now()}-${index}`,
+          field: 'addOnStatus',
+          operator: 'equals',
+          value: status.trim(),
+        });
+      });
+    }
+    
+    return urlFilters;
+  }, [initialTicketType, initialTicketStatus, initialTicketAddOn, initialAddOnStatus]);
+
+  // Advanced filtering state with persistence and URL parameters
+  const [filters, setFilters] = useState(() => {
+    // Check if we have URL parameters first
+    if (initialTicketType || initialTicketStatus || initialTicketAddOn || initialAddOnStatus) {
+      const urlFilters = createInitialFiltersFromURL();
+      // Save URL filters to localStorage to persist them
+      saveFiltersToStorage(urlFilters);
+      return urlFilters;
+    }
+    // Otherwise, load persisted filters
+    return loadFiltersFromStorage();
+  });
+
+  // Track if initial auto-expansion has happened
+  const [hasInitiallyExpanded, setHasInitiallyExpanded] = useState(false);
+
+  // Auto-expand filter section if filters exist (persisted or from URL) - but only initially
+  useEffect(() => {
+    if (!hasInitiallyExpanded && (filters.length > 0 || initialTicketType || initialTicketStatus || initialTicketAddOn || initialAddOnStatus)) {
+      setIsFilterExpanded(true);
+      setHasInitiallyExpanded(true);
+    }
+  }, [filters.length, initialTicketType, initialTicketStatus, initialTicketAddOn, initialAddOnStatus, hasInitiallyExpanded, setIsFilterExpanded]);
 
   // Helper function to get background color without nested ternaries
   const getMobileBackgroundColor = () => {
@@ -370,6 +440,18 @@ const EventFilters = ({
   const clearAllFilters = () => {
     setFilters([]);
     clearFiltersFromStorage();
+    
+    // Collapse the advanced filters section
+    setIsFilterExpanded(false);
+    
+    // Reset the initial expansion flag so future URL parameters can auto-expand again
+    setHasInitiallyExpanded(false);
+    
+    // Reset URL parameters back to the original event URL
+    if (eventId) {
+      const originalUrl = `/dashboard/events/attendees/${eventId}`;
+      router.push(originalUrl);
+    }
   };
 
   // Apply filters to data

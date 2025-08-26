@@ -163,7 +163,7 @@ const EventDetails = ({ id }) => {
         </Grid>
         
         <Grid item size={{ xs: 12 }}>
-          <EventStatistics data={data} />
+          <EventStatistics data={data} eventId={id} />
         </Grid>
         {/* <Grid item size={{ xs: 12 }}>
           <TotalRevenue totalRevenue={totalRevenue} />

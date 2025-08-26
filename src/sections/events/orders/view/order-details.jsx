@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 
 import {
   Box,
@@ -26,10 +26,10 @@ import {
   FormControl,
   CardContent,
   DialogTitle,
+  ListItemText,
   DialogActions,
   DialogContent,
   CircularProgress,
-  ListItemText,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
