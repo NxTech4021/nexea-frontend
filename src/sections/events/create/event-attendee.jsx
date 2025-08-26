@@ -884,6 +884,12 @@ export default function EventAttendee() {
       },
     },
     {
+      field: 'orderAmount',
+      headerName: 'Order Amount',
+      width: persistedWidths.orderAmount || 200,
+      valueGetter: (value, row) => `RM${(row.order.totalAmount || 0).toFixed(2)}`,
+    },
+    {
       field: 'discountCode',
       headerName: 'Discount Code',
       width: persistedWidths.discountCode || 150,
