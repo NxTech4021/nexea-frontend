@@ -749,7 +749,7 @@ export default function EventAttendee() {
         // Check if there's an add-on
         const { ticketAddOn } = row.ticket;
 
-        if (!ticketAddOn) {
+        if (!ticketAddOn || !ticketAddOn?.addOn) {
           return 'none';
         }
 

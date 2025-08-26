@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -29,11 +29,13 @@ import {
   DialogActions,
   DialogContent,
   CircularProgress,
+  ListItemText,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useOrderSearchStore } from 'src/hooks/zustand/useOrderSearch';
 
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
@@ -87,6 +89,30 @@ const getStatusConfig = (status) => {
   };
 };
 
+const fakeData = [
+  {
+    firstName: 'asdnksahjdnaskjndkasjndjasdasdasdsadassadkjnkjnljnljknlkjnkjnkjnkjnkjnkjnkjn',
+  },
+  {
+    firstName: 'asdsadsadasdasd',
+  },
+  {
+    firstName: 'xcvxasdasdsa',
+  },
+  {
+    firstName: 'qweasdasdqe',
+  },
+  {
+    firstName: 'asdsad',
+  },
+  {
+    firstName: 'nvbasdsadasdn',
+  },
+  {
+    firstName: 'tyrtasdsar',
+  },
+];
+
 const OrderDetails = ({ orderId }) => {
   const router = useRouter();
   const { data: order, isLoading, mutate } = useSWR(`${endpoints.order.root}/${orderId}`, fetcher);
@@ -101,6 +127,10 @@ const OrderDetails = ({ orderId }) => {
     message: '',
     severity: 'success',
   });
+
+  const openInvoice = useBoolean();
+
+  const attendees = order?.attendees || [];
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -255,19 +285,19 @@ const OrderDetails = ({ orderId }) => {
             <Iconify icon="eva:arrow-back-fill" width={20} height={20} />
           </IconButton>
         </Tooltip> */}
-        
+
         <Tooltip title="Back to Attendees">
           <IconButton
             onClick={() => {
               const eventIdToUse = order?.event?.id || selectedEventId;
-              
+
               // console.log('Navigation Debug:', {
               //   orderEventId: order?.event?.id,
               //   selectedEventId,
               //   eventIdToUse,
               //   eventName: order?.event?.name,
               // });
-              
+
               if (eventIdToUse) {
                 router.push(`${paths.dashboard.events.attendees}/${eventIdToUse}`);
               } else {
@@ -395,13 +425,11 @@ const OrderDetails = ({ orderId }) => {
               >
                 <Iconify icon="eva:person-outline" width={20} height={20} sx={{ color: '#000' }} />
               </Box>
-              <Typography variant="h6">
-                Buyer Information
-              </Typography>
+              <Typography variant="h6">Buyer Information</Typography>
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
               {/* Buyer Avatar */}
               <Box
@@ -426,27 +454,42 @@ const OrderDetails = ({ orderId }) => {
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                   {order.buyerName}
                 </Typography>
-                
+
                 {/* Contact Information */}
                 <Stack spacing={1}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Iconify icon="eva:email-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                    <Iconify
+                      icon="eva:email-outline"
+                      width={14}
+                      height={14}
+                      sx={{ color: 'text.secondary' }}
+                    />
                     <Typography variant="body2" sx={{ color: 'text.primary' }}>
                       {order.buyerEmail}
                     </Typography>
                   </Box>
-                  
+
                   {order.buyerPhoneNumber && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="eva:phone-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Iconify
+                        icon="eva:phone-outline"
+                        width={14}
+                        height={14}
+                        sx={{ color: 'text.secondary' }}
+                      />
                       <Typography variant="body2" sx={{ color: 'text.primary' }}>
                         {order.buyerPhoneNumber}
                       </Typography>
                     </Box>
                   )}
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Iconify icon="eva:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                    <Iconify
+                      icon="eva:clock-outline"
+                      width={14}
+                      height={14}
+                      sx={{ color: 'text.secondary' }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       Purchased {dayjs(order.createdAt).format('MMM D, YYYY [at] h:mm A')}
                     </Typography>
@@ -477,15 +520,18 @@ const OrderDetails = ({ orderId }) => {
                   justifyContent: 'center',
                 }}
               >
-                <Iconify icon="eva:calendar-outline" width={20} height={20} sx={{ color: '#000' }} />
+                <Iconify
+                  icon="eva:calendar-outline"
+                  width={20}
+                  height={20}
+                  sx={{ color: '#000' }}
+                />
               </Box>
-              <Typography variant="h6">
-                Event Information
-              </Typography>
+              <Typography variant="h6">Event Information</Typography>
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             {order.event ? (
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                 {/* Event Logo */}
@@ -505,7 +551,7 @@ const OrderDetails = ({ orderId }) => {
                 >
                   <Box
                     component="img"
-                    src={order.event?.eventSetting?.eventLogo || "/logo/nexea.png"}
+                    src={order.event?.eventSetting?.eventLogo || '/logo/nexea.png'}
                     alt={order.event?.name || 'Event'}
                     sx={{
                       width: '80%',
@@ -541,12 +587,12 @@ const OrderDetails = ({ orderId }) => {
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
                     {order.event.name}
                   </Typography>
-                  
+
                   {order.event.description && (
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
                         mb: 1.5,
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -562,7 +608,12 @@ const OrderDetails = ({ orderId }) => {
                   <Stack spacing={1}>
                     {/* Date */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="eva:calendar-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Iconify
+                        icon="eva:calendar-outline"
+                        width={14}
+                        height={14}
+                        sx={{ color: 'text.secondary' }}
+                      />
                       <Typography variant="body2" sx={{ color: 'text.primary' }}>
                         {order.event.date
                           ? dayjs(order.event.date).format('MMM D, YYYY')
@@ -572,7 +623,12 @@ const OrderDetails = ({ orderId }) => {
 
                     {/* Time */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="eva:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                      <Iconify
+                        icon="eva:clock-outline"
+                        width={14}
+                        height={14}
+                        sx={{ color: 'text.secondary' }}
+                      />
                       <Typography variant="body2" sx={{ color: 'text.primary' }}>
                         {order.event.date
                           ? dayjs(order.event.date).format('h:mm A')
@@ -584,7 +640,12 @@ const OrderDetails = ({ orderId }) => {
                     {/* Organizer */}
                     {order.event.personInCharge && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify icon="eva:person-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                        <Iconify
+                          icon="eva:person-outline"
+                          width={14}
+                          height={14}
+                          sx={{ color: 'text.secondary' }}
+                        />
                         <Typography variant="body2" sx={{ color: 'text.primary' }}>
                           {order.event.personInCharge.fullName}
                         </Typography>
@@ -594,7 +655,12 @@ const OrderDetails = ({ orderId }) => {
                     {/* Location */}
                     {order.event.location && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify icon="eva:pin-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                        <Iconify
+                          icon="eva:pin-outline"
+                          width={14}
+                          height={14}
+                          sx={{ color: 'text.secondary' }}
+                        />
                         <Typography variant="body2" sx={{ color: 'text.primary' }}>
                           {order.event.location}
                         </Typography>
@@ -614,7 +680,12 @@ const OrderDetails = ({ orderId }) => {
                   gap: 1,
                 }}
               >
-                <Iconify icon="eva:calendar-outline" width={32} height={32} sx={{ color: 'text.secondary', mb: 1 }} />
+                <Iconify
+                  icon="eva:calendar-outline"
+                  width={32}
+                  height={32}
+                  sx={{ color: 'text.secondary', mb: 1 }}
+                />
                 <Typography variant="body2" color="text.secondary">
                   Event information not available
                 </Typography>
@@ -632,7 +703,9 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box
+              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                   sx={{
@@ -644,11 +717,14 @@ const OrderDetails = ({ orderId }) => {
                     justifyContent: 'center',
                   }}
                 >
-                  <Iconify icon="eva:people-outline" width={20} height={20} sx={{ color: '#000' }} />
+                  <Iconify
+                    icon="eva:people-outline"
+                    width={20}
+                    height={20}
+                    sx={{ color: '#000' }}
+                  />
                 </Box>
-                <Typography variant="h6">
-                  Attendees
-                </Typography>
+                <Typography variant="h6">Attendees</Typography>
               </Box>
               <Chip
                 size="small"
@@ -661,9 +737,9 @@ const OrderDetails = ({ orderId }) => {
                 }}
               />
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             {order.attendees && order.attendees.length > 0 ? (
               <Stack spacing={0}>
                 {order.attendees.map((attendee, index) => (
@@ -672,7 +748,10 @@ const OrderDetails = ({ orderId }) => {
                     sx={{
                       py: 2.5,
                       px: 0,
-                      borderBottom: index < order.attendees.length - 1 ? (theme) => `1px solid ${theme.palette.divider}` : 'none',
+                      borderBottom:
+                        index < order.attendees.length - 1
+                          ? (theme) => `1px solid ${theme.palette.divider}`
+                          : 'none',
                       '&:hover': {
                         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
                         borderRadius: 1,
@@ -696,14 +775,24 @@ const OrderDetails = ({ orderId }) => {
                           flexShrink: 0,
                         }}
                       >
-                        <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ color: 'primary.main', fontWeight: 700 }}
+                        >
                           {`${attendee.firstName?.charAt(0) || ''}${attendee.lastName?.charAt(0) || ''}`}
                         </Typography>
                       </Box>
 
                       {/* Main Content */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            mb: 1,
+                          }}
+                        >
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.25 }}>
                               {`${attendee.firstName} ${attendee.lastName}`}
@@ -717,7 +806,7 @@ const OrderDetails = ({ orderId }) => {
                               </Typography>
                             )}
                           </Box>
-                          
+
                           {/* Price */}
                           <Box sx={{ textAlign: 'right', ml: 2 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000' }}>
@@ -726,7 +815,11 @@ const OrderDetails = ({ orderId }) => {
                               )}
                             </Typography>
                             {attendee.ticket?.ticketAddOn?.addOn && (
-                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ display: 'block' }}
+                              >
                                 +{formatCurrency(attendee.ticket.ticketAddOn.price || 0)} add-on
                               </Typography>
                             )}
@@ -736,14 +829,24 @@ const OrderDetails = ({ orderId }) => {
                         {/* Details Row */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1.5 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Iconify icon="eva:briefcase-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Iconify
+                              icon="eva:briefcase-outline"
+                              width={14}
+                              height={14}
+                              sx={{ color: 'text.secondary' }}
+                            />
                             <Typography variant="caption" color="text.secondary">
                               {attendee.companyName || 'No company'}
                             </Typography>
                           </Box>
-                          
+
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Iconify icon="eva:pricetags-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Iconify
+                              icon="eva:pricetags-outline"
+                              width={14}
+                              height={14}
+                              sx={{ color: 'text.secondary' }}
+                            />
                             <Typography variant="caption" color="text.secondary">
                               {attendee?.ticket?.ticketType?.title || 'No ticket type'}
                             </Typography>
@@ -751,7 +854,12 @@ const OrderDetails = ({ orderId }) => {
 
                           {attendee.ticket?.ticketAddOn?.addOn && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Iconify icon="eva:plus-circle-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                              <Iconify
+                                icon="eva:plus-circle-outline"
+                                width={14}
+                                height={14}
+                                sx={{ color: 'text.secondary' }}
+                              />
                               <Typography variant="caption" color="text.secondary">
                                 {attendee.ticket.ticketAddOn.addOn.name}
                               </Typography>
@@ -786,7 +894,12 @@ const OrderDetails = ({ orderId }) => {
                     mb: 1,
                   }}
                 >
-                  <Iconify icon="eva:people-outline" width={24} height={24} sx={{ color: 'text.secondary' }} />
+                  <Iconify
+                    icon="eva:people-outline"
+                    width={24}
+                    height={24}
+                    sx={{ color: 'text.secondary' }}
+                  />
                 </Box>
                 <Typography variant="subtitle2" color="text.secondary">
                   No attendees found
@@ -822,20 +935,30 @@ const OrderDetails = ({ orderId }) => {
                   justifyContent: 'center',
                 }}
               >
-                <Iconify icon="eva:shopping-cart-outline" width={20} height={20} sx={{ color: '#000' }} />
+                <Iconify
+                  icon="eva:shopping-cart-outline"
+                  width={20}
+                  height={20}
+                  sx={{ color: '#000' }}
+                />
               </Box>
-              <Typography variant="h6">
-                Order Summary
-              </Typography>
+              <Typography variant="h6">Order Summary</Typography>
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             <Stack spacing={1.5}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify icon="eva:shopping-cart-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                  <Typography variant="body2" color="text.secondary">Subtotal</Typography>
+                  <Iconify
+                    icon="eva:shopping-cart-outline"
+                    width={14}
+                    height={14}
+                    sx={{ color: 'text.secondary' }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    Subtotal
+                  </Typography>
                 </Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {formatCurrency(
@@ -846,10 +969,19 @@ const OrderDetails = ({ orderId }) => {
 
               {(order.discountCode && order.discountAmount) ||
                 (order.discountAmount > 0 && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="eva:gift-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">Discount</Typography>
+                      <Iconify
+                        icon="eva:gift-outline"
+                        width={14}
+                        height={14}
+                        sx={{ color: 'text.secondary' }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Discount
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
                       -{formatCurrency(order.discountAmount || 0)}
@@ -859,8 +991,15 @@ const OrderDetails = ({ orderId }) => {
 
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify icon="eva:percent-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                  <Typography variant="body2" color="text.secondary">SST</Typography>
+                  <Iconify
+                    icon="eva:percent-outline"
+                    width={14}
+                    height={14}
+                    sx={{ color: 'text.secondary' }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    SST
+                  </Typography>
                 </Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {order.totalAmount > 0 ? formatCurrency(order.tax || 0) : formatCurrency(0)}
@@ -871,8 +1010,15 @@ const OrderDetails = ({ orderId }) => {
 
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify icon="eva:credit-card-outline" width={16} height={16} sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Total</Typography>
+                  <Iconify
+                    icon="eva:credit-card-outline"
+                    width={16}
+                    height={16}
+                    sx={{ color: 'primary.main' }}
+                  />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Total
+                  </Typography>
                 </Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main' }}>
                   {formatCurrency(order.totalAmount)}
@@ -891,7 +1037,9 @@ const OrderDetails = ({ orderId }) => {
               border: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                   sx={{
@@ -903,7 +1051,12 @@ const OrderDetails = ({ orderId }) => {
                     justifyContent: 'center',
                   }}
                 >
-                  <Iconify icon="eva:credit-card-outline" width={20} height={20} sx={{ color: '#000' }} />
+                  <Iconify
+                    icon="eva:credit-card-outline"
+                    width={20}
+                    height={20}
+                    sx={{ color: '#000' }}
+                  />
                 </Box>
                 <Typography variant="h6">Payment Status</Typography>
               </Box>
@@ -923,9 +1076,9 @@ const OrderDetails = ({ orderId }) => {
                 Edit
               </Button>
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box
                 sx={{
@@ -946,7 +1099,7 @@ const OrderDetails = ({ orderId }) => {
                   sx={{ color: getStatusConfig(order.status).color }}
                 />
               </Box>
-              
+
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {order.status
@@ -993,15 +1146,18 @@ const OrderDetails = ({ orderId }) => {
                   justifyContent: 'center',
                 }}
               >
-                <Iconify icon="eva:options-2-outline" width={20} height={20} sx={{ color: '#000' }} />
+                <Iconify
+                  icon="eva:options-2-outline"
+                  width={20}
+                  height={20}
+                  sx={{ color: '#000' }}
+                />
               </Box>
-              <Typography variant="h6">
-                Order Actions
-              </Typography>
+              <Typography variant="h6">Order Actions</Typography>
             </Box>
-            
+
             <Divider sx={{ mb: 3 }} />
-            
+
             <Stack spacing={2}>
               {order.status &&
               (order.status.toLowerCase() === 'pending' ||
@@ -1043,6 +1199,58 @@ const OrderDetails = ({ orderId }) => {
                   {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
                 </Button>
               )}
+            </Stack>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mt: 3,
+              borderRadius: 2,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify
+                  icon="simple-icons:quickbooks"
+                  width={20}
+                  height={20}
+                  sx={{ color: '#000' }}
+                />
+              </Box>
+              <Typography variant="h6">Quickbook Invoice</Typography>
+            </Box>
+
+            <Divider sx={{ mb: 3 }} />
+
+            <Stack spacing={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="info"
+                startIcon={<Iconify icon="mdi:invoice-send-outline" width={18} height={18} />}
+                onClick={openInvoice.onTrue}
+                disabled={resendingEmail}
+                sx={{
+                  textTransform: 'none',
+                  py: 1.5,
+                  borderRadius: 1.5,
+                  fontWeight: 500,
+                }}
+              >
+                Manage Invoice
+              </Button>
             </Stack>
           </Paper>
         </Grid>
@@ -1119,7 +1327,12 @@ const OrderDetails = ({ orderId }) => {
 
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <Iconify icon="eva:people-outline" width={16} height={16} sx={{ color: 'text.secondary' }} />
+                  <Iconify
+                    icon="eva:people-outline"
+                    width={16}
+                    height={16}
+                    sx={{ color: 'text.secondary' }}
+                  />
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     Email Recipients ({1 + (order.attendees?.length || 0)})
                   </Typography>
@@ -1127,7 +1340,16 @@ const OrderDetails = ({ orderId }) => {
 
                 <Stack spacing={1}>
                   {/* Buyer Email */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      p: 1.5,
+                      bgcolor: 'background.neutral',
+                      borderRadius: 1,
+                    }}
+                  >
                     <Box
                       sx={{
                         width: 32,
@@ -1158,7 +1380,17 @@ const OrderDetails = ({ orderId }) => {
                   {order.attendees &&
                     order.attendees.length > 0 &&
                     order.attendees.map((attendee) => (
-                      <Box key={attendee.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                      <Box
+                        key={attendee.id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5,
+                          p: 1.5,
+                          bgcolor: 'background.neutral',
+                          borderRadius: 1,
+                        }}
+                      >
                         <Box
                           sx={{
                             width: 32,
@@ -1171,7 +1403,10 @@ const OrderDetails = ({ orderId }) => {
                             flexShrink: 0,
                           }}
                         >
-                          <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'primary.main', fontWeight: 700 }}
+                          >
                             {`${attendee.firstName?.charAt(0) || ''}${attendee.lastName?.charAt(0) || ''}`}
                           </Typography>
                         </Box>
@@ -1188,7 +1423,16 @@ const OrderDetails = ({ orderId }) => {
                 </Stack>
               </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: alpha('#ffa726', 0.1), borderRadius: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  p: 1.5,
+                  bgcolor: alpha('#ffa726', 0.1),
+                  borderRadius: 1,
+                }}
+              >
                 <Iconify icon="eva:info-outline" width={16} height={16} sx={{ color: '#ffa726' }} />
                 <Typography variant="caption" sx={{ color: '#ffa726', fontWeight: 500 }}>
                   Confirmation emails will be sent immediately to all recipients above.
@@ -1358,6 +1602,116 @@ const OrderDetails = ({ orderId }) => {
             }}
           >
             {updatingStatus ? 'Updating...' : 'Update Status'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Invoices dialog */}
+      <Dialog
+        open={openInvoice.value}
+        // onClose={openInvoice.onFalse}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            background: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(to bottom, #ffffff, #f9fafc)'
+                : 'linear-gradient(to bottom, #1a202c, #2d3748)',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            py: 2.5,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'rgba(245, 247, 250, 0.85)'
+                : 'rgba(26, 32, 44, 0.85)',
+          }}
+        >
+          <Iconify
+            icon="iconamoon:invoice-bold"
+            width={28}
+            height={28}
+            sx={{ color: 'primary.main' }}
+          />
+          <Typography variant="h6">Invoices</Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2, px: 3 }}>
+          <Box
+            mt={3}
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2,1fr)',
+              gap: 2,
+            }}
+          >
+            {attendees.length &&
+              attendees.map((attendee) => (
+                <React.Fragment key={attendee.id}>
+                  <ListItemText
+                    primary={`${attendee.firstName} ${attendee.lastName}`}
+                    secondary={attendee.email}
+                    slotProps={{
+                      primary: {
+                        variant: 'subtitle2',
+                      },
+                      secondary: {
+                        variant: 'caption',
+                      },
+                    }}
+                  />
+
+                  <Button
+                    startIcon={<Iconify icon="mdi:invoice-send-outline" />}
+                    sx={{ justifySelf: 'end', alignSelf: 'center' }}
+                    variant="outlined"
+                    size="small"
+                  >
+                    Send Invoice
+                  </Button>
+                </React.Fragment>
+              ))}
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light' ? 'rgba(247, 250, 252, 0.5)' : 'rgba(26, 32, 44, 0.5)',
+            borderTop: '1px solid',
+            borderColor: (theme) => (theme.palette.mode === 'light' ? '#edf2f7' : '#2d3748'),
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={openInvoice.onFalse}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              borderColor: (theme) => (theme.palette.mode === 'light' ? '#e2e8f0' : '#4a5568'),
+              color: (theme) => (theme.palette.mode === 'light' ? '#64748b' : '#a0aec0'),
+              borderWidth: '1.5px',
+              '&:hover': {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light' ? '#f8fafc' : 'rgba(74, 85, 104, 0.2)',
+                borderColor: (theme) => (theme.palette.mode === 'light' ? '#cbd5e1' : '#718096'),
+              },
+            }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>
