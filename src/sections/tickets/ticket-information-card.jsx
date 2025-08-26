@@ -589,112 +589,123 @@ const TicketInformationCard = () => {
 
       <Box sx={{ p: 2 }}>
         <Stack spacing={2}>
-          {fields.map((field, index) => {
-            console.log('asd');
-            return (
-              <Card
-                key={field.id}
-                elevation={0}
+          {fields.map((field, index) => (
+            <Card
+              key={field.id}
+              elevation={0}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1.5,
+                overflow: 'hidden',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  borderColor: alpha(
+                    theme.palette.mode === 'dark'
+                      ? theme.palette.grey[500]
+                      : theme.palette.grey[700],
+                    theme.palette.mode === 'dark' ? 0.5 : 0.3
+                  ),
+                  boxShadow: `0 0 0 1px ${alpha(
+                    theme.palette.mode === 'dark'
+                      ? theme.palette.grey[400]
+                      : theme.palette.grey[500],
+                    theme.palette.mode === 'dark' ? 0.3 : 0.2
+                  )}`,
+                },
+              }}
+            >
+              <Stack
+                id={field.id}
+                component="div"
+                onMouseDown={(e) => {
+                  e.currentTarget.style.position = 'relative';
+                  e.currentTarget.style.top = '1px';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.position = '';
+                }}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCollapse(index);
+                }}
                 sx={{
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1.5,
-                  overflow: 'hidden',
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    borderColor: alpha(
-                      theme.palette.mode === 'dark'
-                        ? theme.palette.grey[500]
-                        : theme.palette.grey[700],
-                      theme.palette.mode === 'dark' ? 0.5 : 0.3
-                    ),
-                    boxShadow: `0 0 0 1px ${alpha(
-                      theme.palette.mode === 'dark'
-                        ? theme.palette.grey[400]
-                        : theme.palette.grey[500],
-                      theme.palette.mode === 'dark' ? 0.3 : 0.2
-                    )}`,
-                  },
+                  cursor: 'pointer',
+                  p: 1.75,
+                  transition: 'all 0.2s ease',
+                  bgcolor: collapseAttendees.includes(index)
+                    ? alpha(
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.grey[700]
+                          : theme.palette.grey[300],
+                        theme.palette.mode === 'dark' ? 0.6 : 0.5
+                      )
+                    : 'transparent',
                 }}
               >
-                <Stack
-                  id={field.id}
-                  component="div"
-                  onMouseDown={(e) => {
-                    e.currentTarget.style.position = 'relative';
-                    e.currentTarget.style.top = '1px';
-                  }}
-                  onMouseUp={(e) => {
-                    e.currentTarget.style.position = '';
-                  }}
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleCollapse(index);
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    p: 1.75,
-                    transition: 'all 0.2s ease',
-                    bgcolor: collapseAttendees.includes(index)
-                      ? alpha(
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.grey[700]
-                            : theme.palette.grey[300],
-                          theme.palette.mode === 'dark' ? 0.6 : 0.5
-                        )
-                      : 'transparent',
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-                    {/* Attendee completion status indicator */}
-                    <Tooltip
-                      title={
-                        isAttendeeInfoComplete(field, index)
-                          ? 'Information complete'
-                          : 'Information incomplete'
-                      }
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
-                        {isAttendeeInfoComplete(field, index) ? (
-                          <Iconify
-                            icon="mdi:check-circle"
-                            width={16}
-                            sx={{
-                              color: 'success.main',
-                            }}
-                          />
-                        ) : (
-                          <Iconify
-                            icon="mdi:alert-circle-outline"
-                            width={16}
-                            sx={{
-                              color: 'warning.main',
-                            }}
-                          />
-                        )}
-                      </Box>
-                    </Tooltip>
+                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+                  {/* Attendee completion status indicator */}
+                  <Tooltip
+                    title={
+                      isAttendeeInfoComplete(field, index)
+                        ? 'Information complete'
+                        : 'Information incomplete'
+                    }
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
+                      {isAttendeeInfoComplete(field, index) ? (
+                        <Iconify
+                          icon="mdi:check-circle"
+                          width={16}
+                          sx={{
+                            color: 'success.main',
+                          }}
+                        />
+                      ) : (
+                        <Iconify
+                          icon="mdi:alert-circle-outline"
+                          width={16}
+                          sx={{
+                            color: 'warning.main',
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Tooltip>
 
-                    <Typography
-                      variant="subtitle2"
-                      color={collapseAttendees.includes(index) ? 'text.primary' : 'text.secondary'}
-                      sx={{ fontWeight: 500 }}
-                    >
-                      Attendee {index + 1}
-                    </Typography>
+                  <Typography
+                    variant="subtitle2"
+                    color={collapseAttendees.includes(index) ? 'text.primary' : 'text.secondary'}
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Attendee {index + 1}
+                  </Typography>
 
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      flexWrap="wrap"
-                      spacing={0.75}
-                      sx={{ ml: 0.5 }}
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    spacing={0.75}
+                    sx={{ ml: 0.5 }}
+                  >
+                    <Label
+                      color="info"
+                      sx={{
+                        borderRadius: '4px',
+                        py: 0.5,
+                        height: 22,
+                        fontSize: '0.7rem',
+                      }}
                     >
+                      <Iconify icon="mingcute:ticket-line" width={14} sx={{ mr: 0.5 }} />
+                      {field.ticket.title}
+                    </Label>
+                    {field.isForbuyer && (
                       <Label
-                        color="info"
+                        color="success"
                         sx={{
                           borderRadius: '4px',
                           py: 0.5,
@@ -702,207 +713,193 @@ const TicketInformationCard = () => {
                           fontSize: '0.7rem',
                         }}
                       >
-                        <Iconify icon="mingcute:ticket-line" width={14} sx={{ mr: 0.5 }} />
-                        {field.ticket.title}
+                        Buyer&apos;s ticket
                       </Label>
-                      {field.isForbuyer && (
-                        <Label
-                          color="success"
-                          sx={{
-                            borderRadius: '4px',
-                            py: 0.5,
-                            height: 22,
-                            fontSize: '0.7rem',
-                          }}
-                        >
-                          Buyer&apos;s ticket
-                        </Label>
-                      )}
-                      {!!field.addOn.length &&
-                        field.addOn.map((item) => (
-                          <Label
-                            color="warning"
-                            sx={{
-                              borderRadius: '4px',
-                              py: 0.5,
-                              height: 22,
-                              fontSize: '0.7rem',
-                            }}
-                          >
-                            <Iconify icon="icon-park-solid:add-one" width={12} sx={{ mr: 0.5 }} />
-                            Add On - {item?.addOn?.name}
-                          </Label>
-                        ))}
-                    </Stack>
-                  </Stack>
+                    )}
 
-                  <Stack direction="row" spacing={0.75}>
-                    <Tooltip title="Remove ticket">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeTicket(field.ticket.id, index, field?.addOn);
-                        }}
+                    {field.addOn && (
+                      <Label
+                        color="warning"
                         sx={{
-                          bgcolor: alpha(
-                            theme.palette.error.main,
-                            theme.palette.mode === 'dark' ? 0.2 : 0.1
-                          ),
-                          '&:hover': {
-                            bgcolor: alpha(
-                              theme.palette.error.main,
-                              theme.palette.mode === 'dark' ? 0.3 : 0.2
-                            ),
-                          },
+                          borderRadius: '4px',
+                          py: 0.5,
+                          height: 22,
+                          fontSize: '0.7rem',
                         }}
                       >
-                        <Iconify icon="mdi:trash" width={16} />
-                      </IconButton>
-                    </Tooltip>
-
-                    <IconButton
-                      size="small"
-                      sx={{
-                        transition: 'transform 0.2s ease',
-                        transform: collapseAttendees.includes(index)
-                          ? 'rotate(180deg)'
-                          : 'rotate(0deg)',
-                      }}
-                    >
-                      <Iconify icon="ep:arrow-down-bold" width={16} />
-                    </IconButton>
+                        <Iconify icon="icon-park-solid:add-one" width={12} sx={{ mr: 0.5 }} />
+                        Add On - {field?.addOn?.addOn?.name}
+                      </Label>
+                    )}
                   </Stack>
                 </Stack>
 
-                <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
-                  <Box sx={{ px: 2, pb: mdDown ? 4 : 2 }}>
-                    <Box
-                      display="grid"
-                      gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
-                      gap={2}
-                      sx={{ mt: 2 }}
+                <Stack direction="row" spacing={0.75}>
+                  <Tooltip title="Remove ticket">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTicket(field.ticket.id, index, field?.addOn);
+                      }}
+                      sx={{
+                        bgcolor: alpha(
+                          theme.palette.error.main,
+                          theme.palette.mode === 'dark' ? 0.2 : 0.1
+                        ),
+                        '&:hover': {
+                          bgcolor: alpha(
+                            theme.palette.error.main,
+                            theme.palette.mode === 'dark' ? 0.3 : 0.2
+                          ),
+                        },
+                      }}
                     >
-                      <TextFieldCustom
-                        name={`attendees.${index}.firstName`}
-                        label="First Name"
-                        slotProps={
-                          getValues(`attendees.${index}.isForbuyer`) && {
-                            input: {
-                              readOnly: true,
-                            },
-                          }
-                        }
-                      />
-                      <TextFieldCustom
-                        name={`attendees.${index}.lastName`}
-                        label="Last Name"
-                        slotProps={
-                          getValues(`attendees.${index}.isForbuyer`) && {
-                            input: {
-                              readOnly: true,
-                            },
-                          }
-                        }
-                      />
-                      <TextFieldCustom
-                        name={`attendees.${index}.email`}
-                        label="Email"
-                        slotProps={
-                          getValues(`attendees.${index}.isForbuyer`) && {
-                            input: {
-                              readOnly: true,
-                            },
-                          }
-                        }
-                      />
-                      <PhoneInputCustom
-                        name={`attendees.${index}.phoneNumber`}
-                        label="Phone Number"
-                        readOnly={getValues(`attendees.${index}.isForbuyer`)}
-                      />
-                      <TextFieldCustom
-                        name={`attendees.${index}.company`}
-                        label="Company"
-                        slotProps={
-                          getValues(`attendees.${index}.isForbuyer`) && {
-                            input: {
-                              readOnly: true,
-                            },
-                          }
-                        }
-                      />
+                      <Iconify icon="mdi:trash" width={16} />
+                    </IconButton>
+                  </Tooltip>
 
-                      {/* NEW FEATURE: Category field for General ticket type attendees only - styled to match other form fields */}
-                      {field.ticket?.category === 'general' && (
-                        <Box sx={{ width: '100%' }}>
-                          <Typography
-                            variant="body2"
-                            component="label"
-                            sx={{
-                              mb: 0.75,
-                              display: 'block',
-                              fontSize: '0.85rem',
-                              fontWeight: 500,
-                              color: 'text.secondary',
-                            }}
-                          >
-                            Category
-                          </Typography>
-                          <RHFSelect
-                            name={`attendees.${index}.category`}
-                            fullWidth
-                            displayEmpty
-                            // slotProps={{
-                            //   input: getValues(`attendees.${index}.isForbuyer`)
-                            //     ? {
-                            //         readOnly: true,
-                            //       }
-                            //     : {},
-                            // }}
-                            sx={{
-                              '& .MuiInputBase-root': {
+                  <IconButton
+                    size="small"
+                    sx={{
+                      transition: 'transform 0.2s ease',
+                      transform: collapseAttendees.includes(index)
+                        ? 'rotate(180deg)'
+                        : 'rotate(0deg)',
+                    }}
+                  >
+                    <Iconify icon="ep:arrow-down-bold" width={16} />
+                  </IconButton>
+                </Stack>
+              </Stack>
+
+              <Collapse in={collapseAttendees.includes(index)} timeout="auto" unmountOnExit>
+                <Box sx={{ px: 2, pb: mdDown ? 4 : 2 }}>
+                  <Box
+                    display="grid"
+                    gridTemplateColumns={{ xs: 'repeat(1,1fr)', md: 'repeat(2,1fr)' }}
+                    gap={2}
+                    sx={{ mt: 2 }}
+                  >
+                    <TextFieldCustom
+                      name={`attendees.${index}.firstName`}
+                      label="First Name"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.lastName`}
+                      label="Last Name"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.email`}
+                      label="Email"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+                    <PhoneInputCustom
+                      name={`attendees.${index}.phoneNumber`}
+                      label="Phone Number"
+                      readOnly={getValues(`attendees.${index}.isForbuyer`)}
+                    />
+                    <TextFieldCustom
+                      name={`attendees.${index}.company`}
+                      label="Company"
+                      slotProps={
+                        getValues(`attendees.${index}.isForbuyer`) && {
+                          input: {
+                            readOnly: true,
+                          },
+                        }
+                      }
+                    />
+
+                    {/* NEW FEATURE: Category field for General ticket type attendees only - styled to match other form fields */}
+                    {field.ticket?.category === 'general' && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography
+                          variant="body2"
+                          component="label"
+                          sx={{
+                            mb: 0.75,
+                            display: 'block',
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                            color: 'text.secondary',
+                          }}
+                        >
+                          Category
+                        </Typography>
+                        <RHFSelect
+                          name={`attendees.${index}.category`}
+                          fullWidth
+                          displayEmpty
+                          // slotProps={{
+                          //   input: getValues(`attendees.${index}.isForbuyer`)
+                          //     ? {
+                          //         readOnly: true,
+                          //       }
+                          //     : {},
+                          // }}
+                          sx={{
+                            '& .MuiInputBase-root': {
+                              '& fieldset': {
+                                borderColor: alpha(theme.palette.text.primary, 0.2),
+                                transition: 'border-color 0.2s ease-in-out',
+                              },
+                              borderRadius: 1,
+                              fontSize: '0.9rem',
+                              '&:hover': {
                                 '& fieldset': {
-                                  borderColor: alpha(theme.palette.text.primary, 0.2),
-                                  transition: 'border-color 0.2s ease-in-out',
-                                },
-                                borderRadius: 1,
-                                fontSize: '0.9rem',
-                                '&:hover': {
-                                  '& fieldset': {
-                                    borderColor: alpha(theme.palette.grey[600], 0.5),
-                                  },
-                                },
-                                '&.Mui-focused': {
-                                  '& fieldset': {
-                                    borderColor: theme.palette.grey[700],
-                                    borderWidth: '1.5px',
-                                  },
+                                  borderColor: alpha(theme.palette.grey[600], 0.5),
                                 },
                               },
-                              '& .MuiOutlinedInput-input': {
-                                padding: '12px 14px',
+                              '&.Mui-focused': {
+                                '& fieldset': {
+                                  borderColor: theme.palette.grey[700],
+                                  borderWidth: '1.5px',
+                                },
                               },
-                            }}
-                          >
-                            <MenuItem value="">
-                              <em>Select Category</em>
-                            </MenuItem>
-                            <MenuItem value="startup">Startup</MenuItem>
-                            <MenuItem value="corporate">Corporate</MenuItem>
-                            <MenuItem value="government">Government</MenuItem>
-                            <MenuItem value="investor">Investor/Venture Capital</MenuItem>
-                            <MenuItem value="others">Others</MenuItem>
-                          </RHFSelect>
-                        </Box>
-                      )}
-                    </Box>
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              padding: '12px 14px',
+                            },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Select Category</em>
+                          </MenuItem>
+                          <MenuItem value="startup">Startup</MenuItem>
+                          <MenuItem value="corporate">Corporate</MenuItem>
+                          <MenuItem value="government">Government</MenuItem>
+                          <MenuItem value="investor">Investor/Venture Capital</MenuItem>
+                          <MenuItem value="others">Others</MenuItem>
+                        </RHFSelect>
+                      </Box>
+                    )}
                   </Box>
-                </Collapse>
-              </Card>
-            );
-          })}
+                </Box>
+              </Collapse>
+            </Card>
+          ))}
         </Stack>
       </Box>
     </Card>
@@ -913,37 +910,6 @@ const TicketInformationCard = () => {
     if (!el) return;
     el.scrollTop = 0;
   };
-
-  // useEffect(() => {
-  //   if (!cartData?.cartItem?.length) return;
-
-  //   // Load existing attendees from localStorage
-  //   // const storedAttendees = localStorage.getItem('attendees');
-
-  //   // if (storedAttendees) {
-  //   //   setValue('attendees', JSON.parse(storedAttendees));
-  //   //   return;
-  //   // }
-
-  //   // Generate attendee list based on ticket quantity
-  //   const result = cartData.cartItem.flatMap((item) => {
-  //     const addOns =
-  //       item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
-
-  //     console.log(addOns);
-
-  //     return Array.from({ length: item.quantity }, (_, index) => ({
-  //       ticket: item.ticketType,
-  //       addOn: addOns || [],
-  //       ...defaultAttendee,
-  //     }));
-  //   });
-
-  //   // console.log(result);
-
-  //   setValue('attendees', result);
-  //   localStorage.setItem('attendees', JSON.stringify(result)); // Cache the cartData
-  // }, [cartData, setValue, cartSessionId]);
 
   useEffect(() => {
     if (!cartData?.cartItem?.length) return;
@@ -956,44 +922,75 @@ const TicketInformationCard = () => {
       return;
     }
 
+    // Generate attendee list based on ticket quantity
     const result = cartData.cartItem.flatMap((item) => {
-      const results = Array.from({ length: item.quantity }, () => ({
-        ticket: item.ticketType,
-        addOn: [],
-        ...defaultAttendee,
-      }));
-
-      // Expand add-ons by quantity
-      const addOnPool =
+      const addOns =
         item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
 
-      // Assign add-ons round-robin without repeating same type on same ticket
-      let ticketIndex = 0;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const addOn of addOnPool) {
-        let attempts = 0;
-        while (
-          attempts < results.length &&
-          results[ticketIndex].addOn.some((a) => a.id === addOn.id) // Check duplicate
-        ) {
-          ticketIndex = (ticketIndex + 1) % results.length;
-          // eslint-disable-next-line no-plusplus
-          attempts++;
-        }
+      console.log(addOns);
 
-        if (!results[ticketIndex].addOn.some((a) => a.id === addOn.id)) {
-          results[ticketIndex].addOn.push(addOn);
-        }
-
-        ticketIndex = (ticketIndex + 1) % results.length;
-      }
-
-      return results;
+      return Array.from({ length: item.quantity }, (_, index) => ({
+        ticket: item.ticketType,
+        addOn: addOns[index] || null,
+        ...defaultAttendee,
+      }));
     });
 
+    // console.log(result);
+
     setValue('attendees', result);
-    localStorage.setItem('attendees', JSON.stringify(result));
+    localStorage.setItem('attendees', JSON.stringify(result)); // Cache the cartData
   }, [cartData, setValue, cartSessionId]);
+
+  // useEffect(() => {
+  //   if (!cartData?.cartItem?.length) return;
+
+  //   // Load existing attendees from localStorage
+  //   const storedAttendees = localStorage.getItem('attendees');
+
+  //   if (storedAttendees) {
+  //     setValue('attendees', JSON.parse(storedAttendees));
+  //     return;
+  //   }
+
+  //   const result = cartData.cartItem.flatMap((item) => {
+  //     const results = Array.from({ length: item.quantity }, () => ({
+  //       ticket: item.ticketType,
+  //       addOn: [],
+  //       ...defaultAttendee,
+  //     }));
+
+  //     // Expand add-ons by quantity
+  //     const addOnPool =
+  //       item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
+
+  //     // Assign add-ons round-robin without repeating same type on same ticket
+  //     let ticketIndex = 0;
+  //     // eslint-disable-next-line no-restricted-syntax
+  //     for (const addOn of addOnPool) {
+  //       let attempts = 0;
+  //       while (
+  //         attempts < results.length &&
+  //         results[ticketIndex].addOn.some((a) => a.id === addOn.id) // Check duplicate
+  //       ) {
+  //         ticketIndex = (ticketIndex + 1) % results.length;
+  //         // eslint-disable-next-line no-plusplus
+  //         attempts++;
+  //       }
+
+  //       if (!results[ticketIndex].addOn.some((a) => a.id === addOn.id)) {
+  //         results[ticketIndex].addOn.push(addOn);
+  //       }
+
+  //       ticketIndex = (ticketIndex + 1) % results.length;
+  //     }
+
+  //     return results;
+  //   });
+
+  //   setValue('attendees', result);
+  //   localStorage.setItem('attendees', JSON.stringify(result));
+  // }, [cartData, setValue, cartSessionId]);
 
   useEffect(() => {
     const subscription = watch((values) => {
