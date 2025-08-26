@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { toast } from 'sonner';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import { Card } from '@mui/material';
@@ -18,6 +18,7 @@ import { RouterLink } from 'src/routes/components';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { trackMetaPixel } from 'src/hooks/use-track-page';
 
 import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
@@ -25,7 +26,6 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { trackMetaPixel } from 'src/hooks/use-track-page';
 
 // ----------------------------------------------------------------------
 
