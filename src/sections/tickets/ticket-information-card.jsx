@@ -256,7 +256,7 @@ const TicketInformationCard = () => {
     });
   };
 
-  const removeTicket = async (item, index, addOns) => {
+  const removeTicket = async (item, index, addOn) => {
     const attendees = JSON.parse(localStorage.getItem('attendees'));
 
     if (attendees?.length > index) {
@@ -269,11 +269,11 @@ const TicketInformationCard = () => {
       localStorage.removeItem('attendees');
     }
 
-    const addOnIds = addOns.length ? addOns?.map((i) => i.addOn.id) : null;
+    const addOnId = addOn?.addOn?.id || null;
 
     try {
       const ticket = cartData.cartItem.find((a) => a.ticketType.id === item);
-      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket, addOnIds });
+      const res = await axiosInstance.post(endpoints.cart.removeTicket, { ticket, addOnId });
       cartMutate();
 
       toast.success(res?.data?.message);
