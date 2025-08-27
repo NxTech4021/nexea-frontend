@@ -22,6 +22,8 @@ import {
 
 import { useRouter } from 'src/routes/hooks';
 
+import Iconify from 'src/components/iconify';
+
 const StatCard = ({ title, value, subtitle, color }) => {
   const theme = useTheme();
 
@@ -384,15 +386,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                             }}
                             onClick={() => handleNumberClick(type, 'paid')}
                             >
-                              <Typography sx={{ 
-                                color: '#229A16', 
-                                fontSize: 11, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Paid
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:checkmark-circle-2-fill" sx={{ width: 12, height: 12, color: '#229A16' }} />
+                                <Typography sx={{ 
+                                  color: '#229A16', 
+                                  fontSize: 11, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Paid
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#229A16', 
                                 fontSize: { xs: 20, sm: 22 }, 
@@ -429,15 +434,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                             }}
                             onClick={() => handleNumberClick(type, 'free')}
                             >
-                              <Typography sx={{ 
-                                color: '#2196F3', 
-                                fontSize: 11, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Free
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:gift-outline" sx={{ width: 12, height: 12, color: '#2196F3' }} />
+                                <Typography sx={{ 
+                                  color: '#2196F3', 
+                                  fontSize: 11, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Free
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#2196F3', 
                                 fontSize: { xs: 20, sm: 22 }, 
@@ -475,15 +483,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                             }}
                             onClick={() => handleNumberClick(type, 'total')}
                             >
-                              <Typography sx={{ 
-                                color: '#737373', 
-                                fontSize: 11, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Total
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:hash-outline" sx={{ width: 12, height: 12, color: '#737373' }} />
+                                <Typography sx={{ 
+                                  color: '#737373', 
+                                  fontSize: 11, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Total
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#737373', 
                                 fontSize: { xs: 20, sm: 22 }, 
@@ -572,15 +583,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               }}
                               onClick={() => handleNumberClick(type, 'paid')}
                             >
-                              <Typography sx={{ 
-                                color: '#229A16', 
-                                fontSize: 12, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Paid
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:checkmark-circle-2-fill" sx={{ width: 14, height: 14, color: '#229A16' }} />
+                                <Typography sx={{ 
+                                  color: '#229A16', 
+                                  fontSize: 12, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Paid
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#229A16', 
                                 fontSize: 18, 
@@ -618,15 +632,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               }}
                               onClick={() => handleNumberClick(type, 'free')}
                             >
-                              <Typography sx={{ 
-                                color: '#2196F3', 
-                                fontSize: 12, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Free
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:gift-outline" sx={{ width: 14, height: 14, color: '#2196F3' }} />
+                                <Typography sx={{ 
+                                  color: '#2196F3', 
+                                  fontSize: 12, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Free
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#2196F3', 
                                 fontSize: 18, 
@@ -664,15 +681,18 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               }}
                               onClick={() => handleNumberClick(type, 'total')}
                             >
-                              <Typography sx={{ 
-                                color: '#737373', 
-                                fontSize: 12, 
-                                fontWeight: 600, 
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}>
-                                Total
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Iconify icon="eva:hash-outline" sx={{ width: 14, height: 14, color: '#737373' }} />
+                                <Typography sx={{ 
+                                  color: '#737373', 
+                                  fontSize: 12, 
+                                  fontWeight: 600, 
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  Total
+                                </Typography>
+                              </Box>
                               <Typography sx={{ 
                                 color: '#737373', 
                                 fontSize: 18, 
@@ -735,6 +755,7 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                       <Box sx={{ width: columnWidths.paid, display: 'flex', justifyContent: 'center' }}>
                         <Tooltip title={getTooltipMessage(type, 'paid', isAddOn)} arrow placement="top">
                           <Chip
+                            icon={<Iconify icon="eva:checkmark-circle-2-fill" sx={{ width: 16, height: 16 }} />}
                             label={stats.paidQuantity}
                             size="small"
                             clickable
@@ -748,6 +769,10 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               border: '1px solid rgba(34, 154, 22, 0.2)',
                               cursor: 'pointer',
                               '& .MuiChip-label': { px: 1.5 },
+                              '& .MuiChip-icon': {
+                                color: '#229A16',
+                                ml: 0.5,
+                              },
                               '&:hover': {
                                 bgcolor: 'rgba(34, 154, 22, 0.15)',
                               }
@@ -761,6 +786,7 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                       <Box sx={{ width: columnWidths.free, display: 'flex', justifyContent: 'center' }}>
                         <Tooltip title={getTooltipMessage(type, 'free', isAddOn)} arrow placement="top">
                           <Chip
+                            icon={<Iconify icon="eva:gift-outline" sx={{ width: 16, height: 16 }} />}
                             label={stats.freeQuantity}
                             size="small"
                             clickable
@@ -774,6 +800,10 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               border: '1px solid rgba(33, 150, 243, 0.2)',
                               cursor: 'pointer',
                               '& .MuiChip-label': { px: 1.5 },
+                              '& .MuiChip-icon': {
+                                color: '#2196F3',
+                                ml: 0.5,
+                              },
                               '&:hover': {
                                 bgcolor: 'rgba(33, 150, 243, 0.15)',
                               }
@@ -787,6 +817,7 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                       <Box sx={{ width: columnWidths.total, display: 'flex', justifyContent: 'center' }}>
                         <Tooltip title={getTooltipMessage(type, 'total', isAddOn)} arrow placement="top">
                           <Chip
+                            icon={<Iconify icon="eva:hash-outline" sx={{ width: 16, height: 16 }} />}
                             label={stats.paidQuantity + stats.freeQuantity}
                             size="small"
                             clickable
@@ -800,6 +831,10 @@ const ModernTable = ({ data: breakdownData, title, isAddOn = false, eventId }) =
                               border: '1px solid #E5E5E5',
                               cursor: 'pointer',
                               '& .MuiChip-label': { px: 1.5 },
+                              '& .MuiChip-icon': {
+                                color: '#737373',
+                                ml: 0.5,
+                              },
                               '&:hover': {
                                 bgcolor: 'rgba(115, 115, 115, 0.08)',
                               }
@@ -852,16 +887,22 @@ const EventStatistics = ({ data, eventId }) => {
   const [revenueTimeRange, setRevenueTimeRange] = useState(7); // Default to 7 days
 
   // Calculate all orders with 'paid' status (includes both paid and free)
-  const paidStatusOrders = data?.order?.filter((order) => order?.status === 'paid') || [];
+  const paidStatusOrders = useMemo(() => 
+    data?.order?.filter((order) => order?.status === 'paid') || [], [data?.order]);
 
   // Separate paid and free orders based on totalAmount
-  const paidOrders = paidStatusOrders.filter((order) => Number(order.totalAmount) > 0);
-  const freeOrders = paidStatusOrders.filter((order) => Number(order.totalAmount) === 0);
+  const paidOrders = useMemo(() => 
+    paidStatusOrders.filter((order) => Number(order.totalAmount) > 0), [paidStatusOrders]);
+  const freeOrders = useMemo(() => 
+    paidStatusOrders.filter((order) => Number(order.totalAmount) === 0), [paidStatusOrders]);
 
   // Get all attendees from paid status orders
-  const allAttendees = paidStatusOrders.flatMap((order) => order.attendees) || [];
-  const paidAttendees = paidOrders.flatMap((order) => order.attendees) || [];
-  const freeAttendees = freeOrders.flatMap((order) => order.attendees) || [];
+  const allAttendees = useMemo(() => 
+    paidStatusOrders.flatMap((order) => order.attendees) || [], [paidStatusOrders]);
+  const paidAttendees = useMemo(() => 
+    paidOrders.flatMap((order) => order.attendees) || [], [paidOrders]);
+  const freeAttendees = useMemo(() => 
+    freeOrders.flatMap((order) => order.attendees) || [], [freeOrders]);
 
   // 1. Revenue of paid tickets
   const paidTicketRevenue = paidAttendees.reduce((acc, attendee) => {
@@ -970,82 +1011,120 @@ const EventStatistics = ({ data, eventId }) => {
   );
 
   // Group tickets by type for detailed breakdown
-  const ticketTypeBreakdown = allAttendees.reduce((acc, attendee) => {
-    const ticketType = attendee.ticket?.ticketType?.title;
-    const attendeeOrder = paidStatusOrders.find((order) =>
-      order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
-    );
-
-    // Check if this attendee is from a paid or free order
-    const isFromPaidOrder = paidAttendees.includes(attendee);
-
-    if (!ticketType || !attendeeOrder) return acc;
-
-    if (!acc[ticketType]) {
-      acc[ticketType] = {
+  const ticketTypeBreakdown = useMemo(() => {
+    // Initialize with all ticket types from the event 
+    const breakdown = {};
+    
+    // Add all ticket types from the event
+    (data?.ticketType || []).forEach((ticketType) => {
+      breakdown[ticketType.title] = {
         paidQuantity: 0,
         freeQuantity: 0,
         revenue: 0,
       };
-    }
+    });
+    
+    // Now process attendees to populate the data
+    allAttendees.forEach((attendee) => {
+      const ticketType = attendee.ticket?.ticketType?.title;
+      const attendeeOrder = paidStatusOrders.find((order) =>
+        order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
+      );
 
-    if (isFromPaidOrder) {
-      acc[ticketType].paidQuantity += 1;
-      // For ticket types, only count the base ticket price (excluding add-ons)
-      const baseTicketPrice = attendee.ticket?.price || 0;
-      acc[ticketType].revenue += baseTicketPrice;
-    } else {
-      acc[ticketType].freeQuantity += 1;
-    }
+      // Check if this attendee is from a paid or free order
+      const isFromPaidOrder = paidAttendees.includes(attendee);
 
-    return acc;
-  }, {});
+      if (!ticketType || !attendeeOrder) return;
+
+      // Ensure the ticket type exists in breakdown (should already exist from above)
+      if (!breakdown[ticketType]) {
+        breakdown[ticketType] = {
+          paidQuantity: 0,
+          freeQuantity: 0,
+          revenue: 0,
+        };
+      }
+
+      if (isFromPaidOrder) {
+        breakdown[ticketType].paidQuantity += 1;
+        
+        // Calculate ticket revenue: actual ticket price after discount + ALL tax
+        // (since discount only applies to tickets, tickets should bear all tax burden)
+        const actualTicketPrice = attendee.ticket?.price || 0; // This is already the discounted price
+        
+        // Calculate order totals to get total tax
+        const orderTicketTotal = attendeeOrder.attendees.reduce((sum, orderAttendee) => 
+          sum + (orderAttendee.ticket?.price || 0), 0);
+        const orderAddOnTotal = attendeeOrder.attendees.reduce((sum, orderAttendee) => 
+          sum + (orderAttendee.ticket?.ticketAddOn?.price || 0), 0);
+        const orderSubtotal = orderTicketTotal + orderAddOnTotal;
+        const totalTax = (attendeeOrder.totalAmount || 0) - orderSubtotal;
+        
+        // Distribute tax among tickets only (since discount only applies to tickets)
+        const orderTicketCount = attendeeOrder.attendees.filter(orderAttendee => 
+          orderAttendee.ticket?.price && orderAttendee.ticket.price > 0).length;
+        const taxPerTicket = orderTicketCount > 0 ? totalTax / orderTicketCount : 0;
+        
+        // Ticket revenue = actual ticket price + tax share
+        breakdown[ticketType].revenue += actualTicketPrice + taxPerTicket;
+      } else {
+        breakdown[ticketType].freeQuantity += 1;
+      }
+    });
+    
+    return breakdown;
+  }, [data?.ticketType, allAttendees, paidStatusOrders, paidAttendees]);
 
   // Add-on tickets breakdown
-  const addOnBreakdown = allAttendees.reduce((acc, attendee) => {
-    const addOnName = attendee.ticket?.ticketAddOn?.addOn?.name;
-    const attendeeOrder = paidStatusOrders.find((order) =>
-      order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
-    );
+  const addOnBreakdown = useMemo(() => {
+    // Initialize with all add-ons from the event (even those with no orders)
+    const breakdown = {};
+    
+    // Add all add-ons from all ticket types in the event
+    (data?.ticketType || []).forEach((ticketType) => {
+      (ticketType.addOns || []).forEach((addOn) => {
+        breakdown[addOn.name] = {
+          paidQuantity: 0,
+          freeQuantity: 0,
+          revenue: 0,
+        };
+      });
+    });
+    
+    // Now process attendees to populate the data
+    allAttendees.forEach((attendee) => {
+      const addOnName = attendee.ticket?.ticketAddOn?.addOn?.name;
+      const attendeeOrder = paidStatusOrders.find((order) =>
+        order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
+      );
 
-    // Check if this attendee is from a paid or free order
-    const isFromPaidOrder = paidAttendees.includes(attendee);
+      // Check if this attendee is from a paid or free order
+      const isFromPaidOrder = paidAttendees.includes(attendee);
 
-    if (!addOnName || !attendeeOrder) return acc;
+      if (!addOnName || !attendeeOrder) return;
 
-    if (!acc[addOnName]) {
-      acc[addOnName] = {
-        paidQuantity: 0,
-        freeQuantity: 0,
-        revenue: 0,
-      };
-    }
-
-    if (isFromPaidOrder) {
-      acc[addOnName].paidQuantity += 1;
-      const addOnPrice = attendee.ticket?.ticketAddOn?.price || 0;
-      const ticketPrice = attendee.ticket?.price || 0;
-      const originalItemTotal = ticketPrice + addOnPrice;
-
-      // Calculate order's original total before discounts/taxes
-      const orderOriginalTotal = attendeeOrder.attendees.reduce((sum, orderAttendee) => {
-        const orderTicketPrice = orderAttendee.ticket?.price || 0;
-        const orderAddOnPrice = orderAttendee.ticket?.ticketAddOn?.price || 0;
-        return sum + orderTicketPrice + orderAddOnPrice;
-      }, 0);
-
-      // Calculate add-on's proportional share of the actual paid amount
-      if (orderOriginalTotal > 0 && originalItemTotal > 0) {
-        const addOnProportion = addOnPrice / orderOriginalTotal;
-        const proportionalRevenue = (attendeeOrder.totalAmount || 0) * addOnProportion;
-        acc[addOnName].revenue += proportionalRevenue;
+      // Ensure the add-on exists in breakdown (should already exist from above)
+      if (!breakdown[addOnName]) {
+        breakdown[addOnName] = {
+          paidQuantity: 0,
+          freeQuantity: 0,
+          revenue: 0,
+        };
       }
-    } else {
-      acc[addOnName].freeQuantity += 1;
-    }
 
-    return acc;
-  }, {});
+      if (isFromPaidOrder) {
+        breakdown[addOnName].paidQuantity += 1;
+        
+        // Add-on revenue = actual add-on price only (discount codes don't apply to add-ons, no tax included)
+        const addOnPrice = attendee.ticket?.ticketAddOn?.price || 0;
+        breakdown[addOnName].revenue += addOnPrice;
+      } else {
+        breakdown[addOnName].freeQuantity += 1;
+      }
+    });
+    
+    return breakdown;
+  }, [data?.ticketType, allAttendees, paidStatusOrders, paidAttendees]);
 
   return (
     <Box sx={{ mb: 3 }}>

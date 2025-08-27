@@ -967,27 +967,39 @@ const OrderDetails = ({ orderId }) => {
                 </Typography>
               </Box>
 
-              {(order.discountCode && order.discountAmount) ||
-                (order.discountAmount > 0 && (
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify
-                        icon="eva:gift-outline"
-                        width={14}
-                        height={14}
-                        sx={{ color: 'text.secondary' }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        Discount
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
-                      -{formatCurrency(order.discountAmount || 0)}
+              {order.discountAmount > 0 && (
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Iconify
+                      icon="eva:gift-outline"
+                      width={14}
+                      height={14}
+                      sx={{ color: 'text.secondary' }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      Discount
+                      {order.discountCode && (
+                        <Typography 
+                          component="span"
+                          variant="caption" 
+                          color="text.secondary" 
+                          sx={{ 
+                            fontWeight: 500,
+                            ml: 0.5
+                          }}
+                        >
+                          ({order.discountCode.code})
+                        </Typography>
+                      )}
                     </Typography>
                   </Box>
-                ))}
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
+                    -{formatCurrency(order.discountAmount || 0)}
+                  </Typography>
+                </Box>
+              )}
 
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
