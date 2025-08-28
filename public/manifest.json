@@ -1,6 +1,6 @@
 {
-  "name": "Nexea Event App",
-  "short_name": "Event App",
+  "name": "Gettix",
+  "short_name": "Gettix",
   "display": "standalone",
   "start_url": "/",
   "theme_color": "#000000",
