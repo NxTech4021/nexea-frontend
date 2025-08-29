@@ -491,7 +491,7 @@ const OrderDetails = ({ orderId }) => {
                       sx={{ color: 'text.secondary' }}
                     />
                     <Typography variant="caption" color="text.secondary">
-                      Purchased {dayjs(order.createdAt).format('MMM D, YYYY [at] h:mm A')}
+                      Purchased on <b>{dayjs(order.createdAt).format('MMM D, YYYY [at] h:mm A')}</b>
                     </Typography>
                   </Box>
                 </Stack>

@@ -24,6 +24,7 @@ import {
   DialogContent,
   CircularProgress,
 } from '@mui/material';
+import dayjs from 'dayjs';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -900,6 +901,12 @@ export default function EventAttendee() {
       headerName: 'Total Amount',
       width: persistedWidths.orderAmount || 200,
       valueGetter: (value, row) => `RM${(row.order.totalAmount || 0).toFixed(2)}`,
+    },
+    {
+      field: 'purchaseDate',
+      headerName: 'Purchase Date',
+      width: persistedWidths.purchaseDate || 200,
+      valueGetter: (value, row) => row.order.createdAt ? dayjs(row.order.createdAt).format('MMM D, YYYY [at] h:mm A') : 'N/A',
     },
     {
       field: 'discountCode',
