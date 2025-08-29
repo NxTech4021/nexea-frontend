@@ -16,7 +16,9 @@ import {
   Paper,
   Button,
   Dialog,
+  Select,
   Tooltip,
+  MenuItem,
   Container,
   Typography,
   IconButton,
@@ -287,7 +289,7 @@ export default function EventAttendee() {
   const settings = useSettingsContext();
   const theme = useTheme();
   const router = useRouter();
-  
+
   // Get URL search parameters for initial filtering
   const urlParams = new URLSearchParams(window.location.search);
   const initialTicketType = urlParams.get('ticketType');
@@ -323,7 +325,15 @@ export default function EventAttendee() {
   const [allAttendees, setAllAttendees] = useState([]);
   const [event, setEvent] = useState(null);
   const dialog = useBoolean();
-  const { data, isLoading } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
+  const {
+    data,
+    isLoading,
+    mutate: attendeeMutate,
+  } = useSWR(`${endpoints.attendee.root}?eventId=${id}`, fetcher);
+  const { data: tickets, isTicketLoading } = useSWR(
+    `${endpoints.ticketType.getByEventId(id)}`,
+    fetcher
+  );
 
   // const fetchAttendees = useCallback(async () => {
   //   try {
@@ -345,15 +355,6 @@ export default function EventAttendee() {
   //   }
   // }, [id]);
 
-  useEffect(() => {
-    if (selectedEventId) {
-      const attendeesForSelectedEvent = allAttendees.filter(
-        (attendee) => attendee.eventId === selectedEventId
-      );
-      setAttendees(attendeesForSelectedEvent);
-    }
-  }, [selectedEventId, allAttendees]);
-
   const updateAttendees = useCallback(async (newRow) => {
     try {
       await axiosInstance.patch(`/api/attendee/update/${newRow.id}`, newRow); // Add/remove /api if it doesnt work
@@ -365,6 +366,19 @@ export default function EventAttendee() {
       console.error('Error fetching attendees:', error);
     }
   }, []);
+
+  const changeAttendeeTicket = async ({ oldTicketId, newTicketId, attendeeId }) => {
+    try {
+      const res = await axiosInstance.patch(`${endpoints.attendee.changeTicket(attendeeId)}`, {
+        newTicketId,
+        oldTicketId,
+      });
+      attendeeMutate();
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error(error?.message);
+    }
+  };
 
   const handleProcessRowUpdateError = useCallback((error) => {
     setSnackbar({ children: error.message, severity: 'error' });
@@ -536,7 +550,25 @@ export default function EventAttendee() {
       field: 'ticketType',
       headerName: 'Ticket Type',
       width: persistedWidths.ticketType || 200,
-      valueGetter: (value, row) => `${row.ticket.ticketType.title || ''}`,
+      valueGetter: (value, row) => `${row.ticket.ticketType.id || ''}`,
+      renderCell: (params) => (
+        <Select
+          value={params.value}
+          onChange={async (e) => {
+            console.log(`CHANGING FROM ${params.value} to ${e.target.value}`);
+            await changeAttendeeTicket({
+              oldTicketId: params.value,
+              newTicketId: e.target.value,
+              attendeeId: params.row.id,
+            });
+          }}
+          fullWidth
+          size="small"
+        >
+          {!isTicketLoading &&
+            tickets?.map((ticket) => <MenuItem value={ticket.id}>{ticket.title}</MenuItem>)}
+        </Select>
+      ),
     },
     {
       field: 'ticketAddOn',
@@ -916,6 +948,15 @@ export default function EventAttendee() {
     },
   ];
 
+  useEffect(() => {
+    if (selectedEventId) {
+      const attendeesForSelectedEvent = allAttendees.filter(
+        (attendee) => attendee.eventId === selectedEventId
+      );
+      setAttendees(attendeesForSelectedEvent);
+    }
+  }, [selectedEventId, allAttendees]);
+
   if (isLoading) {
     return (
       <Box
@@ -1083,8 +1124,8 @@ export default function EventAttendee() {
             columns: {
               columnVisibilityModel: {
                 orderNumber: false,
-                ticketType: !!((initialTicketType && showColumns === 'ticketType')),
-                ticketAddOn: !!((initialTicketAddOn && showColumns === 'ticketAddOn')),
+                // ticketType: !!(initialTicketType && showColumns === 'ticketType'),
+                ticketAddOn: !!(initialTicketAddOn && showColumns === 'ticketAddOn'),
                 ticketCode: false,
                 ticketStatus: showColumns === 'ticketStatus',
                 addOnStatus: showColumns === 'addOnStatus',

@@ -37,21 +37,6 @@ const SuccessPayment = () => {
 
   const { data, isLoading } = useSWR(`/api/order/${orderId}`, fetcher);
 
-  // useMetaPixel(
-  //   'Purchase',
-  //   {
-  //     value: data?.totalAmount || 0,
-  //     currency: 'MYR',
-  //     content_type: 'product',
-  //     eventName: data?.event?.name || '',
-  //     // name: data?.buyerName || '',
-  //     // email: data?.buyerEmail || '',
-  //     // phoneNumber: data?.buyerPhoneNumber || '',
-  //   },
-  //   true
-  //   // pixelId
-  // );
-
   useEffect(() => {
     localStorage.removeItem('attendees');
   }, []);

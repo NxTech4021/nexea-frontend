@@ -81,6 +81,7 @@ export const endpoints = {
       list: '/api/attendee/event',
     },
     checkedIn: '/api/attendee',
+    changeTicket: (id) => `/api/attendee/update/ticket/${id}`,
   },
   users: {
     list: '/api/users',
