@@ -909,13 +909,20 @@ const EventStatistics = ({ data, eventId }) => {
   const freeOrders = useMemo(() => 
     filteredOrders.filter((order) => Number(order.totalAmount) === 0), [filteredOrders]);
 
-  // Get all attendees from filtered orders
+  // Get all attendees from filtered orders (for revenue/orders charts)
   const allAttendees = useMemo(() => 
     filteredOrders.flatMap((order) => order.attendees) || [], [filteredOrders]);
   const paidAttendees = useMemo(() => 
     paidOrders.flatMap((order) => order.attendees) || [], [paidOrders]);
   const freeAttendees = useMemo(() => 
     freeOrders.flatMap((order) => order.attendees) || [], [freeOrders]);
+
+  // Get all attendees from ALL orders (for ticket breakdown tables - not affected by time range)
+  const allTimeAllAttendees = useMemo(() => 
+    paidStatusOrders.flatMap((order) => order.attendees) || [], [paidStatusOrders]);
+  const allTimePaidAttendees = useMemo(() => 
+    paidStatusOrders.filter((order) => Number(order.totalAmount) > 0)
+      .flatMap((order) => order.attendees) || [], [paidStatusOrders]);
 
   // 1. Revenue of paid tickets
   const paidTicketRevenue = paidAttendees.reduce((acc, attendee) => {
@@ -997,10 +1004,11 @@ const EventStatistics = ({ data, eventId }) => {
   const trendData = getTrendData();
 
 
-  // Calculate add-ons quantity
+  // Calculate add-ons quantity (time-filtered data for TotalTickets component)
   const addOnsQuantity = allAttendees.filter(
     (attendee) => attendee.ticket?.ticketAddOn?.addOn
   ).length;
+
 
 
   // Group tickets by type for detailed breakdown
@@ -1017,15 +1025,15 @@ const EventStatistics = ({ data, eventId }) => {
       };
     });
     
-    // Now process attendees to populate the data
-    allAttendees.forEach((attendee) => {
+    // Now process attendees to populate the data (using all-time data)
+    allTimeAllAttendees.forEach((attendee) => {
       const ticketType = attendee.ticket?.ticketType?.title;
       const attendeeOrder = paidStatusOrders.find((order) =>
         order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
       );
 
-      // Check if this attendee is from a paid or free order
-      const isFromPaidOrder = paidAttendees.includes(attendee);
+      // Check if this attendee is from a paid or free order (using all-time data)
+      const isFromPaidOrder = allTimePaidAttendees.includes(attendee);
 
       if (!ticketType || !attendeeOrder) return;
 
@@ -1066,7 +1074,7 @@ const EventStatistics = ({ data, eventId }) => {
     });
     
     return breakdown;
-  }, [data?.ticketType, allAttendees, paidStatusOrders, paidAttendees]);
+  }, [data?.ticketType, allTimeAllAttendees, paidStatusOrders, allTimePaidAttendees]);
 
   // Add-on tickets breakdown
   const addOnBreakdown = useMemo(() => {
@@ -1084,15 +1092,15 @@ const EventStatistics = ({ data, eventId }) => {
       });
     });
     
-    // Now process attendees to populate the data
-    allAttendees.forEach((attendee) => {
+    // Now process attendees to populate the data (using all-time data)
+    allTimeAllAttendees.forEach((attendee) => {
       const addOnName = attendee.ticket?.ticketAddOn?.addOn?.name;
       const attendeeOrder = paidStatusOrders.find((order) =>
         order.attendees.some((orderAttendee) => orderAttendee.id === attendee.id)
       );
 
-      // Check if this attendee is from a paid or free order
-      const isFromPaidOrder = paidAttendees.includes(attendee);
+      // Check if this attendee is from a paid or free order (using all-time data)
+      const isFromPaidOrder = allTimePaidAttendees.includes(attendee);
 
       if (!addOnName || !attendeeOrder) return;
 
@@ -1117,7 +1125,7 @@ const EventStatistics = ({ data, eventId }) => {
     });
     
     return breakdown;
-  }, [data?.ticketType, allAttendees, paidStatusOrders, paidAttendees]);
+  }, [data?.ticketType, allTimeAllAttendees, paidStatusOrders, allTimePaidAttendees]);
 
   return (
     <Box sx={{ mb: 3 }}>

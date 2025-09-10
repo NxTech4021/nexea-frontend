@@ -17,8 +17,8 @@ import Iconify from 'src/components/iconify';
 const TotalTickets = ({ 
   paidTicketQuantity, 
   freeTicketQuantity, 
-  addOnsQuantity, 
-  revenueTimeRange 
+  addOnsQuantity,
+  revenueTimeRange
 }) => {
   const theme = useTheme();
 

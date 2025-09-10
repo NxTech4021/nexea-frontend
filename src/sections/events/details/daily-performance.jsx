@@ -176,7 +176,7 @@ const DailyPerformance = ({ trendData }) => {
           minHeight: 80
         }}>
           <Typography fontSize={11} color={theme.palette.text.secondary} fontWeight={500} sx={{ mb: 1 }}>
-            Orders
+            Paid Orders
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
             <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
