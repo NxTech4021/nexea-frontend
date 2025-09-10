@@ -997,7 +997,12 @@ const EventStatistics = ({ data, eventId }) => {
     return {
       revenue: calculateTrend(todayRevenue, yesterdayRevenue),
       orders: calculateTrend(todayOrders, yesterdayOrders),
-      registrations: calculateTrend(todayRegistrations, yesterdayRegistrations)
+      registrations: calculateTrend(todayRegistrations, yesterdayRegistrations),
+      todayValues: {
+        revenue: todayRevenue,
+        orders: todayOrders,
+        registrations: todayRegistrations
+      }
     };
   };
 

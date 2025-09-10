@@ -5,7 +5,7 @@ import { Box, useTheme, Typography } from '@mui/material';
 
 import Iconify from 'src/components/iconify';
 
-const DailyPerformance = ({ trendData }) => {
+const DailyPerformance = ({ trendData, todayValues }) => {
   const theme = useTheme();
 
   // functions
@@ -125,37 +125,49 @@ const DailyPerformance = ({ trendData }) => {
           <Typography fontSize={11} color={theme.palette.text.secondary} fontWeight={500} sx={{ mb: 1 }}>
             Revenue
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
-            <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {trendData.revenue.isPositive && trendData.revenue.change > 0 ? '+' : ''}{new Intl.NumberFormat('en-MY', {
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            {/* Today's actual value */}
+            <Typography fontSize={16} fontWeight={700} color={theme.palette.text.primary}>
+              {new Intl.NumberFormat('en-MY', {
                 minimumFractionDigits: 2,
                 style: 'currency',
                 currency: 'MYR',
-              }).format(trendData.revenue.change)}
+              }).format(todayValues?.revenue || 0)}
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 0.25,
-              px: 0.5,
-              py: 0.25,
-              borderRadius: 0.5,
-              bgcolor: getTrendBackgroundColor(trendData.revenue)
-            }}>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.revenue)}
-              >
-                {getTrendIcon(trendData.revenue)}
+            
+            {/* Comparison with yesterday */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography fontSize={12} fontWeight={600} color={theme.palette.text.secondary}>
+                {trendData.revenue.isPositive && trendData.revenue.change > 0 ? '+' : ''}{new Intl.NumberFormat('en-MY', {
+                  minimumFractionDigits: 2,
+                  style: 'currency',
+                  currency: 'MYR',
+                }).format(trendData.revenue.change)}
               </Typography>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.revenue)}
-              >
-                {getTrendPercentage(trendData.revenue, 1)}
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.25,
+                px: 0.5,
+                py: 0.25,
+                borderRadius: 0.5,
+                bgcolor: getTrendBackgroundColor(trendData.revenue)
+              }}>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.revenue)}
+                >
+                  {getTrendIcon(trendData.revenue)}
+                </Typography>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.revenue)}
+                >
+                  {getTrendPercentage(trendData.revenue, 1)}
+                </Typography>
+              </Box>
             </Box>
           </Box>
           <Typography fontSize={10} color={theme.palette.text.secondary}>
@@ -178,33 +190,41 @@ const DailyPerformance = ({ trendData }) => {
           <Typography fontSize={11} color={theme.palette.text.secondary} fontWeight={500} sx={{ mb: 1 }}>
             Paid Orders
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
-            <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {trendData.orders.isPositive && trendData.orders.change > 0 ? '+' : ''}{trendData.orders.change}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            {/* Today's actual value */}
+            <Typography fontSize={16} fontWeight={700} color={theme.palette.text.primary}>
+              {todayValues?.orders || 0}
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 0.25,
-              px: 0.5,
-              py: 0.25,
-              borderRadius: 0.5,
-              bgcolor: getTrendBackgroundColor(trendData.orders)
-            }}>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.orders)}
-              >
-                {getTrendIcon(trendData.orders)}
+            
+            {/* Comparison with yesterday */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography fontSize={12} fontWeight={600} color={theme.palette.text.secondary}>
+                {trendData.orders.isPositive && trendData.orders.change > 0 ? '+' : ''}{trendData.orders.change}
               </Typography>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.orders)}
-              >
-                {getTrendPercentage(trendData.orders, 0)}
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.25,
+                px: 0.5,
+                py: 0.25,
+                borderRadius: 0.5,
+                bgcolor: getTrendBackgroundColor(trendData.orders)
+              }}>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.orders)}
+                >
+                  {getTrendIcon(trendData.orders)}
+                </Typography>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.orders)}
+                >
+                  {getTrendPercentage(trendData.orders, 0)}
+                </Typography>
+              </Box>
             </Box>
           </Box>
           <Typography fontSize={10} color={theme.palette.text.secondary}>
@@ -227,33 +247,41 @@ const DailyPerformance = ({ trendData }) => {
           <Typography fontSize={11} color={theme.palette.text.secondary} fontWeight={500} sx={{ mb: 1 }}>
             Registrations
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
-            <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {trendData.registrations.isPositive && trendData.registrations.change > 0 ? '+' : ''}{trendData.registrations.change}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            {/* Today's actual value */}
+            <Typography fontSize={16} fontWeight={700} color={theme.palette.text.primary}>
+              {todayValues?.registrations || 0}
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 0.25,
-              px: 0.5,
-              py: 0.25,
-              borderRadius: 0.5,
-              bgcolor: getTrendBackgroundColor(trendData.registrations)
-            }}>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.registrations)}
-              >
-                {getTrendIcon(trendData.registrations)}
+            
+            {/* Comparison with yesterday */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography fontSize={12} fontWeight={600} color={theme.palette.text.secondary}>
+                {trendData.registrations.isPositive && trendData.registrations.change > 0 ? '+' : ''}{trendData.registrations.change}
               </Typography>
-              <Typography
-                fontSize={9}
-                fontWeight={600}
-                color={getTrendColor(trendData.registrations)}
-              >
-                {getTrendPercentage(trendData.registrations, 0)}
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.25,
+                px: 0.5,
+                py: 0.25,
+                borderRadius: 0.5,
+                bgcolor: getTrendBackgroundColor(trendData.registrations)
+              }}>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.registrations)}
+                >
+                  {getTrendIcon(trendData.registrations)}
+                </Typography>
+                <Typography
+                  fontSize={9}
+                  fontWeight={600}
+                  color={getTrendColor(trendData.registrations)}
+                >
+                  {getTrendPercentage(trendData.registrations, 0)}
+                </Typography>
+              </Box>
             </Box>
           </Box>
           <Typography fontSize={10} color={theme.palette.text.secondary}>
@@ -287,6 +315,11 @@ DailyPerformance.propTypes = {
       isNeutral: PropTypes.bool.isRequired,
     }).isRequired,
   }).isRequired,
+  todayValues: PropTypes.shape({
+    revenue: PropTypes.number,
+    orders: PropTypes.number,
+    registrations: PropTypes.number,
+  }),
 };
 
 export default DailyPerformance;

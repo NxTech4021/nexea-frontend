@@ -358,7 +358,7 @@ const RevenueOrders = ({
             </Box>
             
             {/* Daily Performance Comparison */}
-            <DailyPerformance trendData={trendData} />
+            <DailyPerformance trendData={trendData} todayValues={trendData.todayValues} />
           </Box>
 
           {/* Revenue and Orders Combined Chart */}
