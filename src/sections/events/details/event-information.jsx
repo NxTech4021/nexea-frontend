@@ -132,27 +132,13 @@ const EventInformation = ({ event }) => {
   return (
     <Card
       sx={{
-        background: 'linear-gradient(to right, rgba(0, 0, 0, 1), rgba(226, 228, 230, 0.2) 400%)',
-        borderRadius: 2,
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        borderRadius: 3,
         width: 1,
         marginTop: 1.5,
         position: 'relative',
         overflow: 'hidden',
-        '::before': {
-          content: '""',
-          position: 'absolute',
-          top: '-2px',
-          left: '-2px',
-          right: '-2px',
-          bottom: '-2px',
-          borderRadius: '18px',
-          padding: '2px',
-          background: 'linear-gradient(to right, #200122, #6f0000, #200122)',
-          backgroundSize: '200% auto',
-          backgroundRepeat: 'repeat',
-          animation: `${borderAnimation} 7s linear infinite`,
-          zIndex: -1,
-        },
+        border: '1px solid rgba(255, 255, 255, 0.1)',
       }}
     >
       <Divider />
@@ -163,8 +149,8 @@ const EventInformation = ({ event }) => {
               <IconButton
                 onClick={() => router.push(paths.dashboard.events.root)}
                 sx={{
-                  width: { xs: 36, sm: 40 },
-                  height: { xs: 36, sm: 40 },
+                  width: { xs: 36, sm: 40, md: 42 },
+                  height: { xs: 36, sm: 40, md: 42 },
                   color: 'common.white',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: 1,
@@ -176,13 +162,13 @@ const EventInformation = ({ event }) => {
                   },
                 }}
               >
-                <Iconify icon="eva:arrow-back-fill" width={{ xs: 18, sm: 20 }} height={{ xs: 18, sm: 20 }} />
+                <Iconify icon="eva:arrow-back-fill" width={{ xs: 18, sm: 20, md: 22 }} height={{ xs: 18, sm: 20, md: 22 }} />
               </IconButton>
             </Tooltip>
             <Box
               sx={{
-                width: { xs: 40, sm: 80 },
-                height: { xs: 40, sm: 80 },
+                width: { xs: 40, sm: 60, md: 80, lg: 90 },
+                height: { xs: 40, sm: 60, md: 80, lg: 90 },
                 borderRadius: 1.5,
                 overflow: 'hidden',
                 position: 'relative',
@@ -209,8 +195,8 @@ const EventInformation = ({ event }) => {
               {/* Desktop layout - Event name and status */}
               <Typography variant="h6" sx={{ 
                 color: 'white', 
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                display: { xs: 'none', sm: 'flex' },
+                fontSize: { xs: '1rem', sm: '1rem', md: '1.1rem', lg: '1.2rem' },
+                display: { xs: 'none', sm: 'none', md: 'flex' },
                 alignItems: 'center',
                 flexDirection: 'row',
                 gap: 1
@@ -225,10 +211,10 @@ const EventInformation = ({ event }) => {
                 </Box>
                 <Box
                   sx={{
-                    px: 1,
+                    px: { sm: 0.75, md: 1, lg: 1.25 },
                     py: 0.5,
                     borderRadius: 1,
-                    fontSize: 12,
+                    fontSize: { sm: 11, md: 12, lg: 13 },
                     fontWeight: 600,
                     color: getStatusConfig(event.status).color,
                     bgcolor: getStatusConfig(event.status).bgColor,
@@ -293,13 +279,13 @@ const EventInformation = ({ event }) => {
               </Typography>
 
               {/* Desktop layout - Date/Time/POI info */}
-              <Stack spacing={0.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+              <Stack spacing={0.5} sx={{ display: { xs: 'none', sm: 'none', md: 'flex' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                  <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
                   <Typography variant="subtitle2" sx={{ 
                     color: 'white', 
                     fontWeight: 'normal', 
-                    fontSize: '0.85rem',
+                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
@@ -308,21 +294,21 @@ const EventInformation = ({ event }) => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                  <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
                   <Typography variant="subtitle2" sx={{ 
                     color: 'white', 
                     fontWeight: 'normal', 
-                    fontSize: '0.85rem'
+                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' }
                   }}>
                     {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 14, height: 14 }} />
+                  <Iconify icon="eva:person-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
                   <Typography variant="subtitle2" sx={{ 
                     color: 'white', 
                     fontWeight: 'normal', 
-                    fontSize: '0.85rem',
+                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
@@ -337,8 +323,8 @@ const EventInformation = ({ event }) => {
           {/* Right side content - Desktop only */}
           <Stack alignItems="flex-end" justifyContent="center" spacing={1.5} sx={{ 
             minWidth: 'fit-content',
-            ml: 2,
-            display: { xs: 'none', sm: 'flex' }
+            ml: { sm: 1, md: 2, lg: 3 },
+            display: { xs: 'none', sm: 'none', md: 'flex' }
           }}>
             {/* Countdown */}
             {countdown && (
@@ -347,7 +333,7 @@ const EventInformation = ({ event }) => {
                 sx={{
                   color: 'white',
                   fontWeight: 500,
-                  fontSize: '0.9rem',
+                  fontSize: { sm: '0.8rem', md: '0.9rem', lg: '1rem' },
                   letterSpacing: 0.5,
                   fontFamily: '"Roboto Mono", monospace',
                   display: 'flex',
@@ -355,7 +341,7 @@ const EventInformation = ({ event }) => {
                   textAlign: 'right',
                 }}
               >
-                <Iconify icon="eva:clock-outline" width={14} height={14} sx={{ opacity: 1, mr: 0.5 }} />
+                <Iconify icon="eva:clock-outline" width={{ sm: 12, md: 14, lg: 16 }} height={{ sm: 12, md: 14, lg: 16 }} sx={{ opacity: 1, mr: 0.5 }} />
                 {countdown}
               </Typography>
             )}
@@ -363,18 +349,19 @@ const EventInformation = ({ event }) => {
             {/* Action Buttons */}
             <Stack 
               direction="row"
-              spacing={0.75}
+              spacing={{ sm: 0.5, md: 0.75, lg: 1 }}
               sx={{ 
                 alignItems: 'flex-end',
-                width: 'fit-content'
+                width: 'fit-content',
+                flexWrap: { sm: 'wrap', md: 'nowrap' }
               }}
             >
               <Button
                 variant="contained"
                 onClick={() => router.push(`${paths.dashboard.events.qr}/${event.id}`)}
                 sx={{
-                  height: '34px',
-                  px: 2,
+                  height: { sm: '32px', md: '34px', lg: '36px' },
+                  px: { sm: 1.5, md: 2, lg: 2.5 },
                   py: 0.5,
                   borderRadius: 1,
                   display: 'flex',
@@ -388,12 +375,12 @@ const EventInformation = ({ event }) => {
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                   },
                   fontWeight: 500,
-                  fontSize: '0.75rem',
+                  fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
                   textTransform: 'none',
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="bx:qr" width={16} height={16} />
+                <Iconify icon="bx:qr" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
                 Check In
               </Button>
 
@@ -412,8 +399,8 @@ const EventInformation = ({ event }) => {
                     });
                 }}
                 sx={{
-                  height: '34px',
-                  px: 2,
+                  height: { sm: '32px', md: '34px', lg: '36px' },
+                  px: { sm: 1.5, md: 2, lg: 2.5 },
                   py: 0.5,
                   borderRadius: 1,
                   display: 'flex',
@@ -427,12 +414,12 @@ const EventInformation = ({ event }) => {
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                   },
                   fontWeight: 500,
-                  fontSize: '0.75rem',
+                  fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
                   textTransform: 'none',
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="eva:copy-outline" width={16} height={16} />
+                <Iconify icon="eva:copy-outline" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
                 Cart Link
               </Button>
 
@@ -440,8 +427,8 @@ const EventInformation = ({ event }) => {
                 variant="contained"
                 onClick={() => router.push(`${paths.dashboard.events.attendees}/${event.id}`)}
                 sx={{
-                  height: '34px',
-                  px: 2,
+                  height: { sm: '32px', md: '34px', lg: '36px' },
+                  px: { sm: 1.5, md: 2, lg: 2.5 },
                   py: 0.5,
                   borderRadius: 1,
                   display: 'flex',
@@ -455,12 +442,12 @@ const EventInformation = ({ event }) => {
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                   },
                   fontWeight: 500,
-                  fontSize: '0.75rem',
+                  fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
                   textTransform: 'none',
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="mdi:account-group" width={16} height={16} />
+                <Iconify icon="mdi:account-group" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
                 List
               </Button>
 
@@ -471,8 +458,8 @@ const EventInformation = ({ event }) => {
                   setOpenEdit(true);
                 }}
                 sx={{
-                  height: '34px',
-                  px: 2,
+                  height: { sm: '32px', md: '34px', lg: '36px' },
+                  px: { sm: 1.5, md: 2, lg: 2.5 },
                   py: 0.5,
                   borderRadius: 1,
                   display: 'flex',
@@ -486,20 +473,250 @@ const EventInformation = ({ event }) => {
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                   },
                   fontWeight: 500,
-                  fontSize: '0.75rem',
+                  fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
                   textTransform: 'none',
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="eva:edit-fill" width={16} height={16} />
+                <Iconify icon="eva:edit-fill" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
                 Edit
               </Button>
             </Stack>
           </Stack>
         </Box>
 
+        {/* Medium Screen Layout - Tablet optimized */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5, mt: 2, px: 1 }}>
+          {/* Event name and status for medium screens */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Typography variant="h6" sx={{ 
+              color: 'white', 
+              fontSize: '1.1rem',
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {items[0].content}
+            </Typography>
+            <Box
+              sx={{
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                fontSize: 12,
+                fontWeight: 600,
+                color: getStatusConfig(event.status).color,
+                bgcolor: getStatusConfig(event.status).bgColor,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                flexShrink: 0,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  bgcolor: getStatusConfig(event.status).color,
+                }}
+              />
+              {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+            </Box>
+          </Box>
+
+          {/* Event details for medium screens */}
+          <Stack spacing={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 16, height: 16 }} />
+              <Typography variant="subtitle2" sx={{ 
+                color: 'white', 
+                fontWeight: 'normal', 
+                fontSize: '0.9rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 16, height: 16 }} />
+              <Typography variant="subtitle2" sx={{ 
+                color: 'white', 
+                fontWeight: 'normal', 
+                fontSize: '0.9rem'
+              }}>
+                {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 16, height: 16 }} />
+              <Typography variant="subtitle2" sx={{ 
+                color: 'white', 
+                fontWeight: 'normal', 
+                fontSize: '0.9rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {items[3].content}
+              </Typography>
+            </Box>
+          </Stack>
+
+          {/* Countdown for medium screens */}
+          {countdown && (
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'white',
+                fontWeight: 500,
+                fontSize: '0.9rem',
+                letterSpacing: 0.5,
+                fontFamily: '"Roboto Mono", monospace',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Iconify icon="eva:clock-outline" width={16} height={16} sx={{ opacity: 1, mr: 0.5 }} />
+              {countdown}
+            </Typography>
+          )}
+
+          {/* Action buttons for medium screens */}
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+            <Button
+              variant="contained"
+              onClick={() => router.push(`${paths.dashboard.events.qr}/${event.id}`)}
+              sx={{
+                height: '36px',
+                px: 2,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                textTransform: 'none',
+                flex: '1 1 auto',
+                minWidth: '120px',
+              }}
+            >
+              <Iconify icon="bx:qr" width={16} height={16} />
+              Check In
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                const eventLink = `${import.meta.env.VITE_BASE_URL}/event/${event.id}`;
+                navigator.clipboard
+                  .writeText(eventLink)
+                  .then(() => {
+                    enqueueSnackbar('Cart link copied!', { variant: 'success' });
+                  })
+                  .catch((error) => {
+                    console.error('Error copying link: ', error);
+                    enqueueSnackbar('Failed to copy link', { variant: 'error' });
+                  });
+              }}
+              sx={{
+                height: '36px',
+                px: 2,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                textTransform: 'none',
+                flex: '1 1 auto',
+                minWidth: '120px',
+              }}
+            >
+              <Iconify icon="eva:copy-outline" width={16} height={16} />
+              Cart Link
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => router.push(`${paths.dashboard.events.attendees}/${event.id}`)}
+              sx={{
+                height: '36px',
+                px: 2,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                textTransform: 'none',
+                flex: '1 1 auto',
+                minWidth: '120px',
+              }}
+            >
+              <Iconify icon="mdi:account-group" width={16} height={16} />
+              Attendee List
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                setSelectedEvent(event);
+                setOpenEdit(true);
+              }}
+              sx={{
+                height: '36px',
+                px: 2,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: '0.8rem',
+                textTransform: 'none',
+                flex: '1 1 auto',
+                minWidth: '120px',
+              }}
+            >
+              <Iconify icon="eva:edit-fill" width={16} height={16} />
+              Edit Event
+            </Button>
+          </Stack>
+        </Box>
+
         {/* Mobile Layout - Stacked Information */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'column', gap: 1, mt: 1, px: { xs: 0.5, sm: 0 } }}>
           {/* Countdown */}
           {countdown && (
             <Typography

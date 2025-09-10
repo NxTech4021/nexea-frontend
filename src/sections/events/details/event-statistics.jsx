@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
-import ReactApexChart from 'react-apexcharts';
 import React, { useMemo, useState } from 'react';
 
 import Grid from '@mui/material/Grid2';
@@ -10,11 +9,8 @@ import {
   Chip,
   Stack,
   alpha,
-  Button,
-  Select,
   Divider,
   Tooltip,
-  MenuItem,
   useTheme,
   Typography,
   CardContent,
@@ -23,6 +19,9 @@ import {
 import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
+
+import TotalTickets from './total-tickets';
+import RevenueOrders from './revenue-orders';
 
 const StatCard = ({ title, value, subtitle, color }) => {
   const theme = useTheme();
@@ -890,15 +889,29 @@ const EventStatistics = ({ data, eventId }) => {
   const paidStatusOrders = useMemo(() => 
     data?.order?.filter((order) => order?.status === 'paid') || [], [data?.order]);
 
+  // Filter orders based on time range
+  const filteredOrders = useMemo(() => {
+    if (revenueTimeRange === 'all') {
+      return paidStatusOrders;
+    }
+    
+    const now = dayjs();
+    const cutoffDate = now.subtract(revenueTimeRange, 'day');
+    
+    return paidStatusOrders.filter((order) => 
+      dayjs(order.createdAt).isAfter(cutoffDate)
+    );
+  }, [paidStatusOrders, revenueTimeRange]);
+
   // Separate paid and free orders based on totalAmount
   const paidOrders = useMemo(() => 
-    paidStatusOrders.filter((order) => Number(order.totalAmount) > 0), [paidStatusOrders]);
+    filteredOrders.filter((order) => Number(order.totalAmount) > 0), [filteredOrders]);
   const freeOrders = useMemo(() => 
-    paidStatusOrders.filter((order) => Number(order.totalAmount) === 0), [paidStatusOrders]);
+    filteredOrders.filter((order) => Number(order.totalAmount) === 0), [filteredOrders]);
 
-  // Get all attendees from paid status orders
+  // Get all attendees from filtered orders
   const allAttendees = useMemo(() => 
-    paidStatusOrders.flatMap((order) => order.attendees) || [], [paidStatusOrders]);
+    filteredOrders.flatMap((order) => order.attendees) || [], [filteredOrders]);
   const paidAttendees = useMemo(() => 
     paidOrders.flatMap((order) => order.attendees) || [], [paidOrders]);
   const freeAttendees = useMemo(() => 
@@ -920,95 +933,75 @@ const EventStatistics = ({ data, eventId }) => {
   // 4. Quantity of all free tickets
   const freeTicketQuantity = freeAttendees.length;
 
-  // Revenue chart data (dynamic time range)
-  const revenueChartData = useMemo(() => {
-    const now = dayjs();
-    let days;
-
-    if (revenueTimeRange === 'all') {
-      // Get all unique dates from orders
-      const allDates = [
-        ...new Set(paidOrders.map((order) => dayjs(order.createdAt).format('YYYY-MM-DD'))),
-      ];
-      const sortedDates = allDates.sort();
-      days = sortedDates.map((date) => dayjs(date));
-    } else {
-      // Get last N days
-      days = Array.from({ length: revenueTimeRange }, (_, i) => now.subtract(i, 'day')).reverse();
+  // Calculate daily trends and percentage changes
+  const calculateTrend = (currentData, previousData) => {
+    if (!previousData || previousData === 0) {
+      // If no previous data, show neutral if current is also 0, otherwise show as new
+      return { 
+        change: currentData, 
+        percentage: 0, 
+        isPositive: currentData > 0, 
+        isNeutral: currentData === 0 
+      };
     }
-
-    const revenueByDay = days.map((day) => {
-      const dayRevenue = paidOrders
-        .filter((order) => dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD'))
-        .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-      return dayRevenue;
-    });
-
-    const orderCountByDay = days.map((day) => {
-      const dayOrders = paidOrders.filter(
-        (order) => dayjs(order.createdAt).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
-      ).length;
-      return dayOrders;
-    });
-
-    const categories = days.map((day) => day.format('MMM D'));
-
-    // Normalize data to different ranges for visual separation
-    const maxRevenue = Math.max(...revenueByDay);
-    const maxOrders = Math.max(...orderCountByDay);
-
-    // Scale revenue to upper half (50-100) only if there's revenue, otherwise keep it flat with orders
-    const normalizedRevenue = revenueByDay.map((value) => {
-      if (maxRevenue > 0 && value > 0) {
-        return 50 + (value / maxRevenue) * 50;
-      }
-      return 0; // Flat when revenue is 0
-    });
-
-    // Scale orders to lower half (0-40)
-    const normalizedOrders = orderCountByDay.map((value) =>
-      maxOrders > 0 ? (value / maxOrders) * 40 : 0
-    );
-
-    return {
-      series: [
-        { name: 'Revenue', data: normalizedRevenue, type: 'area' },
-        { name: 'Orders', data: normalizedOrders, type: 'area' },
-      ],
-      categories,
-      originalData: {
-        revenue: revenueByDay,
-        orders: orderCountByDay,
-      },
+    const change = currentData - previousData;
+    const percentage = previousData > 0 ? (change / previousData) * 100 : 0;
+    return { 
+      change, 
+      percentage, 
+      isPositive: change > 0, 
+      isNeutral: change === 0 
     };
-  }, [paidOrders, revenueTimeRange]);
+  };
+
+  // Get data for trend calculation (last 2 days)
+  const getTrendData = () => {
+    const now = dayjs();
+    const today = now.format('YYYY-MM-DD');
+    const yesterday = now.subtract(1, 'day').format('YYYY-MM-DD');
+    
+    // Revenue trends
+    const todayRevenue = paidOrders
+      .filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === today)
+      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const yesterdayRevenue = paidOrders
+      .filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === yesterday)
+      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    
+    // Orders trends
+    const todayOrders = paidOrders.filter(order => 
+      dayjs(order.createdAt).format('YYYY-MM-DD') === today
+    ).length;
+    const yesterdayOrders = paidOrders.filter(order => 
+      dayjs(order.createdAt).format('YYYY-MM-DD') === yesterday
+    ).length;
+    
+    // Registrations trends
+    const todayRegistrations = [
+      ...paidOrders.filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === today),
+      ...freeOrders.filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === today)
+    ].reduce((sum, order) => sum + (order.attendees?.length || 0), 0);
+    
+    const yesterdayRegistrations = [
+      ...paidOrders.filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === yesterday),
+      ...freeOrders.filter(order => dayjs(order.createdAt).format('YYYY-MM-DD') === yesterday)
+    ].reduce((sum, order) => sum + (order.attendees?.length || 0), 0);
+    
+    return {
+      revenue: calculateTrend(todayRevenue, yesterdayRevenue),
+      orders: calculateTrend(todayOrders, yesterdayOrders),
+      registrations: calculateTrend(todayRegistrations, yesterdayRegistrations)
+    };
+  };
+
+  const trendData = getTrendData();
+
 
   // Calculate add-ons quantity
   const addOnsQuantity = allAttendees.filter(
     (attendee) => attendee.ticket?.ticketAddOn?.addOn
   ).length;
 
-  // Tickets chart data (paid vs free vs add-ons)
-  const ticketsChartData = useMemo(
-    () => ({
-      series: [
-        {
-          name: 'Paid Tickets',
-          data: [paidTicketQuantity],
-        },
-        {
-          name: 'Free Tickets',
-          data: [freeTicketQuantity],
-        },
-        {
-          name: 'Add-ons',
-          data: [addOnsQuantity],
-        },
-      ],
-      categories: ['Tickets'],
-    }),
-    [paidTicketQuantity, freeTicketQuantity, addOnsQuantity]
-  );
 
   // Group tickets by type for detailed breakdown
   const ticketTypeBreakdown = useMemo(() => {
@@ -1132,438 +1125,25 @@ const EventStatistics = ({ data, eventId }) => {
         {/* Revenue and Tickets Charts */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card
-              sx={{
-                border: 1,
-                borderColor: theme.palette.divider,
-                borderRadius: 2,
-                height: '100%',
-                backgroundColor: theme.palette.background.paper,
-              }}
-            >
-              <CardContent>
-                <Stack spacing={0}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      mb: 1,
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        fontSize={14}
-                        color={theme.palette.text.secondary}
-                        fontWeight={400}
-                      >
-                        Revenue & Orders
-                      </Typography>
-                      <Typography color={theme.palette.text.primary} fontSize={28} fontWeight={700}>
-                        {new Intl.NumberFormat('en-MY', {
-                          minimumFractionDigits: 2,
-                          style: 'currency',
-                          currency: 'MYR',
-                        }).format(paidOrderRevenue || 0)}
-                      </Typography>
-                      <Typography
-                        fontSize={14}
-                        color={theme.palette.text.primary}
-                        fontWeight={400}
-                        mt={2}
-                      >
-                        From paid orders
-                      </Typography>
-                    </Box>
-
-                    {/* Date Range Controls - Responsive */}
-                    <>
-                      {/* Desktop/Tablet: Button Group */}
-                      <Box
-                        sx={{
-                          display: { xs: 'none', sm: 'flex' },
-                          bgcolor: theme.palette.action.hover,
-                          borderRadius: 2,
-                          p: { sm: 0.25, md: 0.5 },
-                          gap: 0,
-                        }}
-                      >
-                        {[
-                          { label: 'Last 7 days', shortLabel: '7d', value: 7 },
-                          { label: 'Last 30 days', shortLabel: '30d', value: 30 },
-                          { label: 'All Time', shortLabel: 'All', value: 'all' },
-                        ].map((option) => (
-                          <Button
-                            key={option.value}
-                            size="small"
-                            variant="text"
-                            onClick={() => setRevenueTimeRange(option.value)}
-                            sx={{
-                              minWidth: 'auto',
-                              px: { sm: 1, md: 2 },
-                              py: { sm: 0.5, md: 1 },
-                              fontSize: { sm: '0.75rem', md: '0.875rem' },
-                              fontWeight: 500,
-                              textTransform: 'none',
-                              borderRadius: 1.5,
-                              height: { sm: 32, md: 36 },
-                              ...(revenueTimeRange === option.value
-                                ? {
-                                    bgcolor: theme.palette.background.paper,
-                                    color: theme.palette.text.primary,
-                                    boxShadow: theme.shadows[1],
-                                  }
-                                : {
-                                    color: theme.palette.text.secondary,
-                                  }),
-                            }}
-                          >
-                            {/* Responsive label display */}
-                            <Box component="span" sx={{ display: { sm: 'inline', lg: 'none' } }}>
-                              {option.shortLabel}
-                            </Box>
-                            <Box component="span" sx={{ display: { sm: 'none', lg: 'inline' } }}>
-                              {option.label}
-                            </Box>
-                          </Button>
-                        ))}
-                      </Box>
-
-                      {/* Mobile: Dropdown */}
-                      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                        <Select
-                          value={revenueTimeRange}
-                          onChange={(e) => setRevenueTimeRange(e.target.value)}
-                          size="small"
-                          sx={{
-                            minWidth: 120,
-                            height: 36,
-                            bgcolor: theme.palette.action.hover,
-                            borderRadius: 2,
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              border: 'none',
-                            },
-                            '& .MuiSelect-select': {
-                              py: 1,
-                              px: 2,
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
-                              color: theme.palette.text.primary,
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              border: 'none',
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              border: 'none',
-                            },
-                          }}
-                        >
-                          <MenuItem value={7} sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-                            Last 7 days
-                          </MenuItem>
-                          <MenuItem value={30} sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-                            Last 30 days
-                          </MenuItem>
-                          <MenuItem value="all" sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-                            All Time
-                          </MenuItem>
-                        </Select>
-                      </Box>
-                    </>
-                  </Box>
-
-                  {/* Revenue and Orders Combined Chart */}
-                  <Box sx={{ width: '100%', height: 200, mt: 2 }}>
-                    <ReactApexChart
-                      type="area"
-                      series={revenueChartData.series}
-                      options={{
-                        chart: {
-                          height: 200,
-                          type: 'area',
-                          toolbar: { show: false },
-                          zoom: { enabled: false },
-                          animations: {
-                            enabled: true,
-                            easing: 'easeinout',
-                            speed: 800,
-                          },
-                          background: 'transparent',
-                        },
-                        xaxis: {
-                          categories: revenueChartData.categories,
-                          labels: {
-                            style: {
-                              fontSize: '11px',
-                              colors: theme.palette.text.secondary,
-                              fontWeight: 500,
-                              hideOverlappingLabels: true,
-                            },
-                          },
-                          axisBorder: { show: false },
-                          axisTicks: { show: false },
-                        },
-                        yaxis: {
-                          show: false,
-                        },
-                        grid: {
-                          show: true,
-                          borderColor: alpha(theme.palette.divider, 0.5),
-                          strokeDashArray: 0,
-                        },
-                        stroke: {
-                          curve: 'smooth',
-                          width: [2, 2],
-                          lineCap: 'round',
-                        },
-                        colors: [theme.palette.primary.main, theme.palette.info.main],
-                        markers: {
-                          size: 4,
-                          strokeColors: theme.palette.background.paper,
-                          strokeWidth: 2,
-                          hover: { size: 6 },
-                        },
-                        dataLabels: {
-                          enabled: false,
-                        },
-                        fill: {
-                          type: 'gradient',
-                          gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: [0.6, 0.4],
-                            opacityTo: [0.1, 0.1],
-                            stops: [50, 100],
-                          },
-                        },
-                        tooltip: {
-                          theme: theme.palette.mode,
-                          shared: true,
-                          intersect: false,
-                          custom({ series, seriesIndex, dataPointIndex, w }) {
-                            const date = w.globals.categoryLabels[dataPointIndex];
-                            const revenue = revenueChartData.originalData.revenue[dataPointIndex];
-                            const orders = revenueChartData.originalData.orders[dataPointIndex];
-
-                            return `
-                                <div style="padding: 12px; background: ${theme.palette.background.paper}; border-radius: 8px; box-shadow: ${theme.shadows[4]}; border: 1px solid ${theme.palette.divider};">
-                                  <div style="font-size: 13px; font-weight: 600; color: ${theme.palette.text.primary}; margin-bottom: 8px;">
-                                    ${date}
-                                  </div>
-                                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                    <div style="width: 8px; height: 8px; background: ${theme.palette.primary.main}; border-radius: 50%;"></div>
-                                    <span style="font-size: 12px; color: ${theme.palette.text.secondary};">Revenue:</span>
-                                    <span style="font-size: 12px; font-weight: 600; color: ${theme.palette.text.primary};">RM ${revenue.toFixed(2)}</span>
-                                  </div>
-                                  <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 8px; height: 8px; background: ${theme.palette.info.main}; border-radius: 50%;"></div>
-                                    <span style="font-size: 12px; color: ${theme.palette.text.secondary};">Orders:</span>
-                                    <span style="font-size: 12px; font-weight: 600; color: ${theme.palette.text.primary};">${orders}</span>
-                                  </div>
-                                </div>
-                              `;
-                          },
-                        },
-                        legend: {
-                          show: true,
-                          position: 'top',
-                          horizontalAlign: 'right',
-                          fontSize: '12px',
-                          fontFamily: theme.typography.fontFamily,
-                          fontWeight: 500,
-                          labels: {
-                            colors: theme.palette.text.secondary,
-                          },
-                          markers: {
-                            width: 8,
-                            height: 8,
-                            radius: 2,
-                          },
-                          onItemHover: {
-                            highlightDataSeries: true,
-                          },
-                        },
-                      }}
-                      height={200}
-                    />
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+            <RevenueOrders
+              paidOrders={paidOrders}
+              freeOrders={freeOrders}
+              paidOrderRevenue={paidOrderRevenue}
+              paidTicketQuantity={paidTicketQuantity}
+              freeTicketQuantity={freeTicketQuantity}
+              trendData={trendData}
+              revenueTimeRange={revenueTimeRange}
+              onTimeRangeChange={setRevenueTimeRange}
+            />
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card
-              sx={{
-                border: 1,
-                borderColor: theme.palette.divider,
-                borderRadius: 2,
-                backgroundColor: theme.palette.background.paper,
-              }}
-            >
-              <CardContent>
-                <Stack spacing={0}>
-                  <Typography fontSize={14} color={theme.palette.text.secondary} fontWeight={400}>
-                    Tickets Sold
-                  </Typography>
-                  <Typography color={theme.palette.text.primary} fontSize={28} fontWeight={700}>
-                    {(paidTicketQuantity + freeTicketQuantity + addOnsQuantity).toLocaleString()}
-                  </Typography>
-                  <Typography
-                    fontSize={14}
-                    color={theme.palette.text.primary}
-                    fontWeight={400}
-                    mt={2}
-                  >
-                    Total tickets distributed
-                  </Typography>
-                  <Stack direction="row" spacing={2} mt={1} flexWrap="wrap">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: theme.palette.success.main,
-                        }}
-                      />
-                      <Typography
-                        fontSize={12}
-                        color={theme.palette.text.secondary}
-                        fontWeight={400}
-                      >
-                        Paid: {paidTicketQuantity.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: theme.palette.warning.main,
-                        }}
-                      />
-                      <Typography
-                        fontSize={12}
-                        color={theme.palette.text.secondary}
-                        fontWeight={400}
-                      >
-                        Free: {freeTicketQuantity.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: theme.palette.secondary.main,
-                        }}
-                      />
-                      <Typography
-                        fontSize={12}
-                        color={theme.palette.text.secondary}
-                        fontWeight={400}
-                      >
-                        Add-ons: {addOnsQuantity.toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  {/* Tickets Bar Chart */}
-                  <Box sx={{ width: '100%', height: 200, mt: 2 }}>
-                    <ReactApexChart
-                      type="bar"
-                      series={ticketsChartData.series}
-                      options={{
-                        chart: {
-                          height: 200,
-                          type: 'bar',
-                          toolbar: { show: false },
-                          animations: {
-                            enabled: true,
-                            easing: 'easeinout',
-                            speed: 800,
-                          },
-                          background: 'transparent',
-                        },
-                        plotOptions: {
-                          bar: {
-                            horizontal: false,
-                            columnWidth: '60%',
-                            borderRadius: 4,
-                          },
-                        },
-                        xaxis: {
-                          categories: ticketsChartData.categories,
-                          labels: {
-                            style: {
-                              fontSize: '11px',
-                              colors: theme.palette.text.secondary,
-                              fontWeight: 500,
-                            },
-                          },
-                          axisBorder: { show: false },
-                          axisTicks: { show: false },
-                        },
-                        yaxis: {
-                          labels: {
-                            style: {
-                              fontSize: '11px',
-                              colors: theme.palette.text.secondary,
-                              fontWeight: 500,
-                            },
-                            formatter: (value) => Math.round(value),
-                          },
-                          min: 0,
-                        },
-                        grid: {
-                          show: true,
-                          borderColor: alpha(theme.palette.divider, 0.5),
-                          strokeDashArray: 0,
-                        },
-                        colors: [
-                          theme.palette.success.main,
-                          theme.palette.warning.main,
-                          theme.palette.secondary.main,
-                        ],
-                        dataLabels: {
-                          enabled: true,
-                          style: {
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            colors: [theme.palette.common.white],
-                          },
-                        },
-                        tooltip: {
-                          theme: theme.palette.mode,
-                          y: {
-                            formatter: (value) => `${value} tickets`,
-                          },
-                        },
-                        legend: {
-                          show: true,
-                          position: 'bottom',
-                          horizontalAlign: 'center',
-                          fontSize: '12px',
-                          fontFamily: theme.typography.fontFamily,
-                          fontWeight: 500,
-                          labels: {
-                            colors: theme.palette.text.secondary,
-                          },
-                          markers: {
-                            width: 12,
-                            height: 12,
-                            radius: 2,
-                          },
-                        },
-                      }}
-                      height={200}
-                    />
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+            <TotalTickets
+              paidTicketQuantity={paidTicketQuantity}
+              freeTicketQuantity={freeTicketQuantity}
+              addOnsQuantity={addOnsQuantity}
+              revenueTimeRange={revenueTimeRange}
+            />
           </Grid>
         </Grid>
 
