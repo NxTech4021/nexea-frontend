@@ -127,7 +127,7 @@ const DailyPerformance = ({ trendData }) => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
             <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {new Intl.NumberFormat('en-MY', {
+              {trendData.revenue.isPositive && trendData.revenue.change > 0 ? '+' : ''}{new Intl.NumberFormat('en-MY', {
                 minimumFractionDigits: 2,
                 style: 'currency',
                 currency: 'MYR',
@@ -180,7 +180,7 @@ const DailyPerformance = ({ trendData }) => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
             <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {trendData.orders.change}
+              {trendData.orders.isPositive && trendData.orders.change > 0 ? '+' : ''}{trendData.orders.change}
             </Typography>
             <Box sx={{ 
               display: 'flex', 
@@ -229,7 +229,7 @@ const DailyPerformance = ({ trendData }) => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
             <Typography fontSize={14} fontWeight={700} color={theme.palette.text.primary}>
-              {trendData.registrations.change}
+              {trendData.registrations.isPositive && trendData.registrations.change > 0 ? '+' : ''}{trendData.registrations.change}
             </Typography>
             <Box sx={{ 
               display: 'flex', 
