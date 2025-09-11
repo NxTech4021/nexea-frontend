@@ -83,33 +83,31 @@ const RevenueOrders = ({
 
     const categories = days.map((day) => day.format('MMM D'));
 
-    // Normalize data to different ranges for visual separation
+    // Calculate maximum values for linear scaling
     const maxRevenue = Math.max(...revenueByDay);
     const maxOrders = Math.max(...orderCountByDay);
     const maxTickets = Math.max(...ticketSalesByDay);
 
-    // Scale revenue to upper range (60-100) only if there's revenue, otherwise keep it flat
+    // Linear scaling
     const normalizedRevenue = revenueByDay.map((value) => {
-      if (maxRevenue > 0 && value > 0) {
-        return 60 + (value / maxRevenue) * 40;
+      if (maxRevenue > 0) {
+        return (value / maxRevenue) * 100;
       }
-      return 0; // Flat when revenue is 0
+      return 0;
     });
 
-    // Scale orders to middle range (30-55)
     const normalizedOrders = orderCountByDay.map((value) => {
       if (maxOrders > 0) {
-        return value > 0 ? 30 + (value / maxOrders) * 25 : 0; // 0 orders at very bottom
+        return (value / maxOrders) * 100;
       }
-      return 0; // No orders at all
+      return 0;
     });
 
-    // Scale ticket sales to lower range (0-25)
     const normalizedTickets = ticketSalesByDay.map((value) => {
       if (maxTickets > 0) {
-        return value > 0 ? (value / maxTickets) * 25 : 0; // 0 tickets at very bottom
+        return (value / maxTickets) * 100;
       }
-      return 0; // No tickets at all
+      return 0;
     });
 
     return {
@@ -362,13 +360,13 @@ const RevenueOrders = ({
           </Box>
 
           {/* Revenue and Orders Combined Chart */}
-          <Box sx={{ width: '100%', height: { xs: 250, sm: 200 }, mt: 2 }}>
+          <Box sx={{ width: '100%', height: { xs: 280, sm: 240 }, mt: 2 }}>
             <ReactApexChart
               type="area"
               series={revenueChartData.series}
               options={{
                 chart: {
-                  height: 200,
+                  height: 240,
                   type: 'area',
                   toolbar: { show: false },
                   zoom: { enabled: false },
@@ -398,6 +396,8 @@ const RevenueOrders = ({
                 },
                 yaxis: {
                   show: false,
+                  min: 0,
+                  max: 100,
                 },
                 grid: {
                   show: true,
@@ -411,10 +411,10 @@ const RevenueOrders = ({
                 },
                 colors: [theme.palette.primary.main, theme.palette.info.main, '#8B5CF6'],
                 markers: {
-                  size: 4,
+                  size: 3,
                   strokeColors: theme.palette.background.paper,
                   strokeWidth: 2,
-                  hover: { size: 6 },
+                  hover: { size: 4 },
                 },
                 dataLabels: {
                   enabled: false,
@@ -423,9 +423,14 @@ const RevenueOrders = ({
                   type: 'gradient',
                   gradient: {
                     shadeIntensity: 1,
-                    opacityFrom: [0.6, 0.4, 0.3],
-                    opacityTo: [0.1, 0.1, 0.1],
-                    stops: [50, 100],
+                    opacityFrom: [0.9, 0.7, 0.6],
+                    opacityTo: [0.3, 0.2, 0.15],
+                    stops: [0, 100],
+                    gradientToColors: [
+                      alpha(theme.palette.primary.main, 0.3),
+                      alpha(theme.palette.info.main, 0.2),
+                      alpha('#8B5CF6', 0.15)
+                    ],
                   },
                 },
                 tooltip: {
@@ -486,7 +491,7 @@ const RevenueOrders = ({
                     breakpoint: 600,
                     options: {
                       chart: {
-                        height: 250,
+                        height: 280,
                       },
                       xaxis: {
                         labels: {
@@ -508,7 +513,7 @@ const RevenueOrders = ({
                   },
                 ],
               }}
-              height={200}
+              height={240}
             />
           </Box>
         </Stack>
