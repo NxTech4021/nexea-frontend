@@ -883,7 +883,7 @@ ModernTable.propTypes = {
 
 const EventStatistics = ({ data, eventId }) => {
   const theme = useTheme();
-  const [revenueTimeRange, setRevenueTimeRange] = useState(7); // Default to 7 days
+  const [revenueTimeRange, setRevenueTimeRange] = useState('all'); // Default to All Time
 
   // Calculate all orders with 'paid' status (includes both paid and free)
   const paidStatusOrders = useMemo(() => 
