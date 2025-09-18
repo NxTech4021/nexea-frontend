@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import 'react-phone-number-input/style.css';
 // import PhoneInput from 'react-phone-number-input';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';
@@ -26,7 +26,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { useSearchParams } from 'src/routes/hooks';
+import { useParams, useSearchParams } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
@@ -76,11 +76,18 @@ const TicketInformationCard = () => {
   const { tickets } = useCartStore();
   const [calculatedSST, setCalculatedSST] = useState(null);
   const [resourceConfirmations, setResourceConfirmations] = useState({});
+  const eventIdParams = useParams();
 
   const [lastRemoved, setLastRemoved] = useState(null);
 
   // const { data, isLoading: cartLoading, mutate } = useSWR(`/api/cart/${cartSessionId}`, fetcher);
-  const { data: cartData, cartMutate, cartLoading, eventData } = useGetCartData();
+  const {
+    data: cartData,
+    cartMutate,
+    cartLoading,
+    eventData,
+    mutate: eventMutate,
+  } = useGetCartData();
 
   const isCartExpired = useMemo(
     () => dayjs(cartData?.expiryDate).isBefore(dayjs(), 'date'),
@@ -302,6 +309,22 @@ const TicketInformationCard = () => {
       toast.error(error?.message || 'Error removing code');
     }
   };
+
+  const handleRemoveCart = useCallback(async () => {
+    if (!cartData) return;
+    localStorage.removeItem('buyer');
+    localStorage.removeItem('attendees');
+    try {
+      await axiosInstance.delete(`/api/cart/${cartData?.id}`);
+      cartMutate(undefined);
+      eventMutate();
+      localStorage.removeItem('cartSessionId');
+    } catch (error) {
+      toast.error(error?.message || 'Error remove cart', {
+        variant: 'error',
+      });
+    }
+  }, [cartData, cartMutate, eventMutate]);
 
   const buyerInfo = (
     <Card
@@ -1089,6 +1112,15 @@ const TicketInformationCard = () => {
       document.removeEventListener('click', handleClick);
     };
   }, []);
+
+  useEffect(() => {
+    const eventId = cartData?.eventId;
+    const activeEventId = eventIdParams?.event;
+
+    if (eventId !== activeEventId) {
+      handleRemoveCart();
+    }
+  }, [cartData, eventIdParams, handleRemoveCart]);
 
   if (cartLoading) {
     return (

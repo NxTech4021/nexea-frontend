@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { toast } from 'sonner';
-import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -26,6 +26,7 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
+import { axiosInstance } from 'src/utils/axios';
 
 import { MaterialUISwitch } from 'src/theme/overrides/components/switch';
 
@@ -48,6 +49,7 @@ const TicketSelectionCard = () => {
   const addOnDialog = useBoolean();
   const settings = useSettingsContext();
   const isActive = useUserActivity();
+  const { data: cartData, eventData, mutate: eventMutate, cartMutate } = useGetCartData();
 
   const tixs = useCartStore((state) => state.tickets);
 
@@ -487,6 +489,7 @@ const TicketSelectionCard = () => {
       </Grid2>
     );
   });
+
 
   useEffect(() => {
     const el = ref?.current;

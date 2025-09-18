@@ -190,6 +190,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
   const setTickets = useCartStore((state) => state.setTickets);
 
+
   useEffect(() => {
     if (eventData && eventData.ticketType.length) {
       setTickets(
