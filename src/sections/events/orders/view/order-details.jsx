@@ -42,6 +42,7 @@ import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import QBOSettingsDialog from '../../qbo/dialog';
 
 // Local formatCurrency function
 const formatCurrency = (value) => {
@@ -127,6 +128,7 @@ const OrderDetails = ({ orderId }) => {
     message: '',
     severity: 'success',
   });
+  const qboDialog = useBoolean();
 
   const openInvoice = useBoolean();
 
@@ -216,6 +218,19 @@ const OrderDetails = ({ orderId }) => {
       });
     } finally {
       setResendingEmail(false);
+    }
+  };
+
+  const handleQBOSettingChecking = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/event/qbo/settings/${order?.eventId}`);
+      console.log(res);
+    } catch (error) {
+      if (!error?.results) {
+        qboDialog.onTrue();
+      } else {
+        console.log(error);
+      }
     }
   };
 
@@ -981,13 +996,13 @@ const OrderDetails = ({ orderId }) => {
                     <Typography variant="body2" color="text.secondary">
                       Discount
                       {order.discountCode && (
-                        <Typography 
+                        <Typography
                           component="span"
-                          variant="caption" 
-                          color="text.secondary" 
-                          sx={{ 
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
                             fontWeight: 500,
-                            ml: 0.5
+                            ml: 0.5,
                           }}
                         >
                           ({order.discountCode.code})
@@ -1252,7 +1267,8 @@ const OrderDetails = ({ orderId }) => {
                 variant="outlined"
                 color="info"
                 startIcon={<Iconify icon="mdi:invoice-send-outline" width={18} height={18} />}
-                onClick={openInvoice.onTrue}
+                // onClick={openInvoice.onTrue}
+                onClick={handleQBOSettingChecking}
                 disabled={resendingEmail}
                 sx={{
                   textTransform: 'none',
@@ -1727,6 +1743,8 @@ const OrderDetails = ({ orderId }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <QBOSettingsDialog open={true} onClose={() => qboDialog.onFalse()} />
     </Container>
   );
 };
