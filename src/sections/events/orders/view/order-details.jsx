@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { lazy, useState } from 'react';
 
 import {
   Box,
@@ -42,6 +42,7 @@ import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 import Iconify from 'src/components/iconify';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
 import QBOSettingsDialog from '../../qbo/dialog';
 
 // Local formatCurrency function
@@ -55,6 +56,8 @@ const formatCurrency = (value) => {
 //   PENDING: 'PENDING',
 //   FAILED: 'FAILED',
 // };
+
+// const QBOSettingsDialog = lazy(() => import('../../qbo/dialog'));
 
 const getStatusConfig = (status) => {
   const statusLower = status ? status.toLowerCase() : '';
@@ -223,8 +226,8 @@ const OrderDetails = ({ orderId }) => {
 
   const handleQBOSettingChecking = async () => {
     try {
-      const res = await axiosInstance.get(`/api/event/qbo/settings/${order?.eventId}`);
-      console.log(res);
+      await axiosInstance.get(`/api/event/qbo/settings/${order?.eventId}`);
+      openInvoice.onTrue();
     } catch (error) {
       if (!error?.results) {
         qboDialog.onTrue();
@@ -1705,6 +1708,9 @@ const OrderDetails = ({ orderId }) => {
                     sx={{ justifySelf: 'end', alignSelf: 'center' }}
                     variant="outlined"
                     size="small"
+                    onClick={async () => {
+                      await axiosInstance.post(`/api/invoice/${orderId}`);
+                    }}
                   >
                     Send Invoice
                   </Button>
@@ -1744,7 +1750,13 @@ const OrderDetails = ({ orderId }) => {
         </DialogActions>
       </Dialog>
 
-      <QBOSettingsDialog open={true} onClose={() => qboDialog.onFalse()} />
+      {qboDialog.value && (
+        <QBOSettingsDialog
+          open={qboDialog.value}
+          onClose={() => qboDialog.onFalse()}
+          eventId={order?.eventId}
+        />
+      )}
     </Container>
   );
 };
