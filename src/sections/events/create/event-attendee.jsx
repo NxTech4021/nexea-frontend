@@ -9,6 +9,7 @@ import { useParams } from 'react-router';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';
 import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
 import {
@@ -317,6 +318,8 @@ export default function EventAttendee() {
 
   const [snackbar, setSnackbar] = useState(null);
 
+  const isEmailSending = useBoolean();
+
   // Advanced filtering state
   const [filteredRows, setFilteredRows] = useState([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
@@ -438,6 +441,17 @@ export default function EventAttendee() {
     [gridId, setColumnWidths]
   );
 
+  const handleSendEmail = async () => {
+    try {
+      isEmailSending.onTrue();
+      const res = await axiosInstance.post(`/api/payment/resendEmail/bulk/${id}`);
+      toast.success(res?.data?.message);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      isEmailSending.onFalse();
+    }
+  };
   // Get persisted column widths
   const persistedWidths = getColumnWidths(gridId);
 
@@ -938,7 +952,8 @@ export default function EventAttendee() {
       field: 'purchaseDate',
       headerName: 'Purchase Date',
       width: persistedWidths.purchaseDate || 200,
-      valueGetter: (value, row) => row.order.createdAt ? dayjs(row.order.createdAt).format('MMM D, YYYY [at] h:mm A') : 'N/A',
+      valueGetter: (value, row) =>
+        row.order.createdAt ? dayjs(row.order.createdAt).format('MMM D, YYYY [at] h:mm A') : 'N/A',
     },
     {
       field: 'discountCode',
@@ -1059,7 +1074,14 @@ export default function EventAttendee() {
         </Box>
 
         {/* Add Attendee Button */}
-        <Box sx={{ flexShrink: 0 }}>
+        <Box sx={{ flexShrink: 0, display: 'flex', gap: 1 }}>
+          <LoadingButton
+            variant="outlined"
+            onClick={handleSendEmail}
+            loading={isEmailSending.value}
+          >
+            Resend Bulk Email
+          </LoadingButton>
           <Button
             variant="contained"
             startIcon={<Iconify icon="material-symbols:add" />}

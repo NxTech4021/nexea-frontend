@@ -981,13 +981,13 @@ const OrderDetails = ({ orderId }) => {
                     <Typography variant="body2" color="text.secondary">
                       Discount
                       {order.discountCode && (
-                        <Typography 
+                        <Typography
                           component="span"
-                          variant="caption" 
-                          color="text.secondary" 
-                          sx={{ 
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
                             fontWeight: 500,
-                            ml: 0.5
+                            ml: 0.5,
                           }}
                         >
                           ({order.discountCode.code})
