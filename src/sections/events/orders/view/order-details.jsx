@@ -1,8 +1,10 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
+import { toast } from 'sonner';
 import PropTypes from 'prop-types';
-import React, { lazy, useState } from 'react';
+import React, { useState } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Card,
@@ -134,6 +136,8 @@ const OrderDetails = ({ orderId }) => {
   const qboDialog = useBoolean();
 
   const openInvoice = useBoolean();
+
+  const isSendingInvoice = useBoolean();
 
   const attendees = order?.attendees || [];
 
@@ -1687,7 +1691,41 @@ const OrderDetails = ({ orderId }) => {
               gap: 2,
             }}
           >
-            {attendees.length &&
+            <ListItemText
+              primary={`${order.buyerName}`}
+              secondary={order.buyerEmail}
+              slotProps={{
+                primary: {
+                  variant: 'subtitle2',
+                },
+                secondary: {
+                  variant: 'caption',
+                },
+              }}
+            />
+
+            <LoadingButton
+              startIcon={<Iconify icon="mdi:invoice-send-outline" />}
+              sx={{ justifySelf: 'end', alignSelf: 'center' }}
+              variant="outlined"
+              size="small"
+              onClick={async () => {
+                try {
+                  isSendingInvoice.onTrue();
+                  const res = await axiosInstance.post(`/api/invoice/${orderId}`);
+                  toast.success(res?.data?.message);
+                  openInvoice.onFalse();
+                } catch (error) {
+                  toast.error('Error sending invoice');
+                } finally {
+                  isSendingInvoice.onFalse();
+                }
+              }}
+              loading={isSendingInvoice.value}
+            >
+              Send Invoice
+            </LoadingButton>
+            {/* {attendees.length &&
               attendees.map((attendee) => (
                 <React.Fragment key={attendee.id}>
                   <ListItemText
@@ -1709,13 +1747,18 @@ const OrderDetails = ({ orderId }) => {
                     variant="outlined"
                     size="small"
                     onClick={async () => {
-                      await axiosInstance.post(`/api/invoice/${orderId}`);
+                      try {
+                        const res = await axiosInstance.post(`/api/invoice/${orderId}`);
+                        toast.success(res?.data?.message);
+                      } catch (error) {
+                        toast.error('Error sending invoice');
+                      }
                     }}
                   >
                     Send Invoice
                   </Button>
                 </React.Fragment>
-              ))}
+              ))} */}
           </Box>
         </DialogContent>
 
