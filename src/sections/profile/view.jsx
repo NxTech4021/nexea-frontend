@@ -20,6 +20,7 @@ import {
   Container,
   TextField,
   Typography,
+  ListItemText,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -42,7 +43,8 @@ const Profile = () => {
   const theme = useTheme();
   const { user } = useAuthContext();
   const [currentTab, setCurrentTab] = useState('general');
-  console.log(user);
+
+  const quickBooksData = user?.quickBooksIntegration;
 
   const validationSchema = yup.object({
     email: yup
@@ -71,6 +73,20 @@ const Profile = () => {
   const handleChangeTab = useCallback((event, newValue) => {
     setCurrentTab(newValue);
   }, []);
+
+  const handleConnectQuickbooks = async () => {
+    window.location.href = `${import.meta.env.VITE_BASE_URL}/api/qbo/connect`;
+  };
+
+  const disconnectQBO = async () => {
+    try {
+      const res = await axiosInstance.post('/api/qbo/disconnect');
+      console.log(res);
+      toast.success(res.data.message);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onSubmit = async (values) => {
     try {
@@ -215,6 +231,11 @@ const Profile = () => {
         value="security"
         icon={<Iconify icon="ic:round-vpn-key" width={24} />}
       />
+      <Tab
+        label="Integrations"
+        value="integration"
+        icon={<Iconify icon="carbon:integration" width={24} />}
+      />
     </Tabs>
   );
 
@@ -254,6 +275,40 @@ const Profile = () => {
               {renderForm}
             </Formik>
           </Grid>
+        )}
+
+        {currentTab === 'integration' && (
+          <>
+            {!quickBooksData ? (
+              <Button variant="outlined" onClick={handleConnectQuickbooks}>
+                Connect Quickbooks
+              </Button>
+            ) : (
+              <Button variant="outlined" onClick={disconnectQBO}>
+                Disconnect Quickbooks
+              </Button>
+            )}
+
+            {quickBooksData && (
+              <Stack mt={2} direction="row" flexWrap="wrap" gap={4}>
+                <ListItemText primary="Access Token" secondary={quickBooksData?.accessToken} />
+                <ListItemText primary="Refresh Token" secondary={quickBooksData?.refreshToken} />
+                <ListItemText primary="RealmID" secondary={quickBooksData?.realmId} />
+                <ListItemText
+                  primary="Created At"
+                  secondary={dayjs(quickBooksData?.createdAt).format('LLL')}
+                />
+                <ListItemText
+                  primary="Access Token Expires In"
+                  secondary={dayjs(quickBooksData?.expiresIn).format('LLL')}
+                />
+                <ListItemText
+                  primary="Refresh Token Expires In"
+                  secondary={dayjs(quickBooksData?.refreshTokenExpiresIn).format('LLL')}
+                />
+              </Stack>
+            )}
+          </>
         )}
       </Container>
       <ToastContainer />

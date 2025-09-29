@@ -1,8 +1,10 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
+import { toast } from 'sonner';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Card,
@@ -43,6 +45,8 @@ import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 import Iconify from 'src/components/iconify';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
+import QBOSettingsDialog from '../../qbo/dialog';
+
 // Local formatCurrency function
 const formatCurrency = (value) => {
   if (!value) return 'RM 0.00';
@@ -54,6 +58,8 @@ const formatCurrency = (value) => {
 //   PENDING: 'PENDING',
 //   FAILED: 'FAILED',
 // };
+
+// const QBOSettingsDialog = lazy(() => import('../../qbo/dialog'));
 
 const getStatusConfig = (status) => {
   const statusLower = status ? status.toLowerCase() : '';
@@ -127,8 +133,11 @@ const OrderDetails = ({ orderId }) => {
     message: '',
     severity: 'success',
   });
+  const qboDialog = useBoolean();
 
   const openInvoice = useBoolean();
+
+  const isSendingInvoice = useBoolean();
 
   const attendees = order?.attendees || [];
 
@@ -216,6 +225,19 @@ const OrderDetails = ({ orderId }) => {
       });
     } finally {
       setResendingEmail(false);
+    }
+  };
+
+  const handleQBOSettingChecking = async () => {
+    try {
+      await axiosInstance.get(`/api/event/qbo/settings/${order?.eventId}`);
+      openInvoice.onTrue();
+    } catch (error) {
+      if (!error?.results) {
+        qboDialog.onTrue();
+      } else {
+        console.log(error);
+      }
     }
   };
 
@@ -1252,7 +1274,8 @@ const OrderDetails = ({ orderId }) => {
                 variant="outlined"
                 color="info"
                 startIcon={<Iconify icon="mdi:invoice-send-outline" width={18} height={18} />}
-                onClick={openInvoice.onTrue}
+                // onClick={openInvoice.onTrue}
+                onClick={handleQBOSettingChecking}
                 disabled={resendingEmail}
                 sx={{
                   textTransform: 'none',
@@ -1668,7 +1691,41 @@ const OrderDetails = ({ orderId }) => {
               gap: 2,
             }}
           >
-            {attendees.length &&
+            <ListItemText
+              primary={`${order.buyerName}`}
+              secondary={order.buyerEmail}
+              slotProps={{
+                primary: {
+                  variant: 'subtitle2',
+                },
+                secondary: {
+                  variant: 'caption',
+                },
+              }}
+            />
+
+            <LoadingButton
+              startIcon={<Iconify icon="mdi:invoice-send-outline" />}
+              sx={{ justifySelf: 'end', alignSelf: 'center' }}
+              variant="outlined"
+              size="small"
+              onClick={async () => {
+                try {
+                  isSendingInvoice.onTrue();
+                  const res = await axiosInstance.post(`/api/invoice/${orderId}`);
+                  toast.success(res?.data?.message);
+                  openInvoice.onFalse();
+                } catch (error) {
+                  toast.error('Error sending invoice');
+                } finally {
+                  isSendingInvoice.onFalse();
+                }
+              }}
+              loading={isSendingInvoice.value}
+            >
+              Send Invoice
+            </LoadingButton>
+            {/* {attendees.length &&
               attendees.map((attendee) => (
                 <React.Fragment key={attendee.id}>
                   <ListItemText
@@ -1689,11 +1746,19 @@ const OrderDetails = ({ orderId }) => {
                     sx={{ justifySelf: 'end', alignSelf: 'center' }}
                     variant="outlined"
                     size="small"
+                    onClick={async () => {
+                      try {
+                        const res = await axiosInstance.post(`/api/invoice/${orderId}`);
+                        toast.success(res?.data?.message);
+                      } catch (error) {
+                        toast.error('Error sending invoice');
+                      }
+                    }}
                   >
                     Send Invoice
                   </Button>
                 </React.Fragment>
-              ))}
+              ))} */}
           </Box>
         </DialogContent>
 
@@ -1727,6 +1792,14 @@ const OrderDetails = ({ orderId }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {qboDialog.value && (
+        <QBOSettingsDialog
+          open={qboDialog.value}
+          onClose={() => qboDialog.onFalse()}
+          eventId={order?.eventId}
+        />
+      )}
     </Container>
   );
 };

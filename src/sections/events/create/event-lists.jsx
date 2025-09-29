@@ -578,9 +578,11 @@ const EventLists = ({ query }) => {
                 sx={{
                   borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eee' : '#333'}`,
                   bgcolor: getBackgroundColor(isExpanded, theme.palette.mode),
-                  transition: 'background-color 0.2s ease-in-out',
+                  transition: 'all 0.3s linear',
+
                   '&:hover': {
                     bgcolor: getHoverBackgroundColor(!isExpanded, theme.palette.mode),
+                    transform: 'translateX(10px)',
                   },
                 }}
               >

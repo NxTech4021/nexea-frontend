@@ -62,5 +62,8 @@ export const paths = {
     test: `${ROOTS.DASHBOARD}/test`,
     employee: `${ROOTS.DASHBOARD}/employee`,
     Qr: `${ROOTS.DASHBOARD}/qr`,
+    invoices: {
+      root: `${ROOTS.DASHBOARD}/invoices`,
+    },
   },
 };

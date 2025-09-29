@@ -17,6 +17,7 @@ const ICONS = {
   qr: <Iconify icon="solar:qr-code-linear" width={20} />,
   employee: <Iconify icon="solar:user-linear" width={20} />,
   templates: <Iconify icon="solar:chat-round-linear" width={20} />,
+  invoices: <Iconify icon="teenyicons:invoice-outline" width={20} />,
 };
 
 // ----------------------------------------------------------------------
@@ -57,6 +58,11 @@ export function useNavData() {
             title: 'Orders',
             path: paths.dashboard.order.root,
             icon: ICONS.orders,
+          },
+          {
+            title: 'Invoices',
+            path: paths.dashboard.invoices.root,
+            icon: ICONS.invoices,
           },
 
           // {
