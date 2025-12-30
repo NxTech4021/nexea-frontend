@@ -965,56 +965,6 @@ const TicketInformationCard = () => {
     localStorage.setItem('attendees', JSON.stringify(result)); // Cache the cartData
   }, [cartData, setValue, cartSessionId]);
 
-  // useEffect(() => {
-  //   if (!cartData?.cartItem?.length) return;
-
-  //   // Load existing attendees from localStorage
-  //   const storedAttendees = localStorage.getItem('attendees');
-
-  //   if (storedAttendees) {
-  //     setValue('attendees', JSON.parse(storedAttendees));
-  //     return;
-  //   }
-
-  //   const result = cartData.cartItem.flatMap((item) => {
-  //     const results = Array.from({ length: item.quantity }, () => ({
-  //       ticket: item.ticketType,
-  //       addOn: [],
-  //       ...defaultAttendee,
-  //     }));
-
-  //     // Expand add-ons by quantity
-  //     const addOnPool =
-  //       item.cartAddOn?.flatMap((addOnItem) => Array(addOnItem.quantity).fill(addOnItem)) || [];
-
-  //     // Assign add-ons round-robin without repeating same type on same ticket
-  //     let ticketIndex = 0;
-  //     // eslint-disable-next-line no-restricted-syntax
-  //     for (const addOn of addOnPool) {
-  //       let attempts = 0;
-  //       while (
-  //         attempts < results.length &&
-  //         results[ticketIndex].addOn.some((a) => a.id === addOn.id) // Check duplicate
-  //       ) {
-  //         ticketIndex = (ticketIndex + 1) % results.length;
-  //         // eslint-disable-next-line no-plusplus
-  //         attempts++;
-  //       }
-
-  //       if (!results[ticketIndex].addOn.some((a) => a.id === addOn.id)) {
-  //         results[ticketIndex].addOn.push(addOn);
-  //       }
-
-  //       ticketIndex = (ticketIndex + 1) % results.length;
-  //     }
-
-  //     return results;
-  //   });
-
-  //   setValue('attendees', result);
-  //   localStorage.setItem('attendees', JSON.stringify(result));
-  // }, [cartData, setValue, cartSessionId]);
-
   useEffect(() => {
     const subscription = watch((values) => {
       localStorage.setItem('attendees', JSON.stringify(values.attendees));
@@ -1180,12 +1130,9 @@ const TicketInformationCard = () => {
         ref={ref}
         flexGrow={1}
         sx={{
-          // bgcolor: 'beige',
-          // px: { xs: 1, md: 2 },
-          // height: '100%',
           height: 1,
           my: 2,
-          // height: { xs: 'calc(100vh - 35vh)', md: 'calc(100vh - 30vh)' },
+
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollbarWidth: 'thin',

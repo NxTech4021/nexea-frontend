@@ -89,7 +89,6 @@ const schema = yup.object().shape({
 });
 
 const TicketPurchaseView = ({ eventIdParams }) => {
-  // localStorage.setItem('eventId', eventIdParams);
   const mdDown = useResponsive('down', 'md');
 
   const tixs = useCartStore((state) => state.tickets);
@@ -118,6 +117,8 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   useEffect(() => {
     if (cartData && cartData.event && cartData.event.id !== eventIdParams) {
       localStorage.removeItem('cartSessionId');
+      localStorage.removeItem('attendees');
+      localStorage.removeItem('buyer');
       cartMutate();
     }
   }, [cartData, eventIdParams, cartMutate]);
@@ -189,7 +190,6 @@ const TicketPurchaseView = ({ eventIdParams }) => {
   }, [cartMutate, eventIdParams, loading, mutate, tixs]);
 
   const setTickets = useCartStore((state) => state.setTickets);
-
 
   useEffect(() => {
     if (eventData && eventData.ticketType.length) {
