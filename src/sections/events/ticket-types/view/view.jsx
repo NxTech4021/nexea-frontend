@@ -508,7 +508,7 @@ function applyFilter({ inputData, comparator, filters }) {
   }
 
   if (eventName.length) {
-    inputData = inputData.filter((ticker) => eventName.includes(ticker.event.name));
+    inputData = inputData.filter((ticket) => eventName.includes(ticket?.event?.name));
   }
 
   return inputData;
