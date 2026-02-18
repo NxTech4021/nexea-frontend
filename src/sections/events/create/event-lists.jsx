@@ -58,6 +58,7 @@ import { toast } from 'sonner';
 import EventTicketDialog from './dialog/event-ticket-dialog';
 import EventCreateDialog from './dialog/event-create-dialog';
 import EditEventModal from './dialog/edit-event-modal';
+import EventSettingsDialog from './dialog/event-settings-dialog';
 
 const EventStatus = {
   ACTIVE: 'ACTIVE',
@@ -155,6 +156,8 @@ const EventLists = ({ query }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const createDialog = useBoolean();
+
+  const setting = useBoolean();
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -1071,6 +1074,30 @@ const EventLists = ({ query }) => {
                       aria-label="Edit Event"
                     >
                       Edit
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setting.onTrue();
+                        setSelectedEvent(event);
+                        setExpandedRow(null);
+                      }}
+                      startIcon={<Iconify icon="solar:settings-linear" width={20} height={20} />}
+                      variant="text"
+                      sx={{
+                        minWidth: 0,
+                        px: 1.5,
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        textTransform: 'none',
+                        transition: 'background 0.2s, transform 0.2s',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                          transform: 'scale(1.04)',
+                        },
+                      }}
+                      aria-label="Edit Event"
+                    >
+                      Settings
                     </Button>
                     <Button
                       onClick={() => {
@@ -2065,6 +2092,12 @@ const EventLists = ({ query }) => {
         onClose={ticketDialog.onFalse}
         tickets={selectedEvent?.ticketType}
         event={selectedEvent}
+      />
+
+      <EventSettingsDialog
+        open={setting.value}
+        onClose={setting.onFalse}
+        selectedEvent={selectedEvent}
       />
 
       <EventCreateDialog open={createDialog.value} onClose={createDialog.onFalse} />

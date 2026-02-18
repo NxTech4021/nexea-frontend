@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { toast } from 'sonner';
-import React, { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useLayoutEffect } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import {
@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -26,7 +27,6 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { useUserActivity } from 'src/hooks/use-user-activity';
 
 import { useCartStore } from 'src/utils/store';
-import { axiosInstance } from 'src/utils/axios';
 
 import { MaterialUISwitch } from 'src/theme/overrides/components/switch';
 
@@ -110,6 +110,8 @@ const TicketSelectionCard = () => {
 
     const unavailable = ticket.quantity - ticket.sold === 0;
 
+    const isLowQuantity = availableQuantity < 6;
+
     return (
       <Grid2
         container
@@ -135,7 +137,6 @@ const TicketSelectionCard = () => {
           <Stack spacing={1}>
             <ListItemText
               primary={ticket.title}
-              // secondary={ticket.description}
               slotProps={{
                 primary: {
                   fontWeight: 600,
@@ -143,15 +144,6 @@ const TicketSelectionCard = () => {
                   fontSize: 20,
                   color: '#00000',
                 },
-                // secondary: {
-                //   variant: 'caption',
-                //   fontWeight: 500,
-                //   fontSize: 14,
-                //   letterSpacing: -0.9,
-                //   color: '#606060',
-                //   maxWidth: 300,
-                //   whiteSpace: 'pretty',
-                // },
               }}
             />
             <Typography
@@ -170,7 +162,20 @@ const TicketSelectionCard = () => {
               }}
             />
           </Stack>
+          {isLowQuantity && eventData?.showRemainingTickets && (
+            <Chip
+              sx={{ bgcolor: '#FFF7ED', color: '#B45309', my: 1 }}
+              icon={<Iconify icon="si:alert-line" width={18} style={{ color: '#B45309' }} />}
+              label={
+                <Typography variant="caption">
+                  Only {availableQuantity} tickets remaining!
+                </Typography>
+              }
+            />
+          )}
         </Grid2>
+
+        <Divider sx={{ width: 1 }} />
 
         <Grid2 size={12} alignContent="flex-end">
           <Stack direction="row" flexWrap="wrap" spacing={1}>
@@ -489,7 +494,6 @@ const TicketSelectionCard = () => {
       </Grid2>
     );
   });
-
 
   useEffect(() => {
     const el = ref?.current;
