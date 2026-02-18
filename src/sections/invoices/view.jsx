@@ -2,7 +2,7 @@ import { toast } from 'sonner';
 import React, { useState } from 'react';
 
 import { LoadingButton } from '@mui/lab';
-import { Box, Stack, Container, TextField, Typography, Button } from '@mui/material';
+import { Box, Stack, Button, Container, TextField, Typography } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 

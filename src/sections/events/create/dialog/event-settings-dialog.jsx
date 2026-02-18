@@ -24,7 +24,7 @@ import {
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import axiosInstance from 'src/utils/axios';
+import { axiosInstance } from 'src/utils/axios';
 
 import FormProvider from 'src/components/hook-form';
 
