@@ -10,6 +10,7 @@ import {
   Tabs,
   Table,
   alpha,
+  Stack,
   Button,
   Tooltip,
   Container,
@@ -17,6 +18,10 @@ import {
   IconButton,
   TableContainer,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -80,6 +85,7 @@ export default function DiscountCodeView() {
 
   const [filters, setFilters] = useState(defaultFilters);
   const confirm = useBoolean();
+  const isBulkOpen = useBoolean();
 
   useEffect(() => {
     setTableData(discountCodes);
@@ -277,9 +283,14 @@ export default function DiscountCodeView() {
               { name: 'List' },
             ]}
           />
-          <Button variant="contained" onClick={handleCreateClick}>
-            Create Discount Code
-          </Button>
+          <Stack direction="row" gap={1}>
+            <Button variant="outlined" onClick={isBulkOpen.onTrue}>
+              Create Bulk Discount Code
+            </Button>
+            <Button variant="contained" onClick={handleCreateClick}>
+              Create Discount Code
+            </Button>
+          </Stack>
         </Box>
 
         {isCreating && (
@@ -290,6 +301,24 @@ export default function DiscountCodeView() {
             onClose={handleCloseCreateForm}
             ticketTypes={data?.ticketTypes}
           />
+        )}
+
+        {isBulkOpen.value && (
+          <Dialog
+            open={isBulkOpen.value}
+            onClose={isBulkOpen.onFalse}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{ sx: { borderRadius: 1 } }}
+          >
+            <DialogTitle>
+              <Typography variant="h4">Create Discount Code In Bulk</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Fill out the details to create a new discount code.
+              </Typography>
+            </DialogTitle>
+            <DialogContent>asdasdasd</DialogContent>
+          </Dialog>
         )}
 
         {tableData?.length > 0 && (

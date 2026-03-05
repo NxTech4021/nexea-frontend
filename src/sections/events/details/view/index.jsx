@@ -4,14 +4,7 @@ import React, { useMemo } from 'react';
 
 import Grid from '@mui/material/Grid2';
 import { useTheme } from '@mui/material/styles';
-import {
-  Box,
-  Card,
-  Stack,
-  Container,
-  CardContent,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Card, Stack, Container, CardContent, CircularProgress } from '@mui/material';
 
 import { useRouter } from 'src/routes/hooks';
 
@@ -161,7 +154,7 @@ const EventDetails = ({ id }) => {
         <Grid item size={{ xs: 12 }}>
           <EventInformation event={data} />
         </Grid>
-        
+
         <Grid item size={{ xs: 12 }}>
           <EventStatistics data={data} eventId={id} />
         </Grid>

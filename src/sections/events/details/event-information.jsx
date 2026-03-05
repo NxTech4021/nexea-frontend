@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 // import { toast } from 'react-toastify';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 // import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 // import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -36,11 +36,14 @@ import {
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
+import { useBoolean } from 'src/hooks/use-boolean';
+
 // import { endpoints, axiosInstance } from 'src/utils/axios';
 import { useGetAllEvents } from 'src/api/event';
 
 import Iconify from 'src/components/iconify';
 
+import MetaPixelSetting from './dialog/MetaPixelSetting';
 import EditEventModal from '../create/dialog/edit-event-modal';
 
 const EventStatus = {
@@ -88,6 +91,7 @@ const EventInformation = ({ event }) => {
   const { mutate } = useGetAllEvents(event.id);
   const router = useRouter();
   const theme = useTheme();
+  const isMetaSettingOpen = useBoolean();
 
   useEffect(() => {
     const calculateCountdown = () => {
@@ -142,6 +146,7 @@ const EventInformation = ({ event }) => {
       }}
     >
       <Divider />
+
       <CardContent>
         <Box display="flex" justifyContent="space-between" sx={{ p: 0.5 }}>
           <Stack direction="row" spacing={2} alignItems="center" sx={{ flex: 1, minWidth: 0 }}>
@@ -162,7 +167,11 @@ const EventInformation = ({ event }) => {
                   },
                 }}
               >
-                <Iconify icon="eva:arrow-back-fill" width={{ xs: 18, sm: 20, md: 22 }} height={{ xs: 18, sm: 20, md: 22 }} />
+                <Iconify
+                  icon="eva:arrow-back-fill"
+                  width={{ xs: 18, sm: 20, md: 22 }}
+                  height={{ xs: 18, sm: 20, md: 22 }}
+                />
               </IconButton>
             </Tooltip>
             <Box
@@ -177,7 +186,7 @@ const EventInformation = ({ event }) => {
             >
               <Avatar
                 alt={event.name}
-                src={event.eventSetting?.eventLogo || "/logo/nexea.png"}
+                src={event.eventSetting?.eventLogo || '/logo/nexea.png'}
                 sx={{
                   width: '100%',
                   height: '100%',
@@ -193,20 +202,25 @@ const EventInformation = ({ event }) => {
             </Box>
             <Stack spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
               {/* Desktop layout - Event name and status */}
-              <Typography variant="h6" sx={{ 
-                color: 'white', 
-                fontSize: { xs: '1rem', sm: '1rem', md: '1.1rem', lg: '1.2rem' },
-                display: { xs: 'none', sm: 'none', md: 'flex' },
-                alignItems: 'center',
-                flexDirection: 'row',
-                gap: 1
-              }}>
-                <Box sx={{ 
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'white',
+                  fontSize: { xs: '1rem', sm: '1rem', md: '1.1rem', lg: '1.2rem' },
+                  display: { xs: 'none', sm: 'none', md: 'flex' },
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {items[0].content}
                 </Box>
                 <Box
@@ -236,19 +250,24 @@ const EventInformation = ({ event }) => {
               </Typography>
 
               {/* Mobile layout - Event name and status */}
-              <Typography variant="h6" sx={{ 
-                color: 'white', 
-                fontSize: '0.9rem',
-                display: { xs: 'flex', sm: 'none' },
-                alignItems: 'center',
-                gap: 1
-              }}>
-                <Box sx={{ 
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  display: { xs: 'flex', sm: 'none' },
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {items[0].content}
                 </Box>
                 <Box
@@ -281,51 +300,86 @@ const EventInformation = ({ event }) => {
               {/* Desktop layout - Date/Time/POI info */}
               <Stack spacing={0.5} sx={{ display: { xs: 'none', sm: 'none', md: 'flex' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
-                  <Typography variant="subtitle2" sx={{ 
-                    color: 'white', 
-                    fontWeight: 'normal', 
-                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
+                  <Iconify
+                    icon="eva:calendar-outline"
+                    sx={{
+                      color: 'white',
+                      width: { sm: 12, md: 14, lg: 16 },
+                      height: { sm: 12, md: 14, lg: 16 },
+                    }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: 'white',
+                      fontWeight: 'normal',
+                      fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
-                  <Typography variant="subtitle2" sx={{ 
-                    color: 'white', 
-                    fontWeight: 'normal', 
-                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' }
-                  }}>
+                  <Iconify
+                    icon="eva:clock-outline"
+                    sx={{
+                      color: 'white',
+                      width: { sm: 12, md: 14, lg: 16 },
+                      height: { sm: 12, md: 14, lg: 16 },
+                    }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: 'white',
+                      fontWeight: 'normal',
+                      fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
+                    }}
+                  >
                     {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Iconify icon="eva:person-outline" sx={{ color: 'white', width: { sm: 12, md: 14, lg: 16 }, height: { sm: 12, md: 14, lg: 16 } }} />
-                  <Typography variant="subtitle2" sx={{ 
-                    color: 'white', 
-                    fontWeight: 'normal', 
-                    fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
+                  <Iconify
+                    icon="eva:person-outline"
+                    sx={{
+                      color: 'white',
+                      width: { sm: 12, md: 14, lg: 16 },
+                      height: { sm: 12, md: 14, lg: 16 },
+                    }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: 'white',
+                      fontWeight: 'normal',
+                      fontSize: { sm: '0.75rem', md: '0.85rem', lg: '0.9rem' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {items[3].content}
                   </Typography>
                 </Box>
               </Stack>
             </Stack>
           </Stack>
-          
+
           {/* Right side content - Desktop only */}
-          <Stack alignItems="flex-end" justifyContent="center" spacing={1.5} sx={{ 
-            minWidth: 'fit-content',
-            ml: { sm: 1, md: 2, lg: 3 },
-            display: { xs: 'none', sm: 'none', md: 'flex' }
-          }}>
+          <Stack
+            alignItems="flex-end"
+            justifyContent="center"
+            spacing={1.5}
+            sx={{
+              minWidth: 'fit-content',
+              ml: { sm: 1, md: 2, lg: 3 },
+              display: { xs: 'none', sm: 'none', md: 'flex' },
+            }}
+          >
             {/* Countdown */}
             {countdown && (
               <Typography
@@ -341,19 +395,24 @@ const EventInformation = ({ event }) => {
                   textAlign: 'right',
                 }}
               >
-                <Iconify icon="eva:clock-outline" width={{ sm: 12, md: 14, lg: 16 }} height={{ sm: 12, md: 14, lg: 16 }} sx={{ opacity: 1, mr: 0.5 }} />
+                <Iconify
+                  icon="eva:clock-outline"
+                  width={{ sm: 12, md: 14, lg: 16 }}
+                  height={{ sm: 12, md: 14, lg: 16 }}
+                  sx={{ opacity: 1, mr: 0.5 }}
+                />
                 {countdown}
               </Typography>
             )}
 
             {/* Action Buttons */}
-            <Stack 
+            <Stack
               direction="row"
               spacing={{ sm: 0.5, md: 0.75, lg: 1 }}
-              sx={{ 
+              sx={{
                 alignItems: 'flex-end',
                 width: 'fit-content',
-                flexWrap: { sm: 'wrap', md: 'nowrap' }
+                flexWrap: { sm: 'wrap', md: 'nowrap' },
               }}
             >
               <Button
@@ -380,7 +439,11 @@ const EventInformation = ({ event }) => {
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="bx:qr" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
+                <Iconify
+                  icon="bx:qr"
+                  width={{ sm: 14, md: 16, lg: 18 }}
+                  height={{ sm: 14, md: 16, lg: 18 }}
+                />
                 Check In
               </Button>
 
@@ -419,7 +482,11 @@ const EventInformation = ({ event }) => {
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="eva:copy-outline" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
+                <Iconify
+                  icon="eva:copy-outline"
+                  width={{ sm: 14, md: 16, lg: 18 }}
+                  height={{ sm: 14, md: 16, lg: 18 }}
+                />
                 Cart Link
               </Button>
 
@@ -447,8 +514,44 @@ const EventInformation = ({ event }) => {
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="mdi:account-group" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
+                <Iconify
+                  icon="mdi:account-group"
+                  width={{ sm: 14, md: 16, lg: 18 }}
+                  height={{ sm: 14, md: 16, lg: 18 }}
+                />
                 List
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={() => isMetaSettingOpen.onTrue()}
+                sx={{
+                  height: { sm: '32px', md: '34px', lg: '36px' },
+                  px: { sm: 1.5, md: 2, lg: 2.5 },
+                  py: 0.5,
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  color: 'common.white',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                  },
+                  fontWeight: 500,
+                  fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
+                  textTransform: 'none',
+                  minWidth: 'auto',
+                }}
+              >
+                <Iconify
+                  icon="material-symbols:conversion-path"
+                  width={{ sm: 14, md: 16, lg: 18 }}
+                  height={{ sm: 14, md: 16, lg: 18 }}
+                />
+                Meta Pixel
               </Button>
 
               <Button
@@ -478,7 +581,11 @@ const EventInformation = ({ event }) => {
                   minWidth: 'auto',
                 }}
               >
-                <Iconify icon="eva:edit-fill" width={{ sm: 14, md: 16, lg: 18 }} height={{ sm: 14, md: 16, lg: 18 }} />
+                <Iconify
+                  icon="eva:edit-fill"
+                  width={{ sm: 14, md: 16, lg: 18 }}
+                  height={{ sm: 14, md: 16, lg: 18 }}
+                />
                 Edit
               </Button>
             </Stack>
@@ -486,17 +593,28 @@ const EventInformation = ({ event }) => {
         </Box>
 
         {/* Medium Screen Layout - Tablet optimized */}
-        <Box sx={{ display: { xs: 'none', sm: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5, mt: 2, px: 1 }}>
+        <Box
+          sx={{
+            display: { xs: 'none', sm: 'flex', md: 'none' },
+            flexDirection: 'column',
+            gap: 1.5,
+            mt: 2,
+            px: 1,
+          }}
+        >
           {/* Event name and status for medium screens */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <Typography variant="h6" sx={{ 
-              color: 'white', 
-              fontSize: '1.1rem',
-              flex: 1,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'white',
+                fontSize: '1.1rem',
+                flex: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {items[0].content}
             </Typography>
             <Box
@@ -530,37 +648,46 @@ const EventInformation = ({ event }) => {
           <Stack spacing={1}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 16, height: 16 }} />
-              <Typography variant="subtitle2" sx={{ 
-                color: 'white', 
-                fontWeight: 'normal', 
-                fontSize: '0.9rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'normal',
+                  fontSize: '0.9rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 16, height: 16 }} />
-              <Typography variant="subtitle2" sx={{ 
-                color: 'white', 
-                fontWeight: 'normal', 
-                fontSize: '0.9rem'
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'normal',
+                  fontSize: '0.9rem',
+                }}
+              >
                 {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 16, height: 16 }} />
-              <Typography variant="subtitle2" sx={{ 
-                color: 'white', 
-                fontWeight: 'normal', 
-                fontSize: '0.9rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'normal',
+                  fontSize: '0.9rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {items[3].content}
               </Typography>
             </Box>
@@ -580,7 +707,12 @@ const EventInformation = ({ event }) => {
                 alignItems: 'center',
               }}
             >
-              <Iconify icon="eva:clock-outline" width={16} height={16} sx={{ opacity: 1, mr: 0.5 }} />
+              <Iconify
+                icon="eva:clock-outline"
+                width={16}
+                height={16}
+                sx={{ opacity: 1, mr: 0.5 }}
+              />
               {countdown}
             </Typography>
           )}
@@ -716,7 +848,15 @@ const EventInformation = ({ event }) => {
         </Box>
 
         {/* Mobile Layout - Stacked Information */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'column', gap: 1, mt: 1, px: { xs: 0.5, sm: 0 } }}>
+        <Box
+          sx={{
+            display: { xs: 'flex', sm: 'none' },
+            flexDirection: 'column',
+            gap: 1,
+            mt: 1,
+            px: { xs: 0.5, sm: 0 },
+          }}
+        >
           {/* Countdown */}
           {countdown && (
             <Typography
@@ -731,7 +871,12 @@ const EventInformation = ({ event }) => {
                 alignItems: 'center',
               }}
             >
-              <Iconify icon="eva:clock-outline" width={12} height={12} sx={{ opacity: 1, mr: 0.5 }} />
+              <Iconify
+                icon="eva:clock-outline"
+                width={12}
+                height={12}
+                sx={{ opacity: 1, mr: 0.5 }}
+              />
               {countdown}
             </Typography>
           )}
@@ -740,24 +885,30 @@ const EventInformation = ({ event }) => {
           <Stack spacing={0.5}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Iconify icon="eva:calendar-outline" sx={{ color: 'white', width: 12, height: 12 }} />
-              <Typography variant="subtitle2" sx={{ 
-                color: 'white', 
-                fontWeight: 'normal', 
-                fontSize: '0.75rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'normal',
+                  fontSize: '0.75rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {dayjs(event.date).format('LL')} - {dayjs(event.endDate).format('LL')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Iconify icon="eva:clock-outline" sx={{ color: 'white', width: 12, height: 12 }} />
-              <Typography variant="subtitle2" sx={{ 
-                color: 'white', 
-                fontWeight: 'normal', 
-                fontSize: '0.75rem'
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'normal',
+                  fontSize: '0.75rem',
+                }}
+              >
                 {dayjs(event.date).format('hh:mm A')} - {dayjs(event.endDate).format('hh:mm A')}
               </Typography>
             </Box>
@@ -766,14 +917,17 @@ const EventInformation = ({ event }) => {
           {/* Person in Charge */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Iconify icon="eva:person-outline" sx={{ color: 'white', width: 12, height: 12 }} />
-            <Typography variant="subtitle2" sx={{ 
-              color: 'white', 
-              fontWeight: 'normal', 
-              fontSize: '0.75rem',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: 'white',
+                fontWeight: 'normal',
+                fontSize: '0.75rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {items[3].content}
             </Typography>
           </Box>
@@ -871,6 +1025,38 @@ const EventInformation = ({ event }) => {
 
             <Button
               variant="contained"
+              onClick={() => isMetaSettingOpen.onTrue()}
+              sx={{
+                height: { sm: '32px', md: '34px', lg: '36px' },
+                px: { sm: 1.5, md: 2, lg: 2.5 },
+                py: 0.5,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                bgcolor: 'rgba(255, 255, 255, 0.15)',
+                color: 'common.white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                },
+                fontWeight: 500,
+                fontSize: { sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
+                textTransform: 'none',
+                minWidth: 'auto',
+              }}
+            >
+              <Iconify
+                icon="material-symbols:conversion-path"
+                width={{ sm: 14, md: 16, lg: 18 }}
+                height={{ sm: 14, md: 16, lg: 18 }}
+              />
+              Meta Pixel
+            </Button>
+
+            <Button
+              variant="contained"
               onClick={() => {
                 setSelectedEvent(event);
                 setOpenEdit(true);
@@ -900,6 +1086,13 @@ const EventInformation = ({ event }) => {
           </Stack>
         </Box>
       </CardContent>
+
+      <MetaPixelSetting
+        open={isMetaSettingOpen.value}
+        onClose={isMetaSettingOpen.onFalse}
+        selectedEvent={event}
+      />
+
       <EditEventModal
         open={openEdit}
         onClose={handleCloseEdit}
