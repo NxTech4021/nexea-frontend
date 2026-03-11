@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import dayjs from 'dayjs';
 import * as yup from 'yup';
+import DOMPurify from 'dompurify';
 import PropTypes from 'prop-types';
 import { enqueueSnackbar } from 'notistack';
 import { MuiColorInput } from 'mui-color-input';
@@ -330,7 +331,8 @@ const EventCreateDialog = ({ open, onClose }) => {
       sst: '',
       eventLogo: null,
       bgColor: '#f0f4f8',
-      campResources: [{ title: '', content: '' }], // Default empty camp resource
+      customHtml: '', 
+      campResources: [{ title: '', content: '' }], 
     },
     mode: 'onChange',
   });
@@ -989,6 +991,71 @@ const EventCreateDialog = ({ open, onClose }) => {
                   </Stack>
                 </Grid>
               </Grid>
+
+              
+              <Box sx={{ mt: 3 }}>
+                <Stack spacing={1}>
+                  <InputLabel
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Custom Notice (HTML)
+                  </InputLabel>
+                  <RHFTextField
+                    name="customHtml"
+                    placeholder="<p>Dress code: Business casual</p>&#10;<a href='https://...'>Venue Map</a>"
+                    multiline
+                    rows={4}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                        fontFamily: 'monospace',
+                        fontSize: '0.85rem',
+                      },
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    Add custom HTML to display in the buyer form (e.g., links, notices). Leave empty
+                    if not needed.
+                  </Typography>
+
+                  {watch('customHtml') && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary', fontWeight: 600 }}
+                      >
+                        Preview:
+                      </Typography>
+                      <Box
+                        sx={{
+                          mt: 0.5,
+                          p: 1.5,
+                          borderRadius: 1,
+                          border: '1px dashed',
+                          borderColor: 'divider',
+                          backgroundColor: 'action.hover',
+                          '& a': { color: 'primary.main', textDecoration: 'underline' },
+                          '& p': { m: 0, fontSize: '0.85rem' },
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(watch('customHtml')),
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Stack>
+              </Box>
             </Box>
           )}
         </DialogContent>

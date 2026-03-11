@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 import 'react-phone-number-input/style.css';
-// import PhoneInput from 'react-phone-number-input';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import React, { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
@@ -511,6 +511,24 @@ const TicketInformationCard = () => {
                 Information regarding the event will be sent to your WhatsApp.
               </Typography>
             </Stack>
+            {eventData?.eventSetting?.customHtml && (
+              <Box
+                sx={{
+                  mt: 1,
+                  '& a': {
+                    color: 'primary.main',
+                    textDecoration: 'underline',
+                  },
+                  '& p': {
+                    m: 0,
+                    fontSize: '0.85rem',
+                  },
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(eventData.eventSetting.customHtml),
+                }}
+              />
+            )}
           </Stack>
 
           <Box
