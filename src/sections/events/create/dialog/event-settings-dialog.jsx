@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -7,6 +8,7 @@ import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Stack,
+  Alert,
   Avatar,
   Button,
   Dialog,
@@ -26,7 +28,7 @@ import { useResponsive } from 'src/hooks/use-responsive';
 
 import { axiosInstance } from 'src/utils/axios';
 
-import FormProvider from 'src/components/hook-form';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
   const smUp = useResponsive('up', 'sm');
@@ -34,10 +36,12 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
   const methods = useForm({
     defaultValues: {
       showRemainingTickets: selectedEvent?.showRemainingTickets || false,
+      customHtml: selectedEvent?.eventSetting?.customHtml || '',
     },
   });
 
-  const { control, handleSubmit, setValue } = methods;
+  const { control, handleSubmit, setValue, watch } = methods;
+  const customHtmlValue = watch('customHtml');
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -45,13 +49,13 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
       toast.success(`Successfully updated ${res.data.name} Setting`);
       onClose();
     } catch (error) {
-      console.log(error);
       toast.error(error?.message || 'Error updating event setting');
     }
   });
 
   useEffect(() => {
     setValue('showRemainingTickets', selectedEvent?.showRemainingTickets);
+    setValue('customHtml', selectedEvent?.eventSetting?.customHtml || '');
   }, [selectedEvent, setValue]);
 
   return (
@@ -169,7 +173,69 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
 
           <Divider sx={{ my: 1.2 }} />
 
-          {/* <RHFTextField name="setting" label="asd" placeholder="SADs" /> */}
+          <FormControl variant="standard" fullWidth sx={{ mt: 2 }}>
+            <FormLabel component="legend" sx={{ mb: 1 }}>
+              Custom Notice (HTML)
+            </FormLabel>
+
+            {selectedEvent?.eventSetting?.customHtml &&
+              customHtmlValue === selectedEvent.eventSetting.customHtml && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <Typography variant="caption" fontWeight="600">
+                    Current Setting:
+                  </Typography>
+                  <Box
+                    sx={{
+                      mt: 0.5,
+                      '& a': { color: 'primary.main' },
+                      '& p': { m: 0 },
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(selectedEvent.eventSetting.customHtml),
+                    }}
+                  />
+                </Alert>
+              )}
+
+            <RHFTextField
+              name="customHtml"
+              placeholder="<p>Dress code: Business casual</p>&#10;<a href='https://...'>Venue Map</a>"
+              multiline
+              rows={4}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  fontFamily: 'monospace',
+                  fontSize: '0.85rem',
+                },
+              }}
+            />
+            <FormHelperText>
+              Add custom HTML to display in the buyer form (e.g., links, notices)
+            </FormHelperText>
+
+            {customHtmlValue && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight="600">
+                  Preview:
+                </Typography>
+                <Box
+                  sx={{
+                    mt: 0.5,
+                    p: 1.5,
+                    borderRadius: 1,
+                    border: '1px dashed',
+                    borderColor: 'divider',
+                    backgroundColor: 'action.hover',
+                    '& a': { color: 'primary.main', textDecoration: 'underline' },
+                    '& p': { m: 0, fontSize: '0.85rem' },
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(customHtmlValue),
+                  }}
+                />
+              </Box>
+            )}
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={onClose}>
