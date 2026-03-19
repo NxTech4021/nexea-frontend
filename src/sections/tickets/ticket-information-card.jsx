@@ -3,7 +3,16 @@ import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
 import 'react-phone-number-input/style.css';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import React, { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+  forwardRef,
+  useCallback,
+  useLayoutEffect,
+  useImperativeHandle,
+} from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';
@@ -61,9 +70,26 @@ const bouncing = keyframes`
   }
 `;
 
-const TicketInformationCard = () => {
+const TicketInformationCard = forwardRef((props, forwardedRef) => {
   const collapse = useBoolean(true);
   const [collapseAttendees, setCollapseAttendees] = useState([]);
+
+  // Expose methods to parent for expanding sections when validation fails
+  useImperativeHandle(forwardedRef, () => ({
+    expandBuyerSection: () => {
+      if (!collapse.value) {
+        collapse.onTrue();
+      }
+    },
+    expandAttendeeSection: (index) => {
+      setCollapseAttendees((prev) => {
+        if (!prev.includes(index)) {
+          return [...prev, index];
+        }
+        return prev;
+      });
+    },
+  }));
   const ref = useRef();
   const mdDown = useResponsive('down', 'md');
   const [discountCode, setDiscountCode] = useState(null);
@@ -1665,6 +1691,6 @@ const TicketInformationCard = () => {
       )}
     </Box>
   );
-};
+});
 
 export default TicketInformationCard;

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useRef, useMemo, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -90,6 +90,7 @@ const schema = yup.object().shape({
 
 const TicketPurchaseView = ({ eventIdParams }) => {
   const mdDown = useResponsive('down', 'md');
+  const ticketInfoRef = useRef(null);
 
   const tixs = useCartStore((state) => state.tickets);
   const loading = useBoolean();
@@ -143,6 +144,80 @@ const TicketPurchaseView = ({ eventIdParams }) => {
 
   const { handleSubmit } = methods;
 
+  // Scroll to the first error field
+  const scrollToFirstError = useCallback((errors) => {
+    // Helper to get the first error field name from nested errors
+    const getFirstErrorPath = (obj, prefix = '') => {
+      const keys = Object.keys(obj);
+      let result = null;
+
+      keys.some((key) => {
+        const path = prefix ? `${prefix}.${key}` : key;
+        if (obj[key]?.message) {
+          result = path;
+          return true;
+        }
+        if (obj[key] && typeof obj[key] === 'object') {
+          // Handle array errors (attendees)
+          if (Array.isArray(obj[key])) {
+            obj[key].some((item, i) => {
+              if (item) {
+                const nestedResult = getFirstErrorPath(item, `${path}.${i}`);
+                if (nestedResult) {
+                  result = nestedResult;
+                  return true;
+                }
+              }
+              return false;
+            });
+          } else {
+            const nestedResult = getFirstErrorPath(obj[key], path);
+            if (nestedResult) {
+              result = nestedResult;
+              return true;
+            }
+          }
+        }
+        return result !== null;
+      });
+
+      return result;
+    };
+
+    const firstErrorPath = getFirstErrorPath(errors);
+    if (firstErrorPath) {
+      // Expand the relevant section before scrolling
+      if (ticketInfoRef.current) {
+        if (firstErrorPath.startsWith('buyer.')) {
+          // Expand buyer section
+          ticketInfoRef.current.expandBuyerSection();
+        } else if (firstErrorPath.startsWith('attendees.')) {
+          // Extract attendee index and expand that section
+          const match = firstErrorPath.match(/^attendees\.(\d+)\./);
+          if (match) {
+            const attendeeIndex = parseInt(match[1], 10);
+            ticketInfoRef.current.expandAttendeeSection(attendeeIndex);
+          }
+        }
+      }
+
+      // Wait for collapse animation to complete, then scroll and focus
+      setTimeout(() => {
+        const errorElement =
+          document.querySelector(`[name="${firstErrorPath}"]`) ||
+          document.querySelector(`#${CSS.escape(firstErrorPath)}`);
+
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Small delay to ensure scroll completes before focusing
+          setTimeout(() => {
+            errorElement.focus();
+          }, 300);
+        }
+      }, 350);
+    }
+  }, []);
+
   const onSubmit = handleSubmit(
     async (data) => {
       try {
@@ -162,6 +237,8 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     (formErrors) => {
       toast.error('Missing fields! Please fill in all required fields.');
       console.warn('Validation Errors:', formErrors);
+      // Scroll to the first error field
+      scrollToFirstError(formErrors);
     }
   );
 
@@ -318,7 +395,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
           {!mdDown ? (
             <Grid container minHeight={1}>
               <Grid size={{ xs: 12, md: 8 }} position="relative">
-                {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
+                {isCartExist ? <TicketInformationCard ref={ticketInfoRef} /> : <TicketSelectionCard />}
               </Grid>
               <Grid
                 size={{ xs: 12, md: 4 }}
@@ -333,7 +410,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
             </Grid>
           ) : (
             <Box height={`calc(100vh - ${76}px)`}>
-              {isCartExist ? <TicketInformationCard /> : <TicketSelectionCard />}
+              {isCartExist ? <TicketInformationCard ref={ticketInfoRef} /> : <TicketSelectionCard />}
             </Box>
           )}
         </Box>

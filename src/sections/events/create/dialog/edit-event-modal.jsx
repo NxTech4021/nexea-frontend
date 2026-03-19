@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import React from 'react';
 import dayjs from 'dayjs';
+import DOMPurify from 'dompurify';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { MuiColorInput } from 'mui-color-input';
@@ -156,6 +157,7 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
             status: selectedEvent?.status,
             eventLogo: selectedEvent?.eventSetting?.eventLogo,
             bgColor: selectedEvent?.eventSetting?.bgColor || '#f0f4f8',
+            customHtml: selectedEvent?.eventSetting?.customHtml || '',
           }}
           onSubmit={(values, { setSubmitting }) => {
             // Get date parts from date objects
@@ -871,6 +873,81 @@ const EditEventModal = ({ open, onClose, selectedEvent, onEventUpdated }) => {
                       This preview shows how the event logo will appear in the event list.
                     </Typography>
                   </Grid>
+
+                  {/* Custom Notice (HTML) Field */}
+                  <Grid item xs={12}>
+                    <Typography
+                      component="label"
+                      htmlFor="customHtml"
+                      sx={{
+                        display: 'block',
+                        mb: 0.75,
+                        fontWeight: 500,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Custom Notice (HTML)
+                    </Typography>
+                    <Field
+                      as={TextField}
+                      name="customHtml"
+                      id="customHtml"
+                      multiline
+                      rows={4}
+                      fullWidth
+                      variant="outlined"
+                      placeholder="<p>Dress code: Business casual</p>&#10;<a href='https://...'>Venue Map</a>"
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 1,
+                          bgcolor: (theme) =>
+                            theme.palette.mode === 'light' ? 'grey.100' : 'grey.900',
+                          fontFamily: 'monospace',
+                          fontSize: '0.85rem',
+                        },
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        color: 'text.secondary',
+                        mt: 0.5,
+                        fontSize: '0.75rem',
+                      }}
+                    >
+                      Add custom HTML to display in the buyer form (e.g., links, notices). Leave
+                      empty if not needed.
+                    </Typography>
+
+                    {values.customHtml && (
+                      <Box sx={{ mt: 1.5 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: 'text.secondary', fontWeight: 600 }}
+                        >
+                          Preview:
+                        </Typography>
+                        <Box
+                          sx={{
+                            mt: 0.5,
+                            p: 1.5,
+                            borderRadius: 1,
+                            border: '1px dashed',
+                            borderColor: 'divider',
+                            backgroundColor: 'action.hover',
+                            '& a': { color: 'primary.main', textDecoration: 'underline' },
+                            '& p': { m: 0, fontSize: '0.85rem' },
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(values.customHtml),
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Grid>
+
                   <Grid item xs={12}>
                     <Divider sx={{ my: 2 }} />
                     <Stack direction="row" spacing={2} justifyContent="flex-end">

@@ -95,6 +95,7 @@ export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) 
           <PhoneInput
             {...field}
             id={name}
+            name={name}
             placeholder="Enter phone number"
             value={field.value}
             onChange={(value) => field.onChange(value || '')}
