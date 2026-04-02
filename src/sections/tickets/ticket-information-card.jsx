@@ -981,12 +981,30 @@ const TicketInformationCard = forwardRef((props, forwardedRef) => {
   useEffect(() => {
     if (!cartData?.cartItem?.length) return;
 
+    // Build a set of valid ticket type IDs from the current cart
+    const currentTicketTypeIds = new Set(
+      cartData.cartItem.map((item) => item.ticketType?.id).filter(Boolean)
+    );
+
     // Load existing attendees from localStorage
     const storedAttendees = localStorage.getItem('attendees');
 
     if (storedAttendees) {
-      setValue('attendees', JSON.parse(storedAttendees));
-      return;
+      const parsed = JSON.parse(storedAttendees);
+
+      // Validate that cached attendees' ticket types match the current cart
+      const isValid =
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        parsed.every((att) => att?.ticket?.id && currentTicketTypeIds.has(att.ticket.id));
+
+      if (isValid) {
+        setValue('attendees', parsed);
+        return;
+      }
+
+      // Stale cache from a different event/cart — clear it
+      localStorage.removeItem('attendees');
     }
 
     // Generate attendee list based on ticket quantity
