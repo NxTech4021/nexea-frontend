@@ -52,8 +52,13 @@ const phoneInputStyles = `
 `;
 
 export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) => {
-  const { control, watch } = useFormContext();
+  const { control, watch, getValues } = useFormContext();
   const theme = useTheme();
+
+  // If readOnly is requested, only lock the field when it already has a value.
+  // This allows buyers with no saved phone number to still type one in.
+  const currentValue = getValues(name);
+  const isLocked = readOnly && !!currentValue;
 
   // Add style element for custom PhoneInput styles
   useEffect(() => {
@@ -107,8 +112,8 @@ export const PhoneInputCustom = ({ name, label, readOnly, disabled, ...other }) 
               backgroundColor: 'transparent',
               color: theme.palette.text.primary,
             }}
-            disabled={disabled || readOnly}
-            readOnly={readOnly}
+            disabled={disabled || isLocked}
+            readOnly={isLocked}
             {...other}
           />
           {error && (
