@@ -952,8 +952,15 @@ export default function EventAttendee() {
       field: 'purchaseDate',
       headerName: 'Purchase Date',
       width: persistedWidths.purchaseDate || 200,
-      valueGetter: (value, row) =>
-        row.order.createdAt ? dayjs(row.order.createdAt).format('MMM D, YYYY [at] h:mm A') : 'N/A',
+      valueGetter: (value, row) => (row.order.createdAt ? row.order.createdAt : null),
+      valueFormatter: (value) =>
+        value ? dayjs(value).format('MMM D, YYYY [at] h:mm A') : 'N/A',
+      sortComparator: (v1, v2) => {
+        if (!v1 && !v2) return 0;
+        if (!v1) return -1;
+        if (!v2) return 1;
+        return dayjs(v1).valueOf() - dayjs(v2).valueOf();
+      },
     },
     {
       field: 'discountCode',
