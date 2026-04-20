@@ -4,14 +4,16 @@ import { useMemo } from 'react';
 import { fetcher, endpoints, axiosInstance } from 'src/utils/axios';
 
 export const useGetAllDiscountCode = () => {
-  const { data: discountCodes, isLoading: discountCodesIsLoading, mutate: refetchDiscountCodes } = useSWR(
+  const { data, isLoading: discountCodesIsLoading, mutate: refetchDiscountCodes } = useSWR(
     endpoints.discount.get,
     fetcher
   );
 
+  const discountCodes = data?.discounts ?? data;
+
   const memoizedValue = useMemo(
-    () => ({ discountCodes, discountCodesIsLoading,  refetchDiscountCodes }),
-    [discountCodes, discountCodesIsLoading,  refetchDiscountCodes]
+    () => ({ discountCodes, discountCodesIsLoading, refetchDiscountCodes }),
+    [discountCodes, discountCodesIsLoading, refetchDiscountCodes]
   );
 
   return memoizedValue;

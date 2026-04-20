@@ -161,7 +161,11 @@ export default function OrderView() {
   const router = useRouter();
   const { eventId } = useParams();
 
-  const { data, isLoading } = useSWR(endpoints.order.root, fetcher);
+  const { data, isLoading } = useSWR(
+    selectedEvent ? `${endpoints.order.root}?eventId=${selectedEvent.id}` : null,
+    fetcher
+  );
+  const orders = data?.orders ?? [];
   const { data: eventData, isLoading: loadingEvents } = useGetAllEvents();
 
   // For exporting into CSV
@@ -211,11 +215,9 @@ export default function OrderView() {
   }, [data, eventId, eventData, selectedEventId, setSelectedEventId]);
 
   const eventOptions = useMemo(() => {
-    if (!data?.length) return ['All'];
-
-    const uniqueEvents = [...new Set(data.map((order) => order.event.name))];
-    return ['All', ...uniqueEvents];
-  }, [data]);
+    if (!eventData?.events?.length) return ['All'];
+    return ['All', ...eventData.events.map((e) => e.name)];
+  }, [eventData]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -308,15 +310,10 @@ export default function OrderView() {
     }
   };
 
-  // Update eventOrders when selectedEvent or data changes
+  // Update eventOrders when orders data changes (already filtered by eventId from backend)
   useEffect(() => {
-    if (selectedEvent && data?.length) {
-      const filtered = data.filter((order) => order.event?.id === selectedEvent.id);
-      setEventOrders(filtered);
-    } else {
-      setEventOrders([]);
-    }
-  }, [selectedEvent, data]);
+    setEventOrders(orders);
+  }, [orders]);
 
   // Sort eventOrders by price if priceSort is set
   const sortedEventOrders = useMemo(() => {
@@ -354,7 +351,7 @@ export default function OrderView() {
     togglePriceSort();
   };
 
-  if (isLoading) {
+  if (loadingEvents || (selectedEvent && isLoading)) {
     return (
       <Box
         sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
@@ -660,11 +657,10 @@ export default function OrderView() {
                               variant="subtitle2"
                               sx={{ color: textColor, fontWeight: 600 }}
                             >
-                              {data?.filter((order) => order.event?.id === event.id).length || 0}
+                              {event.orderCount || 0}
                             </Typography>
                             {(() => {
-                              const allOrders =
-                                data?.filter((order) => order.event?.id === event.id) || [];
+                              const allOrders = event.order || [];
                               const last7Days = allOrders.filter((order) =>
                                 dayjs(order.createdAt).isAfter(dayjs().subtract(7, 'days'))
                               );
@@ -729,13 +725,7 @@ export default function OrderView() {
                               currency: 'MYR',
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 0,
-                            }).format(
-                              data
-                                ?.filter(
-                                  (order) => order.event?.id === event.id && order.status === 'paid'
-                                )
-                                .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0
-                            )}
+                            }).format(event.totalRevenue || 0)}
                           </Typography>
                         </Box>
 
@@ -754,9 +744,7 @@ export default function OrderView() {
                             variant="subtitle2"
                             sx={{ color: textColor, fontWeight: 600 }}
                           >
-                            {data
-                              ?.filter((order) => order.event?.id === event.id)
-                              .reduce((sum, order) => sum + (order.attendees?.length || 0), 0) || 0}
+                            {event.attendeeCount || 0}
                           </Typography>
                         </Box>
                       </Box>
@@ -818,9 +806,8 @@ export default function OrderView() {
                                   const ordersByDay = days
                                     .map(
                                       (day) =>
-                                        data?.filter(
+                                        (event.order || []).filter(
                                           (order) =>
-                                            order.event?.id === event.id &&
                                             dayjs(order.createdAt).format('YYYY-MM-DD') ===
                                               day.format('YYYY-MM-DD')
                                         ).length || 0
@@ -858,9 +845,8 @@ export default function OrderView() {
                                   const date = dayjs().subtract(6 - dataPointIndex, 'days');
                                   const dailyOrderCount = series[seriesIndex][dataPointIndex];
                                   const paidOrders =
-                                    data?.filter(
+                                    (event.order || []).filter(
                                       (order) =>
-                                        order.event?.id === event.id &&
                                         dayjs(order.createdAt).format('YYYY-MM-DD') ===
                                           date.format('YYYY-MM-DD') &&
                                         order.status === 'paid'
@@ -929,10 +915,9 @@ export default function OrderView() {
                                   const revenueByDay = days
                                     .map(
                                       (day) =>
-                                        data
-                                          ?.filter(
+                                        (event.order || [])
+                                          .filter(
                                             (order) =>
-                                              order.event?.id === event.id &&
                                               order.status === 'paid' &&
                                               dayjs(order.createdAt).format('YYYY-MM-DD') ===
                                                 day.format('YYYY-MM-DD')
@@ -974,9 +959,8 @@ export default function OrderView() {
                                 custom({ series, seriesIndex, dataPointIndex }) {
                                   const date = dayjs().subtract(6 - dataPointIndex, 'days');
                                   const revenue = series[seriesIndex][dataPointIndex];
-                                  const dailyPaidOrders = data?.filter(
+                                  const dailyPaidOrders = (event.order || []).filter(
                                     (order) =>
-                                      order.event?.id === event.id &&
                                       order.status === 'paid' &&
                                       dayjs(order.createdAt).format('YYYY-MM-DD') ===
                                         date.format('YYYY-MM-DD')
