@@ -170,6 +170,7 @@ export default function TicketTableRow({
   } = row;
 
   const confirm = useBoolean();
+  const addOn = useBoolean();
   const popover = usePopover();
   const smDown = useResponsive('down', 'sm');
   const { enqueueSnackbar } = useSnackbar();
@@ -1184,7 +1185,7 @@ export default function TicketTableRow({
           )}
 
           {/* Step 2: Add Ons */}
-          {activeStep === 1 && <AddOn />}
+          {activeStep === 1 && <AddOn addOn={addOn} />}
         </DialogContent>
 
         <DialogActions
