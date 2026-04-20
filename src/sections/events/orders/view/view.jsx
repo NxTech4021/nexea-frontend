@@ -165,7 +165,7 @@ export default function OrderView() {
     selectedEvent ? `${endpoints.order.root}?eventId=${selectedEvent.id}` : null,
     fetcher
   );
-  const orders = data?.orders ?? [];
+  const fetchedOrders = useMemo(() => data?.orders ?? [], [data]);
   const { data: eventData, isLoading: loadingEvents } = useGetAllEvents();
 
   // For exporting into CSV
@@ -310,10 +310,9 @@ export default function OrderView() {
     }
   };
 
-  // Update eventOrders when orders data changes (already filtered by eventId from backend)
   useEffect(() => {
-    setEventOrders(orders);
-  }, [orders]);
+    setEventOrders(fetchedOrders);
+  }, [fetchedOrders]);
 
   // Sort eventOrders by price if priceSort is set
   const sortedEventOrders = useMemo(() => {
