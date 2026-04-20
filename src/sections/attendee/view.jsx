@@ -44,6 +44,8 @@ export default function Attendees() {
   // To filter to attendees data when an event is selected
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [allAttendees, setAllAttendees] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
 
   const [clickedEvent, setClickedEvent] = useState('false');
 
