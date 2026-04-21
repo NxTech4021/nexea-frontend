@@ -951,18 +951,18 @@ const AddOnDialog = ({ addOnDialog, handleCloseAddOn, addOnInfo, tixs, updateAdd
                 size="small"
                 sx={{
                   bgcolor:
-                    totalSelectedQuantity >= addOnInfo?.selectedQuantity
+                    selectedQuantity >= addOnInfo?.selectedQuantity
                       ? 'grey.200'
                       : 'primary.main',
                   '&:hover': {
                     bgcolor:
-                      totalSelectedQuantity >= addOnInfo?.selectedQuantity
+                      selectedQuantity >= addOnInfo?.selectedQuantity
                         ? 'grey.200'
                         : 'primary.dark',
                   },
                   width: 36,
                   height: 36,
-                  ...(totalSelectedQuantity >= addOnInfo?.selectedQuantity && {
+                  ...(selectedQuantity >= addOnInfo?.selectedQuantity && {
                     pointerEvents: 'none',
                   }),
                 }}
