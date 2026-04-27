@@ -136,8 +136,6 @@ export default function DiscountCodeView() {
     return Array.from(uniqueEvents);
   }, [discountCodes]);
 
-  const notFound = tableData?.length === 0;
-
   const dataFiltered = applyFilter({
     inputData: discountCodes,
     comparator: getComparator(table.order, table.orderBy),
@@ -150,7 +148,7 @@ export default function DiscountCodeView() {
   );
 
   const canReset = !isEqual(defaultFilters, filters);
-  // const notFound = (!dataFiltered?.length && canReset) || !dataFiltered?.length;
+  const notFound = (!dataFiltered?.length && canReset) || !dataFiltered?.length;
 
   const handleFilters = useCallback(
     (name, value) => {
@@ -507,7 +505,7 @@ function applyFilter({ inputData, comparator, filters }) {
     inputData = inputData.filter((discountCode) => {
       if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
         return discountCode.ticketType.some(
-          (ticket) => `${ticket.title} ( ${ticket.event.name} )` === availability
+          (ticket) => `${ticket.title} ( ${ticket.event?.name} )` === availability
         );
       }
       return false;
