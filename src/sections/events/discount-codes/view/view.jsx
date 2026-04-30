@@ -18,10 +18,6 @@ import {
   IconButton,
   TableContainer,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -51,6 +47,7 @@ import {
 
 import DiscountCodeTableRow from '../discount-codes-table-row';
 import CreateDiscountCode from '../modal/create-discount-codes';
+import CreateDiscountCodeBulk from '../modal/create-discount-codes-bulk';
 import DiscountCodeTableToolbar from '../discount-codes-table-toolbar';
 import DiscountCodeTableFiltersResult from '../discount-codes-table-filters-result';
 
@@ -302,21 +299,11 @@ export default function DiscountCodeView() {
         )}
 
         {isBulkOpen.value && (
-          <Dialog
+          <CreateDiscountCodeBulk
             open={isBulkOpen.value}
             onClose={isBulkOpen.onFalse}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{ sx: { borderRadius: 1 } }}
-          >
-            <DialogTitle>
-              <Typography variant="h4">Create Discount Code In Bulk</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Fill out the details to create a new discount code.
-              </Typography>
-            </DialogTitle>
-            <DialogContent>asdasdasd</DialogContent>
-          </Dialog>
+            ticketTypes={data?.ticketTypes}
+          />
         )}
 
         {tableData?.length > 0 && (
