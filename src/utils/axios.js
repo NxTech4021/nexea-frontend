@@ -115,6 +115,7 @@ export const endpoints = {
     get: '/api/discount/',
     create: '/api/discount/',
     update: `/api/discount/`,
+    bulk: '/api/discount/bulk/',
     redeem: '/api/discount/redeem',
     track: (discountCodeId) => `/api/discount/trackDiscountCodeRedemption/${discountCodeId}`,
     add: '/api/discount/addDiscountCode',
