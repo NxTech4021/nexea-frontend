@@ -123,12 +123,22 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
   const discountType = watch('type');
   const availability = watch('availability');
 
+  const [applyAllValue, setApplyAllValue] = React.useState('');
+
   const handleValueChange = (ticketTypeId, newValue) => {
     setValue(
       'availability',
       availability.map((item) =>
         item.id === ticketTypeId ? { ...item, value: newValue } : item
       )
+    );
+  };
+
+  const handleApplyToAll = () => {
+    if (applyAllValue === '') return;
+    setValue(
+      'availability',
+      availability.map((item) => ({ ...item, value: applyAllValue }))
     );
   };
 
@@ -249,13 +259,32 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
             {availability.length > 0 && (
               <>
                 <Divider />
-                <Stack spacing={1}>
+                <Stack spacing={1.5}>
                   <Typography variant="subtitle2">
                     {`Discount Value per Ticket Type${getValueLabel(discountType)}`}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Set a different discount value for each selected ticket type.
-                  </Typography>
+
+                  {/* Apply to all */}
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <TextField
+                      size="small"
+                      type="number"
+                      value={applyAllValue}
+                      onChange={(e) => setApplyAllValue(e.target.value)}
+                      placeholder="e.g. 475"
+                      inputProps={{ min: 0, max: discountType === 'percentage' ? 100 : undefined }}
+                      sx={{ width: 140 }}
+                    />
+                    <Button size="small" variant="outlined" onClick={handleApplyToAll}>
+                      Apply to all
+                    </Button>
+                    <Typography variant="caption" color="textSecondary">
+                      Fill all ticket types with the same value, then adjust individually if needed.
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ borderStyle: 'dashed' }} />
+
                   {availability.map((item) => (
                     <Stack key={item.id} direction="row" alignItems="center" spacing={2}>
                       <Box sx={{ flex: 1 }}>
@@ -283,6 +312,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
                 </Stack>
               </>
             )}
+
 
             <FormField label="Limit">
               <RHFTextField
