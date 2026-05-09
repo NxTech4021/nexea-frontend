@@ -98,14 +98,14 @@ const formatDiscountText = (discountCode) => {
   if (!discountCode) return '';
 
   if (discountCode.type === 'percentage') {
-    return `${discountCode.value}% off`;
+    return 'Percentage discount';
   }
 
   if (discountCode.type === 'fixedAmountPerOrder') {
-    return `RM${discountCode.value} off order`;
+    return 'Fixed amount off order';
   }
 
-  return `RM${discountCode.value} off per ticket`;
+  return 'Fixed amount off per ticket';
 };
 
 export default function OrderView() {
