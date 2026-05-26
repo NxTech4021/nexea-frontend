@@ -10,11 +10,14 @@ import { useForm, Controller } from 'react-hook-form';
 
 import { LoadingButton } from '@mui/lab';
 import {
+  Box,
   Stack,
   Button,
   Select,
   Dialog,
+  Divider,
   MenuItem,
+  TextField,
   InputLabel,
   Typography,
   DialogTitle,
@@ -77,25 +80,26 @@ FormField.propTypes = {
   children: PropTypes.element,
 };
 
-// Validation schema
+const getValueLabel = (discountType) => {
+  if (discountType === 'percentage') return ' (%)';
+  if (discountType) return ' (RM)';
+  return '';
+};
 
 const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) => {
+  const buildDefaultAvailability = () => {
+    if (!discountCode?.discountValues?.length) return discountCode?.ticketType || [];
+    return discountCode.discountValues.map((dv) => ({
+      id: dv.ticketType.id,
+      title: dv.ticketType.title,
+      event: dv.ticketType.event,
+      value: dv.value,
+    }));
+  };
+
   const schema = yup.object().shape({
     name: yup.string().required('Discount code name is required'),
     type: yup.string().required('Type is required'),
-    value: yup
-      .number()
-      .required('Value is required')
-      .when('type', {
-        is: (val) => val === 'percentage',
-        then: (s) =>
-          s
-            .required('Value is required')
-            .max(100, 'Percentage discount cannot exceed 100')
-            .min(0, 'Percentage discount cannot be negative'),
-        otherwise: (s) =>
-          s.required('Value is required').min(0, 'Discount value cannot be negative'),
-      }),
     availability: yup.array().min(1, 'At least one availability is required.'),
     limit: yup.number().min(0, 'Limit cannot be negative'),
   });
@@ -106,8 +110,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
       id: discountCode?.id || '',
       name: discountCode?.code || '',
       type: discountCode?.type || '',
-      value: discountCode?.value || null,
-      availability: discountCode?.ticketType || [],
+      availability: buildDefaultAvailability(),
       limit: discountCode?.limit || 0,
       expirationDate: dayjs(discountCode?.expirationDate) || null,
     },
@@ -115,34 +118,67 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
     reValidateMode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, isSubmitting, watch, setValue } = methods;
+  const { control, handleSubmit, reset, watch, setValue } = methods;
 
   const discountType = watch('type');
+  const availability = watch('availability');
 
-  // const testDiscountValue = useCallback(
-  //   (val) => {
-  //     if (discountType === 'percentage' && val > 100) {
-  //       return false;
-  //     }
-  //     return true;
-  //   },
-  //   [discountType]
-  // );
+  const [applyAllValue, setApplyAllValue] = React.useState('');
 
-  const onSubmit = handleSubmit(async (value) => {
+  const handleValueChange = (ticketTypeId, newValue) => {
+    setValue(
+      'availability',
+      availability.map((item) =>
+        item.id === ticketTypeId ? { ...item, value: newValue } : item
+      )
+    );
+  };
+
+  const handleApplyToAll = () => {
+    if (applyAllValue === '') return;
+    setValue(
+      'availability',
+      availability.map((item) => ({ ...item, value: applyAllValue }))
+    );
+  };
+
+  const validateValues = () => {
+    if (!availability.length) return 'At least one ticket type is required';
+
+    const missingValue = availability.find(
+      (item) => item.value === undefined || item.value === null || item.value === ''
+    );
+    if (missingValue) return `Enter a discount value for "${missingValue.title}"`;
+
+    const negativeValue = availability.find((item) => Number(item.value) < 0);
+    if (negativeValue) return `Discount value cannot be negative for "${negativeValue.title}"`;
+
+    if (discountType === 'percentage') {
+      const exceeds = availability.find((item) => Number(item.value) > 100);
+      if (exceeds) return `Percentage cannot exceed 100 for "${exceeds.title}"`;
+    }
+
+    return null;
+  };
+
+  const onSubmit = handleSubmit(async (formValue) => {
+    const valueError = validateValues();
+    if (valueError) {
+      enqueueSnackbar(valueError, { variant: 'error' });
+      return;
+    }
+
     try {
       const res = await (!discountCode.id
-        ? axiosInstance.post(endpoints.discount.create, value)
-        : axiosInstance.patch(endpoints.discount.update, value));
+        ? axiosInstance.post(endpoints.discount.create, formValue)
+        : axiosInstance.patch(endpoints.discount.update, formValue));
 
       enqueueSnackbar(res?.data?.message);
       mutate(endpoints.discount.get);
       onClose();
       reset();
     } catch (error) {
-      enqueueSnackbar(error?.message || error?.error, {
-        variant: 'error',
-      });
+      enqueueSnackbar(error?.message || error?.error, { variant: 'error' });
     }
   });
 
@@ -182,19 +218,13 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
               />
             </FormField>
 
-            <Stack direction="row" spacing={2}>
-              <RenderSelectField
-                name="type"
-                control={control}
-                label="Discount Type"
-                options={types.map((type) => ({ id: type.id, name: type.name }))}
-                required
-              />
-
-              <FormField label="Discount Value" required>
-                <RHFTextField name="value" type="number" fullWidth helperText="Eg: 100" />
-              </FormField>
-            </Stack>
+            <RenderSelectField
+              name="type"
+              control={control}
+              label="Discount Type"
+              options={types.map((type) => ({ id: type.id, name: type.name }))}
+              required
+            />
 
             <FormField label="Availability" required>
               <RHFAutocomplete
@@ -210,19 +240,79 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect
                 placeholder="Select ticket types"
-                onChange={(event, selected) => {
+                onChange={(_e, selected) => {
                   if (selected.some((item) => item.id === 'all')) {
                     setValue(
                       'availability',
-                      // eslint-disable-next-line no-shadow
-                      ticketTypes.map(({ id, title, event }) => ({ id, title, event })) // Select all except "Select all"
+                      ticketTypes.map(({ id, title, event: ev }) => ({ id, title, event: ev }))
                     );
                   } else {
-                    setValue('availability', selected);
+                    setValue(
+                      'availability',
+                      selected.map((s) => availability.find((a) => a.id === s.id) || s)
+                    );
                   }
                 }}
               />
             </FormField>
+
+            {availability.length > 0 && (
+              <>
+                <Divider />
+                <Stack spacing={1.5}>
+                  <Typography variant="subtitle2">
+                    {`Discount Value per Ticket Type${getValueLabel(discountType)}`}
+                  </Typography>
+
+                  {/* Apply to all */}
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <TextField
+                      size="small"
+                      type="number"
+                      value={applyAllValue}
+                      onChange={(e) => setApplyAllValue(e.target.value)}
+                      placeholder="e.g. 475"
+                      inputProps={{ min: 0, max: discountType === 'percentage' ? 100 : undefined }}
+                      sx={{ width: 140 }}
+                    />
+                    <Button size="small" variant="outlined" onClick={handleApplyToAll}>
+                      Apply to all
+                    </Button>
+                    <Typography variant="caption" color="textSecondary">
+                      Fill all ticket types with the same value, then adjust individually if needed.
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ borderStyle: 'dashed' }} />
+
+                  {availability.map((item) => (
+                    <Stack key={item.id} direction="row" alignItems="center" spacing={2}>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2">{item.title}</Typography>
+                        {item.event?.name && (
+                          <Typography variant="caption" color="textSecondary">
+                            {item.event.name}
+                          </Typography>
+                        )}
+                      </Box>
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={item.value ?? ''}
+                        onChange={(e) => handleValueChange(item.id, e.target.value)}
+                        placeholder="e.g. 100"
+                        inputProps={{
+                          min: 0,
+                          max: discountType === 'percentage' ? 100 : undefined,
+                        }}
+                        sx={{ width: 140 }}
+                      />
+                    </Stack>
+                  ))}
+                </Stack>
+              </>
+            )}
+
 
             <FormField label="Limit">
               <RHFTextField
@@ -244,8 +334,7 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
-
-          <LoadingButton variant="contained" type="submit" loading={isSubmitting}>
+          <LoadingButton variant="contained" type="submit">
             {discountCode.id ? 'Save' : 'Create'}
           </LoadingButton>
         </DialogActions>
@@ -257,17 +346,17 @@ const CreateDiscountCode = ({ discountCode = {}, open, onClose, ticketTypes }) =
 CreateDiscountCode.propTypes = {
   discountCode: PropTypes.shape({
     id: PropTypes.string,
-    codeName: PropTypes.string,
-    codeType: PropTypes.string,
-    codeValue: PropTypes.string,
-    codeAvailability: PropTypes.array,
-    codeLimit: PropTypes.string,
-    startDate: PropTypes.string,
-    endDate: PropTypes.string,
+    code: PropTypes.string,
+    type: PropTypes.string,
+    discountValues: PropTypes.array,
+    ticketType: PropTypes.array,
+    limit: PropTypes.number,
+    expirationDate: PropTypes.string,
   }),
-  onCreate: PropTypes.func.isRequired,
+  onCreate: PropTypes.func,
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  ticketTypes: PropTypes.array,
 };
 
 export default CreateDiscountCode;

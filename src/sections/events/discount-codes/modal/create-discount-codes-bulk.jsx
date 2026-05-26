@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
-import { mutate } from 'swr';
-import * as yup from 'yup';
 import dayjs from 'dayjs';
+import * as yup from 'yup';
+import { mutate } from 'swr';
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { enqueueSnackbar } from 'notistack';
@@ -43,13 +43,19 @@ import FormProvider from 'src/components/hook-form';
 import RHFDatePicker from 'src/components/hook-form/rhf-datePicker';
 import RHFAutocomplete from 'src/components/hook-form/rhf-autocomplete';
 
-const emptyRow = () => ({ id: crypto.randomUUID(), name: '', value: '', limit: '' });
+const emptyRow = () => ({ id: crypto.randomUUID(), name: '', limit: '' });
 
 const schema = yup.object().shape({
   type: yup.string().required('Discount type is required'),
   availability: yup.array().min(1, 'At least one ticket type is required'),
   expirationDate: yup.mixed().required('Expiration date is required'),
 });
+
+const getValueLabel = (discountType) => {
+  if (discountType === 'percentage') return ' (%)';
+  if (discountType) return ' (RM)';
+  return '';
+};
 
 const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
   const [inputMode, setInputMode] = useState('manual');
@@ -68,8 +74,9 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
     mode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, setValue, watch } = methods;
+  const { handleSubmit, reset, setValue, watch } = methods;
   const discountType = watch('type');
+  const availability = watch('availability');
 
   const handleModeChange = (_, newMode) => {
     if (newMode) setInputMode(newMode);
@@ -94,22 +101,43 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
     }));
   };
 
+  const [applyAllValue, setApplyAllValue] = useState('');
+
+  const handleAvailabilityValueChange = (ticketTypeId, newValue) => {
+    setValue(
+      'availability',
+      availability.map((item) =>
+        item.id === ticketTypeId ? { ...item, value: newValue } : item
+      )
+    );
+  };
+
+  const handleApplyToAll = () => {
+    if (applyAllValue === '') return;
+    setValue(
+      'availability',
+      availability.map((item) => ({ ...item, value: applyAllValue }))
+    );
+  };
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target.result;
+    reader.onload = (ev) => {
+      const text = ev.target.result;
       const lines = text.split('\n').filter((l) => l.trim());
 
-      // Skip header row if it contains "Discount Code" (case-insensitive)
       const startIndex = lines[0]?.toLowerCase().includes('discount code') ? 1 : 0;
 
-      const parsed = lines.slice(startIndex).map((line) => {
-        const [name = '', value = '', limit = ''] = line.split(',').map((s) => s.trim().replace(/"/g, ''));
-        return { id: crypto.randomUUID(), name, value, limit };
-      }).filter((r) => r.name);
+      const parsed = lines
+        .slice(startIndex)
+        .map((line) => {
+          const [name = '', limit = ''] = line.split(',').map((s) => s.trim().replace(/"/g, ''));
+          return { id: crypto.randomUUID(), name, limit };
+        })
+        .filter((r) => r.name);
 
       if (parsed.length === 0) {
         enqueueSnackbar('No valid rows found in the file', { variant: 'warning' });
@@ -121,7 +149,6 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
       enqueueSnackbar(`${parsed.length} rows loaded from file`, { variant: 'success' });
     };
     reader.readAsText(file);
-    // Reset so the same file can be re-uploaded
     e.target.value = '';
   };
 
@@ -130,13 +157,8 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
     let valid = true;
     rows.forEach((r) => {
       const rowErr = {};
-      if (!r.name.trim()) { rowErr.name = 'Required'; valid = false; }
-      if (r.value === '' || Number.isNaN(Number(r.value)) || Number(r.value) < 0) {
-        rowErr.value = 'Required';
-        valid = false;
-      }
-      if (discountType === 'percentage' && Number(r.value) > 100) {
-        rowErr.value = 'Max 100%';
+      if (!r.name.trim()) {
+        rowErr.name = 'Required';
         valid = false;
       }
       if (Object.keys(rowErr).length) errors[r.id] = rowErr;
@@ -145,8 +167,31 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
     return valid;
   };
 
+  const validateAvailabilityValues = () => {
+    const missingValue = availability.find(
+      (item) => item.value === undefined || item.value === null || item.value === ''
+    );
+    if (missingValue) return `Enter a discount value for "${missingValue.title}"`;
+
+    const negativeValue = availability.find((item) => Number(item.value) < 0);
+    if (negativeValue) return `Discount value cannot be negative for "${negativeValue.title}"`;
+
+    if (discountType === 'percentage') {
+      const exceeds = availability.find((item) => Number(item.value) > 100);
+      if (exceeds) return `Percentage cannot exceed 100 for "${exceeds.title}"`;
+    }
+
+    return null;
+  };
+
   const onSubmit = handleSubmit(async (sharedValues) => {
     if (!validateRows()) return;
+
+    const valueError = validateAvailabilityValues();
+    if (valueError) {
+      enqueueSnackbar(valueError, { variant: 'error' });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -156,7 +201,6 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
         expirationDate: sharedValues.expirationDate,
         codes: rows.map((r) => ({
           name: r.name.trim(),
-          value: Number(r.value),
           limit: r.limit !== '' ? Number(r.limit) : 0,
         })),
       };
@@ -200,15 +244,10 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
 
         <DialogContent>
           <Stack spacing={3}>
-            {/* Shared fields */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              {/* Discount Type */}
               <Stack spacing={0.5} width={1}>
                 <InputLabel required>Discount Type</InputLabel>
-                <FormControl
-                  fullWidth
-                  error={!!methods.formState.errors.type}
-                >
+                <FormControl fullWidth error={!!methods.formState.errors.type}>
                   <Select
                     value={watch('type')}
                     onChange={(e) => setValue('type', e.target.value, { shouldValidate: true })}
@@ -232,14 +271,12 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
                 </FormControl>
               </Stack>
 
-              {/* Expiration Date */}
               <Stack spacing={0.5} width={1}>
                 <InputLabel required>Expiration Date</InputLabel>
                 <RHFDatePicker name="expirationDate" />
               </Stack>
             </Stack>
 
-            {/* Availability */}
             <Stack spacing={0.5}>
               <InputLabel required>Availability (Ticket Types)</InputLabel>
               <RHFAutocomplete
@@ -255,14 +292,17 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 disableCloseOnSelect
                 placeholder="Select ticket types"
-                onChange={(event, selected) => {
+                onChange={(_e, selected) => {
                   if (selected.some((item) => item.id === 'all')) {
                     setValue(
                       'availability',
-                      (ticketTypes || []).map(({ id, title, event }) => ({ id, title, event }))
+                      (ticketTypes || []).map(({ id, title, event: ev }) => ({ id, title, event: ev }))
                     );
                   } else {
-                    setValue('availability', selected);
+                    setValue(
+                      'availability',
+                      selected.map((s) => availability.find((a) => a.id === s.id) || s)
+                    );
                   }
                 }}
               />
@@ -273,9 +313,65 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
               )}
             </Stack>
 
+            {availability.length > 0 && (
+              <Stack spacing={1.5}>
+                <Typography variant="subtitle2">
+                  {`Discount Value per Ticket Type${getValueLabel(discountType)}`}
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  These values are shared across all codes created below.
+                </Typography>
+
+                {/* Apply to all */}
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={applyAllValue}
+                    onChange={(e) => setApplyAllValue(e.target.value)}
+                    placeholder="e.g. 475"
+                    inputProps={{ min: 0, max: discountType === 'percentage' ? 100 : undefined }}
+                    sx={{ width: 140 }}
+                  />
+                  <Button size="small" variant="outlined" onClick={handleApplyToAll}>
+                    Apply to all
+                  </Button>
+                  <Typography variant="caption" color="textSecondary">
+                    Fill all ticket types with the same value, then adjust individually if needed.
+                  </Typography>
+                </Stack>
+
+                <Divider sx={{ borderStyle: 'dashed' }} />
+
+                {availability.map((item) => (
+                  <Stack key={item.id} direction="row" alignItems="center" spacing={2}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2">{item.title}</Typography>
+                      {item.event?.name && (
+                        <Typography variant="caption" color="textSecondary">
+                          {item.event.name}
+                        </Typography>
+                      )}
+                    </Box>
+                    <TextField
+                      size="small"
+                      type="number"
+                      value={item.value ?? ''}
+                      onChange={(e) => handleAvailabilityValueChange(item.id, e.target.value)}
+                      placeholder="e.g. 750"
+                      inputProps={{
+                        min: 0,
+                        max: discountType === 'percentage' ? 100 : undefined,
+                      }}
+                      sx={{ width: 140 }}
+                    />
+                  </Stack>
+                ))}
+              </Stack>
+            )}
+
             <Divider />
 
-            {/* Mode toggle + upload button */}
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <ToggleButtonGroup
                 value={inputMode}
@@ -305,7 +401,7 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
                     Upload CSV
                   </Button>
                   <Typography variant="caption" color="textSecondary">
-                    Columns: Discount Code, Discount Value, Discount Limit
+                    Columns: Discount Code, Limit
                   </Typography>
                 </Stack>
               )}
@@ -321,15 +417,11 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
               )}
             </Stack>
 
-            {/* Codes table */}
             <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'background.neutral' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Discount Code *</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      Value *{discountType === 'percentage' ? ' (%)' : discountType ? ' (RM)' : ''}
-                    </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Limit (optional)</TableCell>
                     <TableCell width={48} />
                   </TableRow>
@@ -347,19 +439,6 @@ const CreateDiscountCodeBulk = ({ open, onClose, ticketTypes }) => {
                           error={!!rowErrors[row.id]?.name}
                           helperText={rowErrors[row.id]?.name}
                           inputProps={{ style: { textTransform: 'uppercase' } }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          size="small"
-                          fullWidth
-                          type="number"
-                          value={row.value}
-                          onChange={(e) => handleRowChange(row.id, 'value', e.target.value)}
-                          placeholder="e.g. 750"
-                          error={!!rowErrors[row.id]?.value}
-                          helperText={rowErrors[row.id]?.value}
-                          inputProps={{ min: 0, max: discountType === 'percentage' ? 100 : undefined }}
                         />
                       </TableCell>
                       <TableCell>

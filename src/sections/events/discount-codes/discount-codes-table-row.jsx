@@ -43,7 +43,10 @@ export default function DiscountCodeTableRow({
   onSave,
   ticketTypes,
 }) {
-  const { code, created_at, expirationDate, id, limit, ticketType, type, value } = row;
+  const { code, created_at, expirationDate, id, limit, discountValues = [], type } = row;
+
+  // derive ticketType list from discountValues for availability display
+  const ticketType = discountValues.map((dv) => dv.ticketType).filter(Boolean);
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -377,14 +380,23 @@ export default function DiscountCodeTableRow({
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {types.find((val) => val.id === type).name}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {type === 'percentage'
-            ? `${value.toFixed(2)} %`
-            : new Intl.NumberFormat('en-MY', {
-                minimumFractionDigits: 2,
-                style: 'currency',
-                currency: 'MYR',
-              }).format(value)}
+        <TableCell>
+          <Stack spacing={0.5}>
+            {discountValues.map((dv) => (
+              <Typography key={dv.id} variant="caption" noWrap>
+                <Box component="span" sx={{ fontWeight: 600 }}>
+                  {dv.ticketType?.title}:
+                </Box>{' '}
+                {type === 'percentage'
+                  ? `${Number(dv.value).toFixed(2)} %`
+                  : new Intl.NumberFormat('en-MY', {
+                      minimumFractionDigits: 2,
+                      style: 'currency',
+                      currency: 'MYR',
+                    }).format(dv.value)}
+              </Typography>
+            ))}
+          </Stack>
         </TableCell>
         <TableCell sx={{ py: 2 }}>{renderAvailability()}</TableCell>
 

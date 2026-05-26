@@ -93,11 +93,10 @@ export default function DiscountCodeView() {
     if (!discountCodes) return [];
     const uniqueTicketTypes = new Set();
     discountCodes.forEach((code) => {
-      if (code.ticketType && Array.isArray(code.ticketType)) {
-        code.ticketType.forEach((ticket) => {
-          uniqueTicketTypes.add(`${ticket.title} ( ${ticket.event?.name} )`);
-        });
-      }
+      const ticketTypes = (code.discountValues || []).map((dv) => dv.ticketType).filter(Boolean);
+      ticketTypes.forEach((ticket) => {
+        uniqueTicketTypes.add(`${ticket.title} ( ${ticket.event?.name} )`);
+      });
     });
     return Array.from(uniqueTicketTypes);
   }, [discountCodes]);
@@ -122,13 +121,10 @@ export default function DiscountCodeView() {
     if (!discountCodes) return [];
     const uniqueEvents = new Set();
     discountCodes.forEach((code) => {
-      if (code.ticketType && Array.isArray(code.ticketType)) {
-        code.ticketType.forEach((ticket) => {
-          if (ticket.event && ticket.event?.name) {
-            uniqueEvents.add(ticket.event?.name);
-          }
-        });
-      }
+      const ticketTypes = (code.discountValues || []).map((dv) => dv.ticketType).filter(Boolean);
+      ticketTypes.forEach((ticket) => {
+        if (ticket.event?.name) uniqueEvents.add(ticket.event.name);
+      });
     });
     return Array.from(uniqueEvents);
   }, [discountCodes]);
@@ -490,12 +486,10 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (availability !== 'all') {
     inputData = inputData.filter((discountCode) => {
-      if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
-        return discountCode.ticketType.some(
-          (ticket) => `${ticket.title} ( ${ticket.event?.name} )` === availability
-        );
-      }
-      return false;
+      const ticketTypes = (discountCode.discountValues || []).map((dv) => dv.ticketType).filter(Boolean);
+      return ticketTypes.some(
+        (ticket) => `${ticket.title} ( ${ticket.event?.name} )` === availability
+      );
     });
   }
 
@@ -508,12 +502,8 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (event !== 'all') {
     inputData = inputData.filter((discountCode) => {
-      if (discountCode.ticketType && Array.isArray(discountCode.ticketType)) {
-        return discountCode.ticketType.some(
-          (ticket) => ticket.event && ticket.event.name === event
-        );
-      }
-      return false;
+      const ticketTypes = (discountCode.discountValues || []).map((dv) => dv.ticketType).filter(Boolean);
+      return ticketTypes.some((ticket) => ticket.event?.name === event);
     });
   }
 
