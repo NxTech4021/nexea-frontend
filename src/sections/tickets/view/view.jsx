@@ -137,6 +137,7 @@ const TicketPurchaseView = ({ eventIdParams }) => {
         ticket: buyer?.ticket || '',
       },
       attendees: null,
+      paymentMethod: 'card',
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
