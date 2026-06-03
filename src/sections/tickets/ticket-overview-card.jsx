@@ -841,7 +841,47 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Stack>
             )}
-            {/* Instalment toggle hidden until PayEx activates instalment on merchant account */}
+            {cartData && (
+              <Stack spacing={1}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  Payment Method
+                </Typography>
+                <ToggleButtonGroup
+                  value={paymentMethod}
+                  exclusive
+                  onChange={handlePaymentMethodChange}
+                  fullWidth
+                  size="small"
+                  sx={{ mb: 1 }}
+                >
+                  <ToggleButton
+                    value="card"
+                    sx={{ flexDirection: 'column', py: 1, gap: 0.5, textTransform: 'none' }}
+                  >
+                    <Iconify icon="fluent:payment-16-filled" width={18} />
+                    <Typography variant="caption" fontWeight={600}>
+                      Full Payment
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontSize={10}>
+                      Card / FPX / eWallet
+                    </Typography>
+                  </ToggleButton>
+                  <ToggleButton
+                    value="instalment"
+                    disabled
+                    sx={{ flexDirection: 'column', py: 1, gap: 0.5, textTransform: 'none' }}
+                  >
+                    <Iconify icon="mdi:calendar-month-outline" width={18} />
+                    <Typography variant="caption" fontWeight={600}>
+                      Instalment
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontSize={10}>
+                      Coming Soon
+                    </Typography>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Stack>
+            )}
             {cartData ? (
               <LoadingButton
                 variant="contained"
