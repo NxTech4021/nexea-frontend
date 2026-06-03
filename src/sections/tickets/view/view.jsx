@@ -223,7 +223,9 @@ const TicketPurchaseView = ({ eventIdParams }) => {
     async (data) => {
       try {
         const res = await axiosInstance.post('/api/cart/continuePayment', data);
-        window.location.href = res.data.paymentUrl || res.data.url;
+        const redirectUrl = res.data.paymentUrl || res.data.url;
+        if (!redirectUrl) throw new Error('Payment URL not returned. Please try again.');
+        window.location.href = redirectUrl;
       } catch (error) {
         // toast.error(error?.message);
         toast.error(
