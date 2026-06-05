@@ -841,6 +841,7 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Stack>
             )}
+            {/* PAYMENT METHOD TOGGLE - commented out until PayEx activates instalment on iza@nexea.co
             {cartData && (
               <Stack spacing={1}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>
@@ -881,6 +882,7 @@ const TicketOverviewCard = () => {
                 </ToggleButtonGroup>
               </Stack>
             )}
+            */}
             {cartData ? (
               <LoadingButton
                 variant="contained"
