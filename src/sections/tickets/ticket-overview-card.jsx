@@ -841,7 +841,7 @@ const TicketOverviewCard = () => {
                 </Stack>
               </Stack>
             )}
-            {cartData && (
+            {cartData && cartData?.event?.eventSetting?.instalmentEnabled && (
               <Stack spacing={1}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>
                   Payment Method

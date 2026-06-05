@@ -37,6 +37,7 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
     defaultValues: {
       showRemainingTickets: selectedEvent?.showRemainingTickets || false,
       customHtml: selectedEvent?.eventSetting?.customHtml || '',
+      instalmentEnabled: selectedEvent?.eventSetting?.instalmentEnabled || false,
     },
   });
 
@@ -56,6 +57,7 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
   useEffect(() => {
     setValue('showRemainingTickets', selectedEvent?.showRemainingTickets);
     setValue('customHtml', selectedEvent?.eventSetting?.customHtml || '');
+    setValue('instalmentEnabled', selectedEvent?.eventSetting?.instalmentEnabled || false);
   }, [selectedEvent, setValue]);
 
   return (
@@ -169,6 +171,34 @@ const EventSettingsDialog = ({ open, onClose, selectedEvent }) => {
               />
             </Stack>
             <FormHelperText>Buyers will see how many tickets are left</FormHelperText>
+          </FormControl>
+
+          <Divider sx={{ my: 1.2 }} />
+
+          <FormControl variant="standard" fullWidth>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Box>
+                <FormLabel component="legend">Enable EzBeli Instalment Payment</FormLabel>
+                <FormHelperText sx={{ mt: 0 }}>
+                  Allow buyers to pay via 0% credit card instalment plan
+                </FormHelperText>
+              </Box>
+              <Controller
+                name="instalmentEnabled"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(_, checked) => field.onChange(checked)}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Stack>
           </FormControl>
 
           <Divider sx={{ my: 1.2 }} />
